@@ -2,12 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ed9c61e7-ebc0-49b4-b696-be77b3cdb2d7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/dolphin/initializer/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dolphin/initializer/load_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dolphin/initializer/settings_template.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dolphin/processor/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dolphin/processor/load_settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/storage/lens_list.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/storage/lens_list.txt" beforeDir="false" afterPath="$PROJECT_DIR$/working_directory/lens_list.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,11 +14,20 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dolphin/initializer/load_data.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="135">
-              <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+              <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="243">
+              <caret line="67" column="15" lean-forward="true" selection-start-line="67" selection-start-column="15" selection-end-line="67" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -36,7 +42,7 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/storage/lens_list.txt">
+        <entry file="file://$PROJECT_DIR$/working_directory/lens_list.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="30">
               <caret line="2" column="10" lean-forward="true" selection-start-line="2" selection-start-column="10" selection-end-line="2" selection-end-column="10" />
@@ -58,6 +64,12 @@
       </list>
     </option>
   </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>idea</find>
+      <find>cache</find>
+    </findStrings>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -69,6 +81,7 @@
         <option value="$PROJECT_DIR$/data/lens_list.txt" />
         <option value="$PROJECT_DIR$/storage/lens_list.txt" />
         <option value="$PROJECT_DIR$/dolphin/processor/loadd_settings.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -82,8 +95,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="144" />
-    <option name="y" value="84" />
+    <option name="x" value="72" />
+    <option name="y" value="34" />
     <option name="width" value="1368" />
     <option name="height" value="810" />
   </component>
@@ -119,7 +132,7 @@
             <path>
               <item name="dolphin" type="b2602c69:ProjectViewProjectNode" />
               <item name="dolphin" type="462c0819:PsiDirectoryNode" />
-              <item name="storage" type="462c0819:PsiDirectoryNode" />
+              <item name="working_directory" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -171,8 +184,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="144" y="84" width="1368" height="810" extended-state="0" />
-    <editor active="true" />
+    <frame x="72" y="34" width="1368" height="810" extended-state="0" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23608018" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -194,6 +206,13 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/dolphin/initializer/load_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="7" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/dolphin/initializer/settings_template.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
@@ -201,7 +220,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/storage/lens_list.txt">
+    <entry file="file://$PROJECT_DIR$/working_directory/lens_list.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="30">
           <caret line="2" column="10" lean-forward="true" selection-start-line="2" selection-start-column="10" selection-end-line="2" selection-end-column="10" />
@@ -211,10 +230,10 @@
     <entry file="file://$PROJECT_DIR$/dolphin/processor/load_settings.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/dolphin/initializer/load_data.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="7" lean-forward="true" selection-start-line="9" selection-start-column="7" selection-end-line="9" selection-end-column="7" />
+        <state relative-caret-position="243">
+          <caret line="67" column="15" lean-forward="true" selection-start-line="67" selection-start-column="15" selection-end-line="67" selection-end-column="15" />
         </state>
       </provider>
     </entry>

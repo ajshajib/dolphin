@@ -1,0 +1,38 @@
+---
+system-name: J1627-0053
+
+filters:
+  - 'F390W'
+
+model:
+  lens:
+    - 'SPEMD'
+    - 'SHEAR_GAMMA_PSI'
+  lens-light:
+    - 'SERSIC_ELLIPSE'
+  source:
+    - 'SHAPELETS'
+  source_n_max: 5
+
+fitting-sequence:
+  psf_iteration: false
+  psf_iteration_settings:
+    psf_iteration_num: 50
+    psf_iteration_factor: 0.5
+    psf_symmetry: 4
+
+  pso: false
+  pso-settings:
+    num_perticle: 50
+
+  mcmc: true
+  mcmc-sampler: emcee
+  mcmc-settings:
+    burnin_step : 0
+    iteration_step: 100
+    walker_ratio: 4
+
+
+
+
+

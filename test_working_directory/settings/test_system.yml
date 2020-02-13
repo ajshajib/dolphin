@@ -1,8 +1,10 @@
 ---
-system-name: J1627-0053
+system-name: 'J1627-0053'
 
-filters:
+band:
   - 'F390W'
+
+pixel-size : 0.04
 
 model:
   lens:
@@ -10,16 +12,29 @@ model:
     - 'SHEAR_GAMMA_PSI'
   lens-light:
     - 'SERSIC_ELLIPSE'
-  source:
+  source-light:
     - 'SHAPELETS'
-  source_n_max: 5
+  point-source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
-fitting-sequence:
-  psf_iteration: false
-  psf_iteration_settings:
-    psf_iteration_num: 50
-    psf_iteration_factor: 0.5
-    psf_symmetry: 4
+deflector-option:
+  centroid-init: [0.04, -0.04]
+#  centroid-bound:
+
+source-option:
+  n-max: 5
+
+point-source-option:
+  ra-init: []
+  dec-init: []
+  bound: 0.
+
+fitting:
+  psf-iteration: false
+  psf-iteration-settings:
+    psf-iteration-num: 50
+    psf-iteration-factor: 0.5
+    psf-symmetry: 4
+    block-neighbor: 0.
 
   pso: false
   pso-settings:
@@ -32,6 +47,24 @@ fitting-sequence:
     iteration_step: 100
     walker_ratio: 4
 
+kwargs-model:
+
+numeric-option:
+  supersampling-factor: 3
+
+mask:
+  size: [120] # 1d array, number of pixel for each band
+  ra-at-xy-0: [2.4] # 1d array, for each band
+  dec-at-xy-0: [-2.4] # 1d array, for each band
+  centroid-offset: [[0., 0]]
+  # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid
+  radius: [2.] # 1d array, radius in arcsec for each band
+  transform-matrix: [[[-4.00004004e-02, -2.74607936e-07],
+                     [-2.67119793e-07,  3.99999886e-02]]]
+  # same transform_pix2angle` in kwargs_data, 3d array, for each band
+  provided:
+  # actual masks, 3d array with dimension (band, x, y), if
+  # provided everything above will be ignored
 
 
 

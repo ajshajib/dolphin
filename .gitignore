@@ -131,3 +131,5 @@ dmypy.json
 # Pycharm
 .cache/
 .idea/
+
+.DS_Store

@@ -181,14 +181,14 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        test_numerics = {
+        test_numerics = [{
             'supersampling_factor': 3,
             'supersampling_convolution': False,
             'supersampling_kernel_size': 3,
             'flux_evaluate_indexes': None,
             'point_source_supersampling_factor': 1,
             'compute_mode': 'regular',
-        }
+        }]
 
         assert test_numerics == self.config.get_kwargs_numerics()
 

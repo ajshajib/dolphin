@@ -292,22 +292,25 @@ class ModelConfig(Config):
         try:
             self.settings['numeric-option']['supersampling-option']
         except (KeyError, NameError):
-            supersampling_factor = 3
+            supersampling_factor = [3] * self.band_number
         else:
             supersampling_factor = self.settings['numeric-option'][
                                                     'supersampling-option']
 
             if supersampling_factor is None:
-                supersampling_factor = 3
+                supersampling_factor = [3] * self.band_number
 
-        kwargs_numerics = {
-            'supersampling_factor': supersampling_factor,
-            'supersampling_convolution': False,
-            'supersampling_kernel_size': 3,
-            'flux_evaluate_indexes': None,
-            'point_source_supersampling_factor': 1,
-            'compute_mode': 'regular',
-        }
+
+        kwargs_numerics = []
+        for n in range(self.band_number):
+            kwargs_numerics.append({
+                'supersampling_factor': supersampling_factor[n],
+                'supersampling_convolution': False,
+                'supersampling_kernel_size': 3,
+                'flux_evaluate_indexes': None,
+                'point_source_supersampling_factor': 1,
+                'compute_mode': 'regular',
+            })
 
         return kwargs_numerics
 

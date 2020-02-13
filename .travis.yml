@@ -9,17 +9,19 @@ python:
 
 before_install:
   - pip install coveralls
+  - pip install tox-travis
   #- pip install python-coveralls
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - pip install .
   - pip install -r requirements.txt
+  - pip install .
 
 # command to run tests, e.g. python setup.py test
 script:
   #- py.test
-  - coverage run --source=dolphin setup.py test
+  #- coverage run --source=dolphin setup.py test
+  - tox
 
 after_success:
     coveralls

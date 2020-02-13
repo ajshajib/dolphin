@@ -192,6 +192,23 @@ class TestModelConfig(object):
 
         assert test_numerics == self.config.get_kwargs_numerics()
 
+    def test_get_fitting_sequence(self):
+        """
+        Test `get_fitting_sequence` method.
+        :return:
+        :rtype:
+        """
+        fitting_sequence = [[
+            'emcee',
+            {
+                'n_burn': 0,
+                'n_run': 10,
+                'walkerRatio': 4
+            }
+        ]]
+
+        assert fitting_sequence == self.config.get_fitting_sequence()
+
 
 if __name__ == '__main__':
     pytest.main()

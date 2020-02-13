@@ -588,4 +588,80 @@ class ModelConfig(Config):
 
         return kwargs_params
 
+    def get_fitting_sequence(self):
+        """
+        Create `fitting_sequence`.
+        :return:
+        :rtype:
+        """
+        try:
+            self.settings['fitting']['pso']
+        except (NameError, KeyError):
+            do_pso = False
+        else:
+            do_pso = self.settings['fitting']['pso']
+
+            if do_pso is None:
+                do_pso = False
+
+        try:
+            self.settings['fitting']['psf-iteration']
+        except (NameError, KeyError):
+            reconstruct_psf = False
+        else:
+            reconstruct_psf = self.settings['fitting']['psf-iteration']
+
+            if reconstruct_psf is None:
+                reconstruct_psf = False
+
+        try:
+            self.settings['fitting']['mcmc']
+        except (NameError, KeyError):
+            sample_mcmc = False
+        else:
+            sample_mcmc = self.settings['fitting']['mcmc']
+
+            if sample_mcmc is None:
+                sample_mcmc = False
+
+        fitting_sequence = []
+
+        pso_range_multipliers = [10., 1., 1., 0.1, 0.01]
+
+        for multiplier in pso_range_multipliers:
+            if do_pso:
+                fitting_sequence.append([
+                    ['PSO',
+                     {
+                        'sigma_scale': multiplier,
+                        'n_particles': self.settings['fitting'][
+                                                        'pso']['num-particle'],
+                        'n_iterations': self.settings['fitting'][
+                                                        'pso']['num-iteration']
+                     }]
+                ])
+            if reconstruct_psf:
+                fitting_sequence.append(
+                    ['psf_iteration', self.get_kwargs_psf_iteration()]
+                )
+
+        if sample_mcmc:
+            if self.settings['fitting']['mcmc-sampler'] == 'emcee':
+                fitting_sequence.append(
+                    ['emcee',
+                     {
+                         'n_burn': self.settings['fitting']['mcmc-settings'][
+                                                                'burnin-step'],
+                         'n_run': self.settings['fitting']['mcmc-settings'][
+                                                            'iteration-step'],
+                         'walkerRatio': self.settings['fitting'][
+                                                'mcmc-settings']['walker-ratio']
+                     }
+                     ]
+                )
+            else:
+                raise ValueError("{} sampler not implemented yet!".format(
+                                                self.settings['mcmc-sampler']))
+
+        return fitting_sequence
 

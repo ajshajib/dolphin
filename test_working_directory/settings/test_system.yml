@@ -38,14 +38,15 @@ fitting:
 
   pso: false
   pso-settings:
-    num_perticle: 50
+    num-particle: 50
+    num-iteration: 100
 
   mcmc: true
   mcmc-sampler: emcee
   mcmc-settings:
-    burnin_step : 0
-    iteration_step: 100
-    walker_ratio: 4
+    burnin-step : 0
+    iteration-step: 10
+    walker-ratio: 4
 
 kwargs-model:
 

@@ -1,5 +1,6 @@
 wheel>=0.22
 numpy
+mpmath
 pyyaml
 h5py
 lenstronomy==0.9.2

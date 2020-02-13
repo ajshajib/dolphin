@@ -60,7 +60,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        return self.settings['pixel-size']
+        return self.settings['pixel_size']
 
     @property
     def deflector_center_ra(self):
@@ -70,10 +70,10 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'deflector-option' in self.settings and 'centroid-init' in \
-                self.settings['deflector-option']:
-            return float(self.settings['deflector-option'][
-                             'centroid-init'][0])
+        if 'deflector_option' in self.settings and 'centroid_init' in \
+                self.settings['deflector_option']:
+            return float(self.settings['deflector_option'][
+                             'centroid_init'][0])
         else:
             return 0.
 
@@ -85,10 +85,10 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'deflector-option' in self.settings and 'centroid-init' in \
-                self.settings['deflector-option']:
-            return float(self.settings['deflector-option'][
-                             'centroid-init'][1])
+        if 'deflector_option' in self.settings and 'centroid_init' in \
+                self.settings['deflector_option']:
+            return float(self.settings['deflector_option'][
+                             'centroid_init'][1])
         else:
             return 0.
 
@@ -100,9 +100,9 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'deflector-option' in self.settings:
-            if 'centroid-bound' in self.settings['deflector-option']:
-                bound = self.settings['deflector-option']['centroid-bound']
+        if 'deflector_option' in self.settings:
+            if 'centroid_bound' in self.settings['deflector_option']:
+                bound = self.settings['deflector_option']['centroid_bound']
                 if bound is not None:
                     return bound
 
@@ -135,9 +135,9 @@ class ModelConfig(Config):
             'point_source_model_list': self.get_point_source_model_list(),
         }
 
-        if 'kwargs-model' in self.settings and self.settings['kwargs-model']\
+        if 'kwargs_model' in self.settings and self.settings['kwargs_model']\
                 is not None:
-            for key, value in self.settings['kwargs-model'].iteritems():
+            for key, value in self.settings['kwargs_model'].iteritems():
                 kwargs_model[key] = value
 
         return kwargs_model
@@ -220,14 +220,14 @@ class ModelConfig(Config):
                     mask_options = self.settings['mask']
 
                     for n in range(self.band_number):
-                        ra_at_xy_0 = mask_options['ra-at-xy-0'][n]
-                        dec_at_xy_0 = mask_options['dec-at-xy-0'][n]
+                        ra_at_xy_0 = mask_options['ra_at_xy_0'][n]
+                        dec_at_xy_0 = mask_options['dec_at_xy_0'][n]
                         transform_pix2angle = np.array(
-                            mask_options['transform-matrix'][n]
+                            mask_options['transform_matrix'][n]
                         )
                         num_pixel = mask_options['size'][n]
                         radius = mask_options['radius'][n]
-                        offset = mask_options['centroid-offset'][n]
+                        offset = mask_options['centroid_offset'][n]
 
                         coords = Coordinates(transform_pix2angle,
                                              ra_at_xy_0, dec_at_xy_0)
@@ -264,19 +264,19 @@ class ModelConfig(Config):
         # temporary return {} as test function is not written
         return {}
 
-        # if 'psf-iteration' in self.settings['fitting'] and self.settings[
-        #     'fittiing']['psf-iteration']:
+        # if 'psf_iteration' in self.settings['fitting'] and self.settings[
+        #     'fittiing']['psf_iteration']:
         #     kwargs_psf_iteration = {
         #         'stacking_method': 'median',
         #         'keep_psf_error_map': True,
         #         'psf_symmetry': self.settings['fitting'][
-        #             'psf-iteration-settinigs']['psf-symmetry'],
+        #             'psf_iteration_settinigs']['psf_symmetry'],
         #         'block_center_neighbour': self.settings['fitting'][
-        #             'psf-iteration-settings']['block-neighbour'],
+        #             'psf_iteration_settings']['block_neighbour'],
         #         'num_iter': self.settings['fitting'][
-        #             'psf-iteration-settings']['psf-iteration-factor'],
+        #             'psf_iteration_settings']['psf_iteration_factor'],
         #         'psf_iter_factor': self.settings['fitting'][
-        #             'psf-iteration-settings']['psf-iteration-factor']
+        #             'psf_iteration_settings']['psf_iteration_factor']
         #     }
         #
         #     return kwargs_psf_iteration
@@ -290,12 +290,12 @@ class ModelConfig(Config):
         :rtype:
         """
         try:
-            self.settings['numeric-option']['supersampling-option']
+            self.settings['numeric_option']['supersampling_option']
         except (KeyError, NameError):
             supersampling_factor = [3] * self.band_number
         else:
-            supersampling_factor = self.settings['numeric-option'][
-                                                    'supersampling-option']
+            supersampling_factor = self.settings['numeric_option'][
+                                                    'supersampling_option']
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
@@ -331,8 +331,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'source-light' in self.settings['model']:
-            return self.settings['model']['source-light']
+        if 'source_light' in self.settings['model']:
+            return self.settings['model']['source_light']
         else:
             return []
 
@@ -342,8 +342,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'lens-light' in self.settings['model']:
-            return self.settings['model']['lens-light']
+        if 'lens_light' in self.settings['model']:
+            return self.settings['model']['lens_light']
         else:
             return []
 
@@ -353,8 +353,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'point-source' in self.settings['model']:
-            return self.settings['model']['point-source']
+        if 'point_source' in self.settings['model']:
+            return self.settings['model']['point_source']
         else:
             return []
 
@@ -545,8 +545,8 @@ class ModelConfig(Config):
             fixed.append({})
 
             init.append({
-                'ra_image': self.settings['point-source-option']['ra-init'],
-                'dec_image': self.settings['point-source-option']['dec-init'],
+                'ra_image': self.settings['point_source_option']['ra_init'],
+                'dec_image': self.settings['point_source_option']['dec_init'],
             })
 
             num_point_sources = len(init[0]['ra_image'])
@@ -557,16 +557,16 @@ class ModelConfig(Config):
 
             lower.append({
                 'ra_image': init[0]['ra_image']
-                                - self.settings['point-source-option']['bound'],
+                                - self.settings['point_source_option']['bound'],
                 'dec_image': init[0]['dec_image']
-                                - self.settings['point-source-option']['bound'],
+                                - self.settings['point_source_option']['bound'],
             })
 
             upper.append({
                 'ra_image': init[0]['ra_image']
-                                + self.settings['point-source-option']['bound'],
+                                + self.settings['point_source_option']['bound'],
                 'dec_image': init[0]['dec_image']
-                                + self.settings['point-source-option']['bound'],
+                                + self.settings['point_source_option']['bound'],
             })
 
         params = [init, sigma, fixed, lower, upper]
@@ -605,11 +605,11 @@ class ModelConfig(Config):
                 do_pso = False
 
         try:
-            self.settings['fitting']['psf-iteration']
+            self.settings['fitting']['psf_iteration']
         except (NameError, KeyError):
             reconstruct_psf = False
         else:
-            reconstruct_psf = self.settings['fitting']['psf-iteration']
+            reconstruct_psf = self.settings['fitting']['psf_iteration']
 
             if reconstruct_psf is None:
                 reconstruct_psf = False
@@ -635,9 +635,9 @@ class ModelConfig(Config):
                      {
                         'sigma_scale': multiplier,
                         'n_particles': self.settings['fitting'][
-                                                        'pso']['num-particle'],
+                                                        'pso']['num_particle'],
                         'n_iterations': self.settings['fitting'][
-                                                        'pso']['num-iteration']
+                                                        'pso']['num_iteration']
                      }]
                 ])
             if reconstruct_psf:
@@ -646,22 +646,22 @@ class ModelConfig(Config):
                 )
 
         if sample_mcmc:
-            if self.settings['fitting']['mcmc-sampler'] == 'emcee':
+            if self.settings['fitting']['mcmc_sampler'] == 'emcee':
                 fitting_sequence.append(
                     ['emcee',
                      {
-                         'n_burn': self.settings['fitting']['mcmc-settings'][
-                                                                'burnin-step'],
-                         'n_run': self.settings['fitting']['mcmc-settings'][
-                                                            'iteration-step'],
+                         'n_burn': self.settings['fitting']['mcmc_settings'][
+                                                                'burnin_step'],
+                         'n_run': self.settings['fitting']['mcmc_settings'][
+                                                            'iteration_step'],
                          'walkerRatio': self.settings['fitting'][
-                                                'mcmc-settings']['walker-ratio']
+                                                'mcmc_settings']['walker_ratio']
                      }
                      ]
                 )
             else:
                 raise ValueError("{} sampler not implemented yet!".format(
-                                                self.settings['mcmc-sampler']))
+                                                self.settings['mcmc_sampler']))
 
         return fitting_sequence
 

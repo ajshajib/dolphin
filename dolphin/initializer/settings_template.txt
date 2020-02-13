@@ -1,4 +1,0 @@
-mass_profile: SIE
-light_profile: SERSIC_ELLIPSE
-source_profile: SERSIC_ELLIPSE
-point_source: TRUE

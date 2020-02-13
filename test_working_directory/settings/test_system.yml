@@ -1,66 +1,66 @@
 ---
-system-name: 'J1627-0053'
+system_name: 'J1627-0053'
 
 band:
   - 'F390W'
 
-pixel-size : 0.04
+pixel_size : 0.04
 
 model:
   lens:
     - 'SPEMD'
     - 'SHEAR_GAMMA_PSI'
-  lens-light:
+  lens_light:
     - 'SERSIC_ELLIPSE'
-  source-light:
+  source_light:
     - 'SHAPELETS'
-  point-source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
+  point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
-deflector-option:
-  centroid-init: [0.04, -0.04]
-#  centroid-bound:
+deflector_option:
+  centroid_init: [0.04, -0.04]
+#  centroid_bound:
 
-source-option:
-  n-max: 5
+source_option:
+  n_max: 5
 
-point-source-option:
-  ra-init: []
-  dec-init: []
+point_source_option:
+  ra_init: []
+  dec_init: []
   bound: 0.
 
 fitting:
-  psf-iteration: false
-  psf-iteration-settings:
-    psf-iteration-num: 50
-    psf-iteration-factor: 0.5
-    psf-symmetry: 4
-    block-neighbor: 0.
+  psf_iteration: false
+  psf_iteration_settings:
+    psf_iteration_num: 50
+    psf_iteration_factor: 0.5
+    psf_symmetry: 4
+    block_neighbor: 0.
 
   pso: false
-  pso-settings:
-    num-particle: 50
-    num-iteration: 100
+  pso_settings:
+    num_particle: 50
+    num_iteration: 100
 
   mcmc: true
-  mcmc-sampler: emcee
-  mcmc-settings:
-    burnin-step : 0
-    iteration-step: 10
-    walker-ratio: 4
+  mcmc_sampler: emcee
+  mcmc_settings:
+    burnin_step : 0
+    iteration_step: 10
+    walker_ratio: 4
 
-kwargs-model:
+kwargs_model:
 
-numeric-option:
-  supersampling-factor: 3
+numeric_option:
+  supersampling_factor: 3
 
 mask:
   size: [120] # 1d array, number of pixel for each band
-  ra-at-xy-0: [2.4] # 1d array, for each band
-  dec-at-xy-0: [-2.4] # 1d array, for each band
-  centroid-offset: [[0., 0]]
+  ra_at_xy_0: [2.4] # 1d array, for each band
+  dec_at_xy_0: [-2.4] # 1d array, for each band
+  centroid_offset: [[0., 0]]
   # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid
   radius: [2.] # 1d array, radius in arcsec for each band
-  transform-matrix: [[[-4.00004004e-02, -2.74607936e-07],
+  transform_matrix: [[[-4.00004004e-02, -2.74607936e-07],
                      [-2.67119793e-07,  3.99999886e-02]]]
   # same transform_pix2angle` in kwargs_data, 3d array, for each band
   provided:

@@ -1,5 +1,5 @@
 ---
-system_name: 'J1627-0053'
+system_name: 'test_system'
 
 band:
   - 'F390W'

@@ -57,6 +57,7 @@ class Processor(object):
                                             config.get_fitting_kwargs_list())
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 
+        self._save_output(lens_name, model_id, kwargs_result)
 
         log_file.close()
 

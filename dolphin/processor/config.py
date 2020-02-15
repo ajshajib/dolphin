@@ -588,9 +588,9 @@ class ModelConfig(Config):
 
         return kwargs_params
 
-    def get_fitting_sequence(self):
+    def get_fitting_kwargs_list(self):
         """
-        Create `fitting_sequence`.
+        Create `fitting_kwargs_list`.
         :return:
         :rtype:
         """
@@ -624,13 +624,13 @@ class ModelConfig(Config):
             if sample_mcmc is None:
                 sample_mcmc = False
 
-        fitting_sequence = []
+        fitting_kwargs_list = []
 
         pso_range_multipliers = [10., 1., 1., 0.1, 0.01]
 
         for multiplier in pso_range_multipliers:
             if do_pso:
-                fitting_sequence.append([
+                fitting_kwargs_list.append([
                     ['PSO',
                      {
                         'sigma_scale': multiplier,
@@ -641,13 +641,13 @@ class ModelConfig(Config):
                      }]
                 ])
             if reconstruct_psf:
-                fitting_sequence.append(
+                fitting_kwargs_list.append(
                     ['psf_iteration', self.get_kwargs_psf_iteration()]
                 )
 
         if sample_mcmc:
             if self.settings['fitting']['mcmc_sampler'] == 'emcee':
-                fitting_sequence.append(
+                fitting_kwargs_list.append(
                     ['emcee',
                      {
                          'n_burn': self.settings['fitting']['mcmc_settings'][
@@ -663,5 +663,5 @@ class ModelConfig(Config):
                 raise ValueError("{} sampler not implemented yet!".format(
                                                 self.settings['mcmc_sampler']))
 
-        return fitting_sequence
+        return fitting_kwargs_list
 

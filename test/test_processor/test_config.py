@@ -28,7 +28,7 @@ class TestConfig(object):
         :rtype:
         """
         test_setting_file = _ROOT_DIR / 'test_working_directory' \
-                            / 'settings' / 'test_system.yml'
+                            / 'settings' / 'test_system_config.yml'
         config = Config()
         config.load(test_setting_file)
 
@@ -39,7 +39,7 @@ class TestModelConfig(object):
     """
     def setup_class(self):
         test_setting_file = _ROOT_DIR / 'test_working_directory' \
-                            / 'settings' / 'test_system.yml'
+                            / 'settings' / 'test_system_config.yml'
         self.config = ModelConfig(test_setting_file)
 
     @classmethod
@@ -192,13 +192,13 @@ class TestModelConfig(object):
 
         assert test_numerics == self.config.get_kwargs_numerics()
 
-    def test_get_fitting_sequence(self):
+    def test_get_fitting_kwargs_list(self):
         """
-        Test `get_fitting_sequence` method.
+        Test `get_fitting_kwargs_list` method.
         :return:
         :rtype:
         """
-        fitting_sequence = [[
+        fitting_kwargs_list = [[
             'emcee',
             {
                 'n_burn': 0,
@@ -207,7 +207,7 @@ class TestModelConfig(object):
             }
         ]]
 
-        assert fitting_sequence == self.config.get_fitting_sequence()
+        assert fitting_kwargs_list == self.config.get_fitting_kwargs_list()
 
 
 if __name__ == '__main__':

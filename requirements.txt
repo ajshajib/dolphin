@@ -9,3 +9,6 @@ cosmohammer>=0.6.1
 emcee>=3.0.0
 schwimmbad
 multiprocess>=0.70.8
+dynesty
+pymultinest
+pypolychord

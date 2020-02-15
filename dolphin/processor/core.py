@@ -39,14 +39,14 @@ class Processor(object):
         :rtype:
         """
         log_file = open(self.file_system.get_log_file_path(lens_name,
-                                                             model_id),
-                          'wt')
+                                                           model_id),
+                        'wt')
         sys.stdout = log_file
 
         config = ModelConfig(self.file_system.get_config_file_path(lens_name))
 
         fitting_sequence = FittingSequence(
-            self.get_kwargs_data_joint(),
+            self.get_kwargs_data_joint(lens_name),
             config.get_kwargs_model(),
             config.get_kwargs_constraints(),
             config.get_kwargs_likelihood(),
@@ -78,8 +78,9 @@ class Processor(object):
 
         for b, kwargs_num in zip(bands, kwargs_numerics):
             image_data = ImageData(self.file_system.get_image_file_path(
-                                                                    lens_name))
-            psf_data = PSFData(self.file_system.get_psf_file_path(lens_name))
+                                                                    lens_name,
+                                                                    b))
+            psf_data = PSFData(self.file_system.get_psf_file_path(lens_name, b))
 
             multi_band_list.append([
                 image_data.kwargs_data,
@@ -103,8 +104,8 @@ class Processor(object):
         :rtype:
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
-        with open(save_file) as f:
-            json.dump(kwargs_result, f)
+        with open(save_file, 'w', encoding='utf-8') as f:
+            json.dump(kwargs_result, f, ensure_ascii=False, indent=4)
 
     def load_output(self, lens_name, model_id):
         """
@@ -118,7 +119,7 @@ class Processor(object):
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
 
-        with open(save_file, "r") as f:
+        with open(save_file, 'r', encoding='utf-8') as f:
             output = json.load(f)
 
         return output

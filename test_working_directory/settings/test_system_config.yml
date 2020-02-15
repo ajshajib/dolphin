@@ -8,12 +8,12 @@ pixel_size : 0.04
 
 model:
   lens:
-    - 'SPEMD'
+    - 'SPEP'
     - 'SHEAR_GAMMA_PSI'
   lens_light:
     - 'SERSIC_ELLIPSE'
   source_light:
-    - 'SHAPELETS'
+    - 'SERSIC_ELLIPSE'
   point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 deflector_option:
@@ -21,7 +21,7 @@ deflector_option:
 #  centroid_bound:
 
 source_option:
-  n_max: 5
+  n_max: [2] # array with n_max for each band
 
 point_source_option:
   ra_init: []
@@ -36,17 +36,17 @@ fitting:
     psf_symmetry: 4
     block_neighbor: 0.
 
-  pso: false
+  pso: true
   pso_settings:
-    num_particle: 50
-    num_iteration: 100
+    num_particle: 2
+    num_iteration: 2
 
-  mcmc: true
-  mcmc_sampler: emcee
+  sampling: true
+  sampler: 'MCMC'
   mcmc_settings:
-    burnin_step : 0
-    iteration_step: 10
-    walker_ratio: 4
+    burnin_step : 2
+    iteration_step: 2
+    walker_ratio: 2
 
 kwargs_model:
 

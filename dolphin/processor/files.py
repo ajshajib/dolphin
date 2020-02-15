@@ -131,7 +131,7 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(self._root_path / 'data'
+        return self.path2str(Path(self.get_data_directory())
                              / '{}'.format(lens_name)
                              / 'image_{}_{}.hdf5'.format(lens_name, band)
                              )
@@ -146,7 +146,7 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(self._root_path / 'data'
+        return self.path2str(Path(self.get_data_directory())
                              / '{}'.format(lens_name)
                              / 'psf_{}_{}.hdf5'.format(lens_name, band)
                              )
@@ -161,7 +161,7 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(self._root_path / 'logs'
+        return self.path2str(Path(self.get_logs_directory())
                              / 'log_{}_{}.txt'.format(lens_name, model_id)
                              )
 
@@ -175,6 +175,6 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(self._root_path / 'outputs'
+        return self.path2str(Path(self.get_outputs_directory())
                              / 'output_{}_{}.json'.format(lens_name, model_id)
                              )

@@ -10,7 +10,7 @@ import numpy as np
 
 from lenstronomy.Data.coord_transforms import Coordinates
 import lenstronomy.Util.util as util
-import lenstronomy.Util.mask as mask_util
+import lenstronomy.Util.mask_util as mask_util
 
 
 class Config(object):
@@ -193,9 +193,9 @@ class ModelConfig(Config):
             'force_no_add_image': False,
             'source_marg': False,
             #'point_source_likelihood': True,
-            'position_uncertainty': 0.00004,
-            'check_solver': False,
-            'solver_tolerance': 0.001,
+            #'position_uncertainty': 0.00004,
+            #'check_solver': False,
+            #'solver_tolerance': 0.001,
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True]*self.band_number,
@@ -249,7 +249,7 @@ class ModelConfig(Config):
                         mask[mask >= 1.] = 1.
                         mask[mask <= 0.] = 0.
 
-                        masks.append(mask)
+                        masks.append(util.array2image(mask))
 
                 return masks
 
@@ -299,7 +299,6 @@ class ModelConfig(Config):
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
-
 
         kwargs_numerics = []
         for n in range(self.band_number):
@@ -373,7 +372,7 @@ class ModelConfig(Config):
         upper = []
 
         for model in lens_model_list:
-            if model == 'SPEMD':
+            if model in ['SPEP', 'SPEMD']:
                 fixed.append({})
 
                 init.append({
@@ -519,6 +518,21 @@ class ModelConfig(Config):
                         'center_y': 2., 'center_x': 2.,
                         'e1': 0.5, 'e2': 0.5
                     })
+                elif model == 'SHAPELETS':
+                    fixed.append({'n_max': self.settings['source_option'][
+                        'n_max'][n]})
+                    init.append({'center_x': 0., 'center_y': 0., 'beta': 0.015,
+                                 'n_max': self.settings['source_option'][
+                                                                'n_max'][n]})
+                    sigma.append({'center_x': 0.01, 'center_y': 0.01,
+                                  'beta': 0.015/10., 'n_max': 2})
+                    lower.append({'center_x': -10, 'center_y': -10,
+                                  'beta': 0.01, 'n_max': -1})
+                    upper.append({'center_x': 10, 'center_y': 10,
+                                  'beta': 2., 'n_max': 55})
+                else:
+                    raise ValueError('{} not implemented as a source light'
+                                     'model!'.format(model))
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -532,45 +546,44 @@ class ModelConfig(Config):
         # return empty dictionaries as test is not implemented
         return [{}]*5
 
-
-        point_source_model_list = self.get_point_source_model_list()
-
-        fixed = []
-        init = []
-        sigma = []
-        lower = []
-        upper = []
-
-        if len(point_source_model_list) > 0:
-            fixed.append({})
-
-            init.append({
-                'ra_image': self.settings['point_source_option']['ra_init'],
-                'dec_image': self.settings['point_source_option']['dec_init'],
-            })
-
-            num_point_sources = len(init[0]['ra_image'])
-            sigma.append({
-                'ra_image': self.pixel_size * np.ones(num_point_sources),
-                'dec_image': self.pixel_size * np.ones(num_point_sources),
-            })
-
-            lower.append({
-                'ra_image': init[0]['ra_image']
-                                - self.settings['point_source_option']['bound'],
-                'dec_image': init[0]['dec_image']
-                                - self.settings['point_source_option']['bound'],
-            })
-
-            upper.append({
-                'ra_image': init[0]['ra_image']
-                                + self.settings['point_source_option']['bound'],
-                'dec_image': init[0]['dec_image']
-                                + self.settings['point_source_option']['bound'],
-            })
-
-        params = [init, sigma, fixed, lower, upper]
-        return params
+        # point_source_model_list = self.get_point_source_model_list()
+        #
+        # fixed = []
+        # init = []
+        # sigma = []
+        # lower = []
+        # upper = []
+        #
+        # if len(point_source_model_list) > 0:
+        #     fixed.append({})
+        #
+        #     init.append({
+        #         'ra_image': self.settings['point_source_option']['ra_init'],
+        #         'dec_image': self.settings['point_source_option']['dec_init'],
+        #     })
+        #
+        #     num_point_sources = len(init[0]['ra_image'])
+        #     sigma.append({
+        #         'ra_image': self.pixel_size * np.ones(num_point_sources),
+        #         'dec_image': self.pixel_size * np.ones(num_point_sources),
+        #     })
+        #
+        #     lower.append({
+        #         'ra_image': init[0]['ra_image']
+        #                         - self.settings['point_source_option']['bound'],
+        #         'dec_image': init[0]['dec_image']
+        #                         - self.settings['point_source_option']['bound'],
+        #     })
+        #
+        #     upper.append({
+        #         'ra_image': init[0]['ra_image']
+        #                         + self.settings['point_source_option']['bound'],
+        #         'dec_image': init[0]['dec_image']
+        #                         + self.settings['point_source_option']['bound'],
+        #     })
+        #
+        # params = [init, sigma, fixed, lower, upper]
+        # return params
 
     def get_kwargs_params(self):
         """
@@ -615,14 +628,14 @@ class ModelConfig(Config):
                 reconstruct_psf = False
 
         try:
-            self.settings['fitting']['mcmc']
+            self.settings['fitting']['sampling']
         except (NameError, KeyError):
-            sample_mcmc = False
+            do_sampling = False
         else:
-            sample_mcmc = self.settings['fitting']['mcmc']
+            do_sampling = self.settings['fitting']['sampling']
 
-            if sample_mcmc is None:
-                sample_mcmc = False
+            if do_sampling is None:
+                do_sampling = False
 
         fitting_kwargs_list = []
 
@@ -631,25 +644,26 @@ class ModelConfig(Config):
         for multiplier in pso_range_multipliers:
             if do_pso:
                 fitting_kwargs_list.append([
-                    ['PSO',
+                    'PSO',
                      {
                         'sigma_scale': multiplier,
                         'n_particles': self.settings['fitting'][
-                                                        'pso']['num_particle'],
+                                                'pso_settings']['num_particle'],
                         'n_iterations': self.settings['fitting'][
-                                                        'pso']['num_iteration']
-                     }]
+                                                'pso_settings']['num_iteration']
+                     }
                 ])
             if reconstruct_psf:
                 fitting_kwargs_list.append(
                     ['psf_iteration', self.get_kwargs_psf_iteration()]
                 )
 
-        if sample_mcmc:
-            if self.settings['fitting']['mcmc_sampler'] == 'emcee':
+        if do_sampling:
+            if self.settings['fitting']['sampler'] == 'MCMC':
                 fitting_kwargs_list.append(
-                    ['emcee',
+                    ['MCMC',
                      {
+                         'sampler_type': 'EMCEE',
                          'n_burn': self.settings['fitting']['mcmc_settings'][
                                                                 'burnin_step'],
                          'n_run': self.settings['fitting']['mcmc_settings'][

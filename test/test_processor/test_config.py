@@ -93,8 +93,8 @@ class TestModelConfig(object):
         :rtype:
         """
         kwargs_model = {
-            'lens_model_list': ['SPEMD', 'SHEAR_GAMMA_PSI'],
-            'source_light_model_list': ['SHAPELETS'],
+            'lens_model_list': ['SPEP', 'SHEAR_GAMMA_PSI'],
+            'source_light_model_list': ['SERSIC_ELLIPSE'],
             'lens_light_model_list': ['SERSIC_ELLIPSE'],
             'point_source_model_list': []
         }
@@ -126,9 +126,9 @@ class TestModelConfig(object):
             'force_no_add_image': False,
             'source_marg': False,
             #'point_source_likelihood': True,
-            'position_uncertainty': 0.00004,
-            'check_solver': False,
-            'solver_tolerance': 0.001,
+            #'position_uncertainty': 0.00004,
+            #'check_solver': False,
+            #'solver_tolerance': 0.001,
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True],
@@ -199,13 +199,17 @@ class TestModelConfig(object):
         :rtype:
         """
         fitting_kwargs_list = [[
-            'emcee',
+            'MCMC',
             {
-                'n_burn': 0,
-                'n_run': 10,
-                'walkerRatio': 4
+                'sampler_type': 'EMCEE',
+                'n_burn': 2,
+                'n_run': 2,
+                'walkerRatio': 2
             }
         ]]
+
+        self.config.settings['fitting']['sampling'] = True
+        self.config.settings['fitting']['pso'] = False
 
         assert fitting_kwargs_list == self.config.get_fitting_kwargs_list()
 

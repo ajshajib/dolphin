@@ -30,7 +30,7 @@ class TestData(object):
 
         data_file = _ROOT_DIR / 'test_working_directory' \
                     / 'data' / 'test_system' \
-                    / 'image_test_system_f390w.hdf5'
+                    / 'image_test_system_F390W.hdf5'
         data.load_from_file(data_file)
 
 
@@ -52,7 +52,7 @@ class TestImageData(object):
         """
         data_file = _ROOT_DIR / 'test_working_directory' \
                     / 'data' / 'test_system' \
-                    / 'image_test_system_f390w.hdf5'
+                    / 'image_test_system_F390W.hdf5'
         image_data = ImageData(data_file)
 
         #image_data.kwargs_data
@@ -80,7 +80,7 @@ class TestPSFData(object):
         """
         psf_file =  _ROOT_DIR / 'test_working_directory' \
                     / 'data' / 'test_system' \
-                    / 'psf_test_system_f390w.hdf5'
+                    / 'psf_test_system_F390W.hdf5'
 
         psf = PSFData(psf_file)
 

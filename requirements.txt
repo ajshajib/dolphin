@@ -1,5 +1,6 @@
 wheel>=0.22
-numpy
+numpy>1.13
+astropy>=2.0
 mpmath
 pyyaml
 h5py

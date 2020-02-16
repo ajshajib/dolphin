@@ -4,12 +4,20 @@ This module loads settings from a configuration file.
 """
 import sys
 import json
+import numpy as np
+import base64
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 
 from .files import FileSystem
 from .config import ModelConfig
 from .data import ImageData
 from .data import PSFData
+
+try:
+    from mpi4py import MPI
+    COMM_RANK = MPI.COMM_WORLD.Get_rank()
+except:
+    COMM_RANK = 0
 
 
 class Processor(object):
@@ -28,20 +36,23 @@ class Processor(object):
         self.file_system = FileSystem(working_directory)
         self.lens_list = self.file_system.get_lens_list()
 
-    def swim(self, lens_name, model_id=''):
+    def swim(self, lens_name, model_id='', log=True):
         """
         Run models for a single lens.
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: identifier for the model run
         :type model_id: `str`
+        :param log: if `True`, all `print` statements will be logged
+        :type log: `bool`
         :return:
         :rtype:
         """
-        log_file = open(self.file_system.get_log_file_path(lens_name,
-                                                           model_id),
-                        'wt')
-        sys.stdout = log_file
+        if log and COMM_RANK == 0:
+            log_file = open(self.file_system.get_log_file_path(lens_name,
+                                                               model_id),
+                            'wt')
+            sys.stdout = log_file
 
         config = ModelConfig(self.file_system.get_config_file_path(lens_name))
 
@@ -57,9 +68,16 @@ class Processor(object):
                                             config.get_fitting_kwargs_list())
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 
-        self._save_output(lens_name, model_id, kwargs_result)
+        output = {
+            'kwargs_result': kwargs_result,
+            'fit_output': fit_output,
+        }
+        print(fit_output)
+        if COMM_RANK == 0:
+            self._save_output(lens_name, model_id, output)
 
-        log_file.close()
+        if log and COMM_RANK == 0:
+            log_file.close()
 
     def get_kwargs_data_joint(self, lens_name):
         """
@@ -96,7 +114,7 @@ class Processor(object):
 
         return kwargs_data_joint
 
-    def _save_output(self, lens_name, model_id, kwargs_result):
+    def _save_output(self, lens_name, model_id, output):
         """
         Save output from fitting sequence.
         :param kwargs_result:
@@ -106,7 +124,8 @@ class Processor(object):
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
         with open(save_file, 'w', encoding='utf-8') as f:
-            json.dump(kwargs_result, f, ensure_ascii=False, indent=4)
+            json.dump(self.encode_numpy_arrays(output), f,
+                      ensure_ascii=False, indent=4)
 
     def load_output(self, lens_name, model_id):
         """
@@ -123,4 +142,58 @@ class Processor(object):
         with open(save_file, 'r', encoding='utf-8') as f:
             output = json.load(f)
 
-        return output
+        return self.decode_numpy_arrays(output)
+
+    @classmethod
+    def encode_numpy_arrays(cls, obj):
+        """
+        Encode a list/dictionary containing numpy arrays through recursion
+        for JSON serialization.
+        :param obj: object
+        :type obj:
+        :return: object with ndarrays encoded in dictionaries
+        :rtype:
+        """
+        if isinstance(obj, np.ndarray):
+            return {
+                '__ndarray__': obj.tolist(),
+                'shape': obj.shape
+            }
+        elif isinstance(obj, list):
+            encoded = []
+            for element in obj:
+                encoded.append(cls.encode_numpy_arrays(element))
+            return encoded
+        elif isinstance(obj, dict):
+            encoded = {}
+            for key, value in obj.items():
+                encoded[key] = cls.encode_numpy_arrays(value)
+            return encoded
+        else:
+            return obj
+
+    @classmethod
+    def decode_numpy_arrays(cls, obj):
+        """
+        Decode a list/dictionary containing encoded numpy arrays through
+        recursion.
+        :param obj: object with ndarrays encoded in dictionaries
+        :type obj:
+        :return: object
+        :rtype:
+        """
+        if isinstance(obj, dict):
+            if '__ndarray__' in obj:
+                return np.asarray(obj['__ndarray__']).reshape(obj['shape'])
+            else:
+                decoded = {}
+                for key, value in obj.items():
+                    decoded[key] = cls.decode_numpy_arrays(value)
+                return decoded
+        elif isinstance(obj, list):
+            decoded = []
+            for element in obj:
+                decoded.append(cls.decode_numpy_arrays(element))
+            return decoded
+        else:
+            return obj

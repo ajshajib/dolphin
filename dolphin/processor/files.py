@@ -88,8 +88,9 @@ class FileSystem(object):
         """
         settings_dir = self.path2str(self._root_path / 'settings')
 
-        if not os.path.isdir(settings_dir):
-            os.mkdir(settings_dir)
+        # commenting out, as this directory needs to be created by user
+        # if not os.path.isdir(settings_dir):
+        #     os.mkdir(settings_dir)
 
         return settings_dir
 
@@ -116,8 +117,9 @@ class FileSystem(object):
         """
         data_dir = self.path2str(self._root_path / 'data')
 
-        if not os.path.isdir(data_dir):
-            os.mkdir(data_dir)
+        # commenting out, as this directory needs to be created by user
+        # if not os.path.isdir(data_dir):
+        #     os.mkdir(data_dir)
 
         return data_dir
 

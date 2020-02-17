@@ -5,7 +5,6 @@ This module loads settings from a configuration file.
 import sys
 import json
 import numpy as np
-import base64
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 
 from .files import FileSystem
@@ -36,7 +35,7 @@ class Processor(object):
         self.file_system = FileSystem(working_directory)
         self.lens_list = self.file_system.get_lens_list()
 
-    def swim(self, lens_name, model_id='', log=True):
+    def swim(self, lens_name, model_id, log=True):
         """
         Run models for a single lens.
         :param lens_name: lens name
@@ -54,7 +53,7 @@ class Processor(object):
                             'wt')
             sys.stdout = log_file
 
-        config = ModelConfig(self.file_system.get_config_file_path(lens_name))
+        config = self.get_lens_config(lens_name)
 
         fitting_sequence = FittingSequence(
             self.get_kwargs_data_joint(lens_name),
@@ -72,12 +71,22 @@ class Processor(object):
             'kwargs_result': kwargs_result,
             'fit_output': fit_output,
         }
-        print(fit_output)
+
         if COMM_RANK == 0:
             self._save_output(lens_name, model_id, output)
 
         if log and COMM_RANK == 0:
             log_file.close()
+
+    def get_lens_config(self, lens_name):
+        """
+        Get the `ModelConfig` object for a lens.
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :return:
+        :rtype:
+        """
+        return ModelConfig(self.file_system.get_config_file_path(lens_name))
 
     def get_kwargs_data_joint(self, lens_name):
         """
@@ -87,7 +96,7 @@ class Processor(object):
         :return:
         :rtype:
         """
-        config = ModelConfig(self.file_system.get_config_file_path(lens_name))
+        config = self.get_lens_config(lens_name)
 
         bands = config.settings['band']
 

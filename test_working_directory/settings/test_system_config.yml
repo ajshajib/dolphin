@@ -20,6 +20,9 @@ deflector_option:
   centroid_init: [0.04, -0.04]
 #  centroid_bound:
 
+lens_light_option:
+  fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
+
 source_option:
   n_max: [2] # array with n_max for each band
 

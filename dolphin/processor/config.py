@@ -133,6 +133,8 @@ class ModelConfig(Config):
             'source_light_model_list': self.get_source_light_model_list(),
             'lens_light_model_list': self.get_lens_light_model_list(),
             'point_source_model_list': self.get_point_source_model_list(),
+            # 'index_lens_light_model_list': [[0]],
+            # 'index_source_light_model_list': [[0]],
         }
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model']\
@@ -371,9 +373,16 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        for model in lens_model_list:
+        for i, model in enumerate(lens_model_list):
             if model in ['SPEP', 'SPEMD']:
-                fixed.append({})
+                try:
+                    self.settings['deflector_option']['fix']
+                except(NameError, KeyError):
+                    fixed.append({})
+                else:
+                    if i in self.settings['deflector_option']['fix']:
+                        fixed.append(self.settings['deflector_option'][
+                                         'fix'][i])
 
                 init.append({
                     'center_x': self.deflector_center_ra,
@@ -432,9 +441,16 @@ class ModelConfig(Config):
         upper = []
 
         for n in range(self.band_number):
-            for model in lens_light_model_list:
+            for i, model in enumerate(lens_light_model_list):
                 if model == 'SERSIC_ELLIPSE':
-                    fixed.append({})
+                    try:
+                        self.settings['lens_light_option']['fix']
+                    except(NameError, KeyError):
+                        fixed.append({})
+                    else:
+                        if i in self.settings['lens_light_option']['fix']:
+                            fixed.append(self.settings['lens_light_option'][
+                                             'fix'][i])
 
                     init.append({
                         'amp': 1., 'R_sersic': .2,
@@ -489,9 +505,16 @@ class ModelConfig(Config):
         upper = []
 
         for n in range(self.band_number):
-            for model in source_light_model_list:
+            for i, model in enumerate(source_light_model_list):
                 if model == 'SERSIC_ELLIPSE':
-                    fixed.append({})
+                    try:
+                        self.settings['source_option']['fix']
+                    except(NameError, KeyError):
+                        fixed.append({})
+                    else:
+                        if i in self.settings['source_option']['fix']:
+                            fixed.append(self.settings['source_option'][
+                                             'fix'][i])
 
                     init.append({
                         'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,

@@ -108,10 +108,11 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_WORK_DIR / 'data' / 'test' / 'image_test_band.hdf5'
+        path = _TEST_WORK_DIR / 'data' / 'test_system' / \
+            'image_test_system_F390W.hdf5'
 
-        assert Path(self.file_system.get_image_file_path('test', 'band')) == \
-               path
+        assert Path(self.file_system.get_image_file_path('test_system',
+                                                         'F390W')) == path
 
     def test_get_psf_file_path(self):
         """
@@ -119,9 +120,11 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_WORK_DIR / 'data' / 'test' / 'psf_test_band.hdf5'
+        path = _TEST_WORK_DIR / 'data' / 'test_system' / \
+            'psf_test_system_F390W.hdf5'
 
-        assert Path(self.file_system.get_psf_file_path('test', 'band')) == path
+        assert Path(self.file_system.get_psf_file_path('test_system',
+                                                       'F390W')) == path
 
     def test_get_log_file_path(self):
         """

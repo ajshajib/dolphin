@@ -674,17 +674,18 @@ class ModelConfig(Config):
             index = None
 
         for epoch in range(2):
-            if epoch == 0 and index is not None:
-                fitting_kwargs_list.append([
-                        'update_settings',
-                        {'lens_add_fixed': [[index, ['gamma']]]}
+            if do_pso:
+                if epoch == 0 and index is not None:
+                    fitting_kwargs_list.append([
+                            'update_settings',
+                            {'lens_add_fixed': [[index, ['gamma']]]}
 
+                        ])
+                elif index is not None:
+                    fitting_kwargs_list.append([
+                        'update_settings',
+                        {'lens_remove_fixed': [[index, ['gamma']]]}
                     ])
-            elif index is not None:
-                fitting_kwargs_list.append([
-                    'update_settings',
-                    {'lens_remove_fixed': [[index, ['gamma']]]}
-                ])
 
             for multiplier in pso_range_multipliers:
                 if do_pso:

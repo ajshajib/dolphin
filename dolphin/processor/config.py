@@ -662,24 +662,58 @@ class ModelConfig(Config):
 
         fitting_kwargs_list = []
 
-        pso_range_multipliers = [10., 1., 1., 0.1, 0.01]
+        pso_range_multipliers = [1., 0.1, 0.1]
 
-        for multiplier in pso_range_multipliers:
-            if do_pso:
+        for epoch in range(2):
+            lens_model_list = self.get_lens_model_list()
+            if 'SPEMD' in lens_model_list or 'SPEP' is lens_model_list:
+                if 'SPEMD' in lens_model_list:
+                    index = lens_model_list.index('SPEMD')
+                else:
+                    index = lens_model_list.index('SPEP')
+            else:
+                index = None
+
+            if epoch == 0 and index is not None:
                 fitting_kwargs_list.append([
-                    'PSO',
-                     {
-                        'sigma_scale': multiplier,
-                        'n_particles': self.settings['fitting'][
-                                                'pso_settings']['num_particle'],
-                        'n_iterations': self.settings['fitting'][
-                                                'pso_settings']['num_iteration']
-                     }
+                        'update_settings',
+                        {'lens_add_fixed': [[index, ['gamma']]]}
+
+                    ])
+            elif index is not None:
+                fitting_kwargs_list.append([
+                    'update_settings',
+                    {'lens_remove_fixed': [[index, ['gamma']]]}
                 ])
-            if reconstruct_psf:
-                fitting_kwargs_list.append(
-                    ['psf_iteration', self.get_kwargs_psf_iteration()]
-                )
+
+            for multiplier in pso_range_multipliers:
+                if do_pso:
+                    # if multiplier in [10., 1.]:
+                    #     fitting_kwargs_list.append([
+                    #         'update_settings',
+                    #         {'lens_add_fixed': [[index, ['gamma']]]}
+                    #
+                    #     ])
+                    # elif multiplier == .1:
+                    #     fitting_kwargs_list.append([
+                    #         'update_settings',
+                    #         {'lens_remove_fixed': [[index, ['gamma']]]}
+                    #     ])
+
+                    fitting_kwargs_list.append([
+                        'PSO',
+                         {
+                            'sigma_scale': multiplier,
+                            'n_particles': self.settings['fitting'][
+                                                    'pso_settings']['num_particle'],
+                            'n_iterations': self.settings['fitting'][
+                                                    'pso_settings']['num_iteration']
+                         }
+                    ])
+                if reconstruct_psf:
+                    fitting_kwargs_list.append(
+                        ['psf_iteration', self.get_kwargs_psf_iteration()]
+                    )
 
         if do_sampling:
             if self.settings['fitting']['sampler'] == 'MCMC':

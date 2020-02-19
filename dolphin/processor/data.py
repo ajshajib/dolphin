@@ -29,6 +29,8 @@ class Data(object):
         for key in f:
             data[key] = f[key][()]
 
+        f.close()
+
         return data
 
 

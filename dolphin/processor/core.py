@@ -35,7 +35,7 @@ class Processor(object):
         self.file_system = FileSystem(working_directory)
         self.lens_list = self.file_system.get_lens_list()
 
-    def swim(self, lens_name, model_id, log=True):
+    def swim(self, lens_name, model_id, log=True, mpi=False):
         """
         Run models for a single lens.
         :param lens_name: lens name
@@ -44,6 +44,8 @@ class Processor(object):
         :type model_id: `str`
         :param log: if `True`, all `print` statements will be logged
         :type log: `bool`
+        :param mpi: MPI option
+        :type mpi: `bool`
         :return:
         :rtype:
         """
@@ -60,7 +62,8 @@ class Processor(object):
             config.get_kwargs_model(),
             config.get_kwargs_constraints(),
             config.get_kwargs_likelihood(),
-            config.get_kwargs_params()
+            config.get_kwargs_params(),
+            mpi=mpi
         )
 
         fit_output = fitting_sequence.fit_sequence(

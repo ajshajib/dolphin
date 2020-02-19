@@ -524,8 +524,8 @@ class ModelConfig(Config):
                     })
 
                     sigma.append({
-                        'center_x': 0.01,
-                        'center_y': 0.01,
+                        'center_x': 0.5,
+                        'center_y': 0.5,
                         'R_sersic': 0.01, 'n_sersic': 0.5,
                         'e1': 0.05, 'e2': 0.05
                     })
@@ -547,11 +547,11 @@ class ModelConfig(Config):
                     init.append({'center_x': 0., 'center_y': 0., 'beta': 0.015,
                                  'n_max': self.settings['source_option'][
                                                                 'n_max'][n]})
-                    sigma.append({'center_x': 0.01, 'center_y': 0.01,
+                    sigma.append({'center_x': 0.5, 'center_y': 0.5,
                                   'beta': 0.015/10., 'n_max': 2})
-                    lower.append({'center_x': -10, 'center_y': -10,
+                    lower.append({'center_x': -2., 'center_y': -2.,
                                   'beta': 0.01, 'n_max': -1})
-                    upper.append({'center_x': 10, 'center_y': 10,
+                    upper.append({'center_x': 2., 'center_y': 2.,
                                   'beta': 2., 'n_max': 55})
                 else:
                     raise ValueError('{} not implemented as a source light'
@@ -664,16 +664,16 @@ class ModelConfig(Config):
 
         pso_range_multipliers = [1., 0.1, 0.1]
 
-        for epoch in range(2):
-            lens_model_list = self.get_lens_model_list()
-            if 'SPEMD' in lens_model_list or 'SPEP' is lens_model_list:
-                if 'SPEMD' in lens_model_list:
-                    index = lens_model_list.index('SPEMD')
-                else:
-                    index = lens_model_list.index('SPEP')
+        lens_model_list = self.get_lens_model_list()
+        if 'SPEMD' in lens_model_list or 'SPEP' in lens_model_list:
+            if 'SPEMD' in lens_model_list:
+                index = lens_model_list.index('SPEMD')
             else:
-                index = None
+                index = lens_model_list.index('SPEP')
+        else:
+            index = None
 
+        for epoch in range(2):
             if epoch == 0 and index is not None:
                 fitting_kwargs_list.append([
                         'update_settings',

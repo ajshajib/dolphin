@@ -139,7 +139,7 @@ class ModelConfig(Config):
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model']\
                 is not None:
-            for key, value in self.settings['kwargs_model'].iteritems():
+            for key, value in self.settings['kwargs_model'].items():
                 kwargs_model[key] = value
 
         return kwargs_model

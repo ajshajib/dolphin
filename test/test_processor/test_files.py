@@ -132,9 +132,16 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_WORK_DIR / 'logs' / 'log_test_id.txt'
+        with open(str(_TEST_WORK_DIR.resolve())
+                  + '/logs/log_name_test.txt', 'w') as f:
+            pass
 
-        assert Path(self.file_system.get_log_file_path('test', 'id')) == path
+        path = _TEST_WORK_DIR / 'logs' / 'log_name_test.txt'
+
+        assert Path(self.file_system.get_log_file_path('name', 'test')) \
+            == path
+
+        os.remove(str(path.resolve()))
 
     def test_get_output_file_path(self):
         """
@@ -142,7 +149,13 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_WORK_DIR / 'outputs' / 'output_test_id.json'
+        with open(str(_TEST_WORK_DIR.resolve())
+                  + '/outputs/output_name_test.json', 'w') as f:
+            pass
 
-        assert Path(self.file_system.get_output_file_path('test', 'id')) == \
-               path
+        path = _TEST_WORK_DIR / 'outputs' / 'output_name_test.json'
+
+        assert Path(self.file_system.get_output_file_path('name', 'test')) \
+            == path
+
+        os.remove(str(path.resolve()))

@@ -163,9 +163,8 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(Path(self.get_logs_directory())
-                             / 'log_{}_{}.txt'.format(lens_name, model_id)
-                             )
+        return self.path2str(Path(self.get_logs_directory())) \
+            + '/log_{}_{}.txt'.format(lens_name, model_id)
 
     def get_output_file_path(self, lens_name, model_id):
         """
@@ -177,6 +176,5 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(Path(self.get_outputs_directory())
-                             / 'output_{}_{}.json'.format(lens_name, model_id)
-                             )
+        return self.path2str(Path(self.get_outputs_directory())) \
+            + '/output_{}_{}.json'.format(lens_name, model_id)

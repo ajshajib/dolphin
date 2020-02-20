@@ -31,7 +31,7 @@ class Config(object):
         :return:
         :rtype:
         """
-        with open(file,'r') as f:
+        with open(file, 'r') as f:
             settings = yaml.load(f, yaml.FullLoader)
 
         return settings

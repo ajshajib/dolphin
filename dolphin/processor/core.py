@@ -135,7 +135,7 @@ class Processor(object):
         :rtype:
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
-        with open(save_file, 'w', encoding='utf-8') as f:
+        with open(save_file, 'w') as f:
             json.dump(self.encode_numpy_arrays(output), f,
                       ensure_ascii=False, indent=4)
 
@@ -151,7 +151,7 @@ class Processor(object):
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
 
-        with open(save_file, 'r', encoding='utf-8') as f:
+        with open(save_file, 'r') as f:
             output = json.load(f)
 
         return self.decode_numpy_arrays(output)

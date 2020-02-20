@@ -30,7 +30,7 @@ class TestConfig(object):
         test_setting_file = _ROOT_DIR / 'test_working_directory' \
                             / 'settings' / 'test_system_config.yml'
         config = Config()
-        config.load(test_setting_file)
+        config.load(str(test_setting_file.resolve()))
 
 
 class TestModelConfig(object):
@@ -40,7 +40,7 @@ class TestModelConfig(object):
     def setup_class(self):
         test_setting_file = _ROOT_DIR / 'test_working_directory' \
                             / 'settings' / 'test_system_config.yml'
-        self.config = ModelConfig(test_setting_file)
+        self.config = ModelConfig(str(test_setting_file.resolve()))
 
     @classmethod
     def teardown_class(cls):

@@ -183,6 +183,11 @@ class ModelConfig(Config):
             'joint_source_with_point_source': joint_source_with_point_source
         }
 
+        if 'kwargs_constraints' in self.settings and self.settings[
+                'kwargs_constraints'] is not None:
+            for key, value in self.settings['kwargs_constraints'].items():
+                kwargs_constraints[key] = value
+
         return kwargs_constraints
 
     def get_kwargs_likelihood(self):
@@ -238,8 +243,8 @@ class ModelConfig(Config):
                                                                     num_pixel)
 
                         mask_outer = mask_util.mask_center_2d(
-                            self.deflector_center_ra,
-                            self.deflector_center_dec,
+                            self.deflector_center_ra+offset[0],
+                            self.deflector_center_dec+offset[1],
                             radius,
                             util.image2array(x_coords),
                             util.image2array(y_coords)

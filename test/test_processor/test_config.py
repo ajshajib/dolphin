@@ -111,7 +111,8 @@ class TestModelConfig(object):
         kwargs_constraints = {
             'joint_source_with_source': [],
             'joint_lens_light_with_lens_light': [],
-            'joint_source_with_point_source': []
+            'joint_source_with_point_source': [],
+            'joint_lens_with_light': [[0, 0, ['center_x', 'center_y']]]
         }
 
         assert kwargs_constraints == self.config.get_kwargs_constraints()

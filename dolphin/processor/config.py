@@ -403,7 +403,7 @@ class ModelConfig(Config):
                 })
 
                 lower.append({
-                     'theta_E': 0.01, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.5,
+                     'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.5,
                      'center_x': self.deflector_center_ra
                                     - self.deflector_centroid_bound,
                      'center_y': self.deflector_center_dec
@@ -411,7 +411,7 @@ class ModelConfig(Config):
                 })
 
                 upper.append({
-                    'theta_E': 2., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.5,
+                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.5,
                     'center_x': self.deflector_center_ra
                                     + self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -482,7 +482,7 @@ class ModelConfig(Config):
 
                     upper.append({
                         'e1': 0.5, 'e2': 0.5,
-                        'n_sersic': 8., 'R_sersic': 10.,
+                        'n_sersic': 8., 'R_sersic': 5.,
                         'center_x': self.deflector_center_ra
                                         + self.deflector_centroid_bound,
                         'center_y': self.deflector_center_dec
@@ -549,15 +549,15 @@ class ModelConfig(Config):
                 elif model == 'SHAPELETS':
                     fixed.append({'n_max': self.settings['source_option'][
                         'n_max'][n]})
-                    init.append({'center_x': 0., 'center_y': 0., 'beta': 0.015,
+                    init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
                                  'n_max': self.settings['source_option'][
                                                                 'n_max'][n]})
                     sigma.append({'center_x': 0.5, 'center_y': 0.5,
                                   'beta': 0.015/10., 'n_max': 2})
-                    lower.append({'center_x': -2., 'center_y': -2.,
-                                  'beta': 0.01, 'n_max': -1})
-                    upper.append({'center_x': 2., 'center_y': 2.,
-                                  'beta': 2., 'n_max': 55})
+                    lower.append({'center_x': -1.2, 'center_y': -1.2,
+                                  'beta': 0.05, 'n_max': -1})
+                    upper.append({'center_x': 1.2, 'center_y': 1.2,
+                                  'beta': 0.5, 'n_max': 55})
                 else:
                     raise ValueError('{} not implemented as a source light'
                                      'model!'.format(model))

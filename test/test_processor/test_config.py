@@ -38,13 +38,19 @@ class TestModelConfig(object):
 
     """
     def setup_class(self):
-        test_setting_file = _ROOT_DIR / 'test_working_directory' \
+        self.test_setting_file = _ROOT_DIR / 'test_working_directory' \
                             / 'settings' / 'test_system_config.yml'
-        self.config = ModelConfig(str(test_setting_file.resolve()))
+        self.config = ModelConfig(str(self.test_setting_file.resolve()))
 
     @classmethod
     def teardown_class(cls):
         pass
+
+    def test_load_settings_from_file(self):
+        test_config = ModelConfig()
+        test_config.load_settings_from_file(self.test_setting_file.resolve())
+
+        assert test_config.settings is not None
 
     def test_pixel_size(self):
         """

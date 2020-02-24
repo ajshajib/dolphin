@@ -781,11 +781,11 @@ class ModelConfig(Config):
         lower_list = kwargs_params[3]
         fixed_list = kwargs_params[2]
 
-        if not isinstance(index, list):
-            raise ValueError('index must be a list!')
-
         if index is None:
             index = [i for i, _ in enumerate(lower_list)]
+
+        if not isinstance(index, list):
+            raise ValueError('index must be a list!')
 
         param_list_with_index = []
 

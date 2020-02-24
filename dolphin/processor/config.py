@@ -7,6 +7,7 @@ __author__ = 'ajshajib'
 
 import yaml
 import numpy as np
+from copy import deepcopy
 
 from lenstronomy.Data.coord_transforms import Coordinates
 import lenstronomy.Util.util as util
@@ -756,3 +757,67 @@ class ModelConfig(Config):
 
         return fitting_kwargs_list
 
+    def fix_params(self, model_component, index=None):
+        """
+        Fix all the params in `name` that are not fixed already.
+        :param model_component: name of params type, e.g., 'lens_model'
+        :type model_component: `str`
+        :param index: profile indices, if `None` all will be fixed
+        :type index: `list`
+        :return: formatted fit-sequence code to go into `fitting_kwargs_list`
+        :rtype: `list`
+        """
+        if model_component == 'lens_model':
+            kwargs_params = self.get_lens_model_params()
+        #elif model_component == 'point_source':
+        #    kwargs_params = self.get_point_source_params()
+        elif model_component == 'lens_light':
+            kwargs_params = self.get_lens_light_model_params()
+        elif model_component == 'source':
+            kwargs_params = self.get_source_light_model_params()
+        else:
+            raise ValueError('{} not recognized!'.format(model_component))
+
+        lower_list = kwargs_params[3]
+        fixed_list = kwargs_params[2]
+
+        if not isinstance(index, list):
+            raise ValueError('index must be a list!')
+
+        if index is None:
+            index = [i for i, _ in enumerate(lower_list)]
+
+        param_list_with_index = []
+
+        for i, (sigma, fixed) in enumerate(zip(lower_list, fixed_list)):
+            if i in index:
+                param_list = []
+                for key, value in sigma.items():
+                    if key not in fixed:
+                        param_list.append(key)
+
+                param_list_with_index.append([i, param_list])
+
+        key = '{}_add_fixed'.format(model_component)
+
+        return ['update_settings', {key: param_list_with_index}]
+
+    def unfix_params(self, model_component, index=None):
+        """
+        Unfix all the params in `name` that are not fixed already.
+        :param model_component: name of params type, e.g., 'lens_model'
+        :type model_component: `str`
+        :param index: profile indices, if `None` all will be unfixed
+        :type index: `list`
+        :return: formatted fit-sequence code to go into `fitting_kwargs_list`
+        :rtype: `list`
+        """
+        code = self.fix_params(model_component, index=index)
+
+        old_key = '{}_add_fixed'.format(model_component)
+        key = '{}_remove_fixed'.format(model_component)
+
+        code[1][key] = deepcopy(code[1][old_key])
+        del code[1][old_key]
+
+        return code

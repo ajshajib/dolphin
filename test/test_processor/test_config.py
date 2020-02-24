@@ -220,6 +220,60 @@ class TestModelConfig(object):
 
         assert fitting_kwargs_list == self.config.get_fitting_kwargs_list()
 
+    def test_fix_params(self):
+        """
+        Test `fix_params` method.
+        :return:
+        :rtype:
+        """
+        test = self.config.fix_params('lens_model', [0])
+        assert test[1]['lens_model_add_fixed'] == [[0, ['theta_E', 'e1', 'e2',
+                                                        'gamma', 'center_x',
+                                                        'center_y']]]
+
+        test = self.config.fix_params('lens_model', [1])
+        assert test[1]['lens_model_add_fixed'] == [[1, ['gamma_ext',
+                                                        'psi_ext']]]
+
+        test = self.config.fix_params('lens_light', [0])
+        assert test[1]['lens_light_add_fixed'] == [[0, ['e1', 'e2',
+                                                        'R_sersic',
+                                                        'center_x',
+                                                        'center_y']]]
+
+        test = self.config.fix_params('source', [0])
+        assert test[1]['source_add_fixed'] == [[0, ['R_sersic', 'n_sersic',
+                                                    'center_y', 'center_x',
+                                                    'e1', 'e2']]]
+
+    def test_unfix_params(self):
+        """
+        Test `unfix_params` method.
+        :return:
+        :rtype:
+        """
+        test = self.config.unfix_params('lens_model', [0])
+        assert test[1]['lens_model_remove_fixed'] == [[0, ['theta_E', 'e1',
+                                                           'e2', 'gamma',
+                                                           'center_x',
+                                                           'center_y']]]
+
+        test = self.config.unfix_params('lens_model', [1])
+        assert test[1]['lens_model_remove_fixed'] == [[1, ['gamma_ext',
+                                                           'psi_ext']]]
+
+        test = self.config.unfix_params('lens_light', [0])
+        assert test[1]['lens_light_remove_fixed'] == [[0, ['e1', 'e2',
+                                                           'R_sersic',
+                                                           'center_x',
+                                                           'center_y']]]
+
+        test = self.config.unfix_params('source', [0])
+        assert test[1]['source_remove_fixed'] == [[0, ['R_sersic', 'n_sersic',
+                                                       'center_y', 'center_x',
+                                                       'e1', 'e2']]]
+
+
 
 if __name__ == '__main__':
     pytest.main()

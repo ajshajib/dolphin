@@ -767,7 +767,7 @@ class ModelConfig(Config):
         :return: formatted fit-sequence code to go into `fitting_kwargs_list`
         :rtype: `list`
         """
-        if model_component == 'lens_model':
+        if model_component == 'lens':
             kwargs_params = self.get_lens_model_params()
         #elif model_component == 'point_source':
         #    kwargs_params = self.get_point_source_params()
@@ -776,7 +776,8 @@ class ModelConfig(Config):
         elif model_component == 'source':
             kwargs_params = self.get_source_light_model_params()
         else:
-            raise ValueError('{} not recognized!'.format(model_component))
+            raise ValueError('{} not recognized! Must be lens or '
+                             'lens_light or source.'.format(model_component))
 
         lower_list = kwargs_params[3]
         fixed_list = kwargs_params[2]

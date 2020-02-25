@@ -226,13 +226,13 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        test = self.config.fix_params('lens_model', [0])
-        assert test[1]['lens_model_add_fixed'] == [[0, ['theta_E', 'e1', 'e2',
+        test = self.config.fix_params('lens', [0])
+        assert test[1]['lens_add_fixed'] == [[0, ['theta_E', 'e1', 'e2',
                                                         'gamma', 'center_x',
                                                         'center_y']]]
 
-        test = self.config.fix_params('lens_model', [1])
-        assert test[1]['lens_model_add_fixed'] == [[1, ['gamma_ext',
+        test = self.config.fix_params('lens', [1])
+        assert test[1]['lens_add_fixed'] == [[1, ['gamma_ext',
                                                         'psi_ext']]]
 
         test = self.config.fix_params('lens_light', [0])
@@ -252,14 +252,14 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        test = self.config.unfix_params('lens_model', [0])
-        assert test[1]['lens_model_remove_fixed'] == [[0, ['theta_E', 'e1',
+        test = self.config.unfix_params('lens', [0])
+        assert test[1]['lens_remove_fixed'] == [[0, ['theta_E', 'e1',
                                                            'e2', 'gamma',
                                                            'center_x',
                                                            'center_y']]]
 
-        test = self.config.unfix_params('lens_model', [1])
-        assert test[1]['lens_model_remove_fixed'] == [[1, ['gamma_ext',
+        test = self.config.unfix_params('lens', [1])
+        assert test[1]['lens_remove_fixed'] == [[1, ['gamma_ext',
                                                            'psi_ext']]]
 
         test = self.config.unfix_params('lens_light', [0])

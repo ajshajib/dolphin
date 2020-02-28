@@ -57,6 +57,14 @@ class ImageData(Data):
 
         return kwargs_data
 
+    def get_image(self):
+        """
+        Get image `ndarray` from the saved in the class instance.
+        :return: image
+        :rtype: `ndarray`
+        """
+        return deepcopy(self._data[0]['image_data'])
+
 
 class PSFData(Data):
     """

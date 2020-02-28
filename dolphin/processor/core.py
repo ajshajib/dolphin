@@ -94,6 +94,7 @@ class Processor(object):
     def get_kwargs_data_joint(self, lens_name):
         """
         Create `kwargs_data` for a lens and given filters.
+
         :param lens_name:
         :type lens_name:
         :return:
@@ -108,10 +109,8 @@ class Processor(object):
         multi_band_list = []
 
         for b, kwargs_num in zip(bands, kwargs_numerics):
-            image_data = ImageData(self.file_system.get_image_file_path(
-                                                                    lens_name,
-                                                                    b))
-            psf_data = PSFData(self.file_system.get_psf_file_path(lens_name, b))
+            image_data = self.get_image_data(lens_name, b)
+            psf_data = self.get_psf_data(lens_name, b)
 
             multi_band_list.append([
                 image_data.kwargs_data,
@@ -126,9 +125,36 @@ class Processor(object):
 
         return kwargs_data_joint
 
+    def get_image_data(self, lens_name, band):
+        """
+        Get the `ImageData` instance.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param band: name of band
+        :type band: `str`
+        :return: `ImageData` instance
+        :rtype:
+        """
+        return ImageData(self.file_system.get_image_file_path(lens_name, band))
+
+    def get_psf_data(self, lens_name, band):
+        """
+        Get the `PSFData` instance.
+
+        :param lens_name:
+        :type lens_name:
+        :param band:
+        :type band:
+        :return:
+        :rtype:
+        """
+        return PSFData(self.file_system.get_psf_file_path(lens_name, band))
+
     def _save_output(self, lens_name, model_id, output):
         """
         Save output from fitting sequence.
+
         :param kwargs_result:
         :type kwargs_result:
         :return:
@@ -142,6 +168,7 @@ class Processor(object):
     def load_output(self, lens_name, model_id):
         """
         Load from saved output file.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: model identifier provided at run initiation
@@ -161,6 +188,7 @@ class Processor(object):
         """
         Encode a list/dictionary containing numpy arrays through recursion
         for JSON serialization.
+
         :param obj: object
         :type obj:
         :return: object with ndarrays encoded in dictionaries
@@ -189,6 +217,7 @@ class Processor(object):
         """
         Decode a list/dictionary containing encoded numpy arrays through
         recursion.
+
         :param obj: object with ndarrays encoded in dictionaries
         :type obj:
         :return: object

@@ -8,6 +8,9 @@ python:
   - "2.7.16"
 
 before_install:
+  - python --version
+  - pip install -U pip
+  - pip install -U pytest
   - pip install coveralls
   - pip install tox-travis
   #- pip install python-coveralls

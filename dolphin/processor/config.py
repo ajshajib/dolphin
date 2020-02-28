@@ -239,7 +239,7 @@ class ModelConfig(Config):
                     return self.settings['mask']['provided']
                 else:
                     masks = []
-                    mask_options = self.settings['mask']
+                    mask_options = deepcopy(self.settings['mask'])
 
                     for n in range(self.band_number):
                         ra_at_xy_0 = mask_options['ra_at_xy_0'][n]
@@ -316,8 +316,8 @@ class ModelConfig(Config):
         except (KeyError, NameError):
             supersampling_factor = [3] * self.band_number
         else:
-            supersampling_factor = self.settings['numeric_option'][
-                                                    'supersampling_option']
+            supersampling_factor = deepcopy(self.settings['numeric_option'][
+                                                    'supersampling_option'])
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
@@ -401,8 +401,8 @@ class ModelConfig(Config):
                     fixed.append({})
                 else:
                     if i in self.settings['deflector_option']['fix']:
-                        fixed.append(self.settings['deflector_option'][
-                                         'fix'][i])
+                        fixed.append(deepcopy(self.settings['deflector_option'][
+                                         'fix'][i]))
 
                 init.append({
                     'center_x': self.deflector_center_ra,
@@ -469,8 +469,8 @@ class ModelConfig(Config):
                         fixed.append({})
                     else:
                         if i in self.settings['lens_light_option']['fix']:
-                            fixed.append(self.settings['lens_light_option'][
-                                             'fix'][i])
+                            fixed.append(deepcopy(self.settings['lens_light_option'][
+                                             'fix'][i]))
 
                     init.append({
                         'amp': 1., 'R_sersic': .2,
@@ -533,8 +533,8 @@ class ModelConfig(Config):
                         fixed.append({})
                     else:
                         if i in self.settings['source_option']['fix']:
-                            fixed.append(self.settings['source_option'][
-                                             'fix'][i])
+                            fixed.append(deepcopy(self.settings['source_option'][
+                                             'fix'][i]))
 
                     init.append({
                         'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,
@@ -655,7 +655,7 @@ class ModelConfig(Config):
         except (NameError, KeyError):
             do_pso = False
         else:
-            do_pso = self.settings['fitting']['pso']
+            do_pso = deepcopy(self.settings['fitting']['pso'])
 
             if do_pso is None:
                 do_pso = False
@@ -665,7 +665,8 @@ class ModelConfig(Config):
         except (NameError, KeyError):
             reconstruct_psf = False
         else:
-            reconstruct_psf = self.settings['fitting']['psf_iteration']
+            reconstruct_psf = deepcopy(self.settings['fitting'][
+                                           'psf_iteration'])
 
             if reconstruct_psf is None:
                 reconstruct_psf = False
@@ -675,7 +676,7 @@ class ModelConfig(Config):
         except (NameError, KeyError):
             do_sampling = False
         else:
-            do_sampling = self.settings['fitting']['sampling']
+            do_sampling = deepcopy(self.settings['fitting']['sampling'])
 
             if do_sampling is None:
                 do_sampling = False

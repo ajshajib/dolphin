@@ -8,7 +8,6 @@ python:
   - "2.7.16"
 
 before_install:
-  - pip install pluggy>=0.12.0
   - pip install coveralls
   - pip install tox-travis
   #- pip install python-coveralls
@@ -22,6 +21,7 @@ install:
 script:
   #- py.test
   #- coverage run --source=dolphin setup.py test
+  - pip install pluggy>=0.12.0
   - tox
 
 after_success:

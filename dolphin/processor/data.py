@@ -63,7 +63,7 @@ class ImageData(Data):
         :return: image
         :rtype: `ndarray`
         """
-        return deepcopy(self._data[0]['image_data'])
+        return deepcopy(self._data['image_data'])
 
 
 class PSFData(Data):

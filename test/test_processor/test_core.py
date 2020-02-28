@@ -42,6 +42,25 @@ class TestProcessor(object):
         assert len(kwargs_data_joint['multi_band_list']) == 1
         assert len(kwargs_data_joint['multi_band_list'][0]) == 3
 
+    def test_get_image_data(self):
+        """
+        Test `get_image_data` method.
+        :return:
+        :rtype:
+        """
+        image_data = self.processor.get_image_data('test_system', 'F390W')
+        assert image_data is not None
+
+    def test_get_psf_data(self):
+        """
+        Test `get_image_data` method.
+        :return:
+        :rtype:
+        """
+        psf_data = self.processor.get_psf_data('test_system', 'F390W')
+        assert psf_data is not None
+
+
     def test_save_load_output(self):
         """
         Test `_save_output` and `load_output` methods.

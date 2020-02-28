@@ -36,9 +36,11 @@ class TestData(object):
 
 class TestImageData(object):
 
-    @classmethod
-    def setup_class(cls):
-        pass
+    def setup_class(self):
+        data_file = _ROOT_DIR / 'test_working_directory' \
+                    / 'data' / 'test_system' \
+                    / 'image_test_system_F390W.hdf5'
+        self.image_data = ImageData(data_file)
 
     @classmethod
     def teardown_class(cls):
@@ -50,16 +52,21 @@ class TestImageData(object):
         :return:
         :rtype:
         """
-        data_file = _ROOT_DIR / 'test_working_directory' \
-                    / 'data' / 'test_system' \
-                    / 'image_test_system_F390W.hdf5'
-        image_data = ImageData(data_file)
-
-        #image_data.kwargs_data
-
         for key in ['image_data', 'background_rms', 'exposure_time',
                     'ra_at_xy_0', 'dec_at_xy_0', 'transform_pix2angle']:
-            assert key in image_data.kwargs_data
+            assert key in self.image_data.kwargs_data
+
+    def test_get_image(self):
+        """
+        Test `get_image` method.
+        :return:
+        :rtype:
+        """
+        image = self.image_data.get_image()
+
+        assert len(image.shape) == 2
+        assert image.shape == (120, 120)
+
 
 
 class TestPSFData(object):

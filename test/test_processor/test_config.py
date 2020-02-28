@@ -48,7 +48,8 @@ class TestModelConfig(object):
 
     def test_load_settings_from_file(self):
         test_config = ModelConfig()
-        test_config.load_settings_from_file(self.test_setting_file.resolve())
+        test_config.load_settings_from_file(str(
+            self.test_setting_file.resolve()))
 
         assert test_config.settings is not None
 
@@ -227,24 +228,27 @@ class TestModelConfig(object):
         :rtype:
         """
         test = self.config.fix_params('lens', [0])
-        assert test[1]['lens_add_fixed'] == [[0, ['theta_E', 'e1', 'e2',
-                                                        'gamma', 'center_x',
-                                                        'center_y']]]
+        assert set(test[1]['lens_add_fixed'][0][1]) == {'theta_E',
+                                                        'center_x',
+                                                        'center_y',  'e1',
+                                                        'gamma', 'e2'}
 
         test = self.config.fix_params('lens', [1])
-        assert test[1]['lens_add_fixed'] == [[1, ['gamma_ext',
-                                                        'psi_ext']]]
+        assert set(test[1]['lens_add_fixed'][0][1]) == {'gamma_ext',
+                                                        'psi_ext'}
 
         test = self.config.fix_params('lens_light', [0])
-        assert test[1]['lens_light_add_fixed'] == [[0, ['e1', 'e2',
-                                                        'R_sersic',
-                                                        'center_x',
-                                                        'center_y']]]
+        assert set(test[1]['lens_light_add_fixed'][0][1]) == {'e1', 'center_x',
+                                                              'center_y',
+                                                              'R_sersic',
+                                                              'e2'}
 
         test = self.config.fix_params('source', [0])
-        assert test[1]['source_add_fixed'] == [[0, ['R_sersic', 'n_sersic',
-                                                    'center_y', 'center_x',
-                                                    'e1', 'e2']]]
+        assert set(test[1]['source_add_fixed'][0][1]) == {'R_sersic',
+                                                          'n_sersic',
+                                                          'center_x',
+                                                          'center_y',
+                                                          'e1', 'e2'}
 
     def test_unfix_params(self):
         """
@@ -253,25 +257,26 @@ class TestModelConfig(object):
         :rtype:
         """
         test = self.config.unfix_params('lens', [0])
-        assert test[1]['lens_remove_fixed'] == [[0, ['theta_E', 'e1',
-                                                           'e2', 'gamma',
+        assert set(test[1]['lens_remove_fixed'][0][1]) == {'theta_E',
                                                            'center_x',
-                                                           'center_y']]]
+                                                     'center_y',  'e1', 'gamma',
+                                                     'e2'}
 
         test = self.config.unfix_params('lens', [1])
-        assert test[1]['lens_remove_fixed'] == [[1, ['gamma_ext',
-                                                           'psi_ext']]]
+        assert set(test[1]['lens_remove_fixed'][0][1]) == {'gamma_ext',
+                                                           'psi_ext'}
 
         test = self.config.unfix_params('lens_light', [0])
-        assert test[1]['lens_light_remove_fixed'] == [[0, ['e1', 'e2',
-                                                           'R_sersic',
-                                                           'center_x',
-                                                           'center_y']]]
+        assert set(test[1]['lens_light_remove_fixed'][0][1]) == {'e1',
+                                                                 'center_x',
+                                                           'center_y',
+                                                           'R_sersic', 'e2'}
 
         test = self.config.unfix_params('source', [0])
-        assert test[1]['source_remove_fixed'] == [[0, ['R_sersic', 'n_sersic',
-                                                       'center_y', 'center_x',
-                                                       'e1', 'e2']]]
+        assert set(test[1]['source_remove_fixed'][0][1]) == {'R_sersic',
+                                                          'n_sersic',
+                                                       'center_x', 'center_y',
+                                                       'e1', 'e2'}
 
 
 

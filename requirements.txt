@@ -12,3 +12,4 @@ multiprocess>=0.70.8
 dynesty
 pymultinest
 pypolychord
+pathlib

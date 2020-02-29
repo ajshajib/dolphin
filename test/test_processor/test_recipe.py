@@ -70,7 +70,10 @@ class TestRecipe(object):
         :return:
         :rtype:
         """
-        fitting_kwargs_list = self.recipe.get_galaxy_galaxy_recipe()
+        image = np.random.normal(size=(100, 100))
+        kwargs_data_joint = {'multi_band_list': [{'image_data': image}]}
+        fitting_kwargs_list = self.recipe.get_galaxy_galaxy_recipe(
+                                                            kwargs_data_joint)
         assert isinstance(fitting_kwargs_list, list)
 
     def test_get_arc_mask(self):

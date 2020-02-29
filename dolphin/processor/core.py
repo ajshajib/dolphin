@@ -11,6 +11,7 @@ from .files import FileSystem
 from .config import ModelConfig
 from .data import ImageData
 from .data import PSFData
+from .recipe import Recipe
 
 try:
     from mpi4py import MPI
@@ -35,7 +36,8 @@ class Processor(object):
         self.file_system = FileSystem(working_directory)
         self.lens_list = self.file_system.get_lens_list()
 
-    def swim(self, lens_name, model_id, log=True, mpi=False):
+    def swim(self, lens_name, model_id, log=True, mpi=False,
+             recipe_name='default'):
         """
         Run models for a single lens.
         :param lens_name: lens name
@@ -46,6 +48,9 @@ class Processor(object):
         :type log: `bool`
         :param mpi: MPI option
         :type mpi: `bool`
+        :param recipe_name: recipe for pre-sampling optimization, supported ones
+        now: 'default' and 'galaxy-galaxy'
+        :type recipe_name: `str`
         :return:
         :rtype:
         """
@@ -56,6 +61,7 @@ class Processor(object):
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
+        recipe = Recipe(config)
 
         fitting_sequence = FittingSequence(
             self.get_kwargs_data_joint(lens_name),
@@ -66,8 +72,8 @@ class Processor(object):
             mpi=mpi
         )
 
-        fit_output = fitting_sequence.fit_sequence(
-                                            config.get_fitting_kwargs_list())
+        fitting_kwargs_list = recipe.get_recipe(recipe_name=recipe_name)
+        fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 
         output = {

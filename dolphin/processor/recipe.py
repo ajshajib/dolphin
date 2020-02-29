@@ -62,15 +62,13 @@ class Recipe(object):
             if self.do_sampling is None:
                 self.do_sampling = False
 
+        self.guess_params = {}
         for component in ['lens', 'source', 'lens_light', 'ps']:
-            self.guess_params = {}
             try:
-                config.settings['guess_params'][component]
-            except (NameError, KeyError):
-                self.guess_params[component] = None
-            else:
                 self.guess_params[component] = deepcopy(config.settings[
                                                     'guess_params'][component])
+            except (NameError, KeyError):
+                self.guess_params[component] = None
 
     def get_recipe(self, kwargs_data_joint=None, recipe_name='default'):
         """
@@ -241,7 +239,8 @@ class Recipe(object):
                 arc_masks.append(self.get_arc_mask(image) * mask)
 
             pl_model_index = self._get_power_law_model_index()
-            for epoch in range(2):
+
+            for epoch in range(1):
                 # first fix power-law gamma = 2, is SPEMD/SPEP is used
                 if pl_model_index is not None:
                     fitting_kwargs_list += [
@@ -266,6 +265,7 @@ class Recipe(object):
                 # mask
                 fitting_kwargs_list += [
                     self.unfix_params('source'),
+                    #self.unfix_params('lens'),
                     self.fix_params('lens_light'),
                     ['update_settings', {'kwargs_likelihood': {
                         'image_likelihood_mask_list': masks}}],
@@ -275,27 +275,39 @@ class Recipe(object):
                 if self.guess_params['lens'] is not None:
                     param_list = []
                     for index, params in self.guess_params['lens'].items():
-                        param_list.append([index, [params.keys(),
-                                                   params.values()]])
+                        param_list.append([index, list(params.keys()),
+                                                   list(params.values())])
 
                     fitting_kwargs_list += [
-                        ['set_param_value', {'lens': param_list}]
+                        ['update_settings', {'lens_add_fixed': param_list}]
                     ]
 
                 # optimize for the source only
                 fitting_kwargs_list += [
+                    #self.fix_params('lens'),
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
                              'n_iterations': self._pso_num_iteration}],
                     self.unfix_params('lens')
                 ]
 
-                # fix power-law gamma to 2, as all the lens parameters are
-                # unfixed
+                # if self.guess_params['lens'] is not None:
+                #     param_list = []
+                #     for index, params in self.guess_params['lens'].items():
+                #         param_list.append([index, list(params.keys()),
+                #                                    list(params.values())])
+                #
+                #     fitting_kwargs_list += [
+                #         ['set_param_value', {'lens': param_list}]
+                #     ]
+
+                # optimize for lens and source together, fix power-law gamma to
+                # 2, as all the lens parameters are unfixed
                 if pl_model_index is not None:
                     fitting_kwargs_list += [['update_settings',
                                              {'lens_add_fixed': [
-                                                 [pl_model_index, ['gamma']]
+                                                 [pl_model_index, ['gamma'],
+                                                  [2.]]
                                              ]}]]
 
                 # finally optimize with all of lens, lens light and source free
@@ -303,11 +315,10 @@ class Recipe(object):
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
                              'n_iterations': self._pso_num_iteration}],
+                    self.unfix_params('lens_light')
                 ]
 
-            fitting_kwargs_list += [
-
-            ]
+            fitting_kwargs_list += self.get_default_recipe()
 
         return fitting_kwargs_list
 

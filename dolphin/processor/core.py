@@ -63,8 +63,10 @@ class Processor(object):
         config = self.get_lens_config(lens_name)
         recipe = Recipe(config)
 
+        kwargs_data_joint = self.get_kwargs_data_joint(lens_name)
+
         fitting_sequence = FittingSequence(
-            self.get_kwargs_data_joint(lens_name),
+            kwargs_data_joint,
             config.get_kwargs_model(),
             config.get_kwargs_constraints(),
             config.get_kwargs_likelihood(),
@@ -72,7 +74,9 @@ class Processor(object):
             mpi=mpi
         )
 
-        fitting_kwargs_list = recipe.get_recipe(recipe_name=recipe_name)
+        fitting_kwargs_list = recipe.get_recipe(
+                                    kwargs_data_joint=kwargs_data_joint,
+                                    recipe_name=recipe_name)
         fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 

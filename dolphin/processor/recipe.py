@@ -100,6 +100,9 @@ class Recipe(object):
                 else:
                     fitting_kwargs_list += self.get_default_recipe()
         elif recipe_name == 'galaxy-galaxy':
+            if kwargs_data_joint is None:
+                raise ValueError('kwargs_data_joint is necessary to use '
+                                 'galaxy-galaxy optimization recipe!')
             fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
                                                             kwargs_data_joint)
         else:

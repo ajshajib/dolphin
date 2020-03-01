@@ -132,6 +132,22 @@ class Recipe(object):
 
         return index
 
+    def _get_shapelet_model_index(self):
+        """
+        Get the index of the shapelets model, if included in the source model
+        list.
+
+        :return: index or `None`
+        :rtype: `int`
+        """
+        source_model_list = self._config.get_source_light_model_list()
+        if 'SHAPELETS' in source_model_list:
+            index = source_model_list.index('SHAPELETS')
+        else:
+            index = None
+
+        return index
+
     def get_default_recipe(self):
         """
         Get the default pre-sampling optimization routine.
@@ -242,8 +258,9 @@ class Recipe(object):
                 arc_masks.append(self.get_arc_mask(image) * mask)
 
             pl_model_index = self._get_power_law_model_index()
+            shapelets_index = self._get_shapelet_model_index()
 
-            for epoch in range(1):
+            for epoch in range(2):
                 # first fix power-law gamma = 2, is SPEMD/SPEP is used
                 if pl_model_index is not None:
                     fitting_kwargs_list += [
@@ -267,7 +284,18 @@ class Recipe(object):
                 # unfix the source, keep lens fixed, fix lens light, use regular
                 # mask
                 fitting_kwargs_list += [
-                    self.unfix_params('source'),
+                    self.unfix_params('source')
+                ]
+
+                # fix the shapelets beta parameter
+                if shapelets_index is not None:
+                    fitting_kwargs_list += [
+                        ['update_settings',
+                         {'source_add_fixed': [[shapelets_index, ['beta'],
+                                                [0.05]]]}]
+                    ]
+
+                fitting_kwargs_list += [
                     #self.unfix_params('lens'),
                     self.fix_params('lens_light'),
                     ['update_settings', {'kwargs_likelihood': {
@@ -293,6 +321,13 @@ class Recipe(object):
                              'n_iterations': self._pso_num_iteration}],
                     self.unfix_params('lens')
                 ]
+
+                # unfix the shapelets beta parameter
+                if shapelets_index is not None:
+                    fitting_kwargs_list += [
+                        ['update_settings',
+                         {'source_remove_fixed': [[shapelets_index, ['beta']]]}]
+                    ]
 
                 # if self.guess_params['lens'] is not None:
                 #     param_list = []

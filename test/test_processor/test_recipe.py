@@ -44,6 +44,19 @@ class TestRecipe(object):
         """
         assert self.recipe._get_power_law_model_index() == 0
 
+    def test_get_shapelet_model_index(self):
+        """
+        Test `get_power_law_model_index` method.
+        :return:
+        :rtype:
+        """
+        self.recipe._config.settings['model']['source_light'] = [
+                                                'SERSIC_ELLIPSE', 'SHAPELETS']
+        assert self.recipe._get_shapelet_model_index() == 1
+
+        self.recipe._config.settings['model']['source_light'] = [
+                                                            'SERSIC_ELLIPSE']
+
     def test_get_default_recipe(self):
         """
         Test `get_default_recipe` method.

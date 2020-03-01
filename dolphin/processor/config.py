@@ -265,7 +265,28 @@ class ModelConfig(Config):
                             util.image2array(y_coords)
                         )
 
+                        extra_masked_regions = []
+                        try:
+                            self.settings['mask']['extra_regions']
+                        except (NameError, KeyError):
+                            pass
+                        else:
+                            if self.settings['mask']['extra_regions'] is not None:
+                                for reg in self.settings['mask']['extra_regions']:
+                                    extra_masked_regions.append(
+                                        mask_util.mask_center_2d(
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords)
+                                        )
+                                    )
+
                         mask = 1. - mask_outer
+
+                        for extra_region in extra_masked_regions:
+                            mask *= 1 - extra_region
 
                         # sanity check
                         mask[mask >= 1.] = 1.

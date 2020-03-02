@@ -207,8 +207,7 @@ class Recipe(object):
 
     def get_sampling_sequence(self):
         """
-        Get the sampling sequence. Currently only MCMC with cosmohammer is
-        supported.
+        Get the sampling sequence. Currently only MCMC with emcee is supported.
 
         :return:
         :rtype:
@@ -220,7 +219,7 @@ class Recipe(object):
                 fitting_kwargs_list.append(
                     ['MCMC',
                      {
-                         'sampler_type': 'COSMOHAMMER',
+                         'sampler_type': 'EMCEE',
                          'n_burn': self._config.settings['fitting'][
                              'mcmc_settings'][
                              'burnin_step'],

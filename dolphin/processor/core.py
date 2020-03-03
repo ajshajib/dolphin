@@ -37,7 +37,7 @@ class Processor(object):
         self.lens_list = self.file_system.get_lens_list()
 
     def swim(self, lens_name, model_id, log=True, mpi=False,
-             recipe_name='default'):
+             recipe_name='default', sampler='EMCEE'):
         """
         Run models for a single lens.
         :param lens_name: lens name
@@ -51,6 +51,8 @@ class Processor(object):
         :param recipe_name: recipe for pre-sampling optimization, supported ones
         now: 'default' and 'galaxy-galaxy'
         :type recipe_name: `str`
+        :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for legacy
+        :type sampler: `str`
         :return:
         :rtype:
         """
@@ -61,7 +63,7 @@ class Processor(object):
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
-        recipe = Recipe(config)
+        recipe = Recipe(config, sampler=sampler)
 
         kwargs_data_joint = self.get_kwargs_data_joint(lens_name)
 

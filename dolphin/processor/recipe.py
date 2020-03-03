@@ -18,12 +18,14 @@ class Recipe(object):
     first find a good enough lens model within the total parameter space.
     Then, the sampling can be done starting from the neighborhood of this point.
     """
-    def __init__(self, config):
+    def __init__(self, config, sampler='EMCEE'):
         """
         Initiate the class from the given settings for a lens system.
 
         :param config: `ModelConfig` instance
         :type config: `class`
+        :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for legacy
+        :type sampler: `str`
         """
         self._config = config
         try:
@@ -61,6 +63,8 @@ class Recipe(object):
 
             if self.do_sampling is None:
                 self.do_sampling = False
+
+        self._sampler = sampler
 
         self.guess_params = {}
         for component in ['lens', 'source', 'lens_light', 'ps']:
@@ -219,7 +223,7 @@ class Recipe(object):
                 fitting_kwargs_list.append(
                     ['MCMC',
                      {
-                         'sampler_type': 'EMCEE',
+                         'sampler_type': self._sampler,
                          'n_burn': self._config.settings['fitting'][
                              'mcmc_settings'][
                              'burnin_step'],

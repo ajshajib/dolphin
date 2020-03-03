@@ -286,7 +286,7 @@ class ModelConfig(Config):
                         mask = 1. - mask_outer
 
                         for extra_region in extra_masked_regions:
-                            mask *= 1 - extra_region
+                            mask *= extra_region
 
                         # sanity check
                         mask[mask >= 1.] = 1.

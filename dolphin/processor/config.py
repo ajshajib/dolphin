@@ -130,12 +130,15 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        num = len(self.settings['band'])
-
-        if num < 1:
-            raise ValueError("Number of bands less than 1!")
+        try:
+            num = len(self.settings['band'])
+        except (KeyError, TypeError, NameError):
+            raise ValueError('Name of band(s) not properly specified!')
         else:
-            return num
+            if num < 1:
+                raise ValueError("Number of bands less than 1!")
+            else:
+                return num
 
     def get_kwargs_model(self):
         """
@@ -333,12 +336,12 @@ class ModelConfig(Config):
         :rtype:
         """
         try:
-            self.settings['numeric_option']['supersampling_option']
-        except (KeyError, NameError):
+            self.settings['numeric_option']['supersampling_factor']
+        except (KeyError, NameError, TypeError):
             supersampling_factor = [3] * self.band_number
         else:
             supersampling_factor = deepcopy(self.settings['numeric_option'][
-                                                    'supersampling_option'])
+                                                    'supersampling_factor'])
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
@@ -607,47 +610,44 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        # return empty dictionaries as test is not implemented
-        return [{}]*5
+        point_source_model_list = self.get_point_source_model_list()
 
-        # point_source_model_list = self.get_point_source_model_list()
-        #
-        # fixed = []
-        # init = []
-        # sigma = []
-        # lower = []
-        # upper = []
-        #
-        # if len(point_source_model_list) > 0:
-        #     fixed.append({})
-        #
-        #     init.append({
-        #         'ra_image': self.settings['point_source_option']['ra_init'],
-        #         'dec_image': self.settings['point_source_option']['dec_init'],
-        #     })
-        #
-        #     num_point_sources = len(init[0]['ra_image'])
-        #     sigma.append({
-        #         'ra_image': self.pixel_size * np.ones(num_point_sources),
-        #         'dec_image': self.pixel_size * np.ones(num_point_sources),
-        #     })
-        #
-        #     lower.append({
-        #         'ra_image': init[0]['ra_image']
-        #                         - self.settings['point_source_option']['bound'],
-        #         'dec_image': init[0]['dec_image']
-        #                         - self.settings['point_source_option']['bound'],
-        #     })
-        #
-        #     upper.append({
-        #         'ra_image': init[0]['ra_image']
-        #                         + self.settings['point_source_option']['bound'],
-        #         'dec_image': init[0]['dec_image']
-        #                         + self.settings['point_source_option']['bound'],
-        #     })
-        #
-        # params = [init, sigma, fixed, lower, upper]
-        # return params
+        fixed = []
+        init = []
+        sigma = []
+        lower = []
+        upper = []
+
+        if len(point_source_model_list) > 0:
+            fixed.append({})
+
+            init.append({
+                'ra_image': self.settings['point_source_option']['ra_init'],
+                'dec_image': self.settings['point_source_option']['dec_init'],
+            })
+
+            num_point_sources = len(init[0]['ra_image'])
+            sigma.append({
+                'ra_image': self.pixel_size * np.ones(num_point_sources),
+                'dec_image': self.pixel_size * np.ones(num_point_sources),
+            })
+
+            lower.append({
+                'ra_image': init[0]['ra_image']
+                                - self.settings['point_source_option']['bound'],
+                'dec_image': init[0]['dec_image']
+                                - self.settings['point_source_option']['bound'],
+            })
+
+            upper.append({
+                'ra_image': init[0]['ra_image']
+                                + self.settings['point_source_option']['bound'],
+                'dec_image': init[0]['dec_image']
+                                + self.settings['point_source_option']['bound'],
+            })
+
+        params = [init, sigma, fixed, lower, upper]
+        return params
 
     def get_kwargs_params(self):
         """

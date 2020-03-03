@@ -42,6 +42,11 @@ class TestModelConfig(object):
                             / 'settings' / 'test_system_config.yml'
         self.config = ModelConfig(str(self.test_setting_file.resolve()))
 
+        self.test_setting_file2 = _ROOT_DIR / 'test_working_directory' \
+                                  / 'settings' / 'test_system2_config.yml'
+        self.config2 = ModelConfig(str(self.test_setting_file2.resolve()))
+
+
     @classmethod
     def teardown_class(cls):
         pass
@@ -68,6 +73,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.deflector_center_ra == 0.04
+        assert self.config2.deflector_center_ra == 0.
 
     def test_deflector_center_dec(self):
         """
@@ -76,6 +82,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.deflector_center_dec == -0.04
+        assert self.config2.deflector_center_dec == 0.
 
     def test_deflector_centroid_bound(self):
         """
@@ -84,6 +91,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.deflector_centroid_bound == 0.5
+        assert self.config2.deflector_centroid_bound == 0.2
 
     def test_band_number(self):
         """
@@ -92,6 +100,9 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.band_number == 1
+
+        with pytest.raises(ValueError):
+            self.config2.band_number
 
     def test_get_kwargs_model(self):
         """
@@ -107,6 +118,11 @@ class TestModelConfig(object):
         }
 
         assert kwargs_model == self.config.get_kwargs_model()
+
+        kwargs_model2 = self.config2.get_kwargs_model()
+
+        assert kwargs_model2['key1'] == 'value1'
+        assert kwargs_model2['key2'] == 'value2'
 
     def test_get_kwargs_constraints(self):
         """
@@ -161,6 +177,23 @@ class TestModelConfig(object):
                                       self.config.settings['mask']['size'][n]
                                       )
 
+        masks2 = self.config2.get_masks()
+        assert masks2 == [[[0., 0.], [0., 0.]]]
+
+        self.config2.settings['mask']['provided'] = None
+        self.config2.settings['band'] = ['F390W']
+
+        masks2 = self.config2.get_masks()
+        assert len(masks2) == self.config2.band_number
+
+        for n in range(self.config2.band_number):
+            assert masks2[n].shape == (self.config2.settings['mask']['size'][n],
+                                       self.config2.settings['mask']['size'][n]
+                                       )
+
+        self.config2.settings['mask'] = None
+        assert self.config2.get_masks() is None
+
     def test_get_psf_iteration(self):
         """
         Test `get_psf_iteration` method.
@@ -199,6 +232,41 @@ class TestModelConfig(object):
         }]
 
         assert test_numerics == self.config.get_kwargs_numerics()
+
+        self.config2.settings['band'] = ['F390W']
+        assert test_numerics == self.config2.get_kwargs_numerics()
+
+    def test_get_point_source_params(self):
+        """
+        Test `get_point_source_params` method.
+        :return:
+        :rtype:
+        """
+        ps_params = self.config.get_point_source_params()
+
+        assert ps_params == [[]]*5
+
+    def test_get_lens_model_list(self):
+        """
+        Test `get_lens_model_list` method.
+        :return:
+        :rtype:
+        """
+        assert self.config2.get_lens_model_list() == []
+
+    def test_get_lens_model_params(self):
+        """
+        Test `get_lens_model_params` method.
+        :return:
+        :rtype:
+        """
+        self.config2.settings['lens'] = ['SPEP']
+        self.config2.get_lens_model_params()
+
+        # self.config2.settings['lens'] = ['INVALID']
+        # with pytest.raises(ValueError):
+        #     self.config2.get_lens_model_params()
+        # self.config2.settings['lens'] = ['SPEP']
 
 
 if __name__ == '__main__':

@@ -29,6 +29,30 @@ class TestRecipe(object):
     def teardown_class(cls):
         pass
 
+    def test_init(self):
+        """
+        Test `__init__` method.
+        :return:
+        :rtype:
+        """
+        config = deepcopy(self.config)
+
+        config.settings['fitting']['pso'] = None
+        config.settings['fitting']['psf_iteration'] = None
+        config.settings['fitting']['sampling'] = None
+        recipe = Recipe(config)
+        assert recipe.do_sampling is False
+        assert recipe.do_pso is False
+        assert recipe.reconstruct_psf is False
+
+        del config.settings['fitting']['pso']
+        del config.settings['fitting']['psf_iteration']
+        del config.settings['fitting']['sampling']
+        recipe = Recipe(config)
+        assert recipe.do_sampling is False
+        assert recipe.do_pso is False
+        assert recipe.reconstruct_psf is False
+
     def test_get_recipe(self):
         """
         Test `get_recipe` method.
@@ -38,13 +62,38 @@ class TestRecipe(object):
         fitting_kwargs_list = self.recipe.get_recipe()
         assert isinstance(fitting_kwargs_list, list)
 
+        config = deepcopy(self.config)
+
+        config.settings['fitting_kwargs_list'] = [{}, {}]
+        recipe = Recipe(config)
+        assert recipe.get_recipe()[:2] == [{}, {}]
+
+        config.settings['fitting_kwargs_list'] = None
+        recipe = Recipe(config)
+        assert isinstance(recipe.get_recipe(), list)
+
+        # check requirement to pass `kwargs_data_joint`
+        with pytest.raises(ValueError):
+            recipe.get_recipe(recipe_name='galaxy-galaxy')
+
+        with pytest.raises(ValueError):
+            recipe.get_recipe(recipe_name='tuna-salad')
+
     def test_get_power_law_model_index(self):
         """
         Test `get_power_law_model_index` method.
         :return:
         :rtype:
         """
-        assert self.recipe._get_power_law_model_index() == 0
+        config = deepcopy(self.config)
+        config.settings['model']['lens'] = ['SERSIC', 'SPEMD']
+        assert Recipe(config)._get_power_law_model_index() == 1
+
+        config.settings['model']['lens'] = ['SERSIC', 'SPEP']
+        assert Recipe(config)._get_power_law_model_index() == 1
+
+        config.settings['model']['lens'] = ['SERSIC']
+        assert Recipe(config)._get_power_law_model_index() is None
 
     def test_get_external_shear_model_index(self):
         """
@@ -52,7 +101,15 @@ class TestRecipe(object):
         :return:
         :rtype:
         """
-        assert self.recipe._get_external_shear_model_index() == 1
+        config = deepcopy(self.config)
+        config.settings['model']['lens'] = ['SHEAR_GAMMA_PSI', 'SPEMD']
+        assert Recipe(config)._get_external_shear_model_index() == 0
+
+        config.settings['model']['lens'] = ['SERSIC', 'SHEAR']
+        assert Recipe(config)._get_external_shear_model_index() == 1
+
+        config.settings['model']['lens'] = ['SERSIC']
+        assert Recipe(config)._get_external_shear_model_index() is None
 
     def test_get_shapelet_model_index(self):
         """
@@ -60,12 +117,12 @@ class TestRecipe(object):
         :return:
         :rtype:
         """
-        self.recipe._config.settings['model']['source_light'] = [
-                                                'SERSIC_ELLIPSE', 'SHAPELETS']
-        assert self.recipe._get_shapelet_model_index() == 1
+        config = deepcopy(self.config)
+        config.settings['model']['source_light'] = ['SERSIC', 'SHAPELETS']
+        assert Recipe(config)._get_shapelet_model_index() == 1
 
-        self.recipe._config.settings['model']['source_light'] = [
-                                                            'SERSIC_ELLIPSE']
+        config.settings['model']['source_light'] = ['SERSIC']
+        assert Recipe(config)._get_shapelet_model_index() is None
 
     def test_get_default_recipe(self):
         """
@@ -86,6 +143,13 @@ class TestRecipe(object):
         self.recipe.do_sampling = True
         fitting_kwargs_list = self.recipe.get_sampling_sequence()
         assert isinstance(fitting_kwargs_list, list)
+
+        config = deepcopy(self.config)
+        config.settings['fitting']['sampling'] = True
+        config.settings['fitting']['sampler'] = 'not-a-sampler'
+        recipe = Recipe(config)
+        with pytest.raises(ValueError):
+            recipe.get_sampling_sequence()
 
     def test_get_galaxy_galaxy_recipe(self):
         """
@@ -169,6 +233,9 @@ class TestRecipe(object):
                                                           'center_x',
                                                           'center_y',
                                                           'e1', 'e2'}
+
+        with pytest.raises(ValueError):
+            self.recipe.fix_params('observer')
 
     def test_unfix_params(self):
         """

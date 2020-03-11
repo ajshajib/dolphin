@@ -256,7 +256,7 @@ class Recipe(object):
                 )
             else:
                 raise ValueError("{} sampler not implemented yet!".format(
-                    self._config.settings['mcmc_sampler']))
+                    self._config.settings['fitting']['sampler']))
 
         return fitting_kwargs_list
 

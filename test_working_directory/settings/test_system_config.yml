@@ -59,6 +59,13 @@ kwargs_model:
 numeric_option:
   supersampling_factor: [3] # list specifying for each band
 
+guess_params:
+  lens:
+    0:
+      theta_E: 1.2
+      e1: 0.05
+      e2: -0.05
+
 mask:
   size: [120] # 1d array, number of pixel for each band
   ra_at_xy_0: [2.4] # 1d array, for each band

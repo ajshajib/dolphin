@@ -6,6 +6,7 @@ Tests for Recipe module.
 import pytest
 from pathlib import Path
 import numpy as np
+from lenstronomy.Workflow.fitting_sequence import FittingSequence
 
 from dolphin.processor.config import ModelConfig
 from dolphin.processor.recipe import Recipe
@@ -92,10 +93,37 @@ class TestRecipe(object):
         :rtype:
         """
         image = np.random.normal(size=(100, 100))
-        kwargs_data_joint = {'multi_band_list': [{'image_data': image}]}
+        kwargs_data_joint = {
+            'multi_band_list': [{'image_data': image}],
+            'multi_band_type': 'multi-linear'
+        }
         fitting_kwargs_list = self.recipe.get_galaxy_galaxy_recipe(
                                                             kwargs_data_joint)
         assert isinstance(fitting_kwargs_list, list)
+
+        # test the recipe by running it fully
+        lens_name = ''
+        config = self.config
+
+        config.settings['model']['lens_light'] = ['SHAPELETS']
+
+        recipe = self.recipe
+
+        fitting_sequence = FittingSequence(
+            kwargs_data_joint,
+            config.get_kwargs_model(),
+            config.get_kwargs_constraints(),
+            config.get_kwargs_likelihood(),
+            config.get_kwargs_params(),
+        )
+
+        fitting_kwargs_list = recipe.get_recipe(
+            kwargs_data_joint=kwargs_data_joint,
+            recipe_name='galaxy-galaxy')
+
+        fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
+
+        self.config.settings['model']['lens_light'] = ['SERSIC_ELLIPSE']
 
     def test_get_arc_mask(self):
         """

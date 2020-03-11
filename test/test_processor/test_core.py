@@ -60,7 +60,6 @@ class TestProcessor(object):
         psf_data = self.processor.get_psf_data('test_system', 'F390W')
         assert psf_data is not None
 
-
     def test_save_load_output(self):
         """
         Test `_save_output` and `load_output` methods.

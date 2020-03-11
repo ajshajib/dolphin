@@ -379,12 +379,12 @@ class Recipe(object):
                 ]
 
                 # finally, relax shear parameters for MCMC later
-                if external_shear_model_index is not None:
-                    fitting_kwargs_list += [
-                        self.unfix_params('lens', external_shear_model_index)
-                    ]
+                #if external_shear_model_index is not None:
+                fitting_kwargs_list += [
+                    self.unfix_params('lens')
+                ]
 
-            fitting_kwargs_list += self.get_default_recipe()
+            #fitting_kwargs_list += self.get_default_recipe()
 
         return fitting_kwargs_list
 

@@ -74,8 +74,9 @@ class FileSystem(object):
         """
         logs_dir = self.path2str(self._root_path / 'logs')
 
-        if not os.path.isdir(logs_dir):
-            os.mkdir(logs_dir)
+        # commenting out, as this directory needs to be created by user
+        #if not os.path.isdir(logs_dir):
+        #    os.mkdir(logs_dir)
 
         return logs_dir
 
@@ -103,8 +104,9 @@ class FileSystem(object):
         """
         outputs_dir = self.path2str(self._root_path / 'outputs')
 
-        if not os.path.isdir(outputs_dir):
-            os.mkdir(outputs_dir)
+        # commenting out, as this directory needs to be created by user
+        #if not os.path.isdir(outputs_dir):
+        #    os.mkdir(outputs_dir)
 
         return outputs_dir
 

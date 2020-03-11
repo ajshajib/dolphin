@@ -1,0 +1,5 @@
+astropy>=2.0
+mpmath
+dynesty
+-e git://github.com/JohannesBuchner/PyMultiNest.git
+pypolychord

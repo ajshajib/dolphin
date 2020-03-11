@@ -1,5 +1,5 @@
 astropy>=2.0
 mpmath
 dynesty
--e git://github.com/JohannesBuchner/PyMultiNest.git
+-e git://github.com/JohannesBuchner/PyMultiNest.git#egg=pymultinest
 pypolychord

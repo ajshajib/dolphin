@@ -6,18 +6,13 @@ import sys
 import json
 import numpy as np
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
+from schwimmbad import choose_pool
 
 from .files import FileSystem
 from .config import ModelConfig
 from .data import ImageData
 from .data import PSFData
 from .recipe import Recipe
-
-try:
-    from mpi4py import MPI
-    COMM_RANK = MPI.COMM_WORLD.Get_rank()
-except:
-    COMM_RANK = 0
 
 
 class Processor(object):
@@ -56,7 +51,9 @@ class Processor(object):
         :return:
         :rtype:
         """
-        if log and COMM_RANK == 0:
+        pool = choose_pool(mpi=mpi)
+
+        if log and pool.is_master():
             log_file = open(self.file_system.get_log_file_path(lens_name,
                                                                model_id),
                             'wt')
@@ -87,10 +84,10 @@ class Processor(object):
             'fit_output': fit_output,
         }
 
-        if COMM_RANK == 0:
+        if pool.is_master() == 0:
             self._save_output(lens_name, model_id, output)
 
-        if log and COMM_RANK == 0:
+        if log and pool.is_master() == 0:
             log_file.close()
 
     def get_lens_config(self, lens_name):

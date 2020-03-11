@@ -260,13 +260,12 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        self.config2.settings['lens'] = ['SPEP']
-        self.config2.get_lens_model_params()
+        self.config2.settings['model']['lens'] = ['INVALID']
+        with pytest.raises(ValueError):
+            self.config2.get_lens_model_params()
 
-        # self.config2.settings['lens'] = ['INVALID']
-        # with pytest.raises(ValueError):
-        #     self.config2.get_lens_model_params()
-        # self.config2.settings['lens'] = ['SPEP']
+        self.config2.settings['model']['lens'] = ['SPEP']
+        self.config2.get_lens_model_params()
 
 
 if __name__ == '__main__':

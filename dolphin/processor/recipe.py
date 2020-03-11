@@ -275,9 +275,9 @@ class Recipe(object):
         if self.do_pso:
             arc_masks = []
             masks = self._config.get_masks()
-            for element, mask in zip(kwargs_data_joint['multi_band_list'],
+            for band_item, mask in zip(kwargs_data_joint['multi_band_list'],
                                      masks):
-                image = element[0]['image_data']
+                image = band_item[0]['image_data']
                 arc_masks.append(self.get_arc_mask(image) * mask)
 
             pl_model_index = self._get_power_law_model_index()

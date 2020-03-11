@@ -6,6 +6,7 @@ Tests for Recipe module.
 import pytest
 from pathlib import Path
 import numpy as np
+from copy import deepcopy
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 
 from dolphin.processor.config import ModelConfig
@@ -86,15 +87,23 @@ class TestRecipe(object):
         fitting_kwargs_list = self.recipe.get_sampling_sequence()
         assert isinstance(fitting_kwargs_list, list)
 
-    def get_galaxy_galaxy_recipe(self):
+    def test_get_galaxy_galaxy_recipe(self):
         """
         Test `get_galaxy_galaxy_recipe` method.
         :return:
         :rtype:
         """
-        image = np.random.normal(size=(100, 100))
+        image = np.random.normal(size=(120, 120))
         kwargs_data_joint = {
-            'multi_band_list': [{'image_data': image}],
+            'multi_band_list': [[{'image_data': image,
+                                  'background_rms': 0.01,
+                                  'exposure_time': np.ones_like(image),
+                                  'ra_at_xy_0': 0.,
+                                  'dec_at_xy_0': 0.,
+                                  'transform_pix2angle': np.array([[-0.01, 0],
+                                                                   [0, 0.01]])
+                                  },
+                                 {}, {}]],
             'multi_band_type': 'multi-linear'
         }
         fitting_kwargs_list = self.recipe.get_galaxy_galaxy_recipe(
@@ -102,12 +111,10 @@ class TestRecipe(object):
         assert isinstance(fitting_kwargs_list, list)
 
         # test the recipe by running it fully
-        lens_name = ''
-        config = self.config
+        config = deepcopy(self.config)
+        config.settings['model']['source_light'] = ['SHAPELETS']
 
-        config.settings['model']['lens_light'] = ['SHAPELETS']
-
-        recipe = self.recipe
+        recipe = Recipe(config)
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,
@@ -122,8 +129,6 @@ class TestRecipe(object):
             recipe_name='galaxy-galaxy')
 
         fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
-
-        self.config.settings['model']['lens_light'] = ['SERSIC_ELLIPSE']
 
     def test_get_arc_mask(self):
         """

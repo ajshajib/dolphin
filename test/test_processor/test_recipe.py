@@ -44,6 +44,14 @@ class TestRecipe(object):
         """
         assert self.recipe._get_power_law_model_index() == 0
 
+    def test_get_external_shear_model_index(self):
+        """
+        Test `_get_external_shear_model_index` method.
+        :return:
+        :rtype:
+        """
+        assert self.recipe._get_external_shear_model_index() == 1
+
     def test_get_shapelet_model_index(self):
         """
         Test `get_power_law_model_index` method.

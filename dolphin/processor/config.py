@@ -459,8 +459,8 @@ class ModelConfig(Config):
 
             elif model == 'SHEAR_GAMMA_PSI':
                 fixed.append({'ra_0': 0, 'dec_0': 0})
-                init.append({'gamma_ext': 0.005, 'psi_ext': 0.0})
-                sigma.append({'gamma_ext': 0.01, 'psi_ext': np.pi / 90.})
+                init.append({'gamma_ext': 0.001, 'psi_ext': 0.0})
+                sigma.append({'gamma_ext': 0.001, 'psi_ext': np.pi / 90.})
                 lower.append({'gamma_ext': 0.0, 'psi_ext': -np.pi})
                 upper.append({'gamma_ext': 0.5, 'psi_ext': np.pi})
             else:
@@ -594,7 +594,7 @@ class ModelConfig(Config):
                     sigma.append({'center_x': 0.5, 'center_y': 0.5,
                                   'beta': 0.015/10., 'n_max': 2})
                     lower.append({'center_x': -1.2, 'center_y': -1.2,
-                                  'beta': 0.05, 'n_max': -1})
+                                  'beta': 0.02, 'n_max': -1})
                     upper.append({'center_x': 1.2, 'center_y': 1.2,
                                   'beta': 0.5, 'n_max': 55})
                 else:

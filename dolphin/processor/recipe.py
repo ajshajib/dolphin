@@ -136,6 +136,25 @@ class Recipe(object):
 
         return index
 
+    def _get_external_shear_model_index(self):
+        """
+        Get the index of the external shear model, if included in the lens model
+        list.
+
+        :return: index or `None`
+        :rtype: `int`
+        """
+        lens_model_list = self._config.get_lens_model_list()
+        if 'SHEAR_GAMMA_PSI' in lens_model_list or 'SHEAR' in lens_model_list:
+            if 'SHEAR_GAMMA_PSI' in lens_model_list:
+                index = lens_model_list.index('SHEAR_GAMMA_PSI')
+            else:
+                index = lens_model_list.index('SHEAR')
+        else:
+            index = None
+
+        return index
+
     def _get_shapelet_model_index(self):
         """
         Get the index of the shapelets model, if included in the source model
@@ -262,16 +281,11 @@ class Recipe(object):
                 arc_masks.append(self.get_arc_mask(image) * mask)
 
             pl_model_index = self._get_power_law_model_index()
+            external_shear_model_index = self._get_external_shear_model_index()
             shapelets_index = self._get_shapelet_model_index()
 
-            for epoch in range(2):
-                # first fix power-law gamma = 2, is SPEMD/SPEP is used
-                if pl_model_index is not None:
-                    fitting_kwargs_list += [
-                        ['update_settings',
-                         {'lens_add_fixed': [[pl_model_index, ['gamma']]]}]
-                    ]
-                # then fix everything else except for lens light and use arc
+            for epoch in range(1):
+                # first fix everything else except for lens light and use arc
                 # mask to fit the lens light only
                 fitting_kwargs_list += [
                     self.fix_params('lens'),
@@ -285,8 +299,8 @@ class Recipe(object):
                              'n_iterations': self._pso_num_iteration}]
                 ]
 
-                # unfix the source, keep lens fixed, fix lens light, use regular
-                # mask
+                # unfix the source except for beta, keep lens fixed, fix lens
+                # light, use regular mask
                 fitting_kwargs_list += [
                     self.unfix_params('source')
                 ]
@@ -296,7 +310,7 @@ class Recipe(object):
                     fitting_kwargs_list += [
                         ['update_settings',
                          {'source_add_fixed': [[shapelets_index, ['beta'],
-                                                [0.05]]]}]
+                                                [0.1]]]}]
                     ]
 
                 fitting_kwargs_list += [
@@ -323,25 +337,13 @@ class Recipe(object):
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
                              'n_iterations': self._pso_num_iteration}],
-                    self.unfix_params('lens')
                 ]
 
-                # unfix the shapelets beta parameter
-                if shapelets_index is not None:
-                    fitting_kwargs_list += [
-                        ['update_settings',
-                         {'source_remove_fixed': [[shapelets_index, ['beta']]]}]
-                    ]
-
-                # if self.guess_params['lens'] is not None:
-                #     param_list = []
-                #     for index, params in self.guess_params['lens'].items():
-                #         param_list.append([index, list(params.keys()),
-                #                                    list(params.values())])
-                #
-                #     fitting_kwargs_list += [
-                #         ['set_param_value', {'lens': param_list}]
-                #     ]
+                # unfix the central deflector parameters, keep beta fixed
+                fitting_kwargs_list += [
+                    self.unfix_params('lens'),
+                    self.fix_params('lens', external_shear_model_index)
+                ]
 
                 # optimize for lens and source together, fix power-law gamma to
                 # 2, as all the lens parameters are unfixed
@@ -352,13 +354,35 @@ class Recipe(object):
                                                   [2.]]
                                              ]}]]
 
+                fitting_kwargs_list += [
+                    ['PSO', {'sigma_scale': 1.0,
+                             'n_particles': self._pso_num_particle,
+                             'n_iterations': self._pso_num_iteration}],
+                ]
+
+                # unfix the shapelets beta parameter
+                if shapelets_index is not None:
+                    fitting_kwargs_list += [
+                        ['update_settings',
+                         {'source_remove_fixed': [[shapelets_index, ['beta']]]}]
+                    ]
+
                 # finally optimize with all of lens, lens light and source free
                 fitting_kwargs_list += [
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
                              'n_iterations': self._pso_num_iteration}],
-                    self.unfix_params('lens_light')
+                    self.unfix_params('lens_light'),
+                    ['PSO', {'sigma_scale': 1.0,
+                             'n_particles': self._pso_num_particle,
+                             'n_iterations': self._pso_num_iteration}],
                 ]
+
+                # finally, relax shear parameters for MCMC later
+                if external_shear_model_index is not None:
+                    fitting_kwargs_list += [
+                        self.unfix_params('lens', external_shear_model_index)
+                    ]
 
             fitting_kwargs_list += self.get_default_recipe()
 
@@ -439,7 +463,7 @@ class Recipe(object):
 
     def fix_params(self, model_component, index=None):
         """
-        Fix all the params in `name` that are not fixed already.
+        Fix all the params in `name` that are not fixed by settings.
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be fixed
@@ -466,7 +490,7 @@ class Recipe(object):
             index = [i for i, _ in enumerate(lower_list)]
 
         if not isinstance(index, list):
-            raise ValueError('index must be a list!')
+            index = [index]
 
         param_list_with_index = []
 
@@ -485,7 +509,7 @@ class Recipe(object):
 
     def unfix_params(self, model_component, index=None):
         """
-        Unfix all the params in `name` that are not fixed already.
+        Unfix all the params in `name` that are not fixed from settings.
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be unfixed

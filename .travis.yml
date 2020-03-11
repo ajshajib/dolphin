@@ -5,7 +5,7 @@ language: python
 python:
   - "3.7"
   - "3.6"
-  - "2.7.16"
+  - "3.8"
 
 before_install:
   - pip install coveralls
@@ -15,8 +15,8 @@ before_install:
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
   - pip install -r requirements.txt
-  - pip install pluggy==0.13.0
-  - pip install -U pytest
+  #- pip install pluggy==0.13.0
+  #- pip install -U pytest
   - pip install .
 
 # command to run tests, e.g. python setup.py test

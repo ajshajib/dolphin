@@ -2,6 +2,6 @@ numpy>1.13
 scipy>=0.19.1
 pyyaml
 h5py
-lenstronomy==1.3.0
+-e git://github.com/sibirrer/lenstronomy.git#egg=lenstronomy
 emcee>=3.0.0
 schwimmbad

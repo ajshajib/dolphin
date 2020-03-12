@@ -1,3 +1,4 @@
+wheel>=0.22
 astropy>=2.0
 mpmath
 dynesty

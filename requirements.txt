@@ -1,4 +1,5 @@
 numpy>1.13
+scipy>=0.19.1
 pyyaml
 h5py
 lenstronomy==1.3.0

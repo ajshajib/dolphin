@@ -84,10 +84,10 @@ class Processor(object):
             'fit_output': fit_output,
         }
 
-        if pool.is_master() == 0:
+        if pool.is_master():
             self._save_output(lens_name, model_id, output)
 
-        if log and pool.is_master() == 0:
+        if log and pool.is_master():
             log_file.close()
 
     def get_lens_config(self, lens_name):

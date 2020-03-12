@@ -1,11 +1,4 @@
-wheel>=0.22
-numpy>1.13
 astropy>=2.0
 mpmath
-pyyaml
-h5py
--e git://github.com/sibirrer/lenstronomy.git#egg=lenstronomy
-cosmohammer>=0.6.1
-emcee>=3.0.0
-schwimmbad
 dynesty
+emcee>=3.0.0

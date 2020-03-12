@@ -14,8 +14,8 @@ before_install:
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
+  - pip install -r requirements.txt
   - pip install -r test_requirements.txt
-  #- pip install -r requirements.txt
   #- pip install pluggy==0.13.0
   #- pip install -U pytest
   - pip install .

@@ -3,5 +3,4 @@ scipy>=0.19.1
 pyyaml
 h5py
 -e git://github.com/sibirrer/lenstronomy.git#egg=lenstronomy
-emcee>=3.0.0
 schwimmbad

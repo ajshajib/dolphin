@@ -5,7 +5,7 @@ language: python
 python:
   - "3.6"
   - "3.7"
-  - "3.8"
+  #- "3.8"
 
 before_install:
   - pip install coveralls
@@ -17,7 +17,7 @@ install:
   - pip install -r test_requirements.txt
   - pip install -r requirements.txt
   - pip install pluggy==0.13.0
-  #- pip install -U pytest
+  - pip install -U pytest
   - pip install .
 
 # command to run tests, e.g. python setup.py test

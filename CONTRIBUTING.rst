@@ -36,8 +36,8 @@ is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-dolphin could always use more documentation, whether as part of the 
-official dolphin docs, in docstrings, or even on the web in blog posts,
+`dolphin` could always use more documentation, whether as part of the
+official `dolphin` docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 Submit Feedback
@@ -96,13 +96,13 @@ letter, and no period at the end.
 Style Guidelines
 ------------------
 
-dolphin is written in Python and we want to keep it Pythonic. Generally, we strictly follow PEP 8_, and recommend following PEP 257_, and 287_ as  closely as possible. A few key points---that need to be emphasized or are beyond these PEPs---are
+`dolphin` is written in Python and we want to keep it Pythonic. Generally, we strictly follow PEP 8_, and recommend following PEP 257_, and 287_ as closely as possible. A few key points---that need to be emphasized or are beyond these PEPs---are
 
 1. Use full words for variable and function/method names with words separated by underscore. Function/method names must start with a verb.
 2. Class names must follow the CamelCase convention.
 3. Class variables and functions/methods that are not intended for use outside of the class/module (i.e., private) must be named with a starting  underscore.
 4. No Python lines must be more than 79 characters in length.
-5. Commit messages should be in this format. Note that the first word of the commit title is a **verb in present tense**, the first letter is capitalized, and there is no period at the end. ::
+5. Commit messages should be in this format. Note that the first word of the commit title is a **verb in present tense**, the first letter is capitalized, and there is no period at the end.
 
     Write commit subject line
 

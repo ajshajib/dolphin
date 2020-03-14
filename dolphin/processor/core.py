@@ -55,8 +55,7 @@ class Processor(object):
 
         if log and pool.is_master():
             log_file = open(self.file_system.get_log_file_path(lens_name,
-                                                               model_id),
-                            'wt')
+                                                               model_id), 'wt')
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
@@ -80,6 +79,7 @@ class Processor(object):
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 
         output = {
+            'settings': config.settings,
             'kwargs_result': kwargs_result,
             'fit_output': fit_output,
         }

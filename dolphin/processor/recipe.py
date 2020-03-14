@@ -411,7 +411,9 @@ class Recipe(object):
         r = np.sqrt(x * x + y * y)
 
         # compute the radial gradient of the image
-        radial_gradient = -(x_diff * x / r + y_diff * y / r)
+        softening = 1e-10
+        radial_gradient = -(x_diff * x / (r+softening)
+                            + y_diff * y / (r+softening))
 
         # convert radial_gradient to binary map (+ve to 0 and -ve to 1).
         # where the arc starts when going radially outward, the gradient

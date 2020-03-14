@@ -5,6 +5,7 @@ Tests for files module.
 
 import pytest
 from pathlib import Path
+import os
 
 from dolphin.processor.files import *
 

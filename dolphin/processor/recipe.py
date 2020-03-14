@@ -3,7 +3,6 @@
 This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()`
 with pre-defined recipes.
 """
-
 __author__ = 'ajshajib'
 
 from copy import deepcopy
@@ -466,6 +465,7 @@ class Recipe(object):
     def fix_params(self, model_component, index=None):
         """
         Fix all the params in `name` that are not fixed by settings.
+
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be fixed
@@ -512,6 +512,7 @@ class Recipe(object):
     def unfix_params(self, model_component, index=None):
         """
         Unfix all the params in `name` that are not fixed from settings.
+
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be unfixed

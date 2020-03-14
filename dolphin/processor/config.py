@@ -2,7 +2,6 @@
 """
 This module loads settings from a configuration file.
 """
-
 __author__ = 'ajshajib'
 
 import yaml
@@ -29,6 +28,7 @@ class Config(object):
     def load(cls, file):
         """
         Load configuration from `file`.
+
         :return:
         :rtype:
         """
@@ -49,6 +49,7 @@ class ModelConfig(Config):
         Initiate a Model Config object. If the file path is given, `settings`
         will be loaded from it. Otherwise, the `settings` can be
         loaded/reloaded later with the `load_settings_from_file` method.
+
         :param file: path to a settings file
         :type file: `str`
         """
@@ -60,7 +61,8 @@ class ModelConfig(Config):
 
     def load_settings_from_file(self, file):
         """
-        Load the settings
+        Load the settings.
+
         :param file: path to a settings file
         :type file: `str`
         :return:
@@ -71,7 +73,8 @@ class ModelConfig(Config):
     @property
     def pixel_size(self):
         """
-        Get the pixel size.
+        The pixel size.
+
         :return:
         :rtype:
         """
@@ -80,8 +83,9 @@ class ModelConfig(Config):
     @property
     def deflector_center_ra(self):
         """
-        Get the RA offset for the deflector's center from the zero-point
+        The RA offset for the deflector's center from the zero-point
         in the coordinate system of the data. Default is 0.
+
         :return:
         :rtype:
         """
@@ -95,8 +99,9 @@ class ModelConfig(Config):
     @property
     def deflector_center_dec(self):
         """
-        Get the dec offset for the deflector's center from the zero-point
+        The dec offset for the deflector's center from the zero-point
         in the coordinate system of the data. Default is 0.
+
         :return:
         :rtype:
         """
@@ -110,8 +115,9 @@ class ModelConfig(Config):
     @property
     def deflector_centroid_bound(self):
         """
-        Get half of the box width to constrain the deflector's centroid.
+        Half of the box width to constrain the deflector's centroid.
         Default is 0.5 arcsec.
+
         :return:
         :rtype:
         """
@@ -126,7 +132,8 @@ class ModelConfig(Config):
     @property
     def band_number(self):
         """
-        Get the number of bands
+        The number of bands.
+
         :return:
         :rtype:
         """
@@ -143,6 +150,7 @@ class ModelConfig(Config):
     def get_kwargs_model(self):
         """
         Create `kwargs_model`.
+
         :return:
         :rtype:
         """
@@ -165,6 +173,7 @@ class ModelConfig(Config):
     def get_kwargs_constraints(self):
         """
         Create `kwargs_constraints`.
+
         :return:
         :rtype:
         """
@@ -211,6 +220,7 @@ class ModelConfig(Config):
     def get_kwargs_likelihood(self):
         """
         Create `kwargs_likelihood`.
+
         :return:
         :rtype:
         """
@@ -232,6 +242,7 @@ class ModelConfig(Config):
     def get_masks(self):
         """
         Create masks.
+
         :return:
         :rtype:
         """
@@ -306,6 +317,7 @@ class ModelConfig(Config):
     def get_kwargs_psf_iteration(self):
         """
         Create `kwargs_psf_iteration`.
+
         :return:
         :rtype:
         """
@@ -336,6 +348,7 @@ class ModelConfig(Config):
     def get_kwargs_numerics(self):
         """
         Create `kwargs_numerics`.
+
         :return:
         :rtype:
         """
@@ -366,6 +379,7 @@ class ModelConfig(Config):
     def get_lens_model_list(self):
         """
         Return `lens_model_list`.
+
         :return:
         :rtype:
         """
@@ -377,6 +391,7 @@ class ModelConfig(Config):
     def get_source_light_model_list(self):
         """
         Return `source_model_list`.
+
         :return:
         :rtype:
         """
@@ -388,6 +403,7 @@ class ModelConfig(Config):
     def get_lens_light_model_list(self):
         """
         Return `lens_light_model_list`.
+
         :return:
         :rtype:
         """
@@ -399,6 +415,7 @@ class ModelConfig(Config):
     def get_point_source_model_list(self):
         """
         Return `ps_model_list`.
+
         :return:
         :rtype:
         """
@@ -411,6 +428,7 @@ class ModelConfig(Config):
     def get_lens_model_params(self):
         """
         Create `lens_params`.
+
         :return:
         :rtype:
         """
@@ -472,6 +490,7 @@ class ModelConfig(Config):
     def get_lens_light_model_params(self):
         """
         Create `lens_light_params`.
+
         :return:
         :rtype:
         """
@@ -530,6 +549,7 @@ class ModelConfig(Config):
     def get_source_light_model_params(self):
         """
         Create `source_params`.
+
         :return:
         :rtype:
         """
@@ -594,7 +614,8 @@ class ModelConfig(Config):
 
     def get_point_source_params(self):
         """
-        Create 'ps_params`.
+        Create `ps_params`.
+
         :return:
         :rtype:
         """
@@ -643,8 +664,8 @@ class ModelConfig(Config):
         """
         Fill in fixed values from settings for lens, source light and lens
         light.
-        :param component: name of component, 'lens', 'lens_light',
-        or 'source_light'.
+
+        :param component: name of component, 'lens', 'lens_light', or 'source_light'
         :type component: `str`
         :param fixed_list: list of fixed params
         :type fixed_list: `list`
@@ -670,6 +691,7 @@ class ModelConfig(Config):
     def get_kwargs_params(self):
         """
         Create `kwargs_params`.
+
         :return:
         :rtype:
         """

@@ -2,6 +2,8 @@
 """
 This module loads settings from a configuration file.
 """
+__author__ = 'ajshajib'
+
 import sys
 import json
 import numpy as np
@@ -23,8 +25,7 @@ class Processor(object):
     def __init__(self, working_directory):
         """
 
-        :param working_directory: path to the working directory. Should not end
-        with slash.
+        :param working_directory: path to the working directory. Should not end with slash.
         :type working_directory: `str`
         """
         self.working_directory = working_directory
@@ -35,6 +36,7 @@ class Processor(object):
              recipe_name='default', sampler='EMCEE'):
         """
         Run models for a single lens.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: identifier for the model run
@@ -43,8 +45,7 @@ class Processor(object):
         :type log: `bool`
         :param mpi: MPI option
         :type mpi: `bool`
-        :param recipe_name: recipe for pre-sampling optimization, supported ones
-        now: 'default' and 'galaxy-galaxy'
+        :param recipe_name: recipe for pre-sampling optimization, supported  ones now: 'default' and 'galaxy-galaxy'
         :type recipe_name: `str`
         :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for legacy
         :type sampler: `str`
@@ -93,9 +94,10 @@ class Processor(object):
     def get_lens_config(self, lens_name):
         """
         Get the `ModelConfig` object for a lens.
+
         :param lens_name: lens name
         :type lens_name: `str`
-        :return:
+        :return: `ModelConfig` instance
         :rtype:
         """
         return ModelConfig(self.file_system.get_config_file_path(lens_name))
@@ -104,8 +106,8 @@ class Processor(object):
         """
         Create `kwargs_data` for a lens and given filters.
 
-        :param lens_name:
-        :type lens_name:
+        :param lens_name: lens name
+        :type lens_name: `str`
         :return:
         :rtype:
         """
@@ -140,7 +142,7 @@ class Processor(object):
 
         :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: name of band
+        :param band: image band/filter
         :type band: `str`
         :return: `ImageData` instance
         :rtype:
@@ -151,11 +153,11 @@ class Processor(object):
         """
         Get the `PSFData` instance.
 
-        :param lens_name:
-        :type lens_name:
-        :param band:
-        :type band:
-        :return:
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: image band/filter
+        :type band: `str`
+        :return: `PSFData` instance
         :rtype:
         """
         return PSFData(self.file_system.get_psf_file_path(lens_name, band))
@@ -164,9 +166,13 @@ class Processor(object):
         """
         Save output from fitting sequence.
 
-        :param kwargs_result:
-        :type kwargs_result:
-        :return:
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: identifier for model run
+        :type model_id: `str`
+        :param output: output dictionary
+        :type output: `dict`
+        :return: None
         :rtype:
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
@@ -182,8 +188,8 @@ class Processor(object):
         :type lens_name: `str`
         :param model_id: model identifier provided at run initiation
         :type model_id: `str`
-        :return:
-        :rtype:
+        :return: output dictionary
+        :rtype: `dict`
         """
         save_file = self.file_system.get_output_file_path(lens_name, model_id)
 
@@ -200,7 +206,7 @@ class Processor(object):
 
         :param obj: object
         :type obj:
-        :return: object with ndarrays encoded in dictionaries
+        :return: object with `ndarray`s encoded as dictionaries
         :rtype:
         """
         if isinstance(obj, np.ndarray):
@@ -227,9 +233,9 @@ class Processor(object):
         Decode a list/dictionary containing encoded numpy arrays through
         recursion.
 
-        :param obj: object with ndarrays encoded in dictionaries
+        :param obj: object with `ndarray`s encoded as dictionaries
         :type obj:
-        :return: object
+        :return: object with `ndarray`s as `numpy.ndarray`
         :rtype:
         """
         if isinstance(obj, dict):

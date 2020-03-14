@@ -2,9 +2,9 @@
 """
 This module has a class for maintaining the file system.
 """
+__author__ = 'ajshajib'
 
 from pathlib import Path
-import os
 
 
 class FileSystem(object):
@@ -15,6 +15,7 @@ class FileSystem(object):
     def __init__(self, working_directory):
         """
         Initiates a FileSystem object with `working_directory` as root.
+
         :param working_directory: path to working directory
         :type working_directory: str
         """
@@ -25,6 +26,7 @@ class FileSystem(object):
     def path2str(path):
         """
         Converts a pathlib Path into string.
+
         :param path: path to a file or directory
         :type path: `Path`
         :return: path to a file or directory
@@ -35,6 +37,7 @@ class FileSystem(object):
     def get_lens_list_file_path(self):
         """
         Get the address for the lens_list.txt file.
+
         :return:
         :rtype:
         """
@@ -43,6 +46,7 @@ class FileSystem(object):
     def get_lens_list(self):
         """
         Get the list of lenses from lens_list.txt.
+
         :return:
         :rtype:
         """
@@ -57,6 +61,7 @@ class FileSystem(object):
     def get_config_file_path(self, lens_name):
         """
         Get the file path to the config file for `lens_name`.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :return: path to the config file
@@ -69,6 +74,7 @@ class FileSystem(object):
         """
         Get directory for logs folder. If the directory doesn't exist,
         a folder is created.
+
         :return:
         :rtype:
         """
@@ -84,6 +90,7 @@ class FileSystem(object):
         """
         Get directory for settings folder. If the directory doesn't exist,
         a folder is created.
+
         :return:
         :rtype:
         """
@@ -99,6 +106,7 @@ class FileSystem(object):
         """
         Get directory for settings folder. If the directory doesn't exist,
         a folder is created.
+
         :return:
         :rtype:
         """
@@ -114,6 +122,7 @@ class FileSystem(object):
         """
         Get directory for data folder. If the directory doesn't exist,
         a folder is created.
+
         :return:
         :rtype:
         """
@@ -128,6 +137,7 @@ class FileSystem(object):
     def get_image_file_path(self, lens_name, band):
         """
         Get the file path for the imaging data for `lens_name`.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param band: band name
@@ -143,6 +153,7 @@ class FileSystem(object):
     def get_psf_file_path(self, lens_name, band):
         """
         Get the file path for the PSF data for `lens_name`.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param band: band name
@@ -158,6 +169,7 @@ class FileSystem(object):
     def get_log_file_path(self, lens_name, model_id):
         """
         Get the file path for the PSF data for `lens_name`.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: identifier for run model
@@ -171,6 +183,7 @@ class FileSystem(object):
     def get_output_file_path(self, lens_name, model_id):
         """
         Get the file path for the PSF data for `lens_name`.
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: identifier for run model

@@ -37,7 +37,7 @@ dolphin\.processor\.files module
 dolphin\.processor\.recipe module
 ---------------------------------
 
-.. automodule:: dolphin.Processor.recipe
+.. automodule:: dolphin.processor.recipe
     :members:
     :undoc-members:
     :show-inheritance:

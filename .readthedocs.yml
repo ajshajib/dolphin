@@ -9,7 +9,7 @@ version: 2
 sphinx:
   builder: html
   configuration: conf.py
-  fail_on_warning: false
+  fail_on_warning: true
 
 # Build documentation with MkDocs
 #mkdocs:
@@ -24,6 +24,6 @@ python:
   install:
     - requirements: requirements.txt
     - requirements: test_requirements.txt
-    - method: pip
+    - method: setuptools
       path: .
   system_packages: true

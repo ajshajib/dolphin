@@ -1,3 +1,4 @@
+# this config file is only used for testing, do not directly copy for use
 ---
 system_name: 'test_system'
 
@@ -16,7 +17,7 @@ model:
   source_light:
     - 'SERSIC_ELLIPSE'
     - 'SHAPELETS'
-  point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
+  point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 deflector_option:
   #centroid_init: [0.04, -0.04]
@@ -30,9 +31,9 @@ source_option:
   n_max: [2] # array with n_max for each band
 
 point_source_option:
-  ra_init: []
-  dec_init: []
-  bound: 0.
+  ra_init: [1., 0., 1., 0.]
+  dec_init: [0., 1., 0., -1.]
+  bound: 0.1
 
 kwargs_model:
   key1: 'value1'

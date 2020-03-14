@@ -46,7 +46,6 @@ class TestModelConfig(object):
                                   / 'settings' / 'test_system2_config.yml'
         self.config2 = ModelConfig(str(self.test_setting_file2.resolve()))
 
-
     @classmethod
     def teardown_class(cls):
         pass
@@ -104,6 +103,11 @@ class TestModelConfig(object):
         with pytest.raises(ValueError):
             self.config2.band_number
 
+        self.config2.settings['band'] = []
+
+        with pytest.raises(ValueError):
+            self.config2.band_number
+
     def test_get_kwargs_model(self):
         """
         Test `get_kwargs_model` method.
@@ -139,6 +143,17 @@ class TestModelConfig(object):
         }
 
         assert kwargs_constraints == self.config.get_kwargs_constraints()
+
+        kwargs_constraints = self.config2.get_kwargs_constraints()
+
+        assert kwargs_constraints['joint_source_with_source'] == [[0, 1,
+                                                                   ['center_x',
+                                                                    'center_y']]
+                                                                  ]
+        assert kwargs_constraints['joint_source_with_point_source'] == [
+            [0, 0, ['center_x', 'center_y']],
+            [0, 1, ['center_x', 'center_y']]
+        ]
 
     def test_get_kwargs_likelihood(self):
         """
@@ -243,8 +258,11 @@ class TestModelConfig(object):
         :rtype:
         """
         ps_params = self.config.get_point_source_params()
-
         assert ps_params == [[]]*5
+
+        ps_params = self.config2.get_point_source_params()
+        assert np.all(ps_params[0][0]['ra_image'] == [1., 0., 1., 0.])
+        assert np.all(ps_params[0][0]['dec_image'] == [0., 1., 0., -1.])
 
     def test_get_lens_model_list(self):
         """

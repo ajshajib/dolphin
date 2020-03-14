@@ -155,7 +155,7 @@ class ModelConfig(Config):
             # 'index_source_light_model_list': [[0]],
         }
 
-        if 'kwargs_model' in self.settings and self.settings['kwargs_model']\
+        if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
                 is not None:
             for key, value in self.settings['kwargs_model'].items():
                 kwargs_model[key] = value
@@ -187,11 +187,11 @@ class ModelConfig(Config):
 
         joint_source_with_point_source = []
 
-        if len(self.get_point_source_model_list()) > 1 and \
+        if len(self.get_point_source_model_list()) > 0 and \
                 num_source_profiles > 1:
             for n in range(num_source_profiles):
                 joint_source_with_point_source.append([
-                    0, n, ['center_x','center_y']
+                    0, n, ['center_x', 'center_y']
                 ])
 
         kwargs_constraints = {
@@ -202,7 +202,7 @@ class ModelConfig(Config):
         }
 
         if 'kwargs_constraints' in self.settings and self.settings[
-                'kwargs_constraints'] is not None:
+                                            'kwargs_constraints'] is not None:
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
 
@@ -217,13 +217,13 @@ class ModelConfig(Config):
         kwargs_likelihood = {
             'force_no_add_image': False,
             'source_marg': False,
-            #'point_source_likelihood': True,
-            #'position_uncertainty': 0.00004,
-            #'check_solver': False,
-            #'solver_tolerance': 0.001,
+            # 'point_source_likelihood': True,
+            # 'position_uncertainty': 0.00004,
+            # 'check_solver': False,
+            # 'solver_tolerance': 0.001,
             'check_positive_flux': True,
             'check_bounds': True,
-            'bands_compute': [True]*self.band_number,
+            'bands_compute': [True] * self.band_number,
             'image_likelihood_mask_list': self.get_masks()
         }
 
@@ -238,7 +238,7 @@ class ModelConfig(Config):
         if 'mask' in self.settings:
             if self.settings['mask'] is not None:
                 if 'provided' in self.settings['mask'] and self.settings[
-                                        'mask']['provided'] is not None:
+                                                'mask']['provided'] is not None:
                     return self.settings['mask']['provided']
                 else:
                     masks = []
@@ -261,8 +261,8 @@ class ModelConfig(Config):
                                                                     num_pixel)
 
                         mask_outer = mask_util.mask_center_2d(
-                            self.deflector_center_ra+offset[0],
-                            self.deflector_center_dec+offset[1],
+                            self.deflector_center_ra + offset[0],
+                            self.deflector_center_dec + offset[1],
                             radius,
                             util.image2array(x_coords),
                             util.image2array(y_coords)
@@ -274,8 +274,10 @@ class ModelConfig(Config):
                         except (NameError, KeyError):
                             pass
                         else:
-                            if self.settings['mask']['extra_regions'] is not None:
-                                for reg in self.settings['mask']['extra_regions']:
+                            if self.settings['mask']['extra_regions'] is \
+                                                                    not None:
+                                for reg in self.settings['mask'][
+                                                            'extra_regions']:
                                     extra_masked_regions.append(
                                         mask_util.mask_center_2d(
                                             self.deflector_center_ra + reg[0],
@@ -341,7 +343,7 @@ class ModelConfig(Config):
             supersampling_factor = [3] * self.band_number
         else:
             supersampling_factor = deepcopy(self.settings['numeric_option'][
-                                                    'supersampling_factor'])
+                                                        'supersampling_factor'])
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
@@ -398,7 +400,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'point_source' in self.settings['model']:
+        if 'point_source' in self.settings['model'] and \
+                self.settings['model']['point_source'] is not None:
             return self.settings['model']['point_source']
         else:
             return []
@@ -426,35 +429,35 @@ class ModelConfig(Config):
                 else:
                     if i in self.settings['deflector_option']['fix']:
                         fixed.append(deepcopy(self.settings['deflector_option'][
-                                         'fix'][i]))
+                                                  'fix'][i]))
 
                 init.append({
                     'center_x': self.deflector_center_ra,
                     'center_y': self.deflector_center_dec,
-                    'e1':  0., 'e2': 0.,
+                    'e1': 0., 'e2': 0.,
                     'gamma': 2., 'theta_E': 1.
                 })
 
                 sigma.append({
-                    'theta_E': .1, 'e1':0.1, 'e2':0.1,
+                    'theta_E': .1, 'e1': 0.1, 'e2': 0.1,
                     'gamma': 0.02, 'center_x': 0.1,
                     'center_y': 0.1
                 })
 
                 lower.append({
-                     'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.5,
-                     'center_x': self.deflector_center_ra
-                                    - self.deflector_centroid_bound,
-                     'center_y': self.deflector_center_dec
-                                    - self.deflector_centroid_bound
+                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.,
+                    'center_x': self.deflector_center_ra
+                                - self.deflector_centroid_bound,
+                    'center_y': self.deflector_center_dec
+                                - self.deflector_centroid_bound
                 })
 
                 upper.append({
-                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.5,
+                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 3.,
                     'center_x': self.deflector_center_ra
-                                    + self.deflector_centroid_bound,
+                                + self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
-                                    + self.deflector_centroid_bound
+                                + self.deflector_centroid_bound
                 })
 
             elif model == 'SHEAR_GAMMA_PSI':
@@ -493,7 +496,8 @@ class ModelConfig(Config):
                         fixed.append({})
                     else:
                         if i in self.settings['lens_light_option']['fix']:
-                            fixed.append(deepcopy(self.settings['lens_light_option'][
+                            fixed.append(
+                                deepcopy(self.settings['lens_light_option'][
                                              'fix'][i]))
 
                     init.append({
@@ -504,8 +508,8 @@ class ModelConfig(Config):
                     })
 
                     sigma.append({
-                        'center_x': self.pixel_size/10.,
-                        'center_y': self.pixel_size/10.,
+                        'center_x': self.pixel_size / 10.,
+                        'center_y': self.pixel_size / 10.,
                         'R_sersic': 0.05, 'n_sersic': 0.5,
                         'e1': 0.1, 'e2': 0.1
                     })
@@ -514,18 +518,18 @@ class ModelConfig(Config):
                         'e1': -0.5, 'e2': -0.5,
                         'n_sersic': .5, 'R_sersic': 0.1,
                         'center_x': self.deflector_center_ra
-                                        - self.deflector_centroid_bound,
+                                    - self.deflector_centroid_bound,
                         'center_y': self.deflector_center_dec
-                                        -  self.deflector_centroid_bound
+                                    - self.deflector_centroid_bound
                     })
 
                     upper.append({
                         'e1': 0.5, 'e2': 0.5,
                         'n_sersic': 8., 'R_sersic': 5.,
                         'center_x': self.deflector_center_ra
-                                        + self.deflector_centroid_bound,
+                                    + self.deflector_centroid_bound,
                         'center_y': self.deflector_center_dec
-                                        + self.deflector_centroid_bound
+                                    + self.deflector_centroid_bound
                     })
                 else:
                     raise ValueError('{} not implemented as a lens light'
@@ -557,7 +561,8 @@ class ModelConfig(Config):
                         fixed.append({})
                     else:
                         if i in self.settings['source_option']['fix']:
-                            fixed.append(deepcopy(self.settings['source_option'][
+                            fixed.append(
+                                deepcopy(self.settings['source_option'][
                                              'fix'][i]))
 
                     init.append({
@@ -590,9 +595,9 @@ class ModelConfig(Config):
                         'n_max'][n]})
                     init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
                                  'n_max': self.settings['source_option'][
-                                                                'n_max'][n]})
+                                     'n_max'][n]})
                     sigma.append({'center_x': 0.5, 'center_y': 0.5,
-                                  'beta': 0.015/10., 'n_max': 2})
+                                  'beta': 0.015 / 10., 'n_max': 2})
                     lower.append({'center_x': -1.2, 'center_y': -1.2,
                                   'beta': 0.02, 'n_max': -1})
                     upper.append({'center_x': 1.2, 'center_y': 1.2,
@@ -622,8 +627,10 @@ class ModelConfig(Config):
             fixed.append({})
 
             init.append({
-                'ra_image': self.settings['point_source_option']['ra_init'],
-                'dec_image': self.settings['point_source_option']['dec_init'],
+                'ra_image': np.array(self.settings['point_source_option'][
+                                         'ra_init']),
+                'dec_image': np.array(self.settings['point_source_option'][
+                                          'dec_init']),
             })
 
             num_point_sources = len(init[0]['ra_image'])
@@ -633,17 +640,17 @@ class ModelConfig(Config):
             })
 
             lower.append({
-                'ra_image': init[0]['ra_image']
-                                - self.settings['point_source_option']['bound'],
-                'dec_image': init[0]['dec_image']
-                                - self.settings['point_source_option']['bound'],
+                'ra_image': init[0]['ra_image'] - self.settings[
+                                                'point_source_option']['bound'],
+                'dec_image': init[0]['dec_image'] - self.settings[
+                                                'point_source_option']['bound'],
             })
 
             upper.append({
-                'ra_image': init[0]['ra_image']
-                                + self.settings['point_source_option']['bound'],
-                'dec_image': init[0]['dec_image']
-                                + self.settings['point_source_option']['bound'],
+                'ra_image': init[0]['ra_image'] + self.settings[
+                                                'point_source_option']['bound'],
+                'dec_image': init[0]['dec_image'] + self.settings[
+                                                'point_source_option']['bound'],
             })
 
         params = [init, sigma, fixed, lower, upper]
@@ -660,7 +667,7 @@ class ModelConfig(Config):
             'source_model': self.get_source_light_model_params(),
             'lens_light_model': self.get_lens_light_model_params(),
             'point_source_model': self.get_point_source_params(),
-            #'cosmography': []
+            # 'cosmography': []
         }
 
         return kwargs_params

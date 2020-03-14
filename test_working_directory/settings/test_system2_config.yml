@@ -19,15 +19,15 @@ model:
     - 'SHAPELETS'
   point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
-deflector_option:
+lens_option:
   #centroid_init: [0.04, -0.04]
   centroid_bound: 0.2
   fix: {0: {'theta_E': 1.}}
 
 lens_light_option:
-  fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
+  #fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
 
-source_option:
+source_light_option:
   n_max: [2] # array with n_max for each band
 
 point_source_option:
@@ -43,12 +43,12 @@ kwargs_constraints:
   joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
 
 fitting:
-  psf_iteration: false
+  psf_iteration: true
   psf_iteration_settings:
-    psf_iteration_num: 50
-    psf_iteration_factor: 0.5
-    psf_symmetry: 4
-    block_neighbor: 0.
+    num_iter: 20
+    # psf_iter_factor: 0.5
+    # psf_symmetry: 4
+    # block_center_neighbour: 0.
 
   pso: true
   pso_settings:

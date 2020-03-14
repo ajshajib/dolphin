@@ -209,13 +209,24 @@ class TestModelConfig(object):
         self.config2.settings['mask'] = None
         assert self.config2.get_masks() is None
 
-    def test_get_psf_iteration(self):
+    def test_get_kwargs_psf_iteration(self):
         """
         Test `get_psf_iteration` method.
         :return:
         :rtype:
         """
         assert self.config.get_kwargs_psf_iteration() == {}
+
+        kwargs_psf_iteration = self.config2.get_kwargs_psf_iteration()
+
+        assert kwargs_psf_iteration == {
+            'stacking_method': 'median',
+            'keep_psf_error_map': True,
+            'psf_symmetry': 4,
+            'block_center_neighbour': 0.,
+            'num_iter': 20,
+            'psf_iter_factor': 0.5,
+        }
 
     def test_get_kwargs_params(self):
         """
@@ -251,6 +262,12 @@ class TestModelConfig(object):
         self.config2.settings['band'] = ['F390W']
         assert test_numerics == self.config2.get_kwargs_numerics()
 
+        config = deepcopy(self.config)
+        config.settings['numeric_option']['supersampling_factor'] = None
+        kwargs_numerics = config.get_kwargs_numerics()
+        for kwargs_numerics_band in kwargs_numerics:
+            assert kwargs_numerics_band['supersampling_factor'] == 3
+
     def test_get_point_source_params(self):
         """
         Test `get_point_source_params` method.
@@ -272,6 +289,36 @@ class TestModelConfig(object):
         """
         assert self.config2.get_lens_model_list() == []
 
+    def test_get_source_light_model_list(self):
+        """
+        Test `get_source_light_model_list` method.
+        :return:
+        :rtype:
+        """
+        config = deepcopy(self.config2)
+        del config.settings['model']['source_light']
+        assert config.get_source_light_model_list() == []
+
+    def test_get_lens_light_model_list(self):
+        """
+        Test `get_lens_light_model_list` method.
+        :return:
+        :rtype:
+        """
+        config = deepcopy(self.config2)
+        del config.settings['model']['lens_light']
+        assert config.get_lens_light_model_list() == []
+
+    def test_get_point_source_model_list(self):
+        """
+        Test `get_point_source_model_list` method.
+        :return:
+        :rtype:
+        """
+        config = deepcopy(self.config2)
+        del config.settings['model']['point_source']
+        assert config.get_point_source_model_list() == []
+
     def test_get_lens_model_params(self):
         """
         Test `get_lens_model_params` method.
@@ -285,6 +332,38 @@ class TestModelConfig(object):
         self.config2.settings['model']['lens'] = ['SPEP']
         self.config2.get_lens_model_params()
 
+    def test_get_lens_light_model_params(self):
+        """
+        Test `get_lens_light_model_params` method.
+        :return:
+        :rtype:
+        """
+        config = deepcopy(self.config2)
+        config.settings['model']['lens_light'] = ['INVALID']
+        with pytest.raises(ValueError):
+            config.get_lens_light_model_params()
+
+    def test_get_source_light_model_params(self):
+        """
+        Test `get_source_light_model_params` method.
+        :return:
+        :rtype:
+        """
+        config = deepcopy(self.config)
+        config.settings['model']['source_light'] = ['INVALID']
+        with pytest.raises(ValueError):
+            config.get_source_light_model_params()
+
+    def test_fill_in_fixed_from_settings(self):
+        """
+        Test `fill_in_fixed_from_settings` method.
+        :return:
+        :rtype:
+        """
+        fixed = [{}]
+        fixed = self.config.fill_in_fixed_from_settings('lens_light',
+                                                        fixed)
+        assert fixed == [{'n_sersic': 4.}]
 
 if __name__ == '__main__':
     pytest.main()

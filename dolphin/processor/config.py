@@ -85,9 +85,9 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'deflector_option' in self.settings and 'centroid_init' in \
-                self.settings['deflector_option']:
-            return float(self.settings['deflector_option'][
+        if 'lens_option' in self.settings and 'centroid_init' in \
+                self.settings['lens_option']:
+            return float(self.settings['lens_option'][
                              'centroid_init'][0])
         else:
             return 0.
@@ -100,9 +100,9 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'deflector_option' in self.settings and 'centroid_init' in \
-                self.settings['deflector_option']:
-            return float(self.settings['deflector_option'][
+        if 'lens_option' in self.settings and 'centroid_init' in \
+                self.settings['lens_option']:
+            return float(self.settings['lens_option'][
                              'centroid_init'][1])
         else:
             return 0.
@@ -115,9 +115,9 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'deflector_option' in self.settings:
-            if 'centroid_bound' in self.settings['deflector_option']:
-                bound = self.settings['deflector_option']['centroid_bound']
+        if 'lens_option' in self.settings:
+            if 'centroid_bound' in self.settings['lens_option']:
+                bound = self.settings['lens_option']['centroid_bound']
                 if bound is not None:
                     return bound
 
@@ -309,27 +309,29 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        # temporary return {} as test function is not written
-        return {}
+        if 'psf_iteration' in self.settings['fitting'] and self.settings[
+                                                    'fitting']['psf_iteration']:
+            kwargs_psf_iteration = {
+                'stacking_method': 'median',
+                'keep_psf_error_map': True,
+                'psf_symmetry': 4,
+                'block_center_neighbour': 0.,
+                'num_iter': 50,
+                'psf_iter_factor': 0.5
+            }
 
-        # if 'psf_iteration' in self.settings['fitting'] and self.settings[
-        #     'fittiing']['psf_iteration']:
-        #     kwargs_psf_iteration = {
-        #         'stacking_method': 'median',
-        #         'keep_psf_error_map': True,
-        #         'psf_symmetry': self.settings['fitting'][
-        #             'psf_iteration_settinigs']['psf_symmetry'],
-        #         'block_center_neighbour': self.settings['fitting'][
-        #             'psf_iteration_settings']['block_neighbour'],
-        #         'num_iter': self.settings['fitting'][
-        #             'psf_iteration_settings']['psf_iteration_factor'],
-        #         'psf_iter_factor': self.settings['fitting'][
-        #             'psf_iteration_settings']['psf_iteration_factor']
-        #     }
-        #
-        #     return kwargs_psf_iteration
-        # else:
-        #     return {}
+            if 'psf_iteration_settings' in self.settings['fitting']:
+                for key in ['stacking_method', 'keep_psf_error_map',
+                            'psf_symmetry', 'block_center_neighbour',
+                            'num_iter', 'psf_iter_factor']:
+                    if key in self.settings['fitting'][
+                                                    'psf_iteration_settings']:
+                        kwargs_psf_iteration[key] = self.settings['fitting'][
+                                                'psf_iteration_settings'][key]
+
+            return kwargs_psf_iteration
+        else:
+            return {}
 
     def get_kwargs_numerics(self):
         """
@@ -422,15 +424,7 @@ class ModelConfig(Config):
 
         for i, model in enumerate(lens_model_list):
             if model in ['SPEP', 'SPEMD']:
-                try:
-                    self.settings['deflector_option']['fix']
-                except(NameError, KeyError):
-                    fixed.append({})
-                else:
-                    if i in self.settings['deflector_option']['fix']:
-                        fixed.append(deepcopy(self.settings['deflector_option'][
-                                                  'fix'][i]))
-
+                fixed.append({})
                 init.append({
                     'center_x': self.deflector_center_ra,
                     'center_y': self.deflector_center_dec,
@@ -470,6 +464,8 @@ class ModelConfig(Config):
                 raise ValueError('{} not implemented as a lens '
                                  'model!'.format(model))
 
+        fixed = self.fill_in_fixed_from_settings('lens', fixed)
+
         params = [init, sigma, fixed, lower, upper]
         return params
 
@@ -490,16 +486,7 @@ class ModelConfig(Config):
         for n in range(self.band_number):
             for i, model in enumerate(lens_light_model_list):
                 if model == 'SERSIC_ELLIPSE':
-                    try:
-                        self.settings['lens_light_option']['fix']
-                    except(NameError, KeyError):
-                        fixed.append({})
-                    else:
-                        if i in self.settings['lens_light_option']['fix']:
-                            fixed.append(
-                                deepcopy(self.settings['lens_light_option'][
-                                             'fix'][i]))
-
+                    fixed.append({})
                     init.append({
                         'amp': 1., 'R_sersic': .2,
                         'center_x': self.deflector_center_ra,
@@ -535,6 +522,8 @@ class ModelConfig(Config):
                     raise ValueError('{} not implemented as a lens light'
                                      'model!'.format(model))
 
+        fixed = self.fill_in_fixed_from_settings('lens_light', fixed)
+
         params = [init, sigma, fixed, lower, upper]
         return params
 
@@ -555,15 +544,7 @@ class ModelConfig(Config):
         for n in range(self.band_number):
             for i, model in enumerate(source_light_model_list):
                 if model == 'SERSIC_ELLIPSE':
-                    try:
-                        self.settings['source_option']['fix']
-                    except(NameError, KeyError):
-                        fixed.append({})
-                    else:
-                        if i in self.settings['source_option']['fix']:
-                            fixed.append(
-                                deepcopy(self.settings['source_option'][
-                                             'fix'][i]))
+                    fixed.append({})
 
                     init.append({
                         'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,
@@ -591,10 +572,10 @@ class ModelConfig(Config):
                         'e1': 0.5, 'e2': 0.5
                     })
                 elif model == 'SHAPELETS':
-                    fixed.append({'n_max': self.settings['source_option'][
+                    fixed.append({'n_max': self.settings['source_light_option'][
                         'n_max'][n]})
                     init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
-                                 'n_max': self.settings['source_option'][
+                                 'n_max': self.settings['source_light_option'][
                                      'n_max'][n]})
                     sigma.append({'center_x': 0.5, 'center_y': 0.5,
                                   'beta': 0.015 / 10., 'n_max': 2})
@@ -605,6 +586,8 @@ class ModelConfig(Config):
                 else:
                     raise ValueError('{} not implemented as a source light'
                                      'model!'.format(model))
+
+        fixed = self.fill_in_fixed_from_settings('source_light', fixed)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -655,6 +638,34 @@ class ModelConfig(Config):
 
         params = [init, sigma, fixed, lower, upper]
         return params
+
+    def fill_in_fixed_from_settings(self, component, fixed_list):
+        """
+        Fill in fixed values from settings for lens, source light and lens
+        light.
+        :param component: name of component, 'lens', 'lens_light',
+        or 'source_light'.
+        :type component: `str`
+        :param fixed_list: list of fixed params
+        :type fixed_list: `list`
+        :return:
+        :rtype:
+        """
+        assert component in ['lens', 'lens_light', 'source_light']
+        option_str = component + '_option'
+
+        try:
+            self.settings[option_str]['fix']
+        except(NameError, KeyError):
+            pass
+        else:
+            if self.settings[option_str]['fix'] is not None:
+                for index, param_dict in self.settings[option_str][
+                                                                'fix'].items():
+                    for key, value in param_dict.items():
+                        fixed_list[index][key] = value
+
+        return fixed_list
 
     def get_kwargs_params(self):
         """

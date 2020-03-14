@@ -24,5 +24,3 @@ Features
 
 * (Semi-)automated modeling of a large sample of quasar and galaxy-galaxy lenses.
 * Easy portability between local and MPI environments.
-
-.. include:: ./docs/installation.rst

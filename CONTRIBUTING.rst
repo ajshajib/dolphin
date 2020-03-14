@@ -71,9 +71,7 @@ or::
 
     $ git checkout -b bugfix/name-of-your-bugfix
 
-Remember to add 'bugfix/' or 'feature/' at the beginning of your fork name. Now
-you can make your changes
-locally.
+Remember to add 'bugfix/' or 'feature/' at the beginning of your branch name. Now you can make your changes locally.
 
 4. When you're done making changes, check that your changes pass style and unit
    tests, including testing other Python versions with tox::
@@ -98,10 +96,7 @@ letter, and no period at the end.
 Style Guidelines
 ------------------
 
-dolphin is written in Python and we want to keep it Pythonic. Generally, we
-strictly follow PEP 8_, and recommend following PEP 257_, and 287_ as closely
-as possible. A few key points---that need to be emphasized or are beyond these
-PEPsare
+dolphin is written in Python and we want to keep it Pythonic. Generally, we strictly follow PEP 8_, and recommend following PEP 257_, and 287_ as  closely as possible. A few key points---that need to be emphasized or are beyond these PEPs---are
 
 1. Use full words for variable and function/method names with words separated by underscore. Function/method names must start with a verb.
 2. Class names must follow the CamelCase convention.

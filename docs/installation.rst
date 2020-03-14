@@ -2,12 +2,14 @@
 Installation
 ============
 
-At the command line either via easy_install or pip::
+At the command line::
 
-    $ easy_install dolphin
-    $ pip install dolphin
+    $ git clone https://github.com/ajshajib/dolphin.git
+    $ cd dolphin
+    $ python setup.py install --user
 
-Or, if you have virtualenvwrapper installed::
+Or, if you want to keep your installation updated with the latest commits from
+git::
 
-    $ mkvirtualenv dolphin
-    $ pip install dolphin
+    $ python setup.py develop --user
+

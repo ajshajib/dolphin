@@ -40,7 +40,7 @@ kwargs_model:
   key2: 'value2'
 
 kwargs_constraints:
-  joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
+  #joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
 
 fitting:
   psf_iteration: true

@@ -602,7 +602,7 @@ class ModelConfig(Config):
                     lower.append({'center_x': -1.2, 'center_y': -1.2,
                                   'beta': 0.02, 'n_max': -1})
                     upper.append({'center_x': 1.2, 'center_y': 1.2,
-                                  'beta': 0.5, 'n_max': 55})
+                                  'beta': 0.25, 'n_max': 55})
                 else:
                     raise ValueError('{} not implemented as a source light'
                                      'model!'.format(model))

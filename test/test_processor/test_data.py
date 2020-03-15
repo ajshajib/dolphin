@@ -28,7 +28,7 @@ class TestData(object):
         """
         data = Data()
 
-        data_file = _ROOT_DIR / 'test_working_directory' \
+        data_file = _ROOT_DIR / 'io_directory_example' \
                     / 'data' / 'test_system' \
                     / 'image_test_system_F390W.hdf5'
         data.load_from_file(data_file)
@@ -37,7 +37,7 @@ class TestData(object):
 class TestImageData(object):
 
     def setup_class(self):
-        data_file = _ROOT_DIR / 'test_working_directory' \
+        data_file = _ROOT_DIR / 'io_directory_example' \
                     / 'data' / 'test_system' \
                     / 'image_test_system_F390W.hdf5'
         self.image_data = ImageData(data_file)
@@ -85,7 +85,7 @@ class TestPSFData(object):
         :return:
         :rtype:
         """
-        psf_file =  _ROOT_DIR / 'test_working_directory' \
+        psf_file =  _ROOT_DIR / 'io_directory_example' \
                     / 'data' / 'test_system' \
                     / 'psf_test_system_F390W.hdf5'
 

@@ -27,7 +27,7 @@ class TestConfig(object):
         :return:
         :rtype:
         """
-        test_setting_file = _ROOT_DIR / 'test_working_directory' \
+        test_setting_file = _ROOT_DIR / 'io_directory_example' \
                             / 'settings' / 'test_system_config.yml'
         config = Config()
         config.load(str(test_setting_file.resolve()))
@@ -38,11 +38,11 @@ class TestModelConfig(object):
 
     """
     def setup_class(self):
-        self.test_setting_file = _ROOT_DIR / 'test_working_directory' \
+        self.test_setting_file = _ROOT_DIR / 'io_directory_example' \
                             / 'settings' / 'test_system_config.yml'
         self.config = ModelConfig(str(self.test_setting_file.resolve()))
 
-        self.test_setting_file2 = _ROOT_DIR / 'test_working_directory' \
+        self.test_setting_file2 = _ROOT_DIR / 'io_directory_example' \
                                   / 'settings' / 'test_system2_config.yml'
         self.config2 = ModelConfig(str(self.test_setting_file2.resolve()))
 

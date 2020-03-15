@@ -20,7 +20,7 @@ class TestRecipe(object):
     Test the `Recipe` module.
     """
     def setup_class(self):
-        self.test_setting_file = _ROOT_DIR / 'test_working_directory' \
+        self.test_setting_file = _ROOT_DIR / 'io_directory_example' \
                                  / 'settings' / 'test_system_config.yml'
         self.config = ModelConfig(str(self.test_setting_file.resolve()))
         self.recipe = Recipe(self.config)

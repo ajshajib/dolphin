@@ -10,7 +10,7 @@ import os
 from dolphin.processor.files import *
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
-_TEST_WORK_DIR = _ROOT_DIR / 'test_working_directory'
+_TEST_WORK_DIR = _ROOT_DIR / 'io_directory_example'
 
 
 class TestFileSystem(object):

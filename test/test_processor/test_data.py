@@ -2,8 +2,6 @@
 """
 Tests for data module.
 """
-
-import pytest
 from pathlib import Path
 
 from dolphin.processor.data import *
@@ -94,7 +92,3 @@ class TestPSFData(object):
         for key in ['psf_type', 'kernel_point_source',
                     'kernel_point_source_init', 'psf_error_map']:
             assert key in psf.kwargs_psf
-
-
-if __name__ == '__main__':
-    pytest.main()

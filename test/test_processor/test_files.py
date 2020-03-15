@@ -10,13 +10,13 @@ import os
 from dolphin.processor.files import *
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
-_TEST_WORK_DIR = _ROOT_DIR / 'io_directory_example'
+_TEST_IO_DIR = _ROOT_DIR / 'io_directory_example'
 
 
 class TestFileSystem(object):
 
     def setup_class(self):
-        self.file_system = FileSystem(_TEST_WORK_DIR)
+        self.file_system = FileSystem(_TEST_IO_DIR)
 
     @classmethod
     def teardown_class(cls):
@@ -28,7 +28,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        assert Path(self.file_system.path2str(_TEST_WORK_DIR)) == _TEST_WORK_DIR
+        assert Path(self.file_system.path2str(_TEST_IO_DIR)) == _TEST_IO_DIR
 
     def test_get_lens_list_file_path(self):
         """
@@ -36,7 +36,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        lens_list_file_path = _TEST_WORK_DIR / 'lens_list.txt'
+        lens_list_file_path = _TEST_IO_DIR / 'lens_list.txt'
 
         assert Path(self.file_system.get_lens_list_file_path()) == \
             lens_list_file_path
@@ -57,7 +57,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        config_file_path = _TEST_WORK_DIR / 'settings' / \
+        config_file_path = _TEST_IO_DIR / 'settings' / \
                                             'test_system_config.yml'
 
         assert Path(self.file_system.get_config_file_path('test_system')) == \
@@ -69,7 +69,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        logs_directory = _TEST_WORK_DIR / 'logs'
+        logs_directory = _TEST_IO_DIR / 'logs'
 
         assert Path(self.file_system.get_logs_directory()) == logs_directory
 
@@ -79,7 +79,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        settings_dir = _TEST_WORK_DIR / 'settings'
+        settings_dir = _TEST_IO_DIR / 'settings'
 
         assert Path(self.file_system.get_settings_directory()) == settings_dir
 
@@ -89,7 +89,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        outputs_dir = _TEST_WORK_DIR / 'outputs'
+        outputs_dir = _TEST_IO_DIR / 'outputs'
 
         assert Path(self.file_system.get_outputs_directory()) == outputs_dir
 
@@ -99,7 +99,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        data_dir = _TEST_WORK_DIR / 'data'
+        data_dir = _TEST_IO_DIR / 'data'
 
         assert Path(self.file_system.get_data_directory()) == data_dir
 
@@ -109,7 +109,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_WORK_DIR / 'data' / 'test_system' / \
+        path = _TEST_IO_DIR / 'data' / 'test_system' / \
             'image_test_system_F390W.hdf5'
 
         assert Path(self.file_system.get_image_file_path('test_system',
@@ -121,7 +121,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_WORK_DIR / 'data' / 'test_system' / \
+        path = _TEST_IO_DIR / 'data' / 'test_system' / \
             'psf_test_system_F390W.hdf5'
 
         assert Path(self.file_system.get_psf_file_path('test_system',
@@ -133,11 +133,11 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        with open(str(_TEST_WORK_DIR.resolve())
+        with open(str(_TEST_IO_DIR.resolve())
                   + '/logs/log_name_test.txt', 'w') as f:
             pass
 
-        path = _TEST_WORK_DIR / 'logs' / 'log_name_test.txt'
+        path = _TEST_IO_DIR / 'logs' / 'log_name_test.txt'
 
         assert Path(self.file_system.get_log_file_path('name', 'test')) \
             == path
@@ -150,11 +150,11 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        with open(str(_TEST_WORK_DIR.resolve())
+        with open(str(_TEST_IO_DIR.resolve())
                   + '/outputs/output_name_test.json', 'w') as f:
             pass
 
-        path = _TEST_WORK_DIR / 'outputs' / 'output_name_test.json'
+        path = _TEST_IO_DIR / 'outputs' / 'output_name_test.json'
 
         assert Path(self.file_system.get_output_file_path('name', 'test')) \
             == path

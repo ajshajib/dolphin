@@ -2,20 +2,18 @@
 """
 Tests for data module.
 """
-
-import pytest
 from pathlib import Path
 
 from dolphin.processor.core import *
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
-_TEST_WORK_DIR = _ROOT_DIR / 'io_directory_example'
+_TEST_IO_DIR = _ROOT_DIR / 'io_directory_example'
 
 
 class TestProcessor(object):
 
     def setup_class(self):
-        self.processor = Processor(_TEST_WORK_DIR)
+        self.processor = Processor(_TEST_IO_DIR)
 
     @classmethod
     def teardown_class(cls):

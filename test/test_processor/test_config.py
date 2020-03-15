@@ -2,7 +2,6 @@
 """
 Tests for config module.
 """
-
 import pytest
 from pathlib import Path
 
@@ -364,6 +363,3 @@ class TestModelConfig(object):
         fixed = self.config.fill_in_fixed_from_settings('lens_light',
                                                         fixed)
         assert fixed == [{'n_sersic': 4.}]
-
-if __name__ == '__main__':
-    pytest.main()

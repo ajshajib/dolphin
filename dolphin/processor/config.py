@@ -195,7 +195,6 @@ class ModelConfig(Config):
                 ])
 
         joint_source_with_point_source = []
-
         if len(self.get_point_source_model_list()) > 0 and \
                 num_source_profiles > 1:
             for n in range(num_source_profiles):
@@ -207,7 +206,8 @@ class ModelConfig(Config):
             'joint_source_with_source': joint_source_with_source,
             'joint_lens_light_with_lens_light':
                 joint_lens_light_with_lens_light,
-            'joint_source_with_point_source': joint_source_with_point_source
+            'joint_source_with_point_source': joint_source_with_point_source,
+            'joint_lens_with_light': []
         }
 
         if 'kwargs_constraints' in self.settings and self.settings[

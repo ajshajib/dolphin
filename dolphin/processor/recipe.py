@@ -259,13 +259,15 @@ class Recipe(object):
 
         return fitting_kwargs_list
 
-    def get_galaxy_galaxy_recipe(self, kwargs_data_joint):
+    def get_galaxy_galaxy_recipe(self, kwargs_data_joint, epochs=2):
         """
         Get the pre-sampling optimization routine for a galaxy-galaxy lens.
         PSF iteration is not added.
 
         :param kwargs_data_joint:
         :type kwargs_data_joint:
+        :param epochs: number of times to repeat the fitting sequence
+        :type epochs: `int`
         :return:
         :rtype:
         """
@@ -283,16 +285,21 @@ class Recipe(object):
             external_shear_model_index = self._get_external_shear_model_index()
             shapelets_index = self._get_shapelet_model_index()
 
-            for epoch in range(1):
+            temp_constraints = self._config.get_kwargs_constraints()
+            for epoch in range(epochs):
                 # first fix everything else except for lens light and use arc
-                # mask to fit the lens light only
+                # mask to fit the lens light only. Join the centroids of lens
+                # and lens light
                 fitting_kwargs_list += [
                     self.fix_params('lens'),
                     self.fix_params('source'),
                     ['update_settings', {'kwargs_likelihood': {
                                         'image_likelihood_mask_list': arc_masks}
-                                        }
-                     ],
+                    }],
+                    ['update_settings', {'kwargs_constraints': {
+                        'joint_lens_with_light': [[0, 0, ['center_x',
+                                                          'center_y']
+                                                  ]]}}],
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
                              'n_iterations': self._pso_num_iteration}]
@@ -378,9 +385,11 @@ class Recipe(object):
                 ]
 
                 # finally, relax shear parameters for MCMC later
-                #if external_shear_model_index is not None:
+                # disjoin lens and lens light centroids
                 fitting_kwargs_list += [
-                    self.unfix_params('lens')
+                    self.unfix_params('lens'),
+                    ['update_settings', {'kwargs_constraints': temp_constraints}
+                     ],
                 ]
 
             #fitting_kwargs_list += self.get_default_recipe()

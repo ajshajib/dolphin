@@ -22,14 +22,14 @@ class Processor(object):
     This class contains methods to model a single lens system or a bunch of
     systems from the config files.
     """
-    def __init__(self, working_directory):
+    def __init__(self, io_directory):
         """
 
-        :param working_directory: path to the working directory. Should not end with slash.
-        :type working_directory: `str`
+        :param io_directory: path to the input/output directory. Should not end with slash.
+        :type io_directory: `str`
         """
-        self.working_directory = working_directory
-        self.file_system = FileSystem(working_directory)
+        self.io_directory = io_directory
+        self.file_system = FileSystem(io_directory)
         self.lens_list = self.file_system.get_lens_list()
 
     def swim(self, lens_name, model_id, log=True, mpi=False,

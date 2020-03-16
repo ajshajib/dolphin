@@ -12,15 +12,15 @@ class FileSystem(object):
     This class contains the method to handle the file system and directory
     addresses.
     """
-    def __init__(self, working_directory):
+    def __init__(self, io_directory):
         """
-        Initiates a FileSystem object with `working_directory` as root.
+        Initiates a FileSystem object with `io_directory` as root.
 
-        :param working_directory: path to working directory
-        :type working_directory: str
+        :param io_directory: path to input/output directory
+        :type io_directory: str
         """
-        self._root_path = Path(working_directory)
-        self.root = working_directory
+        self._root_path = Path(io_directory)
+        self.root = io_directory
 
     @staticmethod
     def path2str(path):

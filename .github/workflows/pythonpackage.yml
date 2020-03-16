@@ -27,7 +27,7 @@ jobs:
         pip install numba
         pip install future
         pip install six
-        piip install multiprocess
+        pip install multiprocess
     - name: Test with pytest
       run: |
         pip install -U pytest

@@ -177,6 +177,54 @@ class TestFileSystem(object):
 
         assert self.file_system.load_output('test', 'save_test') == save_dict
 
+    def test_save_load_output_h5(self):
+        """
+        Test `save_output` and `load_output` methods.
+        :return:
+        :rtype:
+        """
+        save_dict = {
+            'settings': {'some': ['settings']},
+            'kwargs_result': {'0': 1, '1': 'str', '2': [3, 4]},
+            'fit_output': [
+                ['PSO',
+                 [np.ones((1, 50)), np.ones((4, 50)), np.ones((1, 50))],
+                 np.array(['{}'.format(i) for i in range(4)])
+                 ],
+                ['EMCEE',
+                 np.ones((50, 4)),
+                 ['{}'.format(i) for i in range(4)],
+                 np.ones(50)
+                 ]
+            ]
+        }
+
+        self.file_system.save_output_h5('test', 'save_test', save_dict)
+
+        out = self.file_system.load_output_h5('test','save_test')
+
+        assert save_dict['settings'] == out['settings']
+        assert save_dict['kwargs_result'] == out['kwargs_result']
+
+        for i in [0, 2]:
+            assert np.all(save_dict['fit_output'][0][i]
+                          == out['fit_output'][0][i])
+        for i in range(3):
+            assert np.all(save_dict['fit_output'][0][1][i]
+                          == out['fit_output'][0][1][i])
+
+        for i in range(3):
+            assert np.all(save_dict['fit_output'][1][i]
+                          == out['fit_output'][1][i])
+
+        with pytest.raises(ValueError):
+            save_dict['fit_output'].append(
+                [['INVALID',
+                  np.ones((4, 50)), np.array(['{}'.format(i) for i in
+                                              range(4)])]]
+            )
+            self.file_system.save_output_h5('test', 'save_test', save_dict)
+
     def test_numpy_to_json_encoding(self):
         """
         Test `class NumpyEncoder` and `hook_json_to_numpy` function.

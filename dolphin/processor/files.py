@@ -7,6 +7,7 @@ __author__ = 'ajshajib'
 from pathlib import Path
 import json
 import numpy as np
+import h5py
 
 
 class FileSystem(object):
@@ -182,7 +183,7 @@ class FileSystem(object):
         return self.path2str(Path(self.get_logs_directory())) \
             + '/log_{}_{}.txt'.format(lens_name, model_id)
 
-    def get_output_file_path(self, lens_name, model_id):
+    def get_output_file_path(self, lens_name, model_id, file_type='json'):
         """
         Get the file path for the PSF data for `lens_name`.
 
@@ -190,11 +191,13 @@ class FileSystem(object):
         :type lens_name: `str`
         :param model_id: identifier for run model
         :type model_id: `str`
+        :param file_type: type of file, options: 'json', 'h5'
+        :type file_type: `str`
         :return: file path
         :rtype: `str`
         """
         return self.path2str(Path(self.get_outputs_directory())) \
-            + '/output_{}_{}.json'.format(lens_name, model_id)
+            + '/output_{}_{}.{}'.format(lens_name, model_id, file_type)
 
     def save_output(self, lens_name, model_id, output):
         """
@@ -214,6 +217,68 @@ class FileSystem(object):
             json.dump(self.encode_numpy_arrays(output), f,
                       ensure_ascii=False, indent=4)
 
+    def save_output_h5(self, lens_name, model_id, output):
+        """
+        Save output from fitting sequence to h5 format.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: identifier for model run
+        :type model_id: `str`
+        :param output: output dictionary
+        :type output: `dict`
+        :return: None
+        :rtype:
+        """
+        save_file = self.get_output_file_path(lens_name, model_id,
+                                              file_type='h5')
+
+        with h5py.File(save_file, 'w') as f:
+            f.attrs['settings'] = json.dumps(
+                self.encode_numpy_arrays(output['settings']),
+                ensure_ascii=False)
+            f.attrs['kwargs_result'] = json.dumps(
+                self.encode_numpy_arrays(output['kwargs_result']),
+                ensure_ascii=False)
+
+            group = f.create_group('fit_output')
+            for i, single_output in enumerate(output['fit_output']):
+                subgroup = group.create_group('{}'.format(i))
+                subgroup.attrs['fitting_type'] = np.string_(single_output[0])
+
+                if single_output[0] == 'PSO':
+                    subgroup.create_dataset('chi2',
+                                            data=np.array(single_output[1][0])
+                                            )
+                    subgroup.create_dataset('position',
+                                            data=np.array(single_output[1][1])
+                                            )
+                    subgroup.create_dataset('velocity',
+                                            data=np.array(single_output[1][2])
+                                            )
+                    subgroup.create_dataset('param_list',
+                                            data=np.array(single_output[2],
+                                                          dtype='S10')
+                                            )
+                elif single_output[0] == 'EMCEE':
+                    print(single_output[1].shape)
+                    subgroup.create_dataset('samples',
+                                            data=np.array(single_output[1],
+                                                          )
+                                            )
+                    subgroup.create_dataset('param_list',
+                                            data=np.array(single_output[2],
+                                                          dtype='S10')
+                                            )
+                    print(single_output[3].shape)
+                    subgroup.create_dataset('log_likelihood',
+                                            data=np.array(single_output[3],
+                                                          )
+                                            )
+                else:
+                    raise ValueError('Fitting type {} not recognized for '
+                                     'saving output!'.format(single_output[0]))
+
     def load_output(self, lens_name, model_id):
         """
         Load from saved output file.
@@ -231,6 +296,70 @@ class FileSystem(object):
             output = json.load(f)
 
         return self.decode_numpy_arrays(output)
+
+    def load_output_h5(self, lens_name, model_id):
+        """
+        Load from saved output file.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param model_id: model identifier provided at run initiation
+        :type model_id: `str`
+        :return: output dictionary
+        :rtype: `dict`
+        """
+        load_file = self.get_output_file_path(lens_name, model_id,
+                                              file_type='h5')
+
+        with h5py.File(load_file, 'r') as f:
+            settings = self.decode_numpy_arrays(
+                json.loads(str(f.attrs['settings']))
+            )
+
+            kwargs_result = self.decode_numpy_arrays(
+                json.loads(str(f.attrs['kwargs_result']))
+            )
+
+            fit_output = []
+            group = f['fit_output']
+
+            for index in f['fit_output']:
+                fitting_step = [str(group[index].attrs['fitting_type'],
+                                    encoding='utf-8'
+                                    )
+                                ]
+
+                if fitting_step[0] == 'PSO':
+                    fitting_step.append([
+                        group[index]['chi2'][:],
+                        group[index]['position'][:],
+                        group[index]['velocity'][:]
+                    ])
+                    fitting_step.append([str(s, encoding='utf-8') for s in
+                                         group[index][
+                                             'param_list'][:]
+                                         ])
+                elif fitting_step[0] == 'EMCEE':
+                    fitting_step.append(group[index]['samples'][:])
+                    fitting_step.append([str(s, encoding='utf-8') for s in
+                                         group[index][
+                                             'param_list'][:]
+                                         ])
+                    fitting_step.append(group[index]['log_likelihood'][:])
+                # else:
+                #     raise ValueError('Fitting type {} not recognized for '
+                #                      'loading output!'.format(fitting_step[0]
+                #                      ))
+
+                fit_output.append(fitting_step)
+
+            output = {
+                'settings': settings,
+                'kwargs_result': kwargs_result,
+                'fit_output': fit_output
+            }
+
+            return output
 
     @classmethod
     def encode_numpy_arrays(cls, obj):

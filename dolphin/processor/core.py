@@ -5,7 +5,6 @@ This module loads settings from a configuration file.
 __author__ = 'ajshajib'
 
 import sys
-import json
 import numpy as np
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 from schwimmbad import choose_pool

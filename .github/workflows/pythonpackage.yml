@@ -24,6 +24,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r test_requirements.txt
+        pip install numba
+        pip install future
+        pip install six
+        piip install multiprocess
     - name: Test with pytest
       run: |
         pip install -U pytest

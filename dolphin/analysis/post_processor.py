@@ -58,7 +58,7 @@ class PostProcessor(Processor):
         :return: None
         :rtype:
         """
-        output = super(PostProcessor, self).load_output(lens_name, model_id)
+        output = self.file_system.load_output(lens_name, model_id)
 
         self.model_settings = output['settings']
         self.kwargs_result = output['kwargs_result']
@@ -130,6 +130,6 @@ class PostProcessor(Processor):
             ]
         }
 
-        self._save_output(lens_name, '{}_thinned'.format(model_id),
-                          output_dictionary)
+        self.file_system.save_output(lens_name, '{}_thinned'.format(model_id),
+                                     output_dictionary)
 

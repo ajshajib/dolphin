@@ -62,7 +62,8 @@ class TestProcessor(object):
             ]
         }
 
-        self.processor._save_output('test', 'post_process_load', save_dict)
+        self.processor.file_system.save_output('test', 'post_process_load',
+                                               save_dict)
 
         self.post_processor.load_output('test', 'post_process_load')
 
@@ -120,7 +121,8 @@ class TestProcessor(object):
                  ]
             ]
         }
-        self.processor._save_output('test', 'post_process_thin', save_dict)
+        self.processor.file_system.save_output('test', 'post_process_thin',
+                                                save_dict)
 
         post_processor = PostProcessor(_TEST_IO_DIR)
         post_processor.save_thinned_chain('test', 'post_process_thin',

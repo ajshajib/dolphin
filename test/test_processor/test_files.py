@@ -6,6 +6,7 @@ Tests for files module.
 import pytest
 from pathlib import Path
 import os
+import numpy as np
 
 from dolphin.processor.files import *
 
@@ -160,3 +161,54 @@ class TestFileSystem(object):
             == path
 
         os.remove(str(path.resolve()))
+
+    def test_save_load_output(self):
+        """
+        Test `save_output` and `load_output` methods.
+        :return:
+        :rtype:
+        """
+        save_dict = {
+            'kwargs_test': {'0': None, '1': 'str', '2': [3, 4]},
+            'array_test': np.array([1.])
+        }
+
+        self.file_system.save_output('test', 'save_test', save_dict)
+
+        assert self.file_system.load_output('test', 'save_test') == save_dict
+
+    def test_numpy_to_json_encoding(self):
+        """
+        Test `class NumpyEncoder` and `hook_json_to_numpy` function.
+        :return:
+        :rtype:
+        """
+        a = np.array([[0, 2], [3, 4]])
+        b = {'1': a}
+        c = {'0': {'1': a}, '2': [1, 2]}
+        d = [{'0': {'1': a}, '2': [1, 2]}, 'string', [a, a]]
+
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(a)
+        ) == a)
+
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(b['1'])
+        ) == b['1'])
+
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(c['0']['1'])
+        ) == c['0']['1'])
+
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(d[0]['0']['1'])
+        ) == d[0]['0']['1'])
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(d[2][1])
+        ) == d[2][1])
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(d[2][0])
+        ) == d[2][0])
+        assert np.all(self.file_system.decode_numpy_arrays(
+            self.file_system.encode_numpy_arrays(d[2][1])
+        ) == d[2][1])

@@ -86,7 +86,7 @@ class Processor(object):
         }
 
         if pool.is_master():
-            self._save_output(lens_name, model_id, output)
+            self.file_system.save_output(lens_name, model_id, output)
 
         if log and pool.is_master():
             log_file.close()
@@ -161,95 +161,3 @@ class Processor(object):
         :rtype:
         """
         return PSFData(self.file_system.get_psf_file_path(lens_name, band))
-
-    def _save_output(self, lens_name, model_id, output):
-        """
-        Save output from fitting sequence.
-
-        :param lens_name: name of the lens
-        :type lens_name: `str`
-        :param model_id: identifier for model run
-        :type model_id: `str`
-        :param output: output dictionary
-        :type output: `dict`
-        :return: None
-        :rtype:
-        """
-        save_file = self.file_system.get_output_file_path(lens_name, model_id)
-        with open(save_file, 'w') as f:
-            json.dump(self.encode_numpy_arrays(output), f,
-                      ensure_ascii=False, indent=4)
-
-    def load_output(self, lens_name, model_id):
-        """
-        Load from saved output file.
-
-        :param lens_name: lens name
-        :type lens_name: `str`
-        :param model_id: model identifier provided at run initiation
-        :type model_id: `str`
-        :return: output dictionary
-        :rtype: `dict`
-        """
-        save_file = self.file_system.get_output_file_path(lens_name, model_id)
-
-        with open(save_file, 'r') as f:
-            output = json.load(f)
-
-        return self.decode_numpy_arrays(output)
-
-    @classmethod
-    def encode_numpy_arrays(cls, obj):
-        """
-        Encode a list/dictionary containing numpy arrays through recursion
-        for JSON serialization.
-
-        :param obj: object
-        :type obj:
-        :return: object with `ndarray`s encoded as dictionaries
-        :rtype:
-        """
-        if isinstance(obj, np.ndarray):
-            return {
-                '__ndarray__': obj.tolist(),
-                'shape': obj.shape
-            }
-        elif isinstance(obj, list):
-            encoded = []
-            for element in obj:
-                encoded.append(cls.encode_numpy_arrays(element))
-            return encoded
-        elif isinstance(obj, dict):
-            encoded = {}
-            for key, value in obj.items():
-                encoded[key] = cls.encode_numpy_arrays(value)
-            return encoded
-        else:
-            return obj
-
-    @classmethod
-    def decode_numpy_arrays(cls, obj):
-        """
-        Decode a list/dictionary containing encoded numpy arrays through
-        recursion.
-
-        :param obj: object with `ndarray`s encoded as dictionaries
-        :type obj:
-        :return: object with `ndarray`s as `numpy.ndarray`
-        :rtype:
-        """
-        if isinstance(obj, dict):
-            if '__ndarray__' in obj:
-                return np.asarray(obj['__ndarray__']).reshape(obj['shape'])
-            else:
-                decoded = {}
-                for key, value in obj.items():
-                    decoded[key] = cls.decode_numpy_arrays(value)
-                return decoded
-        elif isinstance(obj, list):
-            decoded = []
-            for element in obj:
-                decoded.append(cls.decode_numpy_arrays(element))
-            return decoded
-        else:
-            return obj

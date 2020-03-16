@@ -219,9 +219,10 @@ class TestFileSystem(object):
 
         with pytest.raises(ValueError):
             save_dict['fit_output'].append(
-                [['INVALID',
+                ['INVALID',
                   np.ones((4, 50)), np.array(['{}'.format(i) for i in
-                                              range(4)])]]
+                                              range(4)])
+                 ]
             )
             self.file_system.save_output_h5('test', 'save_test', save_dict)
 

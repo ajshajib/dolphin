@@ -199,7 +199,29 @@ class FileSystem(object):
         return self.path2str(Path(self.get_outputs_directory())) \
             + '/output_{}_{}.{}'.format(lens_name, model_id, file_type)
 
-    def save_output(self, lens_name, model_id, output):
+    def save_output(self, lens_name, model_id, output, file_type='h5'):
+        """
+        Save output from fitting sequence.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: identifier for model run
+        :type model_id: `str`
+        :param output: output dictionary
+        :type output: `dict`
+        :param file_type: type of file to save, 'h5' or 'json'
+        :type file_type: `str`
+        :return: None
+        :rtype:
+        """
+        if file_type == 'h5':
+            self.save_output_h5(lens_name, model_id, output)
+        elif file_type == 'json':
+            self.save_output_json(lens_name, model_id, output)
+        else:
+            raise ValueError('File type {} not recognized!'.format(file_type))
+
+    def save_output_json(self, lens_name, model_id, output):
         """
         Save output from fitting sequence.
 
@@ -212,7 +234,8 @@ class FileSystem(object):
         :return: None
         :rtype:
         """
-        save_file = self.get_output_file_path(lens_name, model_id)
+        save_file = self.get_output_file_path(lens_name, model_id,
+                                              file_type='json')
         with open(save_file, 'w') as f:
             json.dump(self.encode_numpy_arrays(output), f,
                       ensure_ascii=False, indent=4)
@@ -242,8 +265,10 @@ class FileSystem(object):
                 ensure_ascii=False)
 
             group = f.create_group('fit_output')
+
             for i, single_output in enumerate(output['fit_output']):
                 subgroup = group.create_group('{}'.format(i))
+
                 subgroup.attrs['fitting_type'] = np.string_(single_output[0])
 
                 if single_output[0] == 'PSO':
@@ -261,7 +286,6 @@ class FileSystem(object):
                                                           dtype='S10')
                                             )
                 elif single_output[0] == 'EMCEE':
-                    print(single_output[1].shape)
                     subgroup.create_dataset('samples',
                                             data=np.array(single_output[1],
                                                           )
@@ -270,7 +294,6 @@ class FileSystem(object):
                                             data=np.array(single_output[2],
                                                           dtype='S10')
                                             )
-                    print(single_output[3].shape)
                     subgroup.create_dataset('log_likelihood',
                                             data=np.array(single_output[3],
                                                           )
@@ -279,7 +302,26 @@ class FileSystem(object):
                     raise ValueError('Fitting type {} not recognized for '
                                      'saving output!'.format(single_output[0]))
 
-    def load_output(self, lens_name, model_id):
+    def load_output(self, lens_name, model_id, file_type='h5'):
+        """
+        Load from saved output file.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param model_id: model identifier provided at run initiation
+        :type model_id: `str`
+        :param file_type: type of file, 'h5' or 'json'
+        :return: output dictionary
+        :rtype: `dict`
+        """
+        if file_type == 'h5':
+            return self.load_output_h5(lens_name, model_id)
+        elif file_type == 'json':
+            return self.load_output_json(lens_name, model_id)
+        else:
+            raise ValueError('File type {} not recognized!'.format(file_type))
+
+    def load_output_json(self, lens_name, model_id):
         """
         Load from saved output file.
 
@@ -290,9 +332,10 @@ class FileSystem(object):
         :return: output dictionary
         :rtype: `dict`
         """
-        save_file = self.get_output_file_path(lens_name, model_id)
+        load_file = self.get_output_file_path(lens_name, model_id,
+                                              file_type='json')
 
-        with open(save_file, 'r') as f:
+        with open(load_file, 'r') as f:
             output = json.load(f)
 
         return self.decode_numpy_arrays(output)

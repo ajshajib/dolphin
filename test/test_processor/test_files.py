@@ -48,7 +48,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        lens_list = ['test_system']
+        lens_list = ['test_system', 'demo_system1']
 
         assert self.file_system.get_lens_list() == lens_list
 
@@ -164,7 +164,23 @@ class TestFileSystem(object):
 
     def test_save_load_output(self):
         """
-        Test `save_output` and `load_output` methods.
+        Test for the `save_output()` and `load_output()` will be covered by
+        `test_save_load_output_json()` and `test_save_load_output_h5()`
+        methods.
+        :return:
+        :rtype:
+        """
+        with pytest.raises(ValueError):
+            self.file_system.save_output('test', 'save_test', {},
+                                         file_type='invalid')
+
+        with pytest.raises(ValueError):
+            self.file_system.load_output('test', 'save_test',
+                                         file_type='invalid')
+
+    def test_save_load_output_json(self):
+        """
+        Test `save_output_json` and `load_output_json` methods.
         :return:
         :rtype:
         """
@@ -173,9 +189,11 @@ class TestFileSystem(object):
             'array_test': np.array([1.])
         }
 
-        self.file_system.save_output('test', 'save_test', save_dict)
+        self.file_system.save_output('test', 'save_test', save_dict,
+                                     file_type='json')
 
-        assert self.file_system.load_output('test', 'save_test') == save_dict
+        assert self.file_system.load_output('test', 'save_test',
+                                            file_type='json') == save_dict
 
     def test_save_load_output_h5(self):
         """
@@ -199,9 +217,10 @@ class TestFileSystem(object):
             ]
         }
 
-        self.file_system.save_output_h5('test', 'save_test', save_dict)
+        self.file_system.save_output('test', 'save_test', save_dict,
+                                     file_type='h5')
 
-        out = self.file_system.load_output_h5('test','save_test')
+        out = self.file_system.load_output('test','save_test', file_type='h5')
 
         assert save_dict['settings'] == out['settings']
         assert save_dict['kwargs_result'] == out['kwargs_result']
@@ -224,7 +243,8 @@ class TestFileSystem(object):
                                               range(4)])
                  ]
             )
-            self.file_system.save_output_h5('test', 'save_test', save_dict)
+            self.file_system.save_output('test', 'save_test', save_dict,
+                                         file_type='h5')
 
     def test_numpy_to_json_encoding(self):
         """

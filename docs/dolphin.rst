@@ -6,7 +6,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 3
+    :maxdepth: 3
 
     modules/dolphin.processor
     modules/dolphin.analysis

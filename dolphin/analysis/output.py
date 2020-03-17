@@ -110,10 +110,10 @@ class Output(Processor):
         :return:
         :rtype:
         """
-        if self.params_mcmc is not None:
-            return len(self.params_mcmc)
-        else:
+        if self._params_mcmc is None:
             return 0
+        else:
+            return len(self._params_mcmc)
 
     def swim(self, *args, **kwargs):
         """

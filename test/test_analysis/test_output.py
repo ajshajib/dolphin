@@ -55,6 +55,14 @@ class TestOutput(object):
         self.output._params_mcmc = ['param1', 'param2']
         assert self.output.num_params_mcmc == 2
 
+        self.output._samples_mcmc = np.ones(10)
+        assert np.all(self.output.samples_mcmc == np.ones(10))
+        self.output._samples_mcmc = None
+
+        self.output._params_mcmc = ['param1']
+        assert self.output.params_mcmc == ['param1']
+        self.output._params_mcmc = None
+
     def test_load_output(self):
         """
         Test that outputs are saved and corresponding class variables

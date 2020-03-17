@@ -24,7 +24,8 @@ class Processor(object):
     def __init__(self, io_directory):
         """
 
-        :param io_directory: path to the input/output directory. Should not end with slash.
+        :param io_directory: path to the input/output directory. Should not
+            end with slash.
         :type io_directory: `str`
         """
         self.io_directory = io_directory
@@ -44,9 +45,11 @@ class Processor(object):
         :type log: `bool`
         :param mpi: MPI option
         :type mpi: `bool`
-        :param recipe_name: recipe for pre-sampling optimization, supported  ones now: 'default' and 'galaxy-galaxy'
+        :param recipe_name: recipe for pre-sampling optimization, supported
+            ones now: 'default' and 'galaxy-galaxy'
         :type recipe_name: `str`
-        :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for legacy
+        :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for
+            legacy
         :type sampler: `str`
         :return:
         :rtype:

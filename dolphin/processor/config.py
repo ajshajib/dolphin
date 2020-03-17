@@ -211,7 +211,7 @@ class ModelConfig(Config):
         }
 
         if 'kwargs_constraints' in self.settings and self.settings[
-                                            'kwargs_constraints'] is not None:
+            'kwargs_constraints'] is not None:
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
 
@@ -248,8 +248,8 @@ class ModelConfig(Config):
         """
         if 'mask' in self.settings:
             if self.settings['mask'] is not None:
-                if 'provided' in self.settings['mask'] and self.settings[
-                                                'mask']['provided'] is not None:
+                if 'provided' in self.settings['mask'] \
+                        and self.settings['mask']['provided'] is not None:
                     return self.settings['mask']['provided']
                 else:
                     masks = []
@@ -286,9 +286,9 @@ class ModelConfig(Config):
                             pass
                         else:
                             if self.settings['mask']['extra_regions'] is \
-                                                                    not None:
+                                    not None:
                                 for reg in self.settings['mask'][
-                                                            'extra_regions']:
+                                    'extra_regions']:
                                     extra_masked_regions.append(
                                         mask_util.mask_center_2d(
                                             self.deflector_center_ra + reg[0],
@@ -321,8 +321,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'psf_iteration' in self.settings['fitting'] and self.settings[
-                                                    'fitting']['psf_iteration']:
+        if 'psf_iteration' in self.settings['fitting'] \
+                and self.settings['fitting']['psf_iteration']:
             kwargs_psf_iteration = {
                 'stacking_method': 'median',
                 'keep_psf_error_map': True,
@@ -337,9 +337,9 @@ class ModelConfig(Config):
                             'psf_symmetry', 'block_center_neighbour',
                             'num_iter', 'psf_iter_factor']:
                     if key in self.settings['fitting'][
-                                                    'psf_iteration_settings']:
+                        'psf_iteration_settings']:
                         kwargs_psf_iteration[key] = self.settings['fitting'][
-                                                'psf_iteration_settings'][key]
+                            'psf_iteration_settings'][key]
 
             return kwargs_psf_iteration
         else:
@@ -358,7 +358,7 @@ class ModelConfig(Config):
             supersampling_factor = [3] * self.band_number
         else:
             supersampling_factor = deepcopy(self.settings['numeric_option'][
-                                                        'supersampling_factor'])
+                                                'supersampling_factor'])
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
@@ -592,11 +592,12 @@ class ModelConfig(Config):
                         'e1': 0.5, 'e2': 0.5
                     })
                 elif model == 'SHAPELETS':
-                    fixed.append({'n_max': self.settings['source_light_option'][
-                        'n_max'][n]})
+                    fixed.append(
+                        {'n_max': self.settings['source_light_option'][
+                                                                'n_max'][n]})
                     init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
                                  'n_max': self.settings['source_light_option'][
-                                     'n_max'][n]})
+                                                                'n_max'][n]})
                     sigma.append({'center_x': 0.5, 'center_y': 0.5,
                                   'beta': 0.015 / 10., 'n_max': 2})
                     lower.append({'center_x': -1.2, 'center_y': -1.2,
@@ -632,9 +633,9 @@ class ModelConfig(Config):
 
             init.append({
                 'ra_image': np.array(self.settings['point_source_option'][
-                                         'ra_init']),
+                                                                'ra_init']),
                 'dec_image': np.array(self.settings['point_source_option'][
-                                          'dec_init']),
+                                                                'dec_init']),
             })
 
             num_point_sources = len(init[0]['ra_image'])
@@ -645,16 +646,16 @@ class ModelConfig(Config):
 
             lower.append({
                 'ra_image': init[0]['ra_image'] - self.settings[
-                                                'point_source_option']['bound'],
+                                            'point_source_option']['bound'],
                 'dec_image': init[0]['dec_image'] - self.settings[
-                                                'point_source_option']['bound'],
+                                            'point_source_option']['bound'],
             })
 
             upper.append({
                 'ra_image': init[0]['ra_image'] + self.settings[
-                                                'point_source_option']['bound'],
+                                            'point_source_option']['bound'],
                 'dec_image': init[0]['dec_image'] + self.settings[
-                                                'point_source_option']['bound'],
+                                            'point_source_option']['bound'],
             })
 
         params = [init, sigma, fixed, lower, upper]
@@ -665,7 +666,8 @@ class ModelConfig(Config):
         Fill in fixed values from settings for lens, source light and lens
         light.
 
-        :param component: name of component, 'lens', 'lens_light', or 'source_light'
+        :param component: name of component, 'lens', 'lens_light', or
+            'source_light'
         :type component: `str`
         :param fixed_list: list of fixed params
         :type fixed_list: `list`

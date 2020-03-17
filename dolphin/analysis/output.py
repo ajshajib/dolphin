@@ -18,7 +18,8 @@ class Output(Processor):
     def __init__(self, io_directory):
         """
 
-        :param io_directory: path to the input/output directory. Should not end with slash.
+        :param io_directory: path to the input/output directory. Should not
+            end with slash.
         :type io_directory: `str`
         """
         super(Output, self).__init__(io_directory)

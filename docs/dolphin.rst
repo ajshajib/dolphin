@@ -1,10 +1,12 @@
 ======================
-API/References
+API/Reference
 ======================
 
 Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 3
 
-    dolphin.processor
+    modules/dolphin.processor
+    modules/dolphin.analysis

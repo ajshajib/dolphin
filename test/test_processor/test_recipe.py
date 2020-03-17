@@ -21,7 +21,7 @@ class TestRecipe(object):
     """
     def setup_class(self):
         self.test_setting_file = _ROOT_DIR / 'io_directory_example' \
-                                 / 'settings' / 'test_system_config.yml'
+                                 / 'settings' / 'lens_system1_config.yml'
         self.config = ModelConfig(str(self.test_setting_file.resolve()))
         self.recipe = Recipe(self.config)
 

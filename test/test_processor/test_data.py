@@ -8,6 +8,7 @@ from dolphin.processor.data import *
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
+
 class TestData(object):
 
     @classmethod
@@ -27,8 +28,8 @@ class TestData(object):
         data = Data()
 
         data_file = _ROOT_DIR / 'io_directory_example' \
-                    / 'data' / 'test_system' \
-                    / 'image_test_system_F390W.hdf5'
+                    / 'data' / 'lens_system1' \
+                    / 'image_lens_system1_F390W.hdf5'
         data.load_from_file(data_file)
 
 
@@ -36,8 +37,8 @@ class TestImageData(object):
 
     def setup_class(self):
         data_file = _ROOT_DIR / 'io_directory_example' \
-                    / 'data' / 'test_system' \
-                    / 'image_test_system_F390W.hdf5'
+                    / 'data' / 'lens_system1' \
+                    / 'image_lens_system1_F390W.hdf5'
         self.image_data = ImageData(data_file)
 
     @classmethod
@@ -84,8 +85,8 @@ class TestPSFData(object):
         :rtype:
         """
         psf_file =  _ROOT_DIR / 'io_directory_example' \
-                    / 'data' / 'test_system' \
-                    / 'psf_test_system_F390W.hdf5'
+                    / 'data' / 'lens_system1' \
+                    / 'psf_lens_system1_F390W.hdf5'
 
         psf = PSFData(psf_file)
 

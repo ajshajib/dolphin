@@ -1,5 +1,5 @@
 ---
-system_name: 'test_system'
+system_name: 'lens_system2'
 
 band:
   - 'F390W'
@@ -8,12 +8,12 @@ pixel_size : 0.04
 
 model:
   lens:
-    - 'SPEP'
+    - 'SPEMD'
     - 'SHEAR_GAMMA_PSI'
   lens_light:
     - 'SERSIC_ELLIPSE'
   source_light:
-    - 'SERSIC_ELLIPSE'
+    - 'SHAPELETS'
   point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 lens_option:
@@ -24,30 +24,27 @@ lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
 
 source_light_option:
-  n_max: [2] # array with n_max for each band
+  n_max: [4] # array with n_max for each band
 
 point_source_option:
   ra_init: []
   dec_init: []
   bound: 0.
 
-kwargs_constraints:
-  joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
-
 fitting:
   psf_iteration: false
   psf_iteration_settings:
-    # num_iter: 20
-    # psf_iter_factor: 0.5
-    # psf_symmetry: 4
-    # block_center_neighbour: 0.
+    psf_iteration_num: 50
+    psf_iteration_factor: 0.5
+    psf_symmetry: 4
+    block_neighbor: 0.
 
   pso: true
   pso_settings:
-    num_particle: 2
-    num_iteration: 2
+    num_particle: 20
+    num_iteration: 50
 
-  sampling: true
+  sampling: false
   sampler: 'MCMC'
   mcmc_settings:
     burnin_step : 2
@@ -57,14 +54,7 @@ fitting:
 kwargs_model:
 
 numeric_option:
-  supersampling_factor: [3] # list specifying for each band
-
-guess_params:
-  lens:
-    0:
-      theta_E: 1.2
-      e1: 0.05
-      e2: -0.05
+  supersampling_factor: [3]
 
 mask:
   size: [120] # 1d array, number of pixel for each band

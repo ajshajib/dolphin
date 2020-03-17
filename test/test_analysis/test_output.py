@@ -95,8 +95,8 @@ class TestOutput(object):
         :rtype:
         """
         with pytest.raises(ValueError):
-            _ = self.output.plot_model_overview('demo_system1')
+            _ = self.output.plot_model_overview('lens_system2')
 
-        fig = self.output.plot_model_overview('demo_system1', 'example')
+        fig = self.output.plot_model_overview('lens_system2', 'example')
 
         plt.close(fig)

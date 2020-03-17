@@ -48,7 +48,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        lens_list = ['test_system', 'demo_system1']
+        lens_list = ['lens_system1', 'lens_system2']
 
         assert self.file_system.get_lens_list() == lens_list
 
@@ -59,9 +59,9 @@ class TestFileSystem(object):
         :rtype:
         """
         config_file_path = _TEST_IO_DIR / 'settings' / \
-                                            'test_system_config.yml'
+                                            'lens_system1_config.yml'
 
-        assert Path(self.file_system.get_config_file_path('test_system')) == \
+        assert Path(self.file_system.get_config_file_path('lens_system1')) == \
             config_file_path
 
     def test_get_logs_directory(self):
@@ -110,10 +110,10 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_IO_DIR / 'data' / 'test_system' / \
-            'image_test_system_F390W.hdf5'
+        path = _TEST_IO_DIR / 'data' / 'lens_system1' / \
+            'image_lens_system1_F390W.hdf5'
 
-        assert Path(self.file_system.get_image_file_path('test_system',
+        assert Path(self.file_system.get_image_file_path('lens_system1',
                                                          'F390W')) == path
 
     def test_get_psf_file_path(self):
@@ -122,10 +122,10 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_IO_DIR / 'data' / 'test_system' / \
-            'psf_test_system_F390W.hdf5'
+        path = _TEST_IO_DIR / 'data' / 'lens_system1' / \
+            'psf_lens_system1_F390W.hdf5'
 
-        assert Path(self.file_system.get_psf_file_path('test_system',
+        assert Path(self.file_system.get_psf_file_path('lens_system1',
                                                        'F390W')) == path
 
     def test_get_log_file_path(self):

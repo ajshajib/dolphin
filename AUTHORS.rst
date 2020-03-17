@@ -5,9 +5,16 @@ Credits
 Development Lead
 ----------------
 
-* Anowar J. Shajib <ajshajib@gmail.com>
+* Anowar J. Shajib, |mail| ajshajib@gmail.com, |github| `ajshajib <https://github.com/ajshajib/>`_
+
+
 
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Simon Birrer, |github| `sibirrer <https://github.com/sibirrer/>`_
+
+
+.. |mail| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mail.svg?sanitize=true
+
+.. |github| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mark-github.svg?sanitize=true

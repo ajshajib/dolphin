@@ -14,11 +14,9 @@ model:
     - 'SERSIC_ELLIPSE'
   source_light:
     - 'SHAPELETS'
-  point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 lens_option:
   centroid_init: [0.04, -0.04]
-#  centroid_bound:
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
@@ -26,50 +24,11 @@ lens_light_option:
 source_light_option:
   n_max: [4] # array with n_max for each band
 
-point_source_option:
-  ra_init: []
-  dec_init: []
-  bound: 0.
-
 fitting:
-  psf_iteration: false
-  psf_iteration_settings:
-    psf_iteration_num: 50
-    psf_iteration_factor: 0.5
-    psf_symmetry: 4
-    block_neighbor: 0.
-
   pso: true
   pso_settings:
     num_particle: 20
     num_iteration: 50
 
-  sampling: false
-  sampler: 'MCMC'
-  mcmc_settings:
-    burnin_step : 2
-    iteration_step: 2
-    walker_ratio: 2
-
-kwargs_model:
-
 numeric_option:
-  supersampling_factor: [3]
-
-mask:
-  size: [120] # 1d array, number of pixel for each band
-  ra_at_xy_0: [2.4] # 1d array, for each band
-  dec_at_xy_0: [-2.4] # 1d array, for each band
-  centroid_offset: [[0., 0]]
-  # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid
-  radius: [2.] # 1d array, radius in arcsec for each band
-  transform_matrix: [[[-4.00004004e-02, -2.74607936e-07],
-                     [-2.67119793e-07,  3.99999886e-02]]]
-  # same transform_pix2angle` in kwargs_data, 3d array, for each band
-  provided:
-  # actual masks, 3d array with dimension (band, x, y), if
-  # provided everything above will be ignored
-
-
-
-
+  supersampling_factor: [2]

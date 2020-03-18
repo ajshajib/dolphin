@@ -44,18 +44,21 @@ class ModelConfig(Config):
     settings for a particular system.
     """
 
-    def __init__(self, file=None):
+    def __init__(self, file=None, settings=None):
         """
         Initiate a Model Config object. If the file path is given, `settings`
         will be loaded from it. Otherwise, the `settings` can be
         loaded/reloaded later with the `load_settings_from_file` method.
 
-        :param file: path to a settings file
+        :param file: path to a settings file, file will
         :type file: `str`
+        :param settings: a dictionary containing settings. If both `file`
+            and `settings` are provided, `file` will be prioritized.
+        :type settings: `dict`
         """
         super(ModelConfig, self).__init__()
 
-        self.settings = None
+        self.settings = settings
         if file is not None:
             self.load_settings_from_file(file)
 

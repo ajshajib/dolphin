@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from lenstronomy.Plots.model_plot import ModelPlot
 
 from dolphin.processor import Processor
+from dolphin.processor.config import ModelConfig
 
 
 class Output(Processor):
@@ -188,9 +189,10 @@ class Output(Processor):
             kwargs_result = self.kwargs_result
 
         multi_band_list_out = self.get_kwargs_data_joint(
-            lens_name)['multi_band_list']
+                                                lens_name)['multi_band_list']
 
-        config = self.get_lens_config(lens_name)
+        config = ModelConfig(settings=self.model_settings)
+
         mask = config.get_masks()
         kwargs_model = config.get_kwargs_model()
 

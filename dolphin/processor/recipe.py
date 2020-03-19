@@ -283,7 +283,7 @@ class Recipe(object):
             for band_item, mask in zip(kwargs_data_joint['multi_band_list'],
                                        masks):
                 image = band_item[0]['image_data']
-                arc_masks.append(self.get_arc_mask(image) * mask)
+                arc_masks.append(self.get_arc_mask(image, mask=mask))
 
             pl_model_index = self._get_power_law_model_index()
             external_shear_model_index = self._get_external_shear_model_index()
@@ -403,7 +403,7 @@ class Recipe(object):
 
         return fitting_kwargs_list
 
-    def get_arc_mask(self, image, clear_center=0.4):
+    def get_arc_mask(self, image, clear_center=0.4, mask=None):
         """
         Create a mask for lensed galaxy arcs from the image of the lens. The
         lens galaxy is required to be close to the center (within a few
@@ -413,6 +413,10 @@ class Recipe(object):
         :type image: `ndarray`
         :param clear_center: radius of the central region to **not** mask
         :type clear_center: `float`
+        :param mask: a mask to multiply with the arc mask. If the central
+            region is masked out in `mask`, then a circle with radius
+            `clear_center` will be unmasked.
+        :type mask: `ndarray`
         :return: mask for the lensed galaxy arcs
         :rtype: `ndarray`
         """
@@ -475,6 +479,16 @@ class Recipe(object):
         # check for bad values
         arc_mask[arc_mask > 0] = 1
         arc_mask[arc_mask <= 0] = 0
+
+        if mask is not None:
+            arc_mask *= mask
+
+            w = len(arc_mask) - 1
+            x, y = np.meshgrid(np.linspace(-w / 2, w / 2, int(w + 1)),
+                               np.linspace(-w / 2, w / 2, int(w + 1)))
+            r = np.sqrt(x * x + y * y)
+
+            arc_mask[r < int(clear_center / self._config.pixel_size)] = 1
 
         return arc_mask
 

@@ -202,7 +202,7 @@ class TestRecipe(object):
         """
         image = np.random.normal(size=(100, 100))
 
-        mask = self.recipe.get_arc_mask(image)
+        mask = self.recipe.get_arc_mask(image, mask=np.ones_like(image))
         assert mask.shape == (100, 100)
 
     def test_fix_params(self):

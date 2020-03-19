@@ -1,5 +1,4 @@
 astropy>=2.0
 mpmath
-dynesty
 emcee>=3.0.0
 pytest

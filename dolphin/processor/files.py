@@ -84,7 +84,7 @@ class FileSystem(object):
         logs_dir = self.path2str(self._root_path / 'logs')
 
         # commenting out, as this directory needs to be created by user
-        #if not os.path.isdir(logs_dir):
+        # if not os.path.isdir(logs_dir):
         #    os.mkdir(logs_dir)
 
         return logs_dir
@@ -116,7 +116,7 @@ class FileSystem(object):
         outputs_dir = self.path2str(self._root_path / 'outputs')
 
         # commenting out, as this directory needs to be created by user
-        #if not os.path.isdir(outputs_dir):
+        # if not os.path.isdir(outputs_dir):
         #    os.mkdir(outputs_dir)
 
         return outputs_dir
@@ -150,7 +150,7 @@ class FileSystem(object):
         """
         return self.path2str(Path(self.get_data_directory())
                              / '{}'.format(lens_name)
-                             / 'image_{}_{}.hdf5'.format(lens_name, band)
+                             / 'image_{}_{}.h5'.format(lens_name, band)
                              )
 
     def get_psf_file_path(self, lens_name, band):
@@ -166,7 +166,7 @@ class FileSystem(object):
         """
         return self.path2str(Path(self.get_data_directory())
                              / '{}'.format(lens_name)
-                             / 'psf_{}_{}.hdf5'.format(lens_name, band)
+                             / 'psf_{}_{}.h5'.format(lens_name, band)
                              )
 
     def get_log_file_path(self, lens_name, model_id):
@@ -265,10 +265,8 @@ class FileSystem(object):
                 ensure_ascii=False)
 
             group = f.create_group('fit_output')
-
             for i, single_output in enumerate(output['fit_output']):
                 subgroup = group.create_group('{}'.format(i))
-
                 subgroup.attrs['fitting_type'] = np.string_(single_output[0])
 
                 if single_output[0] == 'PSO':

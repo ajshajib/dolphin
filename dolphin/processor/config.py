@@ -340,7 +340,7 @@ class ModelConfig(Config):
                             'psf_symmetry', 'block_center_neighbour',
                             'num_iter', 'psf_iter_factor']:
                     if key in self.settings['fitting'][
-                        'psf_iteration_settings']:
+                                                    'psf_iteration_settings']:
                         kwargs_psf_iteration[key] = self.settings['fitting'][
                             'psf_iteration_settings'][key]
 
@@ -356,11 +356,11 @@ class ModelConfig(Config):
         :rtype:
         """
         try:
-            self.settings['numeric_option']['supersampling_factor']
+            self.settings['kwargs_numerics']['supersampling_factor']
         except (KeyError, NameError, TypeError):
             supersampling_factor = [3] * self.band_number
         else:
-            supersampling_factor = deepcopy(self.settings['numeric_option'][
+            supersampling_factor = deepcopy(self.settings['kwargs_numerics'][
                                                 'supersampling_factor'])
 
             if supersampling_factor is None:

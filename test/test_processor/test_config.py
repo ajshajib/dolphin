@@ -262,7 +262,7 @@ class TestModelConfig(object):
         assert test_numerics == self.config2.get_kwargs_numerics()
 
         config = deepcopy(self.config)
-        config.settings['numeric_option']['supersampling_factor'] = None
+        config.settings['kwargs_numerics']['supersampling_factor'] = None
         kwargs_numerics = config.get_kwargs_numerics()
         for kwargs_numerics_band in kwargs_numerics:
             assert kwargs_numerics_band['supersampling_factor'] == 3

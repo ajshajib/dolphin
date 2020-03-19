@@ -62,7 +62,7 @@ fitting:
     iteration_step: 2
     walker_ratio: 2
 
-numeric_option:
+kwargs_numerics:
   #supersampling_factor: [3]
 
 mask:

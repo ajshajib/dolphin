@@ -29,7 +29,7 @@ class TestData(object):
 
         data_file = _ROOT_DIR / 'io_directory_example' \
                     / 'data' / 'lens_system1' \
-                    / 'image_lens_system1_F390W.hdf5'
+                    / 'image_lens_system1_F390W.h5'
         data.load_from_file(data_file)
 
 
@@ -38,7 +38,7 @@ class TestImageData(object):
     def setup_class(self):
         data_file = _ROOT_DIR / 'io_directory_example' \
                     / 'data' / 'lens_system1' \
-                    / 'image_lens_system1_F390W.hdf5'
+                    / 'image_lens_system1_F390W.h5'
         self.image_data = ImageData(data_file)
 
     @classmethod
@@ -86,7 +86,7 @@ class TestPSFData(object):
         """
         psf_file =  _ROOT_DIR / 'io_directory_example' \
                     / 'data' / 'lens_system1' \
-                    / 'psf_lens_system1_F390W.hdf5'
+                    / 'psf_lens_system1_F390W.h5'
 
         psf = PSFData(psf_file)
 

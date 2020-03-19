@@ -111,7 +111,7 @@ class TestFileSystem(object):
         :rtype:
         """
         path = _TEST_IO_DIR / 'data' / 'lens_system1' / \
-            'image_lens_system1_F390W.hdf5'
+            'image_lens_system1_F390W.h5'
 
         assert Path(self.file_system.get_image_file_path('lens_system1',
                                                          'F390W')) == path
@@ -123,7 +123,7 @@ class TestFileSystem(object):
         :rtype:
         """
         path = _TEST_IO_DIR / 'data' / 'lens_system1' / \
-            'psf_lens_system1_F390W.hdf5'
+            'psf_lens_system1_F390W.h5'
 
         assert Path(self.file_system.get_psf_file_path('lens_system1',
                                                        'F390W')) == path

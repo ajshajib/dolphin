@@ -199,10 +199,10 @@ class ModelConfig(Config):
 
         joint_source_with_point_source = []
         if len(self.get_point_source_model_list()) > 0 and \
-                num_source_profiles > 1:
+                num_source_profiles > 0:
             for n in range(num_source_profiles):
                 joint_source_with_point_source.append([
-                    0, n, ['center_x', 'center_y']
+                    0, n
                 ])
 
         kwargs_constraints = {
@@ -214,7 +214,7 @@ class ModelConfig(Config):
         }
 
         if 'kwargs_constraints' in self.settings and self.settings[
-            'kwargs_constraints'] is not None:
+                                            'kwargs_constraints'] is not None:
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
 
@@ -291,7 +291,7 @@ class ModelConfig(Config):
                             if self.settings['mask']['extra_regions'] is \
                                     not None:
                                 for reg in self.settings['mask'][
-                                    'extra_regions']:
+                                                            'extra_regions']:
                                     extra_masked_regions.append(
                                         mask_util.mask_center_2d(
                                             self.deflector_center_ra + reg[0],
@@ -462,9 +462,9 @@ class ModelConfig(Config):
                 lower.append({
                     'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.,
                     'center_x': self.deflector_center_ra
-                                - self.deflector_centroid_bound,
+                                    - self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
-                                - self.deflector_centroid_bound
+                                    - self.deflector_centroid_bound
                 })
 
                 upper.append({
@@ -536,9 +536,9 @@ class ModelConfig(Config):
                         'e1': 0.5, 'e2': 0.5,
                         'n_sersic': 8., 'R_sersic': 5.,
                         'center_x': self.deflector_center_ra
-                                    + self.deflector_centroid_bound,
+                                        + self.deflector_centroid_bound,
                         'center_y': self.deflector_center_dec
-                                    + self.deflector_centroid_bound
+                                        + self.deflector_centroid_bound
                     })
                 else:
                     raise ValueError('{} not implemented as a lens light'

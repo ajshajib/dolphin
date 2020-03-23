@@ -150,8 +150,8 @@ class TestModelConfig(object):
                                                                     'center_y']]
                                                                   ]
         assert kwargs_constraints['joint_source_with_point_source'] == [
-            [0, 0, ['center_x', 'center_y']],
-            [0, 1, ['center_x', 'center_y']]
+            [0, 0],
+            [0, 1]
         ]
 
     def test_get_kwargs_likelihood(self):

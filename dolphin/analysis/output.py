@@ -147,6 +147,55 @@ class Output(Processor):
 
         return output
 
+    def get_model_plot(self, lens_name, model_id=None,
+                            kwargs_result=None, band_index=0,
+                            data_cmap='cubehelix'):
+        """
+        Get the `ModelPlot` instance from lenstronomy for the lens.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
+            provided, it will be used to plot the model, otherwise the model
+            will be plotted from the saved/loaded outputs for `lens_name` and
+            `model_id`.
+        :type kwargs_result: `dict`
+        :param band_index: index of band to plot for multi-band case
+        :type band_index: `int`
+        :param data_cmap: colormap for image, reconstruction, and source plots
+        :type data_cmap: `str` or `matplotlib.colors.Colormap`
+        :return: `ModelPlot` instance, maximum pixel value of the image
+        :rtype: `obj`, `float`
+        """
+        if model_id is None and kwargs_result is None:
+            raise ValueError('Either the `model_id` or the `kwargs_result` '
+                             'needs to be provided!')
+
+        if kwargs_result is None:
+            self.load_output(lens_name, model_id)
+            kwargs_result = self.kwargs_result
+
+        multi_band_list_out = self.get_kwargs_data_joint(
+                                                lens_name)['multi_band_list']
+
+        config = ModelConfig(settings=self.model_settings)
+
+        mask = config.get_masks()
+        kwargs_model = config.get_kwargs_model()
+
+        v_max = np.log10(
+            multi_band_list_out[0][band_index]['image_data'].max())
+
+        model_plot = ModelPlot(multi_band_list_out, kwargs_model,
+                               kwargs_result,
+                              arrow_size=0.02, cmap_string=data_cmap,
+                              likelihood_mask_list=mask,
+                              multi_band_type='multi-linear')
+
+        return model_plot, v_max
+
     def plot_model_overview(self, lens_name, model_id=None,
                             kwargs_result=None, band_index=0,
                             data_cmap='cubehelix', residual_cmap='RdBu',
@@ -180,43 +229,24 @@ class Output(Processor):
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
-        if model_id is None and kwargs_result is None:
-            raise ValueError('Either the `model_id` or the `kwargs_result` '
-                             'needs to be provided!')
-
-        if kwargs_result is None:
-            self.load_output(lens_name, model_id)
-            kwargs_result = self.kwargs_result
-
-        multi_band_list_out = self.get_kwargs_data_joint(
-                                                lens_name)['multi_band_list']
-
-        config = ModelConfig(settings=self.model_settings)
-
-        mask = config.get_masks()
-        kwargs_model = config.get_kwargs_model()
-
-        v_max = np.log10(
-            multi_band_list_out[0][band_index]['image_data'].max())
-
-        lens_plot = ModelPlot(multi_band_list_out, kwargs_model, kwargs_result,
-                              arrow_size=0.02, cmap_string=data_cmap,
-                              likelihood_mask_list=mask,
-                              multi_band_type='multi-linear')
+        model_plot, v_max = self.get_model_plot(lens_name, model_id=model_id,
+                                                kwargs_result=kwargs_result,
+                                                band_index=band_index,
+                                                data_cmap=data_cmap)
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
-        lens_plot.data_plot(ax=axes[0, 0], band_index=band_index, v_max=v_max)
-        lens_plot.model_plot(ax=axes[0, 1], band_index=band_index, v_max=v_max)
-        lens_plot.normalized_residual_plot(ax=axes[0, 2],
+        model_plot.data_plot(ax=axes[0, 0], band_index=band_index, v_max=v_max)
+        model_plot.model_plot(ax=axes[0, 1], band_index=band_index, v_max=v_max)
+        model_plot.normalized_residual_plot(ax=axes[0, 2],
                                            band_index=band_index,
                                            cmap=residual_cmap, v_max=3,
                                            v_min=-3)
-        lens_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
+        model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
                               band_index=band_index, v_max=v_max)
-        lens_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
+        model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
                                    cmap=convergence_cmap)
-        lens_plot.magnification_plot(ax=axes[1, 2],
+        model_plot.magnification_plot(ax=axes[1, 2],
                                      band_index=band_index,
                                      cmap=magnification_cmap)
         fig.tight_layout()

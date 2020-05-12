@@ -108,3 +108,15 @@ class TestOutput(object):
         fig = self.output.plot_model_overview('lens_system2', 'example')
 
         plt.close(fig)
+
+    def test_plot_mcmc_trace(self):
+        """
+        Test `plot_mcmc_trace` method.
+
+        :return:
+        :rtype:
+        """
+        fig = self.output.plot_mcmc_trace('lens_system2', 'example', 2,
+                                          verbose=True, burn_in=0)
+
+        plt.close(fig)

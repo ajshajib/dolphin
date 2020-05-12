@@ -689,7 +689,7 @@ class ModelConfig(Config):
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
                     for key, value in param_dict.items():
-                        fixed_list[index][key] = value
+                        fixed_list[int(index)][key] = value
 
         return fixed_list
 

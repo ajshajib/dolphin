@@ -30,5 +30,12 @@ fitting:
     num_particle: 20
     num_iteration: 50
 
+  sampling: true
+  sampler: 'MCMC'
+  mcmc_settings:
+    burnin_step: 0
+    iteration_step: 100
+    walker_ratio: 2
+
 numeric_option:
   supersampling_factor: [2]

@@ -112,6 +112,8 @@ class Recipe(object):
                                  'galaxy-galaxy optimization recipe!')
             fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
                 kwargs_data_joint)
+        elif recipe_name == 'skip':
+            pass
         else:
             raise ValueError("Recipe name '{}' not recognized!!".format(
                 recipe_name))

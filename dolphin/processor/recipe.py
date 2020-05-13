@@ -253,10 +253,25 @@ class Recipe(object):
                              'mcmc_settings'][
                              'iteration_step'],
                          'walkerRatio': self._config.settings['fitting'][
-                             'mcmc_settings']['walker_ratio']
+                             'mcmc_settings']['walker_ratio'],
                      }
                      ]
                 )
+
+                try:
+                    self._config.settings['fitting']['mcmc_settings'][
+                                                            'init_samples']
+                except (NameError, KeyError):
+                    pass
+                else:
+                    if self._config.settings['fitting']['mcmc_settings'][
+                                                'init_samples'] is not None:
+                        fitting_kwargs_list[-1][1]['init_samples'] = \
+                                    np.array(self._config.settings['fitting'][
+                                                        'mcmc_settings'][
+                                                            'init_samples'])
+
+                        fitting_kwargs_list[-1][1]['re_use_samples'] = True
             else:
                 raise ValueError("{} sampler not implemented yet!".format(
                     self._config.settings['fitting']['sampler']))

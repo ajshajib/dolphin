@@ -64,7 +64,9 @@ class Processor(object):
         config = self.get_lens_config(lens_name)
         recipe = Recipe(config, sampler=sampler)
 
-        kwargs_data_joint = self.get_kwargs_data_joint(lens_name)
+        psf_supersampling_factor = config.get_psf_supersampled_factor()
+        kwargs_data_joint = self.get_kwargs_data_joint(lens_name,
+                                                       psf_supersampled_factor=psf_supersampling_factor)
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,
@@ -104,7 +106,7 @@ class Processor(object):
         """
         return ModelConfig(self.file_system.get_config_file_path(lens_name))
 
-    def get_kwargs_data_joint(self, lens_name):
+    def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
         """
         Create `kwargs_data` for a lens and given filters.
 
@@ -124,6 +126,9 @@ class Processor(object):
         for b, kwargs_num in zip(bands, kwargs_numerics):
             image_data = self.get_image_data(lens_name, b)
             psf_data = self.get_psf_data(lens_name, b)
+
+            psf_data.kwargs_psf['point_source_supersampling_factor'] = \
+                psf_supersampled_factor
 
             multi_band_list.append([
                 image_data.kwargs_data,

@@ -98,4 +98,5 @@ class PSFData(Data):
         kwargs_psf['psf_type'] = 'PIXEL'
         kwargs_psf['kernel_point_source_init'] = deepcopy(
                                         kwargs_psf['kernel_point_source'])
+        kwargs_psf['point_source_supersampling_factor'] = 2.
         return kwargs_psf

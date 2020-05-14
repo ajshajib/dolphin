@@ -112,6 +112,8 @@ class Processor(object):
 
         :param lens_name: lens name
         :type lens_name: `str`
+        :param psf_supersampled_factor: Supersampled factor of given PSF.
+        :rtype psf_supersampled_factor: `float`
         :return:
         :rtype:
         """

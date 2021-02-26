@@ -5,3 +5,4 @@ pyyaml
 h5py
 -e git://github.com/sibirrer/lenstronomy.git#egg=lenstronomy
 -e git://github.com/adrn/schwimmbad.git@061eb739a21695762ee4b90cc4f6e1b26986fffb#egg=schwimmbad
+corner

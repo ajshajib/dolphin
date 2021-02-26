@@ -444,7 +444,7 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_model_list):
-            if model in ['SPEP', 'SPEMD']:
+            if model in ['SPEP', 'PEMD']:
                 fixed.append({})
                 init.append({
                     'center_x': self.deflector_center_ra,

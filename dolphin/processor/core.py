@@ -33,7 +33,7 @@ class Processor(object):
         self.lens_list = self.file_system.get_lens_list()
 
     def swim(self, lens_name, model_id, log=True, mpi=False,
-             recipe_name='default', sampler='EMCEE'):
+             recipe_name='default', sampler='EMCEE', thread_count=1):
         """
         Run models for a single lens.
 
@@ -51,6 +51,8 @@ class Processor(object):
         :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for
             legacy
         :type sampler: `str`
+        :param thread_count: number of threads if `multiprocess` is used
+        :type thread_count: `int`
         :return:
         :rtype:
         """
@@ -62,7 +64,7 @@ class Processor(object):
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
-        recipe = Recipe(config, sampler=sampler)
+        recipe = Recipe(config, sampler=sampler, thread_count=thread_count)
 
         psf_supersampling_factor = config.get_psf_supersampled_factor()
         kwargs_data_joint = self.get_kwargs_data_joint(lens_name,

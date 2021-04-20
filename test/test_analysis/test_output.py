@@ -156,7 +156,7 @@ class TestOutput(object):
 
         self.output.get_kwargs_from_args(
             'lens_system2', 'example',
-            np.ones(n),
+            np.ones(param_class.num_param()[0])
         )
 
 

@@ -278,14 +278,9 @@ class Output(Processor):
         """
         self.load_output(lens_name, model_id)
 
-        if self.samples_mcmc is []:
-            warnings.warn("{} doesn't have MCMC chain for model id: "
-                          "{}.".format(lens_name, model_id))
-            return None
-
         num_params = self.num_params_mcmc  # self.samples_mcmc.shape[1]
         num_walkers = walker_ratio * num_params
-        num_step = int(self.samples_mcmc.shape[0] / num_walkers)
+        num_step = int(len(self.samples_mcmc) / num_walkers)
 
         chain = np.empty((num_walkers, num_step, num_params))
 

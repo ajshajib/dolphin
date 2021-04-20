@@ -120,3 +120,43 @@ class TestOutput(object):
                                           verbose=True, burn_in=0)
 
         plt.close(fig)
+
+    def test_get_reshaped_emcee_chain(self):
+        """
+        Test `get_reshaped_emcee_chain` method.
+        :return:
+        :rtype:
+        """
+        self.output.get_reshaped_emcee_chain('lens_system2',
+                                             'example', 2)
+
+    def test_get_param_class(self):
+        """
+        Test `get_param_class` method.
+        :return:
+        :rtype:
+        """
+        param_class = self.output.get_param_class(
+            'lens_system2', 'example'
+        )
+
+        param_class.num_param()
+
+    def test_get_kwargs_from_args(self):
+        """
+        Test `get_kwargs_from_args` method.
+        :return:
+        :rtype:
+        """
+        param_class = self.output.get_param_class(
+            'lens_system2', 'example'
+        )
+
+        n, _ = param_class.num_param()
+
+        self.output.get_kwargs_from_args(
+            'lens_system2', 'example',
+            np.ones(n),
+        )
+
+

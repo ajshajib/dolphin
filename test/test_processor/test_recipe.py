@@ -79,6 +79,10 @@ class TestRecipe(object):
         with pytest.raises(ValueError):
             recipe.get_recipe(recipe_name='tuna-salad')
 
+        # check that the first sequence is 'MCMC' when
+        # recipe 'skip' is used
+        assert recipe.get_recipe(recipe_name='skip')[0][0] == 'MCMC'
+
     def test_get_power_law_model_index(self):
         """
         Test `get_power_law_model_index` method.

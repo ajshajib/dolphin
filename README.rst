@@ -13,6 +13,10 @@ dolphin
     :target: https://coveralls.io/github/ajshajib/dolphin?branch=master
 
 
+.. image:: ./logo.jpg
+    :width: 400
+    :alt: dolphin
+
 Automated pipeline for lens modeling based on lenstronomy_.
 
 .. _lenstronomy: https://github.com/sibirrer/lenstronomy
@@ -24,3 +28,10 @@ Features
 
 * (Semi-)automated modeling of a large sample of quasar and galaxy-galaxy lenses.
 * Easy portability between local and MPI environments.
+
+
+============
+Citation
+============
+If you use `dolphin` in your research, please cite `Shajib et al. (2021)
+<https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract>`_.

@@ -1,4 +1,8 @@
 =============================
+.. image:: ./logo.jpg
+    :width: 40
+    :alt: dolphin
+
 dolphin
 =============================
 
@@ -12,10 +16,6 @@ dolphin
 .. image:: https://coveralls.io/repos/github/ajshajib/dolphin/badge.svg?branch=master&service=github
     :target: https://coveralls.io/github/ajshajib/dolphin?branch=master
 
-
-.. image:: ./logo.jpg
-    :width: 400
-    :alt: dolphin
 
 Automated pipeline for lens modeling based on lenstronomy_.
 

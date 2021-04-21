@@ -5,8 +5,7 @@
 
 .. |logo| raw:: html
 
-  <img src="https://raw.githubusercontent.com/ajshajib/dolphin/dev/logo.png"
-width="50"></img>
+  <img src="./logo.png" width="50"></img>
 
 
 

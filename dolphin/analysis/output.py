@@ -6,7 +6,10 @@ __author__ = 'ajshajib'
 
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
 from lenstronomy.Plots.model_plot import ModelPlot
+from lenstronomy.Sampling.parameters import Param
+from lenstronomy.Util.class_creator import create_im_sim
 
 from dolphin.processor import Processor
 from dolphin.processor.config import ModelConfig
@@ -132,8 +135,8 @@ class Output(Processor):
         :type lens_name: `str`
         :param model_id: model identifier provided at run initiation
         :type model_id: `str`
-        :return: None
-        :rtype:
+        :return: output dictionary
+        :rtype: `dict`
         """
         output = self.file_system.load_output(lens_name, model_id)
 
@@ -148,8 +151,8 @@ class Output(Processor):
         return output
 
     def get_model_plot(self, lens_name, model_id=None,
-                            kwargs_result=None, band_index=0,
-                            data_cmap='cubehelix'):
+                       kwargs_result=None, band_index=0,
+                       data_cmap='cubehelix'):
         """
         Get the `ModelPlot` instance from lenstronomy for the lens.
 
@@ -254,5 +257,177 @@ class Output(Processor):
                             wspace=0., hspace=0.05)
 
         return fig
+
+    def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio,
+                           burn_in=-100, verbose=True
+                           ):
+        """
+
+        :param lens_name:
+        :type lens_name:
+        :param model_id:
+        :type model_id:
+        :param walker_ratio:
+        :type walker_ratio:
+        :param burn_in:
+        :type burn_in:
+        :param verbose:
+        :type verbose:
+        :return:
+        :rtype:
+        """
+        self.load_output(lens_name, model_id)
+
+        num_params = self.num_params_mcmc  # self.samples_mcmc.shape[1]
+        num_walkers = walker_ratio * num_params
+        num_step = int(len(self.samples_mcmc) / num_walkers)
+
+        chain = np.empty((num_walkers, num_step, num_params))
+
+        for i in np.arange(num_params):
+            samples = self.samples_mcmc[:, i].T
+            chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
+
+        return chain
+
+    def plot_mcmc_trace(self, lens_name, model_id, walker_ratio,
+                        burn_in=-100, verbose=True, fig_width=16):
+        """
+        Plot the trace of MCMC walkers.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param walker_ratio: number of walkers per parameter in MCMC
+        :type walker_ratio: `int`
+        :param burn_in: number of burn-in steps to compute the medians after
+            convergence of the MCMC chain
+        :type: `int`
+        :param verbose: if `True`, median values after burn-in will be printed
+        :type verbose: `bool`
+        :param fig_width: width of the figure
+        :type fig_width: `float`
+        :return: `matplotlib.pyplot.figure` instance with the plots
+        :rtype: `matplotlib.pyplot.figure`
+        """
+        chain = self.get_reshaped_emcee_chain(lens_name, model_id,
+                                              walker_ratio,
+                                              burn_in=burn_in, verbose=verbose)
+
+        num_params = self.num_params_mcmc
+        num_step = chain.shape[1]
+
+        mean_pos = np.zeros((num_params, num_step))
+        median_pos = np.zeros((num_params, num_step))
+        std_pos = np.zeros((num_params, num_step))
+        q16_pos = np.zeros((num_params, num_step))
+        q84_pos = np.zeros((num_params, num_step))
+
+        # chain = np.empty((nwalker, nstep, ndim), dtype = np.double)
+        for i in np.arange(num_params):
+            for j in np.arange(num_step):
+                mean_pos[i][j] = np.mean(chain[:, j, i])
+                median_pos[i][j] = np.median(chain[:, j, i])
+                std_pos[i][j] = np.std(chain[:, j, i])
+                q16_pos[i][j] = np.percentile(chain[:, j, i], 16.)
+                q84_pos[i][j] = np.percentile(chain[:, j, i], 84.)
+
+        fig, ax = plt.subplots(num_params, sharex='all',
+                               figsize=(fig_width, int(fig_width/8) *
+                                        num_params))
+        last = num_step
+        medians = []
+
+        for i in range(num_params):
+            if verbose:
+                print(self.params_mcmc[i],
+                      '{:.4f} ± {:.4f}'.format(median_pos[i][last - 1],
+                                               (q84_pos[i][last - 1] -
+                                                q16_pos[i][last - 1]) / 2))
+            # ax[i].plot(mean_pos[i][:3000], c='b')
+            ax[i].plot(median_pos[i][:last], c='g')
+            # ax[i].axhline(np.mean(mean_pos[i][burnin:2900]), c='b')
+            ax[i].axhline(np.median(median_pos[i][burn_in:last]), c='r', lw=1)
+            ax[i].fill_between(np.arange(last), q84_pos[i][:last],
+                               q16_pos[i][:last], alpha=0.4)
+            # ax[i].fill_between(np.arange(last), mean_pos[i][:last]+std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last], alpha=0.4)
+            ax[i].set_ylabel(self.params_mcmc[i], fontsize=10)
+            ax[i].set_xlim(0, last)
+
+            medians.append(np.median(median_pos[i][burn_in:last]))
+
+        return fig
+
+    def get_param_class(self, lens_name, model_id):
+        """
+        Get `Param` instance for the lens model.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :return: `Param` instance
+        :rtype: `obj`
+        """
+        self.load_output(lens_name, model_id=model_id)
+
+        config = ModelConfig(settings=self._model_settings)
+        kwargs_params = config.get_kwargs_params()
+        kwargs_model = config.get_kwargs_model()
+        kwargs_constraints = config.get_kwargs_constraints()
+
+        param = Param(kwargs_model,
+                      kwargs_params['lens_model'][2],
+                      kwargs_params['source_model'][2],
+                      kwargs_params['lens_light_model'][2],
+                      kwargs_params['point_source_model'][2],
+                      #kwargs_params['special'][2],
+                      #kwargs_params['extinction_model'][2],
+                      # kwargs_lens_init=kwargs_result['kwargs_lens'],
+                      kwargs_lens_init=kwargs_params['lens_model'][0],
+                      **kwargs_constraints
+                      )
+        return param
+
+    def get_kwargs_from_args(self, lens_name, model_id, args, band_index=0,
+                             linear_solve=False, param=None):
+        """
+
+        :param lens_name:
+        :type lens_name:
+        :param model_id:
+        :type model_id:
+        :return:
+        :rtype:
+        """
+        if param is None:
+            param = self.get_param_class(lens_name, model_id)
+
+        kwargs = param.args2kwargs(args)
+
+        if linear_solve:
+            config = ModelConfig(settings=self._model_settings)
+
+            kwargs_numerics = config.get_kwargs_numerics()
+            kwargs_model = config.get_kwargs_model()
+
+            multi_band_list_out = self.get_kwargs_data_joint(
+                lens_name)['multi_band_list']
+
+            kwargs_data = multi_band_list_out[band_index][0]
+            kwargs_psf = multi_band_list_out[band_index][1]
+
+            im_sim = create_im_sim(multi_band_list_out,
+                                        'multi-linear',
+                                        kwargs_model,
+                                        bands_compute=None,
+                                        likelihood_mask_list=config.get_masks(),
+                                        band_index=band_index)
+
+            im_sim.image_linear_solve(**kwargs, inv_bool=True)
+
+        return kwargs
+
 
 

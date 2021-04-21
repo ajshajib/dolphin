@@ -444,7 +444,7 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_model_list):
-            if model in ['SPEP', 'SPEMD']:
+            if model in ['SPEP', 'PEMD']:
                 fixed.append({})
                 init.append({
                     'center_x': self.deflector_center_ra,
@@ -689,7 +689,7 @@ class ModelConfig(Config):
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
                     for key, value in param_dict.items():
-                        fixed_list[index][key] = value
+                        fixed_list[int(index)][key] = value
 
         return fixed_list
 
@@ -709,3 +709,16 @@ class ModelConfig(Config):
         }
 
         return kwargs_params
+
+    def get_psf_supersampled_factor(self):
+        """
+        Retrieve PSF supersampling factor if specified in the config file.
+        :return: PSF supersampling factor
+        :rtype: `float`
+        """
+        try:
+            self.settings['psf_supersampled_factor']
+        except (NameError, KeyError):
+            return 1
+        else:
+            return self.settings['psf_supersampled_factor']

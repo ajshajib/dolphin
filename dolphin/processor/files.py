@@ -364,7 +364,8 @@ class FileSystem(object):
             fit_output = []
             group = f['fit_output']
 
-            for index in f['fit_output']:
+            n = len(f['fit_output'].keys())
+            for index in ['{}'.format(i) for i in range(n)]:
                 fitting_step = [str(group[index].attrs['fitting_type'],
                                     encoding='utf-8'
                                     )

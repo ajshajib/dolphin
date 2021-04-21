@@ -6,6 +6,7 @@ Tests for Recipe module.
 import pytest
 from pathlib import Path
 import numpy as np
+import numpy.testing as npt
 from copy import deepcopy
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 
@@ -79,6 +80,10 @@ class TestRecipe(object):
         with pytest.raises(ValueError):
             recipe.get_recipe(recipe_name='tuna-salad')
 
+        # check that the first sequence is 'MCMC' when
+        # recipe 'skip' is used
+        assert recipe.get_recipe(recipe_name='skip')[0][0] == 'MCMC'
+
     def test_get_power_law_model_index(self):
         """
         Test `get_power_law_model_index` method.
@@ -150,6 +155,21 @@ class TestRecipe(object):
         recipe = Recipe(config)
         with pytest.raises(ValueError):
             recipe.get_sampling_sequence()
+
+        # test initiating from given `init_samples`
+        config = deepcopy(self.config)
+        config.settings['fitting']['mcmc_settings']['init_samples'] = \
+            np.ones(20)
+
+        recipe = Recipe(config)
+        sequence = recipe.get_sampling_sequence()
+        npt.assert_array_equal(sequence[0][1]['init_samples'], np.ones(20))
+        npt.assert_raises(
+            AssertionError,
+            npt.assert_array_equal,
+            sequence[0][1]['init_samples'],
+            np.zeros(20)
+        )
 
     def test_get_galaxy_galaxy_recipe(self):
         """

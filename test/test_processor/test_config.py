@@ -363,3 +363,14 @@ class TestModelConfig(object):
         fixed = self.config.fill_in_fixed_from_settings('lens_light',
                                                         fixed)
         assert fixed == [{'n_sersic': 4.}]
+
+    def test_get_psf_supersampling_factor(self):
+        """
+        Test `get_psf_supersampling_factor` method.
+        :return:
+        :rtype:
+        """
+        assert self.config.get_psf_supersampled_factor() == 1
+
+        self.config.settings['psf_supersampled_factor'] = 3
+        assert self.config.get_psf_supersampled_factor() == 3

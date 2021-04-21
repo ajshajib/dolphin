@@ -19,7 +19,7 @@ class Recipe(object):
     point.
     """
 
-    def __init__(self, config, sampler='EMCEE'):
+    def __init__(self, config, sampler='EMCEE', thread_count=1):
         """
         Initiate the class from the given settings for a lens system.
 
@@ -28,6 +28,8 @@ class Recipe(object):
         :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for
             legacy
         :type sampler: `str`
+        :param thread_count: number of threads if `multiprocess` is used
+        :type thread_count: `int`
         """
         self._config = config
         try:
@@ -67,6 +69,7 @@ class Recipe(object):
                 self.do_sampling = False
 
         self._sampler = sampler
+        self._thread_count = thread_count
 
         self.guess_params = {}
         for component in ['lens', 'source', 'lens_light', 'ps']:
@@ -112,6 +115,8 @@ class Recipe(object):
                                  'galaxy-galaxy optimization recipe!')
             fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
                 kwargs_data_joint)
+        elif recipe_name == 'skip':
+            pass
         else:
             raise ValueError("Recipe name '{}' not recognized!!".format(
                 recipe_name))
@@ -219,7 +224,8 @@ class Recipe(object):
                         {
                             'sigma_scale': multiplier,
                             'n_particles': self._pso_num_particle,
-                            'n_iterations': self._pso_num_iteration
+                            'n_iterations': self._pso_num_iteration,
+                            'threadCount': self._thread_count
                         }
                     ])
 
@@ -253,10 +259,26 @@ class Recipe(object):
                              'mcmc_settings'][
                              'iteration_step'],
                          'walkerRatio': self._config.settings['fitting'][
-                             'mcmc_settings']['walker_ratio']
+                             'mcmc_settings']['walker_ratio'],
+                         'threadCount': self._thread_count
                      }
                      ]
                 )
+
+                try:
+                    self._config.settings['fitting']['mcmc_settings'][
+                                                            'init_samples']
+                except (NameError, KeyError):
+                    pass
+                else:
+                    if self._config.settings['fitting']['mcmc_settings'][
+                                                'init_samples'] is not None:
+                        fitting_kwargs_list[-1][1]['init_samples'] = \
+                                    np.array(self._config.settings['fitting'][
+                                                        'mcmc_settings'][
+                                                            'init_samples'])
+
+                        fitting_kwargs_list[-1][1]['re_use_samples'] = True
             else:
                 raise ValueError("{} sampler not implemented yet!".format(
                     self._config.settings['fitting']['sampler']))
@@ -307,7 +329,9 @@ class Recipe(object):
                                                    ]]}}],
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration}]
+                             'n_iterations': self._pso_num_iteration,
+                             'threadCount': self._thread_count
+                             }]
                 ]
 
                 # unfix the source except for beta, keep lens fixed, fix lens
@@ -347,7 +371,9 @@ class Recipe(object):
                     # self.fix_params('lens'),
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration}],
+                             'n_iterations': self._pso_num_iteration,
+                             'threadCount': self._thread_count
+                             }],
                 ]
 
                 # unfix the central deflector parameters, keep beta fixed
@@ -368,7 +394,9 @@ class Recipe(object):
                 fitting_kwargs_list += [
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration}],
+                             'n_iterations': self._pso_num_iteration,
+                             'threadCount': self._thread_count
+                             }],
                 ]
 
                 # unfix the shapelets beta parameter
@@ -383,11 +411,15 @@ class Recipe(object):
                 fitting_kwargs_list += [
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration}],
+                             'n_iterations': self._pso_num_iteration,
+                             'threadCount': self._thread_count
+                             }],
                     self.unfix_params('lens_light'),
                     ['PSO', {'sigma_scale': 1.0,
                              'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration}],
+                             'n_iterations': self._pso_num_iteration,
+                             'threadCount': self._thread_count
+                             }],
                 ]
 
                 # finally, relax shear parameters for MCMC later

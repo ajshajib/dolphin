@@ -48,7 +48,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        lens_list = ['lens_system1', 'lens_system2']
+        lens_list = ['lens_system1', 'lens_system2', 'lens_system3']
 
         assert self.file_system.get_lens_list() == lens_list
 

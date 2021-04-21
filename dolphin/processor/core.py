@@ -33,7 +33,7 @@ class Processor(object):
         self.lens_list = self.file_system.get_lens_list()
 
     def swim(self, lens_name, model_id, log=True, mpi=False,
-             recipe_name='default', sampler='EMCEE'):
+             recipe_name='default', sampler='EMCEE', thread_count=1):
         """
         Run models for a single lens.
 
@@ -51,6 +51,8 @@ class Processor(object):
         :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for
             legacy
         :type sampler: `str`
+        :param thread_count: number of threads if `multiprocess` is used
+        :type thread_count: `int`
         :return:
         :rtype:
         """
@@ -62,9 +64,11 @@ class Processor(object):
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
-        recipe = Recipe(config, sampler=sampler)
+        recipe = Recipe(config, sampler=sampler, thread_count=thread_count)
 
-        kwargs_data_joint = self.get_kwargs_data_joint(lens_name)
+        psf_supersampling_factor = config.get_psf_supersampled_factor()
+        kwargs_data_joint = self.get_kwargs_data_joint(lens_name,
+                                                       psf_supersampled_factor=psf_supersampling_factor)
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,
@@ -104,12 +108,14 @@ class Processor(object):
         """
         return ModelConfig(self.file_system.get_config_file_path(lens_name))
 
-    def get_kwargs_data_joint(self, lens_name):
+    def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
         """
         Create `kwargs_data` for a lens and given filters.
 
         :param lens_name: lens name
         :type lens_name: `str`
+        :param psf_supersampled_factor: Supersampled factor of given PSF.
+        :rtype psf_supersampled_factor: `float`
         :return:
         :rtype:
         """
@@ -124,6 +130,9 @@ class Processor(object):
         for b, kwargs_num in zip(bands, kwargs_numerics):
             image_data = self.get_image_data(lens_name, b)
             psf_data = self.get_psf_data(lens_name, b)
+
+            psf_data.kwargs_psf['point_source_supersampling_factor'] = \
+                psf_supersampled_factor
 
             multi_band_list.append([
                 image_data.kwargs_data,

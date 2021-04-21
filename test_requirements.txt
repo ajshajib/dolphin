@@ -2,3 +2,6 @@ astropy>=2.0
 mpmath
 emcee>=3.0.0
 pytest
+numba
+multiprocess
+scikit-image

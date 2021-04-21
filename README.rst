@@ -1,9 +1,14 @@
-================================
-|logo| `dolphin`
-================================
 
-.. |logo| image:: https://raw.githubusercontent.com/ajshajib/dolphin/dev/logo.jpg
-  :width: 50
+=================
+|logo| `dolphin`
+=================
+
+.. |logo| raw:: html
+
+  <img src="https://raw.githubusercontent.com/ajshajib/dolphin/dev/logo.png"
+width="50"></img>
+
+
 
 .. image:: https://travis-ci.com/ajshajib/dolphin.svg?branch=master
     :target: https://travis-ci.com/ajshajib/dolphin

@@ -150,21 +150,33 @@ class ModelConfig(Config):
             else:
                 return num
 
-    def get_kwargs_model(self):
+    def get_kwargs_model(self, verbose):
         """
         Create `kwargs_model`.
 
         :return:
         :rtype:
         """
+
         kwargs_model = {
             'lens_model_list': self.get_lens_model_list(),
             'source_light_model_list': self.get_source_light_model_list(),
             'lens_light_model_list': self.get_lens_light_model_list(),
             'point_source_model_list': self.get_point_source_model_list(),
-            # 'index_lens_light_model_list': [[0]],
-            # 'index_source_light_model_list': [[0]],
+            'index_lens_light_model_list': self.get_index_lens_light_model_list(),
+            'index_source_light_model_list':self.get_index_source_light_model_list(),
+
         }
+
+        if verbose:
+            print('lens model list:', kwargs_model['lens_model_list'])
+            print('')
+            print('lens light model list:', kwargs_model['lens_light_model_list'])
+            print('lens light indices:', kwargs_model['index_lens_light_model_list'])
+            print('')
+            print('source light model list:', kwargs_model['source_light_model_list'])
+            print('source light indices:', kwargs_model['index_source_light_model_list'])
+            print('')
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
                 is not None:
@@ -173,7 +185,7 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self):
+    def get_kwargs_constraints(self,verbose):
         """
         Create `kwargs_constraints`.
 
@@ -210,13 +222,22 @@ class ModelConfig(Config):
             'joint_lens_light_with_lens_light':
                 joint_lens_light_with_lens_light,
             'joint_source_with_point_source': joint_source_with_point_source,
-            'joint_lens_with_light': []
+            'joint_lens_with_light': [],
+            'joint_lens_with_lens': []
         }
 
         if 'kwargs_constraints' in self.settings and self.settings[
                                             'kwargs_constraints'] is not None:
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
+
+        if verbose:
+            print('joint lens with lens:', kwargs_constraints['joint_lens_with_lens'])
+            print('joint lens light with lens:', kwargs_constraints['joint_lens_with_light'])
+            print('joint lens light with lens light:', kwargs_constraints['joint_lens_light_with_lens_light'])
+            print('joint source with source:', kwargs_constraints['joint_source_with_source'])
+            print('joint source with point source:', kwargs_constraints['joint_source_with_point_source'])
+            print('')
 
         return kwargs_constraints
 
@@ -399,7 +420,11 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'source_light' in self.settings['model']:
-            return self.settings['model']['source_light']
+         #   return self.settings['model']['source_light']
+            combined_source_light_model_list = []
+            for i in range(self.band_number):
+                combined_source_light_model_list.extend(self.settings['model']['source_light'])
+            return combined_source_light_model_list
         else:
             return []
 
@@ -411,7 +436,13 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'lens_light' in self.settings['model']:
-            return self.settings['model']['lens_light']
+           # return self.settings['model']['lens_light']
+
+            Combined_lens_light_model_list=[]
+            for i in range(self.band_number):
+                Combined_lens_light_model_list.extend(self.settings['model']['lens_light'])
+            return Combined_lens_light_model_list
+
         else:
             return []
 
@@ -427,6 +458,58 @@ class ModelConfig(Config):
             return self.settings['model']['point_source']
         else:
             return []
+
+
+    def get_index_lens_light_model_list(self):
+        """
+        CY
+
+        Pocca=[]
+    num=0
+    for i in range (2):
+      One_Pocca=[]
+      for j in range(2):
+
+        One_Pocca.append(num)
+        num+=1
+    Pocca.append(One_Pocca)
+
+
+
+        """
+        if 'lens_light' in self.settings['model']:
+            index_lens_light_model_list=[]
+            index_num=0
+            for i in range(self.band_number):
+                Single_index_list=[]
+                for j in range(len(self.settings['model']['lens_light'])):
+                    Single_index_list.append(index_num)
+                    index_num+=1
+                index_lens_light_model_list.append(Single_index_list)
+
+            return index_lens_light_model_list
+        else:
+            return []
+
+    def get_index_source_light_model_list(self):
+        """
+        CY
+        """
+        if 'lens_light' in self.settings['model']:
+            index_source_light_model_list=[]
+            index_num=0
+            for i in range(self.band_number):
+                Single_index_list=[]
+                for j in range(len(self.settings['model']['source_light'])):
+                    Single_index_list.append(index_num)
+                    index_num+=1
+                index_source_light_model_list.append(Single_index_list)
+            return index_source_light_model_list
+
+        else:
+            return []
+
+
 
     def get_lens_model_params(self):
         """
@@ -722,3 +805,4 @@ class ModelConfig(Config):
             return 1
         else:
             return self.settings['psf_supersampled_factor']
+

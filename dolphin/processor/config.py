@@ -159,23 +159,26 @@ class ModelConfig(Config):
         """
 
         kwargs_model = {
-            'lens_model_list': self.get_lens_model_list(),
-            'source_light_model_list': self.get_source_light_model_list(),
-            'lens_light_model_list': self.get_lens_light_model_list(),
-            'point_source_model_list': self.get_point_source_model_list(),
-            'index_lens_light_model_list': self.get_index_lens_light_model_list(),
-            'index_source_light_model_list':self.get_index_source_light_model_list(),
-
+      'lens_model_list': self.get_lens_model_list(),
+      'source_light_model_list': self.get_source_light_model_list(),
+      'lens_light_model_list': self.get_lens_light_model_list(),
+      'point_source_model_list': self.get_point_source_model_list(),
+      'index_lens_light_model_list': self.get_index_lens_light_model_list(),
+      'index_source_light_model_list':self.get_index_source_light_model_list(),
         }
 
-        if verbose:
-            print('lens model list:', kwargs_model['lens_model_list'])
+        if  verbose:
+            print('lens_model_list:', kwargs_model['lens_model_list'])
             print('')
-            print('lens light model list:', kwargs_model['lens_light_model_list'])
-            print('lens light indices:', kwargs_model['index_lens_light_model_list'])
+            print('lens_light_model_list:',
+                  kwargs_model['lens_light_model_list'])
+            print('lens_light_indices:',
+                  kwargs_model['index_lens_light_model_list'])
             print('')
-            print('source light model list:', kwargs_model['source_light_model_list'])
-            print('source light indices:', kwargs_model['index_source_light_model_list'])
+            print('source_light_model_list:',
+                  kwargs_model['source_light_model_list'])
+            print('source_light_indices:',
+                  kwargs_model['index_source_light_model_list'])
             print('')
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
@@ -232,11 +235,16 @@ class ModelConfig(Config):
                 kwargs_constraints[key] = value
 
         if verbose:
-            print('joint lens with lens:', kwargs_constraints['joint_lens_with_lens'])
-            print('joint lens light with lens:', kwargs_constraints['joint_lens_with_light'])
-            print('joint lens light with lens light:', kwargs_constraints['joint_lens_light_with_lens_light'])
-            print('joint source with source:', kwargs_constraints['joint_source_with_source'])
-            print('joint source with point source:', kwargs_constraints['joint_source_with_point_source'])
+            print('joint_lens_with_lens:',
+                  kwargs_constraints['joint_lens_with_lens'])
+            print('joint_lens_light_with_lens:',
+                  kwargs_constraints['joint_lens_with_light'])
+            print('joint_lens_light_with_lens_light:',
+                  kwargs_constraints['joint_lens_light_with_lens_light'])
+            print('joint_source_with_source:',
+                  kwargs_constraints['joint_source_with_source'])
+            print('joint_source_with_point_source:',
+                  kwargs_constraints['joint_source_with_point_source'])
             print('')
 
         return kwargs_constraints
@@ -423,7 +431,8 @@ class ModelConfig(Config):
          #   return self.settings['model']['source_light']
             combined_source_light_model_list = []
             for i in range(self.band_number):
-                combined_source_light_model_list.extend(self.settings['model']['source_light'])
+                combined_source_light_model_list.extend(
+                           self.settings['model']['source_light'])
             return combined_source_light_model_list
         else:
             return []
@@ -440,7 +449,8 @@ class ModelConfig(Config):
 
             Combined_lens_light_model_list=[]
             for i in range(self.band_number):
-                Combined_lens_light_model_list.extend(self.settings['model']['lens_light'])
+                Combined_lens_light_model_list.extend(self.settings[
+                                                        'model']['lens_light'])
             return Combined_lens_light_model_list
 
         else:
@@ -463,19 +473,6 @@ class ModelConfig(Config):
     def get_index_lens_light_model_list(self):
         """
         CY
-
-        Pocca=[]
-    num=0
-    for i in range (2):
-      One_Pocca=[]
-      for j in range(2):
-
-        One_Pocca.append(num)
-        num+=1
-    Pocca.append(One_Pocca)
-
-
-
         """
         if 'lens_light' in self.settings['model']:
             index_lens_light_model_list=[]
@@ -647,6 +644,14 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
+        for n in range(self.band_number-1):
+            self.settings['source_light_option']['n_max'].extend(
+                             self.settings['source_light_option']['n_max'])
+
+
+        print("nmax: " +str(self.settings['source_light_option']['n_max']))
+
+
         for n in range(self.band_number):
             for i, model in enumerate(source_light_model_list):
                 if model == 'SERSIC_ELLIPSE':
@@ -771,8 +776,10 @@ class ModelConfig(Config):
             if self.settings[option_str]['fix'] is not None:
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
-                    for key, value in param_dict.items():
-                        fixed_list[int(index)][key] = value
+                    for key, value in param_dict.items():  #CY: For Some Reason it only reads the last option in the yml file
+                        for n in range(self.band_number):
+                            n_lens=len(self.settings['model']['lens_light'])
+                            fixed_list[int(index)+n_lens*n][key] = value
 
         return fixed_list
 

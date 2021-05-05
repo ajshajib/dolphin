@@ -68,7 +68,7 @@ class Processor(object):
 
         psf_supersampling_factor = config.get_psf_supersampled_factor()
         kwargs_data_joint = self.get_kwargs_data_joint(lens_name,
-                                                       psf_supersampled_factor=psf_supersampling_factor)
+                              psf_supersampled_factor=psf_supersampling_factor)
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,

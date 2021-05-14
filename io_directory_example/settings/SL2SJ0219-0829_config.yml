@@ -1,0 +1,47 @@
+---
+system_name: 'SL2SJ0219-0829'
+
+band:
+  - 'F475X'
+  - 'F600LP'
+
+pixel_size : 0.04
+
+model:
+  lens:
+    - 'SPEP'
+    - 'SHEAR_GAMMA_PSI'
+
+  lens_light:
+    - 'SERSIC_ELLIPSE'
+    - 'SERSIC_ELLIPSE'
+
+  source_light:
+    - 'SHAPELETS'
+
+lens_option:
+  centroid_init: [0.04, -0.04]
+
+lens_light_option:
+  fix: { 0: { 'n_sersic': 4. }, 1: { 'n_sersic': 3.5 } }
+  #fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 1st light profile
+
+
+source_light_option:
+  n_max: [4] # array with n_max for each source light profile
+
+fitting:
+  pso: true
+  pso_settings:
+    num_particle: 10
+    num_iteration: 10
+
+  sampling: true
+  sampler: 'MCMC'
+  mcmc_settings:
+    burnin_step: 0
+    iteration_step: 10
+    walker_ratio: 2
+
+numeric_option:
+  supersampling_factor: [2]

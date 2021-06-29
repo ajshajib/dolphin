@@ -99,13 +99,13 @@ class TestModelConfig(object):
         """
         assert self.config.band_number == 1
 
-     #   with pytest.raises(ValueError):
-     #       self.config2.band_number
+        with pytest.raises(ValueError):
+            self.config2.band_number
 
-     #   self.config2.settings['band'] = []
+        self.config2.settings['band'] = []
 
-     #   with pytest.raises(ValueError):
-     #       self.config2.band_number
+        with pytest.raises(ValueError):
+            self.config2.band_number
 
     def test_get_kwargs_model(self):
         """
@@ -125,10 +125,13 @@ class TestModelConfig(object):
 
         assert kwargs_model == self.config.get_kwargs_model()
 
+        self.config2.settings['band'] = ['F390W']
         kwargs_model2 = self.config2.get_kwargs_model()
 
         assert kwargs_model2['key1'] == 'value1'
         assert kwargs_model2['key2'] == 'value2'
+
+        self.config2.settings['band'] = []
 
     def test_get_kwargs_constraints(self):
         """
@@ -146,7 +149,7 @@ class TestModelConfig(object):
         }
 
         assert kwargs_constraints == self.config.get_kwargs_constraints()
-
+        self.config2.settings['band'] = ['F390W']
         kwargs_constraints = self.config2.get_kwargs_constraints()
 
         assert kwargs_constraints['joint_source_with_source'] == [[0, 1,
@@ -157,7 +160,7 @@ class TestModelConfig(object):
             [0, 0],
             [0, 1]
         ]
-
+        self.config2.settings['band'] = []
     def test_get_kwargs_likelihood(self):
         """
         Test `get_kwargs_likelihood` method.

@@ -3,7 +3,7 @@
 system_name: 'lens_system1'
 
 band:
-  - 'F390W'
+#  - 'F390W'
 
 pixel_size : 0.04
 

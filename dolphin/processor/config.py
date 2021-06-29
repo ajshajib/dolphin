@@ -150,7 +150,7 @@ class ModelConfig(Config):
             else:
                 return num
 
-    def get_kwargs_model(self, verbose):
+    def get_kwargs_model(self, verbose=False):
         """
         Create `kwargs_model`.
 
@@ -189,7 +189,7 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self,verbose):
+    def get_kwargs_constraints(self,verbose=False):
         """
         Create `kwargs_constraints`.
 

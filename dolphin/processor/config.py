@@ -238,7 +238,7 @@ class ModelConfig(Config):
         if verbose:
             print('joint_lens_with_lens:',
                   kwargs_constraints['joint_lens_with_lens'])
-            print('joint_lens_light_with_lens:',
+            print('joint_lens_with_light',
                   kwargs_constraints['joint_lens_with_light'])
             print('joint_lens_light_with_lens_light:',
                   kwargs_constraints['joint_lens_light_with_lens_light'])
@@ -470,7 +470,8 @@ class ModelConfig(Config):
 
     def get_index_lens_light_model_list(self):
         """
-        Create list with of index for the different lens light profiles (for multiple filters)
+        Create list with of index for the different lens light profile
+         (for multiple filters)
         """
         if 'lens_light' in self.settings['model']:
             index_lens_light_model_list=[]
@@ -774,7 +775,7 @@ class ModelConfig(Config):
             if self.settings[option_str]['fix'] is not None:
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
-                    for key, value in param_dict.items():  #CY: For Some Reason it only reads the last option in the yml file, Need to fix bug
+                    for key, value in param_dict.items():
                         for n in range(self.band_number):
                             n_lens=len(self.settings['model']['lens_light'])
                             fixed_list[int(index)+n_lens*n][key] = value

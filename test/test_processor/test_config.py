@@ -44,6 +44,10 @@ class TestModelConfig(object):
         self.test_setting_file2 = _ROOT_DIR / 'io_directory_example' \
                                   / 'settings' / '_test_config.yml'
         self.config2 = ModelConfig(str(self.test_setting_file2.resolve()))
+        self.test_setting_file3 = _ROOT_DIR / 'io_directory_example' \
+                                  / 'settings' / '_test_config2.yml'
+        self.config3 = ModelConfig(str(self.test_setting_file3.resolve()))
+
 
     @classmethod
     def teardown_class(cls):
@@ -381,3 +385,21 @@ class TestModelConfig(object):
 
         self.config.settings['psf_supersampled_factor'] = 3
         assert self.config.get_psf_supersampled_factor() == 3
+
+    def test_get_index_lens_light_model_list(self):
+        """
+        Test `get_index_lens_light_model_list` method.
+        :return:
+        :rtype:
+        """
+        assert self.config.get_index_lens_light_model_list() == [[0]]
+        assert self.config3.get_index_lens_light_model_list() == [[0,1],[2,3]]
+
+    def test_get_index_source_light_model_list(self):
+        """
+        Test `get_index_source_light_model_list` method.
+        :return:
+        :rtype:
+        """
+        assert self.config.get_index_source_light_model_list() == [[0]]
+        assert self.config3.get_index_lens_light_model_list() == [[0,1],[2,3]]

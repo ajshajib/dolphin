@@ -470,7 +470,7 @@ class ModelConfig(Config):
 
     def get_index_lens_light_model_list(self):
         """
-        CY
+        Create list with of index for the different lens light profiles (for multiple filters)
         """
         if 'lens_light' in self.settings['model']:
             index_lens_light_model_list=[]
@@ -487,7 +487,8 @@ class ModelConfig(Config):
 
     def get_index_source_light_model_list(self):
         """
-        CY
+        Create list with of index for the different source light profiles (for multiple filters)
+
         """
         if 'lens_light' in self.settings['model']:
             index_source_light_model_list=[]
@@ -499,7 +500,6 @@ class ModelConfig(Config):
                     index_num+=1
                 index_source_light_model_list.append(Single_index_list)
             return index_source_light_model_list
-
 
         else:
             return []
@@ -774,7 +774,7 @@ class ModelConfig(Config):
             if self.settings[option_str]['fix'] is not None:
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
-                    for key, value in param_dict.items():  #CY: For Some Reason it only reads the last option in the yml file
+                    for key, value in param_dict.items():  #CY: For Some Reason it only reads the last option in the yml file, Need to fix bug
                         for n in range(self.band_number):
                             n_lens=len(self.settings['model']['lens_light'])
                             fixed_list[int(index)+n_lens*n][key] = value

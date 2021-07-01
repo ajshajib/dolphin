@@ -186,7 +186,7 @@ class Output(Processor):
         config = ModelConfig(settings=self.model_settings)
 
         mask = config.get_masks()
-        kwargs_model = config.get_kwargs_model(verbose=False)
+        kwargs_model = config.get_kwargs_model()
 
         v_max = np.log10(
             multi_band_list_out[band_index][0]['image_data'].max())
@@ -374,7 +374,7 @@ class Output(Processor):
 
         config = ModelConfig(settings=self._model_settings)
         kwargs_params = config.get_kwargs_params()
-        kwargs_model = config.get_kwargs_model(verbose=False)
+        kwargs_model = config.get_kwargs_model()
         kwargs_constraints = config.get_kwargs_constraints()
 
         param = Param(kwargs_model,
@@ -410,7 +410,7 @@ class Output(Processor):
             config = ModelConfig(settings=self._model_settings)
 
             kwargs_numerics = config.get_kwargs_numerics()
-            kwargs_model = config.get_kwargs_model(verbose=False)
+            kwargs_model = config.get_kwargs_model()
 
             multi_band_list_out = self.get_kwargs_data_joint(
                 lens_name)['multi_band_list']

@@ -150,7 +150,7 @@ class ModelConfig(Config):
             else:
                 return num
 
-    def get_kwargs_model(self, verbose=False):
+    def get_kwargs_model(self):
         """
         Create `kwargs_model`.
 
@@ -168,19 +168,19 @@ class ModelConfig(Config):
       'index_source_light_model_list':self.get_index_source_light_model_list(),
         }
 
-        if  verbose:
-            print('lens_model_list:', kwargs_model['lens_model_list'])
-            print('')
-            print('lens_light_model_list:',
-                  kwargs_model['lens_light_model_list'])
-            print('lens_light_indices:',
-                  kwargs_model['index_lens_light_model_list'])
-            print('')
-            print('source_light_model_list:',
-                  kwargs_model['source_light_model_list'])
-            print('source_light_indices:',
-                  kwargs_model['index_source_light_model_list'])
-            print('')
+       # For debugging multi-lensing
+       # print('lens_model_list:', kwargs_model['lens_model_list'])
+       # print('')
+       # print('lens_light_model_list:',
+       #       kwargs_model['lens_light_model_list'])
+       # print('lens_light_indices:',
+       #       kwargs_model['index_lens_light_model_list'])
+       # print('')
+       # print('source_light_model_list:',
+       #       kwargs_model['source_light_model_list'])
+       # print('source_light_indices:',
+       #       kwargs_model['index_source_light_model_list'])
+       # print('')
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
                 is not None:
@@ -189,7 +189,7 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self,verbose=False):
+    def get_kwargs_constraints(self):
         """
         Create `kwargs_constraints`.
 
@@ -235,18 +235,18 @@ class ModelConfig(Config):
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
 
-        if verbose:
-            print('joint_lens_with_lens:',
-                  kwargs_constraints['joint_lens_with_lens'])
-            print('joint_lens_with_light',
-                  kwargs_constraints['joint_lens_with_light'])
-            print('joint_lens_light_with_lens_light:',
-                  kwargs_constraints['joint_lens_light_with_lens_light'])
-            print('joint_source_with_source:',
-                  kwargs_constraints['joint_source_with_source'])
-            print('joint_source_with_point_source:',
-                  kwargs_constraints['joint_source_with_point_source'])
-            print('')
+      # For debugging multi-lensing
+      #  print('joint_lens_with_lens:',
+      #        kwargs_constraints['joint_lens_with_lens'])
+      #  print('joint_lens_with_light',
+      #        kwargs_constraints['joint_lens_with_light'])
+      #  print('joint_lens_light_with_lens_light:',
+      #        kwargs_constraints['joint_lens_light_with_lens_light'])
+      #  print('joint_source_with_source:',
+      #        kwargs_constraints['joint_source_with_source'])
+      #  print('joint_source_with_point_source:',
+      #        kwargs_constraints['joint_source_with_point_source'])
+      #  print('')
 
         return kwargs_constraints
 

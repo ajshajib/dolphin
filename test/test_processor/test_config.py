@@ -422,6 +422,9 @@ class TestModelConfig(object):
         """
         assert self.config.get_index_lens_light_model_list() == [[0]]
         assert self.config3.get_index_lens_light_model_list() == [[0,1],[2,3]]
+        config = deepcopy(self.config2)
+        del config.settings['model']['lens_light']
+        assert config.get_index_lens_light_model_list() == []
 
     def test_get_index_source_light_model_list(self):
         """
@@ -432,3 +435,6 @@ class TestModelConfig(object):
         assert self.config.get_index_source_light_model_list() == [[0]]
         assert self.config3.get_index_source_light_model_list() == [[0,1,2],
                                                                   [3,4,5]]
+        config = deepcopy(self.config2)
+        del config.settings['model']['lens_light']
+        assert config.get_index_source_light_model_list() == []

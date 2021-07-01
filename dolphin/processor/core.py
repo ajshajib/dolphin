@@ -32,7 +32,7 @@ class Processor(object):
         self.file_system = FileSystem(io_directory)
         self.lens_list = self.file_system.get_lens_list()
 
-    def swim(self, lens_name, model_id, log=True, mpi=False, verbose=False,
+    def swim(self, lens_name, model_id, log=True, mpi=False,
              recipe_name='default', sampler='EMCEE', thread_count=1):
         """
         Run models for a single lens.
@@ -72,8 +72,8 @@ class Processor(object):
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,
-            config.get_kwargs_model(verbose),
-            config.get_kwargs_constraints(verbose),
+            config.get_kwargs_model(),
+            config.get_kwargs_constraints(),
             config.get_kwargs_likelihood(),
             config.get_kwargs_params(),
             mpi=mpi

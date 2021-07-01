@@ -189,7 +189,7 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self,verbose=False):
+    def get_kwargs_constraints(self, verbose=False):
         """
         Create `kwargs_constraints`.
 
@@ -811,4 +811,3 @@ class ModelConfig(Config):
             return 1
         else:
             return self.settings['psf_supersampled_factor']
-

@@ -329,8 +329,9 @@ class TestModelConfig(object):
         assert config.get_source_light_model_list() == []
 
         config2 = deepcopy(self.config3)
-        assert config2.get_source_light_model_list() == ['SERSIC_ELLIPSE',
-            'SHAPELETS', 'SHAPELETS','SERSIC_ELLIPSE', 'SHAPELETS','SHAPELETS']
+        assert config2.get_source_light_model_list() == \
+               ['SERSIC_ELLIPSE', 'SHAPELETS', 'SHAPELETS',
+                'SERSIC_ELLIPSE', 'SHAPELETS', 'SHAPELETS']
 
     def test_get_lens_light_model_list(self):
         """
@@ -343,8 +344,9 @@ class TestModelConfig(object):
         assert config.get_lens_light_model_list() == []
 
         config2 = deepcopy(self.config3)
-        assert config2.get_lens_light_model_list() == ['SERSIC_ELLIPSE',
-                        'SERSIC_ELLIPSE', 'SERSIC_ELLIPSE', 'SERSIC_ELLIPSE']
+        assert config2.get_lens_light_model_list() == \
+               ['SERSIC_ELLIPSE', 'SERSIC_ELLIPSE',
+                'SERSIC_ELLIPSE', 'SERSIC_ELLIPSE']
 
     def test_get_point_source_model_list(self):
         """
@@ -441,3 +443,4 @@ class TestModelConfig(object):
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']
         assert config.get_index_source_light_model_list() == []
+        

@@ -4,7 +4,9 @@ Tests for data module.
 """
 from pathlib import Path
 
-from dolphin.processor.data import *
+from dolphin.processor.data import Data
+from dolphin.processor.data import ImageData
+from dolphin.processor.data import PSFData
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
@@ -28,8 +30,8 @@ class TestData(object):
         data = Data()
 
         data_file = _ROOT_DIR / 'io_directory_example' \
-                    / 'data' / 'lens_system1' \
-                    / 'image_lens_system1_F390W.h5'
+            / 'data' / 'lens_system1' \
+            / 'image_lens_system1_F390W.h5'
         data.load_from_file(data_file)
 
 
@@ -67,7 +69,6 @@ class TestImageData(object):
         assert image.shape == (120, 120)
 
 
-
 class TestPSFData(object):
 
     @classmethod
@@ -84,9 +85,9 @@ class TestPSFData(object):
         :return:
         :rtype:
         """
-        psf_file =  _ROOT_DIR / 'io_directory_example' \
-                    / 'data' / 'lens_system1' \
-                    / 'psf_lens_system1_F390W.h5'
+        psf_file = _ROOT_DIR / 'io_directory_example' \
+            / 'data' / 'lens_system1' \
+            / 'psf_lens_system1_F390W.h5'
 
         psf = PSFData(psf_file)
 

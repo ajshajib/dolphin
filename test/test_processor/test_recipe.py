@@ -212,7 +212,7 @@ class TestRecipe(object):
             kwargs_data_joint=kwargs_data_joint,
             recipe_name='galaxy-galaxy')
 
-        fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
+        fitting_sequence.fit_sequence(fitting_kwargs_list)
 
     def test_get_arc_mask(self):
         """
@@ -266,7 +266,8 @@ class TestRecipe(object):
         test = self.recipe.unfix_params('lens', [0])
         assert set(test[1]['lens_remove_fixed'][0][1]) == {'theta_E',
                                                            'center_x',
-                                                           'center_y',  'e1', 'gamma',
+                                                           'center_y',  'e1',
+                                                           'gamma',
                                                            'e2'}
 
         test = self.recipe.unfix_params('lens', [1])
@@ -277,10 +278,12 @@ class TestRecipe(object):
         assert set(test[1]['lens_light_remove_fixed'][0][1]) == {'e1',
                                                                  'center_x',
                                                                  'center_y',
-                                                                 'R_sersic', 'e2'}
+                                                                 'R_sersic',
+                                                                 'e2'}
 
         test = self.recipe.unfix_params('source', [0])
         assert set(test[1]['source_remove_fixed'][0][1]) == {'R_sersic',
                                                              'n_sersic',
-                                                             'center_x', 'center_y',
+                                                             'center_x',
+                                                             'center_y',
                                                              'e1', 'e2'}

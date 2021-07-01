@@ -5,7 +5,6 @@ This module loads settings from a configuration file.
 __author__ = 'ajshajib'
 
 import sys
-import numpy as np
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 from schwimmbad import choose_pool
 
@@ -67,8 +66,9 @@ class Processor(object):
         recipe = Recipe(config, sampler=sampler, thread_count=thread_count)
 
         psf_supersampling_factor = config.get_psf_supersampled_factor()
-        kwargs_data_joint = self.get_kwargs_data_joint(lens_name,
-                                                       psf_supersampled_factor=psf_supersampling_factor)
+        kwargs_data_joint = self.get_kwargs_data_joint(
+            lens_name,
+            psf_supersampled_factor=psf_supersampling_factor)
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,

@@ -4,7 +4,7 @@ Tests for data module.
 """
 from pathlib import Path
 
-from dolphin.processor.core import *
+from dolphin.processor.core import Processor
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / 'io_directory_example'

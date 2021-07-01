@@ -8,7 +8,7 @@ from pathlib import Path
 import os
 import numpy as np
 
-from dolphin.processor.files import *
+from dolphin.processor.files import FileSystem
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / 'io_directory_example'
@@ -59,7 +59,7 @@ class TestFileSystem(object):
         :rtype:
         """
         config_file_path = _TEST_IO_DIR / 'settings' / \
-                                            'lens_system1_config.yml'
+            'lens_system1_config.yml'
 
         assert Path(self.file_system.get_config_file_path('lens_system1')) == \
             config_file_path
@@ -135,7 +135,7 @@ class TestFileSystem(object):
         :rtype:
         """
         with open(str(_TEST_IO_DIR.resolve())
-                  + '/logs/log_name_test.txt', 'w') as f:
+                  + '/logs/log_name_test.txt', 'w'):
             pass
 
         path = _TEST_IO_DIR / 'logs' / 'log_name_test.txt'
@@ -152,7 +152,7 @@ class TestFileSystem(object):
         :rtype:
         """
         with open(str(_TEST_IO_DIR.resolve())
-                  + '/outputs/output_name_test.json', 'w') as f:
+                  + '/outputs/output_name_test.json', 'w'):
             pass
 
         path = _TEST_IO_DIR / 'outputs' / 'output_name_test.json'
@@ -220,7 +220,7 @@ class TestFileSystem(object):
         self.file_system.save_output('test', 'save_test', save_dict,
                                      file_type='h5')
 
-        out = self.file_system.load_output('test','save_test', file_type='h5')
+        out = self.file_system.load_output('test', 'save_test', file_type='h5')
 
         assert save_dict['settings'] == out['settings']
         assert save_dict['kwargs_result'] == out['kwargs_result']
@@ -239,8 +239,7 @@ class TestFileSystem(object):
         with pytest.raises(ValueError):
             save_dict['fit_output'].append(
                 ['INVALID',
-                  np.ones((4, 50)), np.array(['{}'.format(i) for i in
-                                              range(4)])
+                 np.ones((4, 50)), np.array(['{}'.format(i) for i in range(4)])
                  ]
             )
             self.file_system.save_output('test', 'save_test', save_dict,

@@ -5,7 +5,7 @@ Tests for output module.
 from pathlib import Path
 import pytest
 import numpy as np
-import  matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 from dolphin.processor import Processor
 from dolphin.analysis.output import Output
@@ -159,5 +159,3 @@ class TestOutput(object):
             self.output.samples_mcmc[0],
             linear_solve=True,
         )
-
-

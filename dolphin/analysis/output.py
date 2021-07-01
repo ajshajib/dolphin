@@ -6,7 +6,7 @@ __author__ = 'ajshajib'
 
 import numpy as np
 import matplotlib.pyplot as plt
-import warnings
+
 from lenstronomy.Plots.model_plot import ModelPlot
 from lenstronomy.Sampling.parameters import Param
 from lenstronomy.Util.class_creator import create_im_sim
@@ -193,9 +193,9 @@ class Output(Processor):
 
         model_plot = ModelPlot(multi_band_list_out, kwargs_model,
                                kwargs_result,
-                              arrow_size=0.02, cmap_string=data_cmap,
-                              likelihood_mask_list=mask,
-                              multi_band_type='multi-linear')
+                               arrow_size=0.02, cmap_string=data_cmap,
+                               likelihood_mask_list=mask,
+                               multi_band_type='multi-linear')
 
         return model_plot, v_max
 
@@ -240,18 +240,19 @@ class Output(Processor):
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
         model_plot.data_plot(ax=axes[0, 0], band_index=band_index, v_max=v_max)
-        model_plot.model_plot(ax=axes[0, 1], band_index=band_index, v_max=v_max)
+        model_plot.model_plot(ax=axes[0, 1], band_index=band_index,
+                              v_max=v_max)
         model_plot.normalized_residual_plot(ax=axes[0, 2],
-                                           band_index=band_index,
-                                           cmap=residual_cmap, v_max=3,
-                                           v_min=-3)
+                                            band_index=band_index,
+                                            cmap=residual_cmap, v_max=3,
+                                            v_min=-3)
         model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
-                              band_index=band_index, v_max=v_max)
+                               band_index=band_index, v_max=v_max)
         model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
-                                   cmap=convergence_cmap)
+                                    cmap=convergence_cmap)
         model_plot.magnification_plot(ax=axes[1, 2],
-                                     band_index=band_index,
-                                     cmap=magnification_cmap)
+                                      band_index=band_index,
+                                      cmap=magnification_cmap)
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)
@@ -259,8 +260,7 @@ class Output(Processor):
         return fig
 
     def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio,
-                           burn_in=-100, verbose=True
-                           ):
+                                 burn_in=-100, verbose=True):
         """
 
         :param lens_name:
@@ -351,7 +351,9 @@ class Output(Processor):
             ax[i].axhline(np.median(median_pos[i][burn_in:last]), c='r', lw=1)
             ax[i].fill_between(np.arange(last), q84_pos[i][:last],
                                q16_pos[i][:last], alpha=0.4)
-            # ax[i].fill_between(np.arange(last), mean_pos[i][:last]+std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last], alpha=0.4)
+            # ax[i].fill_between(np.arange(last), mean_pos[i][:last] \
+            # +std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last],
+            # alpha=0.4)
             ax[i].set_ylabel(self.params_mcmc[i], fontsize=10)
             ax[i].set_xlim(0, last)
 
@@ -382,8 +384,8 @@ class Output(Processor):
                       kwargs_params['source_model'][2],
                       kwargs_params['lens_light_model'][2],
                       kwargs_params['point_source_model'][2],
-                      #kwargs_params['special'][2],
-                      #kwargs_params['extinction_model'][2],
+                      # kwargs_params['special'][2],
+                      # kwargs_params['extinction_model'][2],
                       # kwargs_lens_init=kwargs_result['kwargs_lens'],
                       kwargs_lens_init=kwargs_params['lens_model'][0],
                       **kwargs_constraints
@@ -409,25 +411,22 @@ class Output(Processor):
         if linear_solve:
             config = ModelConfig(settings=self._model_settings)
 
-            kwargs_numerics = config.get_kwargs_numerics()
+            # kwargs_numerics = config.get_kwargs_numerics()
             kwargs_model = config.get_kwargs_model()
 
             multi_band_list_out = self.get_kwargs_data_joint(
                 lens_name)['multi_band_list']
 
-            kwargs_data = multi_band_list_out[band_index][0]
-            kwargs_psf = multi_band_list_out[band_index][1]
+            # kwargs_data = multi_band_list_out[band_index][0]
+            # kwargs_psf = multi_band_list_out[band_index][1]
 
             im_sim = create_im_sim(multi_band_list_out,
-                                        'multi-linear',
-                                        kwargs_model,
-                                        bands_compute=None,
-                                        likelihood_mask_list=config.get_masks(),
-                                        band_index=band_index)
+                                   'multi-linear',
+                                   kwargs_model,
+                                   bands_compute=None,
+                                   likelihood_mask_list=config.get_masks(),
+                                   band_index=band_index)
 
             im_sim.image_linear_solve(**kwargs, inv_bool=True)
 
         return kwargs
-
-
-

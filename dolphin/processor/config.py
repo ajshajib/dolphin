@@ -551,9 +551,9 @@ class ModelConfig(Config):
                 upper.append({
                     'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 3.,
                     'center_x': self.deflector_center_ra
-                                + self.deflector_centroid_bound,
+                    + self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
-                                + self.deflector_centroid_bound
+                    + self.deflector_centroid_bound
                 })
 
             elif model == 'SHEAR_GAMMA_PSI':

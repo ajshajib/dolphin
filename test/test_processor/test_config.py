@@ -3,9 +3,12 @@
 Tests for config module.
 """
 import pytest
+from copy import deepcopy
+import numpy as np
 from pathlib import Path
 
-from dolphin.processor.config import *
+from dolphin.processor.config import Config
+from dolphin.processor.config import ModelConfig
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
@@ -27,7 +30,7 @@ class TestConfig(object):
         :rtype:
         """
         test_setting_file = _ROOT_DIR / 'io_directory_example' \
-                            / 'settings' / 'lens_system1_config.yml'
+            / 'settings' / 'lens_system1_config.yml'
         config = Config()
         config.load(str(test_setting_file.resolve()))
 
@@ -42,7 +45,7 @@ class TestModelConfig(object):
         self.config = ModelConfig(str(self.test_setting_file.resolve()))
 
         self.test_setting_file2 = _ROOT_DIR / 'io_directory_example' \
-                                  / 'settings' / '_test_config.yml'
+            / 'settings' / '_test_config.yml'
         self.config2 = ModelConfig(str(self.test_setting_file2.resolve()))
         self.test_setting_file3 = _ROOT_DIR / 'io_directory_example' \
                                   / 'settings' / '_test_config2.yml'
@@ -189,14 +192,14 @@ class TestModelConfig(object):
         test_likelihood = {
             'force_no_add_image': False,
             'source_marg': False,
-            #'point_source_likelihood': True,
-            #'position_uncertainty': 0.00004,
-            #'check_solver': False,
-            #'solver_tolerance': 0.001,
+            # 'point_source_likelihood': True,
+            # 'position_uncertainty': 0.00004,
+            # 'check_solver': False,
+            # 'solver_tolerance': 0.001,
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True],
-            #'image_likelihood_mask_list': self.config.get_masks()
+            # 'image_likelihood_mask_list': self.config.get_masks()
         }
         kwargs_likelihood = self.config.get_kwargs_likelihood()
         kwargs_likelihood.pop('image_likelihood_mask_list')
@@ -414,6 +417,7 @@ class TestModelConfig(object):
         self.config.settings['psf_supersampled_factor'] = 3
         assert self.config.get_psf_supersampled_factor() == 3
 
+
     def test_get_index_lens_light_model_list(self):
         """
         Test `get_index_lens_light_model_list` method.
@@ -438,3 +442,4 @@ class TestModelConfig(object):
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']
         assert config.get_index_source_light_model_list() == []
+

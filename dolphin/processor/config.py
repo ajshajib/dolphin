@@ -169,20 +169,6 @@ class ModelConfig(Config):
                 self.get_index_source_light_model_list(),
         }
 
-        # For debugging multi-lensing
-        # print('lens_model_list:', kwargs_model['lens_model_list'])
-        # print('')
-        # print('lens_light_model_list:',
-        #       kwargs_model['lens_light_model_list'])
-        # print('lens_light_indices:',
-        #       kwargs_model['index_lens_light_model_list'])
-        # print('')
-        # print('source_light_model_list:',
-        #       kwargs_model['source_light_model_list'])
-        # print('source_light_indices:',
-        #       kwargs_model['index_source_light_model_list'])
-        # print('')
-
         if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
                 is not None:
             for key, value in self.settings['kwargs_model'].items():
@@ -236,19 +222,6 @@ class ModelConfig(Config):
                                             'kwargs_constraints'] is not None:
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
-
-        # For debugging multi-lensing
-        #  print('joint_lens_with_lens:',
-        #        kwargs_constraints['joint_lens_with_lens'])
-        #  print('joint_lens_with_light',
-        #        kwargs_constraints['joint_lens_with_light'])
-        #  print('joint_lens_light_with_lens_light:',
-        #        kwargs_constraints['joint_lens_light_with_lens_light'])
-        #  print('joint_source_with_source:',
-        #        kwargs_constraints['joint_source_with_source'])
-        #  print('joint_source_with_point_source:',
-        #        kwargs_constraints['joint_source_with_point_source'])
-        #  print('')
 
         return kwargs_constraints
 
@@ -447,11 +420,11 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'lens_light' in self.settings['model']:
-            Combined_lens_light_model_list = []
+            combined_lens_light_model_list = []
             for i in range(self.band_number):
-                Combined_lens_light_model_list.extend(self.settings[
+                combined_lens_light_model_list.extend(self.settings[
                                                         'model']['lens_light'])
-            return Combined_lens_light_model_list
+            return combined_lens_light_model_list
 
         else:
             return []
@@ -478,11 +451,11 @@ class ModelConfig(Config):
             index_lens_light_model_list = []
             index_num = 0
             for i in range(self.band_number):
-                Single_index_list = []
+                single_index_list = []
                 for j in range(len(self.settings['model']['lens_light'])):
-                    Single_index_list.append(index_num)
+                    single_index_list.append(index_num)
                     index_num += 1
-                index_lens_light_model_list.append(Single_index_list)
+                index_lens_light_model_list.append(single_index_list)
             return index_lens_light_model_list
         else:
             return []
@@ -497,11 +470,11 @@ class ModelConfig(Config):
             index_source_light_model_list = []
             index_num = 0
             for i in range(self.band_number):
-                Single_index_list = []
+                single_index_list = []
                 for j in range(len(self.settings['model']['source_light'])):
-                    Single_index_list.append(index_num)
+                    single_index_list.append(index_num)
                     index_num += 1
-                index_source_light_model_list.append(Single_index_list)
+                index_source_light_model_list.append(single_index_list)
             return index_source_light_model_list
 
         else:
@@ -646,9 +619,6 @@ class ModelConfig(Config):
         for n in range(self.band_number-1):
             self.settings['source_light_option']['n_max'].extend(
                              self.settings['source_light_option']['n_max'])
-
-        # For debugging multi-lensing
-        # print("nmax: " +str(self.settings['source_light_option']['n_max']))
 
         for n in range(self.band_number):
             for i, model in enumerate(source_light_model_list):

@@ -159,12 +159,14 @@ class ModelConfig(Config):
         """
 
         kwargs_model = {
-      'lens_model_list': self.get_lens_model_list(),
-      'source_light_model_list': self.get_source_light_model_list(),
-      'lens_light_model_list': self.get_lens_light_model_list(),
-      'point_source_model_list': self.get_point_source_model_list(),
-      'index_lens_light_model_list': self.get_index_lens_light_model_list(),
-      'index_source_light_model_list':self.get_index_source_light_model_list(),
+            'lens_model_list': self.get_lens_model_list(),
+            'source_light_model_list': self.get_source_light_model_list(),
+            'lens_light_model_list': self.get_lens_light_model_list(),
+            'point_source_model_list': self.get_point_source_model_list(),
+            'index_lens_light_model_list':
+                self.get_index_lens_light_model_list(),
+            'index_source_light_model_list':
+                self.get_index_source_light_model_list(),
         }
 
         # For debugging multi-lensing
@@ -445,7 +447,7 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'lens_light' in self.settings['model']:
-            Combined_lens_light_model_list=[]
+            Combined_lens_light_model_list = []
             for i in range(self.band_number):
                 Combined_lens_light_model_list.extend(self.settings[
                                                         'model']['lens_light'])
@@ -774,7 +776,7 @@ class ModelConfig(Config):
                                                                 'fix'].items():
                     for key, value in param_dict.items():
                         for n in range(self.band_number):
-                            n_lens=len(self.settings['model']['lens_light'])
+                            n_lens = len(self.settings['model']['lens_light'])
                             fixed_list[int(index)+n_lens*n][key] = value
 
         return fixed_list

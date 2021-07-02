@@ -157,13 +157,16 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+
         kwargs_model = {
             'lens_model_list': self.get_lens_model_list(),
             'source_light_model_list': self.get_source_light_model_list(),
             'lens_light_model_list': self.get_lens_light_model_list(),
             'point_source_model_list': self.get_point_source_model_list(),
-            # 'index_lens_light_model_list': [[0]],
-            # 'index_source_light_model_list': [[0]],
+            'index_lens_light_model_list':
+                self.get_index_lens_light_model_list(),
+            'index_source_light_model_list':
+                self.get_index_source_light_model_list(),
         }
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
@@ -174,6 +177,7 @@ class ModelConfig(Config):
         return kwargs_model
 
     def get_kwargs_constraints(self):
+
         """
         Create `kwargs_constraints`.
 
@@ -210,7 +214,8 @@ class ModelConfig(Config):
             'joint_lens_light_with_lens_light':
                 joint_lens_light_with_lens_light,
             'joint_source_with_point_source': joint_source_with_point_source,
-            'joint_lens_with_light': []
+            'joint_lens_with_light': [],
+            'joint_lens_with_lens': []
         }
 
         if 'kwargs_constraints' in self.settings and self.settings[
@@ -399,7 +404,11 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'source_light' in self.settings['model']:
-            return self.settings['model']['source_light']
+            combined_source_light_model_list = []
+            for i in range(self.band_number):
+                combined_source_light_model_list.extend(
+                           self.settings['model']['source_light'])
+            return combined_source_light_model_list
         else:
             return []
 
@@ -411,7 +420,12 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'lens_light' in self.settings['model']:
-            return self.settings['model']['lens_light']
+            combined_lens_light_model_list = []
+            for i in range(self.band_number):
+                combined_lens_light_model_list.extend(self.settings[
+                                                        'model']['lens_light'])
+            return combined_lens_light_model_list
+
         else:
             return []
 
@@ -425,6 +439,44 @@ class ModelConfig(Config):
         if 'point_source' in self.settings['model'] and \
                 self.settings['model']['point_source'] is not None:
             return self.settings['model']['point_source']
+        else:
+            return []
+
+    def get_index_lens_light_model_list(self):
+        """
+        Create list with of index for the different lens light profile
+         (for multiple filters)
+        """
+        if 'lens_light' in self.settings['model']:
+            index_lens_light_model_list = []
+            index_num = 0
+            for i in range(self.band_number):
+                single_index_list = []
+                for j in range(len(self.settings['model']['lens_light'])):
+                    single_index_list.append(index_num)
+                    index_num += 1
+                index_lens_light_model_list.append(single_index_list)
+            return index_lens_light_model_list
+        else:
+            return []
+
+    def get_index_source_light_model_list(self):
+        """
+        Create list with of index for the different source light profiles
+         (for multiple filters)
+
+        """
+        if 'lens_light' in self.settings['model']:
+            index_source_light_model_list = []
+            index_num = 0
+            for i in range(self.band_number):
+                single_index_list = []
+                for j in range(len(self.settings['model']['source_light'])):
+                    single_index_list.append(index_num)
+                    index_num += 1
+                index_source_light_model_list.append(single_index_list)
+            return index_source_light_model_list
+
         else:
             return []
 
@@ -564,6 +616,10 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
+        for n in range(self.band_number-1):
+            self.settings['source_light_option']['n_max'].extend(
+                             self.settings['source_light_option']['n_max'])
+
         for n in range(self.band_number):
             for i, model in enumerate(source_light_model_list):
                 if model == 'SERSIC_ELLIPSE':
@@ -689,7 +745,9 @@ class ModelConfig(Config):
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
                     for key, value in param_dict.items():
-                        fixed_list[int(index)][key] = value
+                        for n in range(self.band_number):
+                            n_lens = len(self.settings['model']['lens_light'])
+                            fixed_list[int(index)+n_lens*n][key] = value
 
         return fixed_list
 

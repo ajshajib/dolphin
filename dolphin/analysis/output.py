@@ -189,7 +189,7 @@ class Output(Processor):
         kwargs_model = config.get_kwargs_model()
 
         v_max = np.log10(
-            multi_band_list_out[0][band_index]['image_data'].max())
+            multi_band_list_out[band_index][0]['image_data'].max())
 
         model_plot = ModelPlot(multi_band_list_out, kwargs_model,
                                kwargs_result,

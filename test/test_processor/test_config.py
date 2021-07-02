@@ -426,7 +426,8 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.get_index_lens_light_model_list() == [[0]]
-        assert self.config3.get_index_lens_light_model_list() == [[0,1], [2,3]]
+        assert self.config3.get_index_lens_light_model_list() == [[0, 1],
+                                                                  [2, 3]]
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']
         assert config.get_index_lens_light_model_list() == []
@@ -443,4 +444,3 @@ class TestModelConfig(object):
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']
         assert config.get_index_source_light_model_list() == []
-        

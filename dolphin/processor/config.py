@@ -158,7 +158,6 @@ class ModelConfig(Config):
         :rtype:
         """
 
-
         kwargs_model = {
       'lens_model_list': self.get_lens_model_list(),
       'source_light_model_list': self.get_source_light_model_list(),
@@ -168,19 +167,19 @@ class ModelConfig(Config):
       'index_source_light_model_list':self.get_index_source_light_model_list(),
         }
 
-       # For debugging multi-lensing
-       # print('lens_model_list:', kwargs_model['lens_model_list'])
-       # print('')
-       # print('lens_light_model_list:',
-       #       kwargs_model['lens_light_model_list'])
-       # print('lens_light_indices:',
-       #       kwargs_model['index_lens_light_model_list'])
-       # print('')
-       # print('source_light_model_list:',
-       #       kwargs_model['source_light_model_list'])
-       # print('source_light_indices:',
-       #       kwargs_model['index_source_light_model_list'])
-       # print('')
+        # For debugging multi-lensing
+        # print('lens_model_list:', kwargs_model['lens_model_list'])
+        # print('')
+        # print('lens_light_model_list:',
+        #       kwargs_model['lens_light_model_list'])
+        # print('lens_light_indices:',
+        #       kwargs_model['index_lens_light_model_list'])
+        # print('')
+        # print('source_light_model_list:',
+        #       kwargs_model['source_light_model_list'])
+        # print('source_light_indices:',
+        #       kwargs_model['index_source_light_model_list'])
+        # print('')
 
         if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
                 is not None:
@@ -188,7 +187,6 @@ class ModelConfig(Config):
                 kwargs_model[key] = value
 
         return kwargs_model
-
 
     def get_kwargs_constraints(self):
 
@@ -237,18 +235,18 @@ class ModelConfig(Config):
             for key, value in self.settings['kwargs_constraints'].items():
                 kwargs_constraints[key] = value
 
-      # For debugging multi-lensing
-      #  print('joint_lens_with_lens:',
-      #        kwargs_constraints['joint_lens_with_lens'])
-      #  print('joint_lens_with_light',
-      #        kwargs_constraints['joint_lens_with_light'])
-      #  print('joint_lens_light_with_lens_light:',
-      #        kwargs_constraints['joint_lens_light_with_lens_light'])
-      #  print('joint_source_with_source:',
-      #        kwargs_constraints['joint_source_with_source'])
-      #  print('joint_source_with_point_source:',
-      #        kwargs_constraints['joint_source_with_point_source'])
-      #  print('')
+        # For debugging multi-lensing
+        #  print('joint_lens_with_lens:',
+        #        kwargs_constraints['joint_lens_with_lens'])
+        #  print('joint_lens_with_light',
+        #        kwargs_constraints['joint_lens_with_light'])
+        #  print('joint_lens_light_with_lens_light:',
+        #        kwargs_constraints['joint_lens_light_with_lens_light'])
+        #  print('joint_source_with_source:',
+        #        kwargs_constraints['joint_source_with_source'])
+        #  print('joint_source_with_point_source:',
+        #        kwargs_constraints['joint_source_with_point_source'])
+        #  print('')
 
         return kwargs_constraints
 
@@ -469,20 +467,19 @@ class ModelConfig(Config):
         else:
             return []
 
-
     def get_index_lens_light_model_list(self):
         """
         Create list with of index for the different lens light profile
          (for multiple filters)
         """
         if 'lens_light' in self.settings['model']:
-            index_lens_light_model_list=[]
-            index_num=0
+            index_lens_light_model_list = []
+            index_num = 0
             for i in range(self.band_number):
-                Single_index_list=[]
+                Single_index_list = []
                 for j in range(len(self.settings['model']['lens_light'])):
                     Single_index_list.append(index_num)
-                    index_num+=1
+                    index_num += 1
                 index_lens_light_model_list.append(Single_index_list)
             return index_lens_light_model_list
         else:
@@ -490,24 +487,23 @@ class ModelConfig(Config):
 
     def get_index_source_light_model_list(self):
         """
-        Create list with of index for the different source light profiles (for multiple filters)
+        Create list with of index for the different source light profiles
+         (for multiple filters)
 
         """
         if 'lens_light' in self.settings['model']:
-            index_source_light_model_list=[]
-            index_num=0
+            index_source_light_model_list = []
+            index_num = 0
             for i in range(self.band_number):
-                Single_index_list=[]
+                Single_index_list = []
                 for j in range(len(self.settings['model']['source_light'])):
                     Single_index_list.append(index_num)
-                    index_num+=1
+                    index_num += 1
                 index_source_light_model_list.append(Single_index_list)
             return index_source_light_model_list
 
         else:
             return []
-
-
 
     def get_lens_model_params(self):
         """
@@ -649,9 +645,8 @@ class ModelConfig(Config):
             self.settings['source_light_option']['n_max'].extend(
                              self.settings['source_light_option']['n_max'])
 
-
-        print("nmax: " +str(self.settings['source_light_option']['n_max']))
-
+        # For debugging multi-lensing
+        # print("nmax: " +str(self.settings['source_light_option']['n_max']))
 
         for n in range(self.band_number):
             for i, model in enumerate(source_light_model_list):

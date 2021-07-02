@@ -48,7 +48,7 @@ class TestModelConfig(object):
             / 'settings' / '_test_config.yml'
         self.config2 = ModelConfig(str(self.test_setting_file2.resolve()))
         self.test_setting_file3 = _ROOT_DIR / 'io_directory_example' \
-            / 'settings' / '_test_config2.yml'
+            / 'settings' / 'lens_system3_config.yml'
         self.config3 = ModelConfig(str(self.test_setting_file3.resolve()))
 
     @classmethod
@@ -154,11 +154,7 @@ class TestModelConfig(object):
         }
 
         kwargs_constraints_2 = {
-            'joint_source_with_source': [[0, 1, ['center_x', 'center_y']],
-                                         [0, 2, ['center_x', 'center_y']],
-                                         [0, 3, ['center_x', 'center_y']],
-                                         [0, 4, ['center_x', 'center_y']],
-                                         [0, 5, ['center_x', 'center_y']]],
+            'joint_source_with_source': [[0, 1, ['center_x', 'center_y']]],
             'joint_lens_light_with_lens_light':
                                         [[0, 1, ['center_x', 'center_y']],
                                          [0, 2, ['center_x', 'center_y']],
@@ -330,8 +326,7 @@ class TestModelConfig(object):
 
         config2 = deepcopy(self.config3)
         assert config2.get_source_light_model_list() == \
-               ['SERSIC_ELLIPSE', 'SHAPELETS', 'SHAPELETS',
-                'SERSIC_ELLIPSE', 'SHAPELETS', 'SHAPELETS']
+               ['SHAPELETS', 'SHAPELETS']
 
     def test_get_lens_light_model_list(self):
         """
@@ -395,7 +390,7 @@ class TestModelConfig(object):
 
         config2 = deepcopy(self.config3)
         config2.get_source_light_model_params()
-        assert config2.settings['source_light_option']['n_max'] == [2, 2, 2, 2]
+        assert config2.settings['source_light_option']['n_max'] == [2, 2]
 
     def test_fill_in_fixed_from_settings(self):
         """
@@ -439,8 +434,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.get_index_source_light_model_list() == [[0]]
-        assert self.config3.get_index_source_light_model_list() == [[0, 1, 2],
-                                                                    [3, 4, 5]]
+        assert self.config3.get_index_source_light_model_list() == [[0], [1]]
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']
         assert config.get_index_source_light_model_list() == []

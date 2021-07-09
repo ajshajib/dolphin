@@ -87,9 +87,9 @@ class ModelConfig(Config):
             return self.settings['pixel_size']
 
     @property
-    def maximun_pixel_size(self):
+    def maximum_pixel_size(self):
         """
-        The maximun pixel size.
+        The maximum pixel size.
 
         :return:
         :rtype:
@@ -714,9 +714,9 @@ class ModelConfig(Config):
 
             num_point_sources = len(init[0]['ra_image'])
             sigma.append({
-                'ra_image': (self.maximun_pixel_size[0] * np.ones(
+                'ra_image': (self.maximum_pixel_size[0] * np.ones(
                                                            num_point_sources)),
-                'dec_image': (self.maximun_pixel_size[0] * np.ones(
+                'dec_image': (self.maximum_pixel_size[0] * np.ones(
                                                            num_point_sources)),
             })
 

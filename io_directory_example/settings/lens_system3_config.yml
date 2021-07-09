@@ -5,7 +5,9 @@ band:
   - 'F475X'
   - 'F600LP'
 
-pixel_size : 0.04
+pixel_size :
+  - 0.04
+  - 0.08
 
 model:
   lens:

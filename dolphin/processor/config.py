@@ -95,9 +95,9 @@ class ModelConfig(Config):
         :rtype:
         """
         if type(self.settings['pixel_size']) == float:
-            return [self.settings['pixel_size']]
+            return self.settings['pixel_size']
         else:
-            return [max(self.settings['pixel_size'])]
+            return max(self.settings['pixel_size'])
 
     @property
     def deflector_center_ra(self):
@@ -714,9 +714,9 @@ class ModelConfig(Config):
 
             num_point_sources = len(init[0]['ra_image'])
             sigma.append({
-                'ra_image': (self.maximum_pixel_size[0] * np.ones(
+                'ra_image': (self.maximum_pixel_size * np.ones(
                                                            num_point_sources)),
-                'dec_image': (self.maximum_pixel_size[0] * np.ones(
+                'dec_image': (self.maximum_pixel_size * np.ones(
                                                            num_point_sources)),
             })
 

@@ -715,9 +715,9 @@ class ModelConfig(Config):
             num_point_sources = len(init[0]['ra_image'])
             sigma.append({
                 'ra_image': self.maximun_pixel_size[0] *
-                                np.ones(num_point_sources),
+                            np.ones(num_point_sources),
                 'dec_image': self.maximun_pixel_size[0] *
-                                np.ones(num_point_sources),
+                             np.ones(num_point_sources),
             })
 
             lower.append({

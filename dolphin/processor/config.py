@@ -87,19 +87,6 @@ class ModelConfig(Config):
             return self.settings['pixel_size']
 
     @property
-    def maximum_pixel_size(self):
-        """
-        The maximum pixel size.
-
-        :return:
-        :rtype:
-        """
-        if type(self.settings['pixel_size']) == float:
-            return self.settings['pixel_size']
-        else:
-            return max(self.settings['pixel_size'])
-
-    @property
     def deflector_center_ra(self):
         """
         The RA offset for the deflector's center from the zero-point
@@ -714,9 +701,9 @@ class ModelConfig(Config):
 
             num_point_sources = len(init[0]['ra_image'])
             sigma.append({
-                'ra_image': self.maximum_pixel_size * np.ones(
+                'ra_image': np.max(self.pixel_size) * np.ones(
                                                            num_point_sources),
-                'dec_image': self.maximum_pixel_size * np.ones(
+                'dec_image': np.max(self.pixel_size) * np.ones(
                                                            num_point_sources),
             })
 

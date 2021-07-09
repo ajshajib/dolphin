@@ -71,15 +71,6 @@ class TestModelConfig(object):
         assert self.config.pixel_size == [0.04]
         assert self.config3.pixel_size == [0.04, 0.08]
 
-    def test_maximum_pixel_size(self):
-        """
-        Test the `maximum_pixel_size` property.
-        :return:
-        :rtype:
-        """
-        assert self.config.maximum_pixel_size == 0.04
-        assert self.config3.maximum_pixel_size == 0.08
-
     def test_deflector_center_ra(self):
         """
         Test the `deflector_center_ra` property.

@@ -69,7 +69,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.pixel_size == [0.04]
-        assert self.config3.pixel_size == [0.04,0.08]
+        assert self.config3.pixel_size == [0.04, 0.08]
 
     def test_maximum_pixel_size(self):
         """

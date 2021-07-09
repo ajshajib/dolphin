@@ -584,10 +584,10 @@ class ModelConfig(Config):
                         'e1': 0, 'e2': 0, 'n_sersic': 4.0
                     })
                     sigma.append({
-                    'center_x': self.pixel_size[n] / 10.,
-                    'center_y': self.pixel_size[n] / 10.,
-                    'R_sersic': 0.05, 'n_sersic': 0.5,
-                    'e1': 0.1, 'e2': 0.1
+                        'center_x': self.pixel_size[n] / 10.,
+                        'center_y': self.pixel_size[n] / 10.,
+                        'R_sersic': 0.05, 'n_sersic': 0.5,
+                        'e1': 0.1, 'e2': 0.1
                     })
 
                     lower.append({
@@ -714,8 +714,10 @@ class ModelConfig(Config):
 
             num_point_sources = len(init[0]['ra_image'])
             sigma.append({
-                'ra_image': self.maximun_pixel_size[0] * np.ones(num_point_sources),
-                'dec_image': self.maximun_pixel_size[0]* np.ones(num_point_sources),
+                'ra_image': self.maximun_pixel_size[0] *
+                                np.ones(num_point_sources),
+                'dec_image': self.maximun_pixel_size[0] *
+                                np.ones(num_point_sources),
             })
 
             lower.append({

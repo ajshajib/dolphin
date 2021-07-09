@@ -82,7 +82,10 @@ class ModelConfig(Config):
         :rtype:
         """
         if type(self.settings['pixel_size']) == float:
-            return [self.settings['pixel_size']]
+            pixel_size_list=[]
+            for n in range(self.band_number):
+                pixel_size_list.append(self.settings['pixel_size'])
+            return pixel_size_list
         else:
             return self.settings['pixel_size']
 

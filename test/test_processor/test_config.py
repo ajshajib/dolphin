@@ -71,6 +71,13 @@ class TestModelConfig(object):
         assert self.config.pixel_size == [0.04]
         assert self.config3.pixel_size == [0.04, 0.08]
 
+        config = deepcopy(self.config3)
+        assert config.pixel_size == [0.04, 0.08]
+
+        config.settings['pixel_size'] = 0.04
+        assert config.pixel_size == [0.04, 0.04]
+
+
     def test_deflector_center_ra(self):
         """
         Test the `deflector_center_ra` property.

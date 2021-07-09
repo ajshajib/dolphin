@@ -72,7 +72,7 @@ mask:
   centroid_offset: [[0., 0]]
   # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid
   radius: [2.] # 1d array, radius in arcsec for each band
-  extra_regions: [[0., 0., .2], [1.5, 1., .5]]
+  extra_regions: [[[0., 0., .2], [1.5, 1., .5]]]
   transform_matrix: [[[-4.00004004e-02, -2.74607936e-07],
                      [-2.67119793e-07,  3.99999886e-02]]]
   # same transform_pix2angle` in kwargs_data, 3d array, for each band

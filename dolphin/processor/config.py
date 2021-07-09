@@ -81,7 +81,23 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        return self.settings['pixel_size']
+        if type(self.settings['pixel_size']) == float:
+            return [self.settings['pixel_size']]
+        else:
+            return self.settings['pixel_size']
+
+    @property
+    def maximun_pixel_size(self):
+        """
+        The maximun pixel size.
+
+        :return:
+        :rtype:
+        """
+        if type(self.settings['pixel_size']) == float:
+            return [self.settings['pixel_size']]
+        else:
+            return [max(self.settings['pixel_size'])]
 
     @property
     def deflector_center_ra(self):
@@ -296,7 +312,7 @@ class ModelConfig(Config):
                             if self.settings['mask']['extra_regions'] is \
                                     not None:
                                 for reg in self.settings['mask'][
-                                                            'extra_regions']:
+                                                        'extra_regions'][n]:
                                     extra_masked_regions.append(
                                         mask_util.mask_center_2d(
                                             self.deflector_center_ra + reg[0],
@@ -567,12 +583,11 @@ class ModelConfig(Config):
                         'center_y': self.deflector_center_dec,
                         'e1': 0, 'e2': 0, 'n_sersic': 4.0
                     })
-
                     sigma.append({
-                        'center_x': self.pixel_size / 10.,
-                        'center_y': self.pixel_size / 10.,
-                        'R_sersic': 0.05, 'n_sersic': 0.5,
-                        'e1': 0.1, 'e2': 0.1
+                    'center_x': self.pixel_size[n] / 10.,
+                    'center_y': self.pixel_size[n] / 10.,
+                    'R_sersic': 0.05, 'n_sersic': 0.5,
+                    'e1': 0.1, 'e2': 0.1
                     })
 
                     lower.append({
@@ -699,8 +714,8 @@ class ModelConfig(Config):
 
             num_point_sources = len(init[0]['ra_image'])
             sigma.append({
-                'ra_image': self.pixel_size * np.ones(num_point_sources),
-                'dec_image': self.pixel_size * np.ones(num_point_sources),
+                'ra_image': self.maximun_pixel_size[0] * np.ones(num_point_sources),
+                'dec_image': self.maximun_pixel_size[0]* np.ones(num_point_sources),
             })
 
             lower.append({

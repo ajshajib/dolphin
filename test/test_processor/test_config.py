@@ -68,7 +68,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config.pixel_size == 0.04
+        assert self.config.pixel_size[0] == 0.04
 
     def test_deflector_center_ra(self):
         """

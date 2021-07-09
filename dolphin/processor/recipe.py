@@ -475,7 +475,8 @@ class Recipe(object):
         radial_gradient = 1 - radial_gradient
 
         # unmark any marked pixels from the central region
-        radial_gradient[r < int(clear_center / self._config.pixel_size)] = 0
+        radial_gradient[r < int(clear_center /
+                            self._config.maximun_pixel_size[0])] = 0
 
         # remove connected regions with area less than 5 pixels to remove
         # masked regions created by noise
@@ -520,7 +521,8 @@ class Recipe(object):
                                np.linspace(-w / 2, w / 2, int(w + 1)))
             r = np.sqrt(x * x + y * y)
 
-            arc_mask[r < int(clear_center / self._config.pixel_size)] = 1
+            arc_mask[r < int(clear_center /
+                        self._config.maximun_pixel_size[0])] = 1
 
         return arc_mask
 

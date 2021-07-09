@@ -77,7 +77,6 @@ class TestModelConfig(object):
         config.settings['pixel_size'] = 0.04
         assert config.pixel_size == [0.04, 0.04]
 
-
     def test_deflector_center_ra(self):
         """
         Test the `deflector_center_ra` property.

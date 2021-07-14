@@ -399,7 +399,7 @@ class ModelConfig(Config):
         else:
             return []
 
-    def get_source_light_model_list(self):
+    def get_source_light_model_list(self,single=False):
         """
         Return `source_model_list`.
 
@@ -407,15 +407,18 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'source_light' in self.settings['model']:
-            combined_source_light_model_list = []
-            for i in range(self.band_number):
-                combined_source_light_model_list.extend(
-                           self.settings['model']['source_light'])
-            return combined_source_light_model_list
+            if single == False:
+                combined_source_light_model_list = []
+                for i in range(self.band_number):
+                    combined_source_light_model_list.extend(
+                               self.settings['model']['source_light'])
+                return combined_source_light_model_list
+            else:
+                return self.settings['model']['source_light']
         else:
             return []
 
-    def get_lens_light_model_list(self):
+    def get_lens_light_model_list(self,single=False):
         """
         Return `lens_light_model_list`.
 
@@ -423,12 +426,14 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'lens_light' in self.settings['model']:
-            combined_lens_light_model_list = []
-            for i in range(self.band_number):
-                combined_lens_light_model_list.extend(self.settings[
-                                                        'model']['lens_light'])
-            return combined_lens_light_model_list
-
+            if single == False:
+                combined_lens_light_model_list = []
+                for i in range(self.band_number):
+                    combined_lens_light_model_list.extend(self.settings[
+                                                            'model']['lens_light'])
+                return combined_lens_light_model_list
+            else:
+                return self.settings['model']['lens_light']
         else:
             return []
 
@@ -552,7 +557,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        lens_light_model_list = self.get_lens_light_model_list()
+        lens_light_model_list = self.get_lens_light_model_list(single=True)
 
         fixed = []
         init = []
@@ -601,6 +606,7 @@ class ModelConfig(Config):
         fixed = self.fill_in_fixed_from_settings('lens_light', fixed)
 
         params = [init, sigma, fixed, lower, upper]
+     #   print("Seoul",init)
         return params
 
     def get_source_light_model_params(self):
@@ -610,7 +616,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        source_light_model_list = self.get_source_light_model_list()
+        source_light_model_list = self.get_source_light_model_list(single=True)
 
         fixed = []
         init = []

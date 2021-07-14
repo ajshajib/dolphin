@@ -570,7 +570,7 @@ class Recipe(object):
                 param_list_with_index.append([i, param_list])
 
         key = '{}_add_fixed'.format(model_component)
-
+    #    print("Paris",param_list_with_index)
         return ['update_settings', {key: param_list_with_index}]
 
     def unfix_params(self, model_component, index=None):

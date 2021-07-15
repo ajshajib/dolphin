@@ -82,7 +82,6 @@ class Processor(object):
         fitting_kwargs_list = recipe.get_recipe(
                                     kwargs_data_joint=kwargs_data_joint,
                                     recipe_name=recipe_name)
-       # print("Auckland",fitting_kwargs_list)
         fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 

@@ -401,7 +401,8 @@ class ModelConfig(Config):
 
     def get_source_light_model_list(self):
         """
-        Return `source_model_list`.
+        Return `source_model_list`. Duplicate elements in the list if
+        there is multiple bands.
 
         :return:
         :rtype:
@@ -417,7 +418,8 @@ class ModelConfig(Config):
 
     def get_lens_light_model_list(self):
         """
-        Return `lens_light_model_list`.
+        Return `lens_light_model_list`. Duplicate elements in the list if
+        there is multiple bands.
 
         :return:
         :rtype:

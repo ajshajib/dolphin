@@ -401,7 +401,7 @@ class ModelConfig(Config):
 
     def get_source_light_model_list(self):
         """
-        Return `source_model_list`. 
+        Return `source_model_list`.
 
         :return:
         :rtype:

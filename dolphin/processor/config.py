@@ -616,7 +616,7 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        k = 0
+        band_index = 0
         for i, model in enumerate(source_light_model_list):
             if model == 'SERSIC_ELLIPSE':
                 fixed.append({})
@@ -649,17 +649,17 @@ class ModelConfig(Config):
             elif model == 'SHAPELETS':
                 fixed.append(
                     {'n_max': self.settings['source_light_option'][
-                                                            'n_max'][k]})
+                                                        'n_max'][band_index]})
                 init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
                              'n_max': self.settings['source_light_option'][
-                                                            'n_max'][k]})
+                                                        'n_max'][band_index]})
                 sigma.append({'center_x': 0.5, 'center_y': 0.5,
                               'beta': 0.015 / 10., 'n_max': 2})
                 lower.append({'center_x': -1.2, 'center_y': -1.2,
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
                               'beta': 0.25, 'n_max': 55})
-                k += 1
+                band_index += 1
             else:
                 raise ValueError('{} not implemented as a source light'
                                  'model!'.format(model))

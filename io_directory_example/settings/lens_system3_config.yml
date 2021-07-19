@@ -32,7 +32,7 @@ lens_light_option:
   #fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 1st light profile
 
 source_light_option:
-  n_max: [2] # array with n_max for each source light profile
+  n_max: [2, 4] # array with n_max for each source light profile
 
 kwargs_constraints:
   #joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]

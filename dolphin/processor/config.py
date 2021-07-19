@@ -428,7 +428,6 @@ class ModelConfig(Config):
                 combined_lens_light_model_list.extend(self.settings[
                                                         'model']['lens_light'])
             return combined_lens_light_model_list
-
         else:
             return []
 
@@ -560,43 +559,42 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        for n in range(self.band_number):
-            for i, model in enumerate(lens_light_model_list):
-                if model == 'SERSIC_ELLIPSE':
-                    fixed.append({})
-                    init.append({
-                        'amp': 1., 'R_sersic': .2,
-                        'center_x': self.deflector_center_ra,
-                        'center_y': self.deflector_center_dec,
-                        'e1': 0, 'e2': 0, 'n_sersic': 4.0
-                    })
-                    sigma.append({
-                        'center_x': self.pixel_size[n] / 10.,
-                        'center_y': self.pixel_size[n] / 10.,
-                        'R_sersic': 0.05, 'n_sersic': 0.5,
-                        'e1': 0.1, 'e2': 0.1
-                    })
+        for i, model in enumerate(lens_light_model_list):
+            if model == 'SERSIC_ELLIPSE':
+                fixed.append({})
+                init.append({
+                    'amp': 1., 'R_sersic': .2,
+                    'center_x': self.deflector_center_ra,
+                    'center_y': self.deflector_center_dec,
+                    'e1': 0, 'e2': 0, 'n_sersic': 4.0
+                })
+                sigma.append({
+                    'center_x': np.max(self.pixel_size) / 10.,
+                    'center_y': np.max(self.pixel_size) / 10.,
+                    'R_sersic': 0.05, 'n_sersic': 0.5,
+                    'e1': 0.1, 'e2': 0.1
+                })
 
-                    lower.append({
-                        'e1': -0.5, 'e2': -0.5,
-                        'n_sersic': .5, 'R_sersic': 0.1,
-                        'center_x': self.deflector_center_ra
-                                    - self.deflector_centroid_bound,
-                        'center_y': self.deflector_center_dec
-                                    - self.deflector_centroid_bound
-                    })
+                lower.append({
+                    'e1': -0.5, 'e2': -0.5,
+                    'n_sersic': .5, 'R_sersic': 0.1,
+                    'center_x': self.deflector_center_ra
+                                - self.deflector_centroid_bound,
+                    'center_y': self.deflector_center_dec
+                                - self.deflector_centroid_bound
+                })
 
-                    upper.append({
-                        'e1': 0.5, 'e2': 0.5,
-                        'n_sersic': 8., 'R_sersic': 5.,
-                        'center_x': self.deflector_center_ra
-                                        + self.deflector_centroid_bound,
-                        'center_y': self.deflector_center_dec
-                                        + self.deflector_centroid_bound
-                    })
-                else:
-                    raise ValueError('{} not implemented as a lens light'
-                                     'model!'.format(model))
+                upper.append({
+                    'e1': 0.5, 'e2': 0.5,
+                    'n_sersic': 8., 'R_sersic': 5.,
+                    'center_x': self.deflector_center_ra
+                                    + self.deflector_centroid_bound,
+                    'center_y': self.deflector_center_dec
+                                    + self.deflector_centroid_bound
+                })
+            else:
+                raise ValueError('{} not implemented as a lens light'
+                                 'model!'.format(model))
 
         fixed = self.fill_in_fixed_from_settings('lens_light', fixed)
 
@@ -618,56 +616,53 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        for n in range(self.band_number-1):
-            self.settings['source_light_option']['n_max'].extend(
-                             self.settings['source_light_option']['n_max'])
+        band_index = 0
+        for i, model in enumerate(source_light_model_list):
+            if model == 'SERSIC_ELLIPSE':
+                fixed.append({})
 
-        for n in range(self.band_number):
-            for i, model in enumerate(source_light_model_list):
-                if model == 'SERSIC_ELLIPSE':
-                    fixed.append({})
+                init.append({
+                    'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,
+                    'center_x': 0.,
+                    'center_y': 0.,
+                    'e1': 0., 'e2': 0.
+                })
 
-                    init.append({
-                        'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,
-                        'center_x': 0.,
-                        'center_y': 0.,
-                        'e1': 0., 'e2': 0.
-                    })
+                sigma.append({
+                    'center_x': 0.5,
+                    'center_y': 0.5,
+                    'R_sersic': 0.01, 'n_sersic': 0.5,
+                    'e1': 0.05, 'e2': 0.05
+                })
 
-                    sigma.append({
-                        'center_x': 0.5,
-                        'center_y': 0.5,
-                        'R_sersic': 0.01, 'n_sersic': 0.5,
-                        'e1': 0.05, 'e2': 0.05
-                    })
+                lower.append({
+                    'R_sersic': 0.04, 'n_sersic': .5,
+                    'center_y': -2., 'center_x': -2.,
+                    'e1': -0.5, 'e2': -0.5
+                })
 
-                    lower.append({
-                        'R_sersic': 0.04, 'n_sersic': .5,
-                        'center_y': -2., 'center_x': -2.,
-                        'e1': -0.5, 'e2': -0.5
-                    })
-
-                    upper.append({
-                        'R_sersic': .5, 'n_sersic': 8.,
-                        'center_y': 2., 'center_x': 2.,
-                        'e1': 0.5, 'e2': 0.5
-                    })
-                elif model == 'SHAPELETS':
-                    fixed.append(
-                        {'n_max': self.settings['source_light_option'][
-                                                                'n_max'][n]})
-                    init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
-                                 'n_max': self.settings['source_light_option'][
-                                                                'n_max'][n]})
-                    sigma.append({'center_x': 0.5, 'center_y': 0.5,
-                                  'beta': 0.015 / 10., 'n_max': 2})
-                    lower.append({'center_x': -1.2, 'center_y': -1.2,
-                                  'beta': 0.02, 'n_max': -1})
-                    upper.append({'center_x': 1.2, 'center_y': 1.2,
-                                  'beta': 0.25, 'n_max': 55})
-                else:
-                    raise ValueError('{} not implemented as a source light'
-                                     'model!'.format(model))
+                upper.append({
+                    'R_sersic': .5, 'n_sersic': 8.,
+                    'center_y': 2., 'center_x': 2.,
+                    'e1': 0.5, 'e2': 0.5
+                })
+            elif model == 'SHAPELETS':
+                fixed.append(
+                    {'n_max': self.settings['source_light_option'][
+                                                        'n_max'][band_index]})
+                init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
+                             'n_max': self.settings['source_light_option'][
+                                                        'n_max'][band_index]})
+                sigma.append({'center_x': 0.5, 'center_y': 0.5,
+                              'beta': 0.015 / 10., 'n_max': 2})
+                lower.append({'center_x': -1.2, 'center_y': -1.2,
+                              'beta': 0.02, 'n_max': -1})
+                upper.append({'center_x': 1.2, 'center_y': 1.2,
+                              'beta': 0.25, 'n_max': 55})
+                band_index += 1
+            else:
+                raise ValueError('{} not implemented as a source light'
+                                 'model!'.format(model))
 
         fixed = self.fill_in_fixed_from_settings('source_light', fixed)
 

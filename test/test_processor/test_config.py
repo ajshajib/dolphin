@@ -397,7 +397,7 @@ class TestModelConfig(object):
 
         config2 = deepcopy(self.config3)
         config2.get_source_light_model_params()
-        assert config2.settings['source_light_option']['n_max'] == [2, 2]
+        assert config2.settings['source_light_option']['n_max'] == [2, 4]
 
     def test_fill_in_fixed_from_settings(self):
         """

@@ -254,11 +254,9 @@ class ModelConfig(Config):
             for index, param_dict in \
                     self.settings['lens_option']['gaussian_prior'].items():
                 for i in param_dict:
-                    Plist = [index]
-                    Plist.extend(i)
-                    print(Plist)
-                    kwargs_likelihood['prior_lens'].append(Plist)
-        print(kwargs_likelihood)
+                    prior_param = [index]
+                    prior_param.extend(i)
+                    kwargs_likelihood['prior_lens'].append(prior_param)
         return kwargs_likelihood
 
     def get_masks(self):

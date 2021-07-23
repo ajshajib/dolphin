@@ -26,7 +26,10 @@ model:
 
 lens_option:
   centroid_init: [0.04, -0.04]
-
+  gaussian_prior:
+    0 :
+      - ['gamma', 2.11, 0.03]
+      - ['theta_E', 1.11, 0.13]
 lens_light_option:
   fix: { 0: { 'n_sersic': 4. }, 1: { 'n_sersic': 3.5 } }
   #fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 1st light profile

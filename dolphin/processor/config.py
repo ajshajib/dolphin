@@ -245,9 +245,20 @@ class ModelConfig(Config):
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True] * self.band_number,
-            'image_likelihood_mask_list': self.get_masks()
+            'image_likelihood_mask_list': self.get_masks(),
+            'prior_lens': []
         }
 
+        if 'lens_option' in self.settings and \
+           'gaussian_prior' in self.settings['lens_option']:
+            for index, param_dict in \
+                    self.settings['lens_option']['gaussian_prior'].items():
+                for i in param_dict:
+                    Plist = [index]
+                    Plist.extend(i)
+                    print(Plist)
+                    kwargs_likelihood['prior_lens'].append(Plist)
+        print(kwargs_likelihood)
         return kwargs_likelihood
 
     def get_masks(self):

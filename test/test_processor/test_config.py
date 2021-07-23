@@ -203,11 +203,16 @@ class TestModelConfig(object):
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True],
+            'prior_lens': []
             # 'image_likelihood_mask_list': self.config.get_masks()
         }
         kwargs_likelihood = self.config.get_kwargs_likelihood()
         kwargs_likelihood.pop('image_likelihood_mask_list')
         assert kwargs_likelihood == test_likelihood
+
+        kwargs_likelihood2 = self.config3.get_kwargs_likelihood()
+        assert kwargs_likelihood2['prior_lens'] == \
+            [[0, 'gamma', 2.11, 0.03], [0, 'theta_E', 1.11, 0.13]]
 
     def test_get_masks(self):
         """

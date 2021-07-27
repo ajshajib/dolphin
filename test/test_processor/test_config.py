@@ -221,6 +221,9 @@ class TestModelConfig(object):
         assert kwargs_likelihood2['prior_source'] == \
             [[0, 'R_sersic', 0.21, 0.15]]
 
+        assert kwargs_likelihood2['prior_ps'] == \
+            [[0, 'ra_image', 0.21, 0.15]]
+
     def test_get_masks(self):
         """
         Test `get_masks` method.

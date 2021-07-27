@@ -45,6 +45,10 @@ source_light_option:
     0:
       - [ 'R_sersic', 0.21, 0.15 ]
 
+point_source_option:
+  gaussian_prior:
+    0:
+      - [ 'ra_image', 0.21, 0.15 ]
 
 kwargs_constraints:
   #joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]

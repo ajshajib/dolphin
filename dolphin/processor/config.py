@@ -245,8 +245,48 @@ class ModelConfig(Config):
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True] * self.band_number,
-            'image_likelihood_mask_list': self.get_masks()
+            'image_likelihood_mask_list': self.get_masks(),
+            'prior_lens': [],
+            'prior_lens_light': [],
+            'prior_ps': [],
+            'prior_source': [],
         }
+
+        if 'lens_option' in self.settings and \
+           'gaussian_prior' in self.settings['lens_option']:
+            for index, param_dict in \
+              self.settings['lens_option']['gaussian_prior'].items():
+                for i in param_dict:
+                    prior_param = [index]
+                    prior_param.extend(i)
+                    kwargs_likelihood['prior_lens'].append(prior_param)
+
+        if 'lens_light_option' in self.settings and \
+           'gaussian_prior' in self.settings['lens_light_option']:
+            for index, param_dict in \
+              self.settings['lens_light_option']['gaussian_prior'].items():
+                for i in param_dict:
+                    prior_param = [index]
+                    prior_param.extend(i)
+                    kwargs_likelihood['prior_lens_light'].append(prior_param)
+
+        if 'source_light_option' in self.settings and \
+           'gaussian_prior' in self.settings['source_light_option']:
+            for index, param_dict in \
+              self.settings['source_light_option']['gaussian_prior'].items():
+                for i in param_dict:
+                    prior_param = [index]
+                    prior_param.extend(i)
+                    kwargs_likelihood['prior_source'].append(prior_param)
+
+        if 'point_source_option' in self.settings and \
+           'gaussian_prior' in self.settings['point_source_option']:
+            for index, param_dict in \
+              self.settings['point_source_option']['gaussian_prior'].items():
+                for i in param_dict:
+                    prior_param = [index]
+                    prior_param.extend(i)
+                    kwargs_likelihood['prior_ps'].append(prior_param)
 
         return kwargs_likelihood
 

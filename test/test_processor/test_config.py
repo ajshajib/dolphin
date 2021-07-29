@@ -175,10 +175,8 @@ class TestModelConfig(object):
         self.config2.settings['band'] = ['F390W']
         kwargs_constraints = self.config2.get_kwargs_constraints()
 
-        assert kwargs_constraints['joint_source_with_source'] == [[0, 1,
-                                                                   ['center_x',
-                                                                    'center_y']]
-                                                                  ]
+        assert kwargs_constraints['joint_source_with_source'] == \
+               [[0, 1, ['center_x', 'center_y']]]
         assert kwargs_constraints['joint_source_with_point_source'] == [
             [0, 0],
             [0, 1]
@@ -203,11 +201,31 @@ class TestModelConfig(object):
             'check_positive_flux': True,
             'check_bounds': True,
             'bands_compute': [True],
+            'prior_lens': [],
+            'prior_lens_light': [],
+            'prior_ps': [],
+            'prior_source': [],
             # 'image_likelihood_mask_list': self.config.get_masks()
         }
         kwargs_likelihood = self.config.get_kwargs_likelihood()
         kwargs_likelihood.pop('image_likelihood_mask_list')
         assert kwargs_likelihood == test_likelihood
+
+        kwargs_likelihood2 = self.config3.get_kwargs_likelihood()
+        assert kwargs_likelihood2['prior_lens'] == \
+            [[0, 'gamma', 2.11, 0.03], [0, 'theta_E', 1.11, 0.13]]
+        assert kwargs_likelihood2['prior_lens_light'] == \
+            [[0, 'R_sersic', 0.21, 0.15]]
+        assert kwargs_likelihood2['prior_source'] == \
+            [[0, 'beta', 0.15, 0.05]]
+
+        config = deepcopy(self.config3)
+        config.settings['point_source_option'] = \
+            {'gaussian_prior': {0: [['ra_image', 0.21, 0.15]]}}
+
+        kwargs_likelihood3 = config.get_kwargs_likelihood()
+        assert kwargs_likelihood3['prior_ps'] == \
+            [[0, 'ra_image', 0.21, 0.15]]
 
     def test_get_masks(self):
         """
@@ -234,9 +252,9 @@ class TestModelConfig(object):
         assert len(masks2) == self.config2.band_number
 
         for n in range(self.config2.band_number):
-            assert masks2[n].shape == (self.config2.settings['mask']['size'][n],
-                                       self.config2.settings['mask']['size'][n]
-                                       )
+            assert masks2[n].shape == \
+                   (self.config2.settings['mask']['size'][n],
+                    self.config2.settings['mask']['size'][n])
 
         self.config2.settings['mask'] = None
         assert self.config2.get_masks() is None
@@ -442,6 +460,7 @@ class TestModelConfig(object):
         """
         assert self.config.get_index_source_light_model_list() == [[0]]
         assert self.config3.get_index_source_light_model_list() == [[0], [1]]
+
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']
         assert config.get_index_source_light_model_list() == []

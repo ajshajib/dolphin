@@ -217,12 +217,11 @@ class TestModelConfig(object):
         assert kwargs_likelihood2['prior_lens_light'] == \
             [[0, 'R_sersic', 0.21, 0.15]]
 
-
         config = deepcopy(self.config3)
         config.settings['source_light_option'] = \
-            {'gaussian_prior': { 0: [['R_sersic', 0.21, 0.15]]}}
+            {'gaussian_prior': {0: [['R_sersic', 0.21, 0.15]]}}
         config.settings['point_source_option'] = \
-            {'gaussian_prior': { 0: [['ra_image', 0.21, 0.15]]}}
+            {'gaussian_prior': {0: [['ra_image', 0.21, 0.15]]}}
 
         kwargs_likelihood3 = config.get_kwargs_likelihood()
         assert kwargs_likelihood3['prior_source'] == \

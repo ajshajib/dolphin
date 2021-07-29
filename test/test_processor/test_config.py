@@ -161,9 +161,7 @@ class TestModelConfig(object):
         }
 
         kwargs_constraints_2 = {
-            'joint_source_with_source': [[0, 1, ['center_x', 'center_y']],
-                                         [0, 2, ['center_x', 'center_y']],
-                                         [0, 3, ['center_x', 'center_y']]],
+            'joint_source_with_source': [[0, 1, ['center_x', 'center_y']]],
             'joint_lens_light_with_lens_light':
                                         [[0, 1, ['center_x', 'center_y']],
                                          [0, 2, ['center_x', 'center_y']],
@@ -218,10 +216,18 @@ class TestModelConfig(object):
             [[0, 'gamma', 2.11, 0.03], [0, 'theta_E', 1.11, 0.13]]
         assert kwargs_likelihood2['prior_lens_light'] == \
             [[0, 'R_sersic', 0.21, 0.15]]
-        assert kwargs_likelihood2['prior_source'] == \
-            [[0, 'R_sersic', 0.21, 0.15]]
 
-        assert kwargs_likelihood2['prior_ps'] == \
+
+        config = deepcopy(self.config3)
+        config.settings['source_light_option'] = \
+            {'gaussian_prior': { 0: [['R_sersic', 0.21, 0.15]]}}
+        config.settings['point_source_option'] = \
+            {'gaussian_prior': { 0: [['ra_image', 0.21, 0.15]]}}
+
+        kwargs_likelihood3 = config.get_kwargs_likelihood()
+        assert kwargs_likelihood3['prior_source'] == \
+            [[0, 'R_sersic', 0.21, 0.15]]
+        assert kwargs_likelihood3['prior_ps'] == \
             [[0, 'ra_image', 0.21, 0.15]]
 
     def test_get_masks(self):
@@ -348,7 +354,7 @@ class TestModelConfig(object):
 
         config2 = deepcopy(self.config3)
         assert config2.get_source_light_model_list() == \
-               ['SERSIC_ELLIPSE', 'SHAPELETS', 'SERSIC_ELLIPSE', 'SHAPELETS']
+               ['SHAPELETS', 'SHAPELETS']
 
     def test_get_lens_light_model_list(self):
         """
@@ -456,8 +462,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config.get_index_source_light_model_list() == [[0]]
-        assert self.config3.get_index_source_light_model_list() == [[0, 1],
-                                                                    [2, 3]]
+        assert self.config3.get_index_source_light_model_list() == [[0], [1]]
 
         config = deepcopy(self.config2)
         del config.settings['model']['lens_light']

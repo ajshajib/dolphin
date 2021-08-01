@@ -447,11 +447,7 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'source_light' in self.settings['model']:
-            combined_source_light_model_list = []
-            for i in range(self.band_number):
-                combined_source_light_model_list.extend(
-                           self.settings['model']['source_light'])
-            return combined_source_light_model_list
+            return self.settings['model']['source_light']
         else:
             return []
 
@@ -463,11 +459,7 @@ class ModelConfig(Config):
         :rtype:
         """
         if 'lens_light' in self.settings['model']:
-            combined_lens_light_model_list = []
-            for i in range(self.band_number):
-                combined_lens_light_model_list.extend(self.settings[
-                                                        'model']['lens_light'])
-            return combined_lens_light_model_list
+            return self.settings['model']['lens_light']
         else:
             return []
 
@@ -490,15 +482,24 @@ class ModelConfig(Config):
          (for multiple filters)
         """
         if 'lens_light' in self.settings['model']:
-            index_lens_light_model_list = []
-            index_num = 0
-            for i in range(self.band_number):
-                single_index_list = []
-                for j in range(len(self.settings['model']['lens_light'])):
-                    single_index_list.append(index_num)
-                    index_num += 1
-                index_lens_light_model_list.append(single_index_list)
-            return index_lens_light_model_list
+            if self.band_number == 1:
+                index_list = [[]]
+                for k, model in enumerate(
+                        self.settings['model']['lens_light']):
+                    index_list[0].append(k)
+                return index_list
+            else:
+                if 'lens_light_band_index' in self.settings['model']:
+                    index_list_settings = \
+                       self.settings['model']['lens_light_band_index']
+                    index_list = [[] for _ in range(self.band_number)]
+                    for i, model in enumerate(index_list_settings):
+                        index_list[model].append(i)
+                    for k in index_list:
+                        assert k != [], "One of the bands have no lens light"
+                    return index_list
+                else:
+                    raise ValueError('Missing lens_light_band_index')
         else:
             return []
 
@@ -508,17 +509,25 @@ class ModelConfig(Config):
          (for multiple filters)
 
         """
-        if 'lens_light' in self.settings['model']:
-            index_source_light_model_list = []
-            index_num = 0
-            for i in range(self.band_number):
-                single_index_list = []
-                for j in range(len(self.settings['model']['source_light'])):
-                    single_index_list.append(index_num)
-                    index_num += 1
-                index_source_light_model_list.append(single_index_list)
-            return index_source_light_model_list
-
+        if 'source_light' in self.settings['model']:
+            if self.band_number == 1:
+                index_list = [[]]
+                for k, model in enumerate(
+                        self.settings['model']['source_light']):
+                    index_list[0].append(k)
+                return index_list
+            else:
+                if 'source_light_band_index' in self.settings['model']:
+                    index_list_settings =\
+                        self.settings['model']['source_light_band_index']
+                    index_list = [[] for _ in range(self.band_number)]
+                    for i, model in enumerate(index_list_settings):
+                        index_list[model].append(i)
+                    for k in index_list:
+                        assert k != [], "One of the bands have no source light"
+                    return index_list
+                else:
+                    raise ValueError('Missing source_light_band_index')
         else:
             return []
 
@@ -554,7 +563,7 @@ class ModelConfig(Config):
                 })
 
                 lower.append({
-                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.,
+                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.5,
                     'center_x': self.deflector_center_ra
                                     - self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -562,7 +571,7 @@ class ModelConfig(Config):
                 })
 
                 upper.append({
-                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 3.,
+                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.5,
                     'center_x': self.deflector_center_ra
                     + self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -784,10 +793,7 @@ class ModelConfig(Config):
                 for index, param_dict in self.settings[option_str][
                                                                 'fix'].items():
                     for key, value in param_dict.items():
-                        for n in range(self.band_number):
-                            n_lens = len(self.settings['model']['lens_light'])
-                            fixed_list[int(index)+n_lens*n][key] = value
-
+                        fixed_list[int(index)][key] = value
         return fixed_list
 
     def get_kwargs_params(self):

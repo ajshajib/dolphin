@@ -17,9 +17,14 @@ model:
   lens_light:
     - 'SERSIC_ELLIPSE'
     - 'SERSIC_ELLIPSE'
+    - 'SERSIC_ELLIPSE'
+    - 'SERSIC_ELLIPSE'
+  lens_light_band_index: [0,0,1,1]
 
   source_light:
     - 'SHAPELETS'
+    - 'SHAPELETS'
+  source_light_band_index: [0,1]
 
  # point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
@@ -32,14 +37,14 @@ lens_option:
       - ['theta_E', 1.11, 0.13]
 
 lens_light_option:
-  fix: { 0: { 'n_sersic': 4. }, 1: { 'n_sersic': 3.5 } }
+  fix: { 0: { 'n_sersic': 4. }, 2: { 'n_sersic': 4. }  }
   # fix n_sersic to 4. for 1st light profile
   gaussian_prior:
     0:
       - ['R_sersic', 0.21, 0.15 ]
 
 source_light_option:
-  n_max: [2, 4] # array with n_max for each source light profile
+  n_max: [2, 4] # array with n_max for each shapelets source profile
   gaussian_prior:
     0:
       - ['beta', 0.15, 0.05 ]

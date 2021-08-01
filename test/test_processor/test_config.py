@@ -428,6 +428,12 @@ class TestModelConfig(object):
                                                         fixed)
         assert fixed == [{'n_sersic': 4.}]
 
+        fixed2 = [{}, {}, {}, {}]
+        fixed2 = self.config3.fill_in_fixed_from_settings('lens_light',
+                                                          fixed2)
+        assert fixed2 == [{'n_sersic': 4.}, {}, {'n_sersic': 4.}, {}]
+
+
     def test_get_psf_supersampling_factor(self):
         """
         Test `get_psf_supersampling_factor` method.
@@ -462,5 +468,5 @@ class TestModelConfig(object):
         assert self.config3.get_index_source_light_model_list() == [[0], [1]]
 
         config = deepcopy(self.config2)
-        del config.settings['model']['lens_light']
+        del config.settings['model']['source_light']
         assert config.get_index_source_light_model_list() == []

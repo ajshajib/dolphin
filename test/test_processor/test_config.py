@@ -428,6 +428,11 @@ class TestModelConfig(object):
                                                         fixed)
         assert fixed == [{'n_sersic': 4.}]
 
+        fixed2 = [{}, {}, {}, {}]
+        fixed2 = self.config3.fill_in_fixed_from_settings('lens_light',
+                                                          fixed2)
+        assert fixed2 == [{'n_sersic': 4.}, {}, {'n_sersic': 4.}, {}]
+
     def test_get_psf_supersampling_factor(self):
         """
         Test `get_psf_supersampling_factor` method.
@@ -452,6 +457,11 @@ class TestModelConfig(object):
         del config.settings['model']['lens_light']
         assert config.get_index_lens_light_model_list() == []
 
+        config2 = deepcopy(self.config2)
+        config2.settings['band'] = ['F390W', 'F555W']
+        with pytest.raises(ValueError):
+            config2.get_index_lens_light_model_list()
+
     def test_get_index_source_light_model_list(self):
         """
         Test `get_index_source_light_model_list` method.
@@ -462,5 +472,10 @@ class TestModelConfig(object):
         assert self.config3.get_index_source_light_model_list() == [[0], [1]]
 
         config = deepcopy(self.config2)
-        del config.settings['model']['lens_light']
+        del config.settings['model']['source_light']
         assert config.get_index_source_light_model_list() == []
+
+        config2 = deepcopy(self.config2)
+        config2.settings['band'] = ['F390W', 'F555W']
+        with pytest.raises(ValueError):
+            config2.get_index_source_light_model_list()

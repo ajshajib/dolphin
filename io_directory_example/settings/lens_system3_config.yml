@@ -19,12 +19,12 @@ model:
     - 'SERSIC_ELLIPSE'
     - 'SERSIC_ELLIPSE'
     - 'SERSIC_ELLIPSE'
-  lens_light_band_indices: [0,0,1,1]
+  lens_light_band_indices: [0, 0, 1, 1]
 
   source_light:
     - 'SHAPELETS'
     - 'SHAPELETS'
-  source_light_band_indices: [0,1]
+  source_light_band_indices: [0, 1]
 
  # point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
 

@@ -428,6 +428,11 @@ class TestModelConfig(object):
                                                         fixed)
         assert fixed == [{'n_sersic': 4.}]
 
+        fixed2 = [{}, {}, {}, {}]
+        fixed2 = self.config3.fill_in_fixed_from_settings('lens_light',
+                                                          fixed2)
+        assert fixed2 == [{'n_sersic': 4.}, {}, {'n_sersic': 4.}, {}]
+
     def test_get_psf_supersampling_factor(self):
         """
         Test `get_psf_supersampling_factor` method.

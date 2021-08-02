@@ -489,17 +489,17 @@ class ModelConfig(Config):
                     index_list[0].append(k)
                 return index_list
             else:
-                if 'lens_light_band_index' in self.settings['model']:
-                    index_list_settings = \
-                       self.settings['model']['lens_light_band_index']
+                if 'lens_light_band_indices' in self.settings['model']:
                     index_list = [[] for _ in range(self.band_number)]
-                    for i, model in enumerate(index_list_settings):
+                    for i, model in enumerate(self.settings['model'][
+                                                  'lens_light_band_indices']):
                         index_list[model].append(i)
                     for k in index_list:
                         assert k != [], "One of the bands have no lens light"
                     return index_list
                 else:
-                    raise ValueError('Missing lens_light_band_index')
+                    raise ValueError(
+                     'Missing "lens_light_band_indices" in the settings file!')
         else:
             return []
 
@@ -517,17 +517,18 @@ class ModelConfig(Config):
                     index_list[0].append(k)
                 return index_list
             else:
-                if 'source_light_band_index' in self.settings['model']:
-                    index_list_settings =\
-                        self.settings['model']['source_light_band_index']
+                if 'source_light_band_indices' in self.settings['model']:
                     index_list = [[] for _ in range(self.band_number)]
-                    for i, model in enumerate(index_list_settings):
+                    for i, model in enumerate(self.settings['model'][
+                                                 'source_light_band_indices']):
                         index_list[model].append(i)
                     for k in index_list:
                         assert k != [], "One of the bands have no source light"
                     return index_list
                 else:
-                    raise ValueError('Missing source_light_band_index')
+                    raise ValueError(
+                        'Missing "source_light_band_indices" '
+                        'in the settings file!')
         else:
             return []
 

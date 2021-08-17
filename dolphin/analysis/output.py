@@ -241,12 +241,11 @@ class Output(Processor):
                                                  band_index=band_index,
                                                  data_cmap=data_cmap)
         else:
-            model_plot, v_max2 = self.get_model_plot(
-                                                 lens_name,
-                                                 model_id=model_id,
-                                                 kwargs_result=kwargs_result,
-                                                 band_index=band_index,
-                                                 data_cmap=data_cmap)
+            model_plot = self.get_model_plot(lens_name,
+                                             model_id=model_id,
+                                             kwargs_result=kwargs_result,
+                                             band_index=band_index,
+                                             data_cmap=data_cmap)[0]
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 

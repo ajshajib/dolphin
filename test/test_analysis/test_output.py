@@ -109,6 +109,11 @@ class TestOutput(object):
 
         plt.close(fig)
 
+        fig2 = self.output.plot_model_overview('lens_system2', 'example',
+                                               v_min = -3.0, v_max = 1.0)
+
+        plt.close(fig2)
+
     def test_plot_mcmc_trace(self):
         """
         Test `plot_mcmc_trace` method.

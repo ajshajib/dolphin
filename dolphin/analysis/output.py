@@ -225,11 +225,15 @@ class Output(Processor):
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
         :param residual_cmap: colormap for noise residual plot
-        :type residual_cmap: str` or `matplotlib.colors.Colormap`
+        :type residual_cmap: `str` or `matplotlib.colors.Colormap`
         :param convergence_cmap: colormap for convergence plot
-        :type convergence_cmap: str` or `matplotlib.colors.Colormap`
+        :type convergence_cmap: `str` or `matplotlib.colors.Colormap`
         :param magnification_cmap: colormap for magnification plot
-        :type magnification_cmap: str` or `matplotlib.colors.Colormap`
+        :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
+        :param v_min: minimum plotting scale for the model, data, & source plot
+        :type v_min: `float` or `int`
+        :param v_max: maximum plotting scale for the model, data, & source plot
+        :type v_max: `float` or `int`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """

@@ -22,6 +22,7 @@ lens_option:
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
+  prior_lens_light_ellip: 15 # degrees
 
 source_light_option:
   n_max: [2] # array with n_max for each band

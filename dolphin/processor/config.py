@@ -313,8 +313,10 @@ class ModelConfig(Config):
 
         sigma = self.settings['lens_light_option']['prior_lens_light_ellip']
 
-        log_prior = -0.5 * (pa_light - pa_mass) ** 2 / sigma ** 2 - np.log(
-            np.sqrt(np.pi * 2) * sigma)
+        diff = min(abs(pa_light-pa_mass), 90-abs(pa_light-pa_mass))
+
+        log_prior = -0.5 * (diff) ** 2 / sigma ** 2 \
+                    - np.log(np.sqrt(np.pi * 2) * sigma)
 
         return log_prior
 

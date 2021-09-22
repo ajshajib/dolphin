@@ -8,7 +8,8 @@ pixel_size : 0.04
 
 model:
   lens:
-    - 'SPEP' # the first mass profile needs to be for the deflector as required by `lenstronomy`
+    - 'SPEP' # the first mass profile needs to be for the deflector
+             # as required by `lenstronomy`
     - 'SHEAR_GAMMA_PSI'
   lens_light:
     - 'SERSIC_ELLIPSE'
@@ -22,7 +23,9 @@ lens_option:
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
-  prior_lens_light_ellip: 15 # sigma (degrees)
+  prior_lens_light_ellip: 15
+  # Allowed range of angle difference between lens and lens
+  # light ellipticity (degrees)
 
 source_light_option:
   n_max: [2] # array with n_max for each band

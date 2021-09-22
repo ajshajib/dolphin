@@ -313,12 +313,12 @@ class ModelConfig(Config):
 
         sigma = self.settings['lens_light_option']['prior_lens_light_ellip']
 
-        diff = min(abs(pa_light-pa_mass), 90-abs(pa_light-pa_mass))
+        diff = min(abs(pa_light-pa_mass), 180 - abs(pa_light-pa_mass))
 
-        log_prior = -0.5 * (diff) ** 2 / sigma ** 2 \
-                    - np.log(np.sqrt(np.pi * 2) * sigma)
-
-        return log_prior
+        if diff < sigma:
+            return 0.0
+        else:
+            return -np.inf
 
     def get_masks(self):
         """

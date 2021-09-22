@@ -205,6 +205,7 @@ class TestModelConfig(object):
             'prior_lens_light': [],
             'prior_ps': [],
             'prior_source': [],
+            'custom_logL_addition': self.config.custom_logL_addition
             # 'image_likelihood_mask_list': self.config.get_masks()
         }
         kwargs_likelihood = self.config.get_kwargs_likelihood()

@@ -9,6 +9,7 @@ import numpy as np
 from copy import deepcopy
 
 from lenstronomy.Data.coord_transforms import Coordinates
+from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util
 
@@ -288,7 +289,36 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood['prior_ps'].append(prior_param)
 
+        if 'lens_light_option' in self.settings and \
+                'prior_lens_light_ellip' in self.settings['lens_light_option']:
+            kwargs_likelihood['custom_logL_addition'] = \
+                self.custom_logL_addition
+
         return kwargs_likelihood
+
+    def custom_logL_addition(self, kwargs_lens=None, kwargs_source=None,
+                             kwargs_lens_light=None, kwargs_ps=None,
+                             kwargs_special=None,
+                             kwargs_extinction=None):
+        """
+        Impose a Gaussian prior on the NFW scale radius R_s based on
+         Gavazzi et al. (2007).
+        """
+
+        pa_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                     kwargs_lens[0]['e2'])[0] * 180 / np.pi
+        pa_mass = \
+            ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                              kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+
+        sigma = self.settings['lens_light_option']['prior_lens_light_ellip']
+
+        diff = min(abs(pa_light-pa_mass), 180 - abs(pa_light-pa_mass))
+
+        if diff < sigma:
+            return 0.0
+        else:
+            return -np.inf
 
     def get_masks(self):
         """

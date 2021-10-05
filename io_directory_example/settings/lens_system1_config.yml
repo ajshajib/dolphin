@@ -20,12 +20,12 @@ model:
 lens_option:
   centroid_init: [0.04, -0.04]
 #  centroid_bound:
+  constrain_position_angle_from_lens_light: 15
+  # Maximum allowed position angle difference between lens mass and lens
+  # light in degrees
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
-  prior_lens_light_ellip: 15
-  # Allowed range of angle difference between lens and lens
-  # light ellipticity (degrees)
 
 source_light_option:
   n_max: [2] # array with n_max for each band

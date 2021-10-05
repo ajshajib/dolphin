@@ -42,7 +42,6 @@ lens_light_option:
   gaussian_prior:
     0:
       - ['R_sersic', 0.21, 0.15 ]
-  prior_lens_light_ellip: 15 # degrees
 
 source_light_option:
   n_max: [2, 4] # array with n_max for each shapelets source profile

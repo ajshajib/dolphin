@@ -115,12 +115,12 @@ class Recipe(object):
                                  'galaxy-galaxy optimization recipe!')
             fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
                 kwargs_data_joint)
-        elif recipe_name == 'galaxy-galaxy_fixed-slope' :
+        elif recipe_name == 'galaxy-galaxy_fixed-slope':
             if kwargs_data_joint is None:
                 raise ValueError('kwargs_data_joint is necessary to use '
                                  'galaxy-galaxy optimization recipe!')
             fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
-                kwargs_data_joint,const=True)
+                kwargs_data_joint, const=True)
         elif recipe_name == 'skip':
             pass
         else:
@@ -388,7 +388,7 @@ class Recipe(object):
                     self.unfix_params('lens'),
                     self.fix_params('lens', external_shear_model_index)
                 ]
-                #fix the gamma parameter for fixed-slope recipe
+                # fix the gamma parameter for fixed-slope recipe
                 if const:
                     fitting_kwargs_list += [
                      ['update_settings',

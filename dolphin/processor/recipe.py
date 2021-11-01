@@ -115,6 +115,12 @@ class Recipe(object):
                                  'galaxy-galaxy optimization recipe!')
             fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
                 kwargs_data_joint)
+        elif recipe_name == 'galaxy-galaxy_fixed-slope' :
+            if kwargs_data_joint is None:
+                raise ValueError('kwargs_data_joint is necessary to use '
+                                 'galaxy-galaxy optimization recipe!')
+            fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
+                kwargs_data_joint,const=True)
         elif recipe_name == 'skip':
             pass
         else:
@@ -285,7 +291,8 @@ class Recipe(object):
 
         return fitting_kwargs_list
 
-    def get_galaxy_galaxy_recipe(self, kwargs_data_joint, epochs=2):
+    def get_galaxy_galaxy_recipe(self, kwargs_data_joint,
+                                 epochs=2, const=False):
         """
         Get the pre-sampling optimization routine for a galaxy-galaxy lens.
         PSF iteration is not added.
@@ -381,6 +388,11 @@ class Recipe(object):
                     self.unfix_params('lens'),
                     self.fix_params('lens', external_shear_model_index)
                 ]
+                #fix the gamma parameter for fixed-slope recipe
+                if const:
+                    fitting_kwargs_list += [
+                     ['update_settings',
+                      {'lens_add_fixed': [[0, ['gamma']]]}]]
 
                 # optimize for lens and source together, fix power-law gamma to
                 # 2, as all the lens parameters are unfixed

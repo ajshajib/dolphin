@@ -78,6 +78,9 @@ class TestRecipe(object):
             recipe.get_recipe(recipe_name='galaxy-galaxy')
 
         with pytest.raises(ValueError):
+            recipe.get_recipe(recipe_name='galaxy-galaxy_fixed-slope')
+
+        with pytest.raises(ValueError):
             recipe.get_recipe(recipe_name='tuna-salad')
 
         # check that the first sequence is 'MCMC' when
@@ -213,6 +216,11 @@ class TestRecipe(object):
             recipe_name='galaxy-galaxy')
 
         fitting_sequence.fit_sequence(fitting_kwargs_list)
+
+        # Similar test for galaxy-galaxy_fixed-slope recipe
+        fitting_kwargs_list2 = recipe.get_recipe(
+            kwargs_data_joint=kwargs_data_joint,
+            recipe_name='galaxy-galaxy_fixed-slope')
 
     def test_get_arc_mask(self):
         """

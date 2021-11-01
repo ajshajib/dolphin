@@ -222,6 +222,8 @@ class TestRecipe(object):
             kwargs_data_joint=kwargs_data_joint,
             recipe_name='galaxy-galaxy_fixed-slope')
 
+        fitting_sequence.fit_sequence(fitting_kwargs_list2)
+
     def test_get_arc_mask(self):
         """
         Test `get_arc_mask` method.

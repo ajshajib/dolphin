@@ -78,9 +78,6 @@ class TestRecipe(object):
             recipe.get_recipe(recipe_name='galaxy-galaxy')
 
         with pytest.raises(ValueError):
-            recipe.get_recipe(recipe_name='galaxy-galaxy_fixed-slope')
-
-        with pytest.raises(ValueError):
             recipe.get_recipe(recipe_name='tuna-salad')
 
         # check that the first sequence is 'MCMC' when

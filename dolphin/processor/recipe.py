@@ -134,9 +134,12 @@ class Recipe(object):
         :rtype: `int`
         """
         lens_model_list = self._config.get_lens_model_list()
-        if 'SPEMD' in lens_model_list or 'SPEP' in lens_model_list:
+        if 'SPEMD' in lens_model_list or 'PEMD' in lens_model_list or  \
+                'SPEP' in lens_model_list:
             if 'SPEMD' in lens_model_list:
                 index = lens_model_list.index('SPEMD')
+            elif 'PEMD' in lens_model_list:
+                index = lens_model_list.index('PEMD')
             else:
                 index = lens_model_list.index('SPEP')
         else:

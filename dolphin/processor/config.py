@@ -387,6 +387,29 @@ class ModelConfig(Config):
                         for extra_region in extra_masked_regions:
                             mask *= extra_region
 
+                        edge_mask_regions = []
+
+                        try:
+                            self.settings['mask']['mask_edge_pixel']
+                        except (NameError, KeyError):
+                            pass
+                        else:
+                            bdr_len = \
+                                self.settings['mask']['mask_edge_pixel'][n]
+                            if bdr_len > 0:
+                                edge_mask = 0 * np.ones(
+                                 (num_pixel, num_pixel), dtype=int)
+
+                                edge_mask[bdr_len:-bdr_len,
+                                          bdr_len:-bdr_len] = 1
+                                edge_mask = (edge_mask.flatten()).tolist()
+                            elif bdr_len == 0:
+                                edge_mask = 1 * np.ones(
+                                   (num_pixel, num_pixel), dtype=int)
+                                edge_mask = (edge_mask.flatten()).tolist()
+
+                            mask *= edge_mask
+
                         # sanity check
                         mask[mask >= 1.] = 1.
                         mask[mask <= 0.] = 0.

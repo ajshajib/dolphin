@@ -387,8 +387,6 @@ class ModelConfig(Config):
                         for extra_region in extra_masked_regions:
                             mask *= extra_region
 
-                        edge_mask_regions = []
-
                         try:
                             self.settings['mask']['mask_edge_pixel']
                         except (NameError, KeyError):

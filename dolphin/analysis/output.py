@@ -308,22 +308,22 @@ class Output(Processor):
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
         model_plot.decomposition_plot(ax=axes[0, 0], text='Lens light',
-                                     lens_light_add=True, unconvolved=True)
+                                      lens_light_add=True, unconvolved=True)
         model_plot.decomposition_plot(ax=axes[1, 0],
-                                     text='Lens light convolved',
-                                     lens_light_add=True)
+                                      text='Lens light convolved',
+                                      lens_light_add=True)
         model_plot.decomposition_plot(ax=axes[0, 1], text='Source light',
-                                     source_add=True, unconvolved=True)
+                                      source_add=True, unconvolved=True)
         model_plot.decomposition_plot(ax=axes[1, 1],
-                                     text='Source light convolved',
-                                     source_add=True)
+                                      text='Source light convolved',
+                                      source_add=True)
         model_plot.decomposition_plot(ax=axes[0, 2], text='All components',
-                                     source_add=True, lens_light_add=True,
-                                     unconvolved=True)
+                                      source_add=True, lens_light_add=True,
+                                      unconvolved=True)
         model_plot.decomposition_plot(ax=axes[1, 2],
-                                     text='All components convolved',
-                                     source_add=True, lens_light_add=True,
-                                     point_source_add=True)
+                                      text='All components convolved',
+                                      source_add=True, lens_light_add=True,
+                                      point_source_add=True)
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)

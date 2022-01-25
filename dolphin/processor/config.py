@@ -305,7 +305,6 @@ class ModelConfig(Config):
         Impose a Gaussian prior to limit the Maximum allowed position angle
          difference between lens mass and lens light (in degrees).
         """
-
         pa_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                      kwargs_lens[0]['e2'])[0] * 180 / np.pi
         pa_mass = \
@@ -413,8 +412,8 @@ class ModelConfig(Config):
                         except (NameError, KeyError):
                             pass
                         else:
-                            if self.settings['mask']['custom_mask'][
-                                n] is not None:
+                            if self.settings['mask']['custom_mask'][n]\
+                                    is not None:
                                 provided_mask = \
                                     self.settings['mask']['custom_mask'][n]
                                 provided_mask = np.array(provided_mask)
@@ -427,8 +426,6 @@ class ModelConfig(Config):
                                                 provided_mask == 1),
                                     provided_mask ^ 1, provided_mask)
                                 mask *= provided_mask
-
-
 
                         # sanity check
                         mask[mask >= 1.] = 1.

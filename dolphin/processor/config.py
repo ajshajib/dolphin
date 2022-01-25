@@ -386,7 +386,7 @@ class ModelConfig(Config):
 
                         for extra_region in extra_masked_regions:
                             mask *= extra_region
-
+                        # Mask Edge Pixels
                         try:
                             self.settings['mask']['mask_edge_pixel']
                         except (NameError, KeyError):
@@ -407,6 +407,28 @@ class ModelConfig(Config):
                                 edge_mask = (edge_mask.flatten()).tolist()
 
                             mask *= edge_mask
+                        # Add custom Mask
+                        try:
+                            self.settings['mask']['custom_mask']
+                        except (NameError, KeyError):
+                            pass
+                        else:
+                            if self.settings['mask']['custom_mask'][
+                                n] is not None:
+                                provided_mask = \
+                                    self.settings['mask']['custom_mask'][n]
+                                provided_mask = np.array(provided_mask)
+                                # make sure that mask consist of only 0 and 1
+                                provided_mask[provided_mask > 0.] = 1.
+                                provided_mask[provided_mask <= 0.] = 0.
+                                # Invert mask
+                                provided_mask = np.where(
+                                    (provided_mask == 0) | (
+                                                provided_mask == 1),
+                                    provided_mask ^ 1, provided_mask)
+                                mask *= provided_mask
+
+
 
                         # sanity check
                         mask[mask >= 1.] = 1.

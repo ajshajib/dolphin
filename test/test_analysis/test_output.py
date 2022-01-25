@@ -110,7 +110,27 @@ class TestOutput(object):
         plt.close(fig)
 
         fig2 = self.output.plot_model_overview('lens_system2', 'example',
-                                               v_min=-3.0, v_max=1.0)
+                                               v_min=-3.0, v_max=1.0,
+                                               print_Results=True)
+
+        plt.close(fig2)
+
+    def test_plot_model_decomposition(self):
+        """
+        Test `plot_model_overview` method.
+
+        :return:
+        :rtype:
+        """
+        with pytest.raises(ValueError):
+            _ = self.output.plot_model_decomposition('lens_system2')
+
+        fig = self.output.plot_model_decomposition('lens_system2', 'example')
+
+        plt.close(fig)
+
+        fig2 = self.output.plot_model_decomposition('lens_system2', 'example',
+                                                    v_min=-3.0, v_max=1.0)
 
         plt.close(fig2)
 

@@ -260,6 +260,10 @@ class TestModelConfig(object):
         self.config2.settings['mask'] = None
         assert self.config2.get_masks() is None
 
+        masks2 = self.config2.get_masks()
+
+        masks3 = self.config3.get_masks()
+
     def test_get_kwargs_psf_iteration(self):
         """
         Test `get_psf_iteration` method.

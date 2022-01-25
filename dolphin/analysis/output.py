@@ -238,10 +238,11 @@ class Output(Processor):
         :rtype: `matplotlib.pyplot.figure`
         """
         if print_Results:
+            print_kwargs_result = kwargs_result
             if kwargs_result is None:
-                print((self.load_output(lens_name, model_id))["kwargs_result"])
-            else:
-                print(kwargs_result)
+                print_kwargs_result =\
+                    self.load_output(lens_name, model_id)["kwargs_result"]
+            print(print_kwargs_result)
 
         if v_max is None:
             model_plot, v_max = self.get_model_plot(

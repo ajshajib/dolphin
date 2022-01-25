@@ -117,7 +117,7 @@ class TestOutput(object):
 
     def test_plot_model_decomposition(self):
         """
-        Test `plot_model_overview` method.
+        Test `plot_model_decomposition` method.
 
         :return:
         :rtype:

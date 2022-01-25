@@ -44,7 +44,7 @@ mask:
   dec_at_xy_0:
   - -2.4
   - -2.4
-  included:
+  custom_mask:
   - - 0
     - 1
     - 0
@@ -147,17 +147,17 @@ mask:
     - 1
   - null
   mask_edge_pixel:
-  - 5
   - 0
+  - 1
   ra_at_xy_0:
   - 2.4
   - 2.4
   radius:
   - 20.0
-  - 2.0
+  - 20.0
   size:
   - 10
-  - 120
+  - 10
   transform_matrix:
   - - - -0.0400004004
       - -2.74607936e-07

@@ -97,6 +97,9 @@ class TestRecipe(object):
         config.settings['model']['lens'] = ['SERSIC', 'SPEP']
         assert Recipe(config)._get_power_law_model_index() == 1
 
+        config.settings['model']['lens'] = ['PEMD', 'SERSIC']
+        assert Recipe(config)._get_power_law_model_index() == 0
+
         config.settings['model']['lens'] = ['SERSIC']
         assert Recipe(config)._get_power_law_model_index() is None
 

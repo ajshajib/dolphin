@@ -421,10 +421,7 @@ class ModelConfig(Config):
                                 provided_mask[provided_mask > 0.] = 1.
                                 provided_mask[provided_mask <= 0.] = 0.
                                 # Invert mask
-                                provided_mask = np.where(
-                                    (provided_mask == 0) | (
-                                                provided_mask == 1),
-                                    provided_mask ^ 1, provided_mask)
+                                provided_mask = np.abs(provided_mask - 1)
                                 mask *= provided_mask
 
                         # sanity check

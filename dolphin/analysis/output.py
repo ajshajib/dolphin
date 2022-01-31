@@ -201,7 +201,7 @@ class Output(Processor):
 
     def plot_model_overview(self, lens_name, model_id=None,
                             kwargs_result=None, band_index=0,
-                            data_cmap='cubehelix', residual_cmap='RdBu',
+                            data_cmap='cubehelix', residual_cmap='RdBu_r',
                             convergence_cmap='afmhot',
                             magnification_cmap='viridis',
                             v_min=None, v_max=None, print_Results=False):
@@ -283,9 +283,7 @@ class Output(Processor):
 
     def plot_model_decomposition(self, lens_name, model_id=None,
                                  kwargs_result=None, band_index=0,
-                                 data_cmap='cubehelix', residual_cmap='RdBu',
-                                 convergence_cmap='afmhot',
-                                 magnification_cmap='viridis',
+                                 data_cmap='cubehelix',
                                  v_min=None, v_max=None):
         """
         Plot model decomposition
@@ -309,22 +307,33 @@ class Output(Processor):
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
         model_plot.decomposition_plot(ax=axes[0, 0], text='Lens light',
-                                      lens_light_add=True, unconvolved=True)
+                                      lens_light_add=True, unconvolved=True,
+                                      band_index=band_index,
+                                      v_max=v_max, v_min=v_min)
         model_plot.decomposition_plot(ax=axes[1, 0],
                                       text='Lens light convolved',
-                                      lens_light_add=True)
+                                      lens_light_add=True,
+                                      band_index=band_index,
+                                      v_max=v_max, v_min=v_min)
         model_plot.decomposition_plot(ax=axes[0, 1], text='Source light',
-                                      source_add=True, unconvolved=True)
+                                      source_add=True, unconvolved=True,
+                                      band_index=band_index,
+                                      v_max=v_max, v_min=v_min)
         model_plot.decomposition_plot(ax=axes[1, 1],
                                       text='Source light convolved',
-                                      source_add=True)
+                                      source_add=True,
+                                      band_index=band_index,
+                                      v_max=v_max, v_min=v_min)
         model_plot.decomposition_plot(ax=axes[0, 2], text='All components',
                                       source_add=True, lens_light_add=True,
-                                      unconvolved=True)
+                                      unconvolved=True, band_index=band_index,
+                                      v_max=v_max, v_min=v_min)
         model_plot.decomposition_plot(ax=axes[1, 2],
                                       text='All components convolved',
                                       source_add=True, lens_light_add=True,
-                                      point_source_add=True)
+                                      point_source_add=True,
+                                      band_index=band_index,
+                                      v_max=v_max, v_min=v_min)
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)

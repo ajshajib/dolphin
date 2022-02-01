@@ -204,7 +204,7 @@ class Output(Processor):
                             data_cmap='cubehelix', residual_cmap='RdBu_r',
                             convergence_cmap='afmhot',
                             magnification_cmap='viridis',
-                            v_min=None, v_max=None, print_Results=False):
+                            v_min=None, v_max=None, print_results=False):
         """
         Plot the model, residual, reconstructed source, convergence,
         and magnification profiles. Either `model_id` or `kwargs_result`
@@ -237,7 +237,7 @@ class Output(Processor):
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
-        if print_Results:
+        if print_results:
             print_kwargs_result = kwargs_result
             if kwargs_result is None:
                 print_kwargs_result =\
@@ -286,8 +286,30 @@ class Output(Processor):
                                  data_cmap='cubehelix',
                                  v_min=None, v_max=None):
         """
-        Plot model decomposition
+        Plot lens light and source light model decomposition, both with
+        convolved  and unconvolved light. Either `model_id` or `kwargs_result`
+        needs to be provided. `kwargs_result` is prioritized for plotting if
+        both are provided.
 
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
+            provided, it will be used to plot the model, otherwise the model
+            will be plotted from the saved/loaded outputs for `lens_name` and
+            `model_id`.
+        :type kwargs_result: `dict`
+        :param band_index: index of band to plot for multi-band case
+        :type band_index: `int`
+        :param data_cmap: colormap for image, reconstruction, and source plots
+        :type data_cmap: `str` or `matplotlib.colors.Colormap`
+        :param v_min: minimum plotting scale for the model, data, & source plot
+        :type v_min: `float` or `int`
+        :param v_max: maximum plotting scale for the model, data, & source plot
+        :type v_max: `float` or `int`
+        :return: `matplotlib.pyplot.figure` instance with the plots
+        :rtype: `matplotlib.pyplot.figure`
 
         """
 

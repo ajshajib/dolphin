@@ -391,16 +391,16 @@ class ModelConfig(Config):
                         except (NameError, KeyError):
                             pass
                         else:
-                            bdr_len = \
+                            border_length = \
                                 self.settings['mask']['mask_edge_pixel'][n]
-                            if bdr_len > 0:
+                            if border_length > 0:
                                 edge_mask = 0 * np.ones(
                                  (num_pixel, num_pixel), dtype=int)
 
-                                edge_mask[bdr_len:-bdr_len,
-                                          bdr_len:-bdr_len] = 1
+                                edge_mask[border_length:-border_length,
+                                          border_length:-border_length] = 1
                                 edge_mask = (edge_mask.flatten()).tolist()
-                            elif bdr_len == 0:
+                            elif border_length == 0:
                                 edge_mask = 1 * np.ones(
                                    (num_pixel, num_pixel), dtype=int)
                                 edge_mask = (edge_mask.flatten()).tolist()

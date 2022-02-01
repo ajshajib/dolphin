@@ -263,12 +263,13 @@ class TestModelConfig(object):
         masks2 = self.config2.get_masks()
 
         masks3 = self.config3.get_masks()
-        # Test custom mask
+        # Test custom mask (Alternating Pattern)
         assert masks3[0][0][0] == 1.
         assert masks3[0][0][1] == 0.
+        assert masks3[0][0][2] == 1.
         # Test mask_edge_pixel
-        assert masks3[1][0][0] == 0.
-        assert masks3[1][5][5] == 1.
+        assert masks3[1][0][0] == 0. #Edge Pixel
+        assert masks3[1][5][5] == 1. #Middle Pixel
 
     def test_get_kwargs_psf_iteration(self):
         """

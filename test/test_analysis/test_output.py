@@ -111,7 +111,7 @@ class TestOutput(object):
 
         fig2 = self.output.plot_model_overview('lens_system2', 'example',
                                                v_min=-3.0, v_max=1.0,
-                                               print_Results=True)
+                                               print_results=True)
 
         plt.close(fig2)
 

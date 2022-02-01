@@ -268,8 +268,8 @@ class TestModelConfig(object):
         assert masks3[0][0][1] == 0.
         assert masks3[0][0][2] == 1.
         # Test mask_edge_pixel
-        assert masks3[1][0][0] == 0. #Edge Pixel
-        assert masks3[1][5][5] == 1. #Middle Pixel
+        assert masks3[1][0][0] == 0.  # Edge Pixel
+        assert masks3[1][5][5] == 1.  # Middle Pixel
 
     def test_get_kwargs_psf_iteration(self):
         """

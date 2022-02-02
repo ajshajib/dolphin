@@ -305,7 +305,6 @@ class ModelConfig(Config):
         Impose a Gaussian prior to limit the Maximum allowed position angle
          difference between lens mass and lens light (in degrees).
         """
-
         pa_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                      kwargs_lens[0]['e2'])[0] * 180 / np.pi
         pa_mass = \
@@ -386,6 +385,44 @@ class ModelConfig(Config):
 
                         for extra_region in extra_masked_regions:
                             mask *= extra_region
+                        # Mask Edge Pixels
+                        try:
+                            self.settings['mask']['mask_edge_pixel']
+                        except (NameError, KeyError):
+                            pass
+                        else:
+                            border_length = \
+                                self.settings['mask']['mask_edge_pixel'][n]
+                            if border_length > 0:
+                                edge_mask = 0 * np.ones(
+                                 (num_pixel, num_pixel), dtype=int)
+
+                                edge_mask[border_length:-border_length,
+                                          border_length:-border_length] = 1
+                                edge_mask = (edge_mask.flatten()).tolist()
+                            elif border_length == 0:
+                                edge_mask = 1 * np.ones(
+                                   (num_pixel, num_pixel), dtype=int)
+                                edge_mask = (edge_mask.flatten()).tolist()
+
+                            mask *= edge_mask
+                        # Add custom Mask
+                        try:
+                            self.settings['mask']['custom_mask']
+                        except (NameError, KeyError):
+                            pass
+                        else:
+                            if self.settings['mask']['custom_mask'][n]\
+                                    is not None:
+                                provided_mask = \
+                                    self.settings['mask']['custom_mask'][n]
+                                provided_mask = np.array(provided_mask)
+                                # make sure that mask consist of only 0 and 1
+                                provided_mask[provided_mask > 0.] = 1.
+                                provided_mask[provided_mask <= 0.] = 0.
+                                # Invert mask
+                                provided_mask = np.abs(provided_mask - 1)
+                                mask *= provided_mask
 
                         # sanity check
                         mask[mask >= 1.] = 1.
@@ -732,15 +769,15 @@ class ModelConfig(Config):
                 fixed.append(
                     {'n_max': self.settings['source_light_option'][
                                                         'n_max'][band_index]})
-                init.append({'center_x': 0., 'center_y': 0., 'beta': 0.15,
+                init.append({'center_x': 0., 'center_y': 0., 'beta': 0.10,
                              'n_max': self.settings['source_light_option'][
                                                         'n_max'][band_index]})
                 sigma.append({'center_x': 0.5, 'center_y': 0.5,
-                              'beta': 0.015 / 10., 'n_max': 2})
+                              'beta': 0.010 / 10., 'n_max': 2})
                 lower.append({'center_x': -1.2, 'center_y': -1.2,
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
-                              'beta': 0.25, 'n_max': 55})
+                              'beta': 0.18, 'n_max': 55})
                 band_index += 1
             else:
                 raise ValueError('{} not implemented as a source light'

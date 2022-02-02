@@ -1,66 +1,205 @@
----
-system_name: 'lens_system3'
-
 band:
-  - 'F475X'
-  - 'F600LP'
-
-pixel_size :
-  - 0.04
-  - 0.08
-
-model:
-  lens:
-    - 'SPEP' # the first mass profile needs to be for the deflector as required by `lenstronomy`
-    - 'SHEAR_GAMMA_PSI'
-
-  lens_light:
-    - 'SERSIC_ELLIPSE'
-    - 'SERSIC_ELLIPSE'
-    - 'SERSIC_ELLIPSE'
-    - 'SERSIC_ELLIPSE'
-  lens_light_band_indices: [0, 0, 1, 1]
-
-  source_light:
-    - 'SHAPELETS'
-    - 'SHAPELETS'
-  source_light_band_indices: [0, 1]
-
- # point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
-
-
-lens_option:
-  centroid_init: [0.04, -0.04]
-  gaussian_prior:
-    0 :
-      - ['gamma', 2.11, 0.03]
-      - ['theta_E', 1.11, 0.13]
-
-lens_light_option:
-  fix: { 0: { 'n_sersic': 4. }, 2: { 'n_sersic': 4. }  }
-  # fix n_sersic to 4. for 1st light profile
-  gaussian_prior:
-    0:
-      - ['R_sersic', 0.21, 0.15 ]
-
-source_light_option:
-  n_max: [2, 4] # array with n_max for each shapelets source profile
-  gaussian_prior:
-    0:
-      - ['beta', 0.15, 0.05 ]
-
+- F475X
+- F600LP
 fitting:
-  pso: true
-  pso_settings:
-    num_particle: 10
-    num_iteration: 10
-
-  sampling: true
-  sampler: 'MCMC'
   mcmc_settings:
     burnin_step: 0
     iteration_step: 10
     walker_ratio: 2
-
+  pso: true
+  pso_settings:
+    num_iteration: 10
+    num_particle: 10
+  sampler: MCMC
+  sampling: true
+lens_light_option:
+  fix:
+    0:
+      n_sersic: 4.0
+    2:
+      n_sersic: 4.0
+  gaussian_prior:
+    0:
+    - - R_sersic
+      - 0.21
+      - 0.15
+lens_option:
+  centroid_init:
+  - 0.04
+  - -0.04
+  gaussian_prior:
+    0:
+    - - gamma
+      - 2.11
+      - 0.03
+    - - theta_E
+      - 1.11
+      - 0.13
+mask:
+  centroid_offset:
+  - - 0.0
+    - 0
+  - - 0.0
+    - 0
+  dec_at_xy_0:
+  - -2.4
+  - -2.4
+  custom_mask:
+  - - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+    - 0
+    - 1
+  - null
+  mask_edge_pixel:
+  - 0
+  - 1
+  ra_at_xy_0:
+  - 2.4
+  - 2.4
+  radius:
+  - 20.0
+  - 20.0
+  size:
+  - 10
+  - 10
+  transform_matrix:
+  - - - -0.0400004004
+      - -2.74607936e-07
+    - - -2.67119793e-07
+      - 0.0399999886
+  - - - -0.0400004004
+      - -2.74607936e-07
+    - - -2.67119793e-07
+      - 0.0399999886
+model:
+  lens:
+  - SPEP
+  - SHEAR_GAMMA_PSI
+  lens_light:
+  - SERSIC_ELLIPSE
+  - SERSIC_ELLIPSE
+  - SERSIC_ELLIPSE
+  - SERSIC_ELLIPSE
+  lens_light_band_indices:
+  - 0
+  - 0
+  - 1
+  - 1
+  source_light:
+  - SHAPELETS
+  - SHAPELETS
+  source_light_band_indices:
+  - 0
+  - 1
 numeric_option:
-  supersampling_factor: [2]
+  supersampling_factor:
+  - 2
+pixel_size:
+- 0.04
+- 0.08
+source_light_option:
+  gaussian_prior:
+    0:
+    - - beta
+      - 0.15
+      - 0.05
+  n_max:
+  - 2
+  - 4
+system_name: lens_system3

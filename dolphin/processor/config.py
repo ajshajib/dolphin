@@ -295,7 +295,7 @@ class ModelConfig(Config):
             if 'constrain_position_angle_from_lens_light'\
                     in self.settings['lens_option']:
                 use_custom_logL_addition = True
-            elif 'max_qm/qi_ratio' in self.settings['lens_option']:
+            if 'max_qm/qi_ratio' in self.settings['lens_option']:
                 use_custom_logL_addition = True
 
         if 'source_light_option' in self.settings:
@@ -308,8 +308,7 @@ class ModelConfig(Config):
 
         return kwargs_likelihood
 
-    def custom_logL_addition(self,
-                             kwargs_lens=None, kwargs_source=None,
+    def custom_logL_addition(self, kwargs_lens=None, kwargs_source=None,
                              kwargs_lens_light=None, kwargs_ps=None,
                              kwargs_special=None,
                              kwargs_extinction=None):

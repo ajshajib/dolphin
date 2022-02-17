@@ -228,6 +228,37 @@ class TestModelConfig(object):
         assert kwargs_likelihood3['prior_ps'] == \
             [[0, 'ra_image', 0.21, 0.15]]
 
+    def test_custom_logL_addition(self):
+        """
+        Test `custom_logL_addition` method.
+        :return:
+        :rtype:
+        """
+        # Satisfy both priors
+        config = deepcopy(self.config)
+        prior1 = config.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.176, 'e2': 0.0}])
+        assert prior1 == 0
+
+        # qm < qL
+        prior2 = config.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
+        assert prior2 == -np.inf
+
+        # Angle out of sync
+        prior3 = config.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.055, 'e2': 0.096}])
+        assert prior3 == -np.inf
+
+        # Test Jeffrey's Prior
+        config3 = deepcopy(self.config3)
+        prior3 = config3.custom_logL_addition(
+            kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
+        assert round(prior3, 2) == 4.61
+
     def test_get_masks(self):
         """
         Test `get_masks` method.
@@ -263,13 +294,11 @@ class TestModelConfig(object):
         masks2 = self.config2.get_masks()
 
         masks3 = self.config3.get_masks()
-        # Test custom mask (Alternating Pattern)
-        assert masks3[0][0][0] == 1.
-        assert masks3[0][0][1] == 0.
-        assert masks3[0][0][2] == 1.
-        # Test mask_edge_pixel
-        assert masks3[1][0][0] == 0.  # Edge Pixel
-        assert masks3[1][5][5] == 1.  # Middle Pixel
+        # Test custom mask (Alternating Pixel Mask)
+        assert masks3[0][0, 0:6].tolist() == [1., 0., 1., 0., 1., 0.]
+        # Test mask_edge_pixel (2 pixels border)
+        assert masks3[1][5, 0:6].tolist() == [0., 0., 1., 1., 1., 1.]
+        assert masks3[1][5, -6:].tolist() == [1., 1., 1., 1., 0., 0.]
 
     def test_get_kwargs_psf_iteration(self):
         """

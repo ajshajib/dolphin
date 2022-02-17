@@ -44,7 +44,7 @@ mask:
   dec_at_xy_0:
   - -2.4
   - -2.4
-  custom_mask:
+  custom_mask:  #Alternating Pixel Mask (1 represent masking )
   - - 0
     - 1
     - 0
@@ -148,7 +148,7 @@ mask:
   - null
   mask_edge_pixel:
   - 0
-  - 1
+  - 2
   ra_at_xy_0:
   - 2.4
   - 2.4
@@ -199,6 +199,7 @@ source_light_option:
     - - beta
       - 0.15
       - 0.05
+  jeffreys_beta: true
   n_max:
   - 2
   - 4

@@ -289,37 +289,81 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood['prior_ps'].append(prior_param)
 
-        if 'lens_option' in self.settings and \
-            'constrain_position_angle_from_lens_light' \
-                in self.settings['lens_option']:
-            kwargs_likelihood['custom_logL_addition'] = \
+        use_custom_logL_addition = False
+
+        if 'lens_option' in self.settings:
+            if 'constrain_position_angle_from_lens_light'\
+                    in self.settings['lens_option']:
+                use_custom_logL_addition = True
+            elif 'max_qm/qi_ratio' in self.settings['lens_option']:
+                use_custom_logL_addition = True
+
+        if 'source_light_option' in self.settings:
+            if 'jeffreys_beta' in self.settings['source_light_option']:
+                use_custom_logL_addition = True
+
+        if use_custom_logL_addition:
+            kwargs_likelihood['custom_logL_addition'] =\
                 self.custom_logL_addition
 
         return kwargs_likelihood
 
-    def custom_logL_addition(self, kwargs_lens=None, kwargs_source=None,
+    def custom_logL_addition(self,
+                             kwargs_lens=None, kwargs_source=None,
                              kwargs_lens_light=None, kwargs_ps=None,
                              kwargs_special=None,
                              kwargs_extinction=None):
         """
-        Impose a Gaussian prior to limit the Maximum allowed position angle
+        Add different types of custom log L funtions
+        1) Impose a Gaussian prior to limit the Maximum allowed position angle
          difference between lens mass and lens light (in degrees).
+        2) Impose a Gaussian prior to limit the ratio between the lens mass and
+           less light
+        3) Impose a Jeffrey's prior and the beta of the system
         """
-        pa_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
-                                     kwargs_lens[0]['e2'])[0] * 180 / np.pi
-        pa_mass = \
-            ellipticity2phi_q(kwargs_lens_light[0]['e1'],
-                              kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+        prior = 0.0
 
-        max_delta = (self.settings['lens_option']
-                     ['constrain_position_angle_from_lens_light'])
+        # Allign pa_light and pa_mass
+        if 'lens_option' in self.settings and \
+                'constrain_position_angle_from_lens_light' \
+                in self.settings['lens_option']:
+            max_delta = (self.settings['lens_option']
+                         ['constrain_position_angle_from_lens_light'])
 
-        diff = min(abs(pa_light-pa_mass), 180 - abs(pa_light-pa_mass))
+            pa_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                        kwargs_lens[0]['e2'])[0] * 180 / np.pi
+            pa_light = \
+                ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                                  kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+            diff = min(abs(pa_light - pa_mass), 180 - abs(pa_light - pa_mass))
 
-        if diff < np.abs(max_delta):
-            return 0.0
-        else:
-            return -np.inf
+            if diff < np.abs(max_delta):
+                prior += 0.0
+            else:
+                prior += -np.inf
+
+        # Ensure q_mass is smaller than q_light
+        if 'lens_option' in self.settings and \
+                'max_qm/qi_ratio' in self.settings['lens_option']:
+            max_ratio = self.settings['lens_option']['max_qm/qi_ratio']
+            q_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                        kwargs_lens[0]['e2'])[1]
+            q_mass = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                                       kwargs_lens_light[0]['e2'])[1]
+            if q_mass / q_light <= max_ratio:
+                prior += 0.0
+            else:
+                prior += -np.inf
+
+        # Jeffrey's Prior for beta
+        if 'source_light_option' in self.settings and \
+                'jeffreys_beta' in self.settings['source_light_option']:
+            for i, pfl in enumerate(self.settings['model']['source_light']):
+                if pfl == "SHAPELETS":
+                    beta = kwargs_source[i]['beta']
+                    prior += - np.log(beta)
+
+        return prior
 
     def get_masks(self):
         """
@@ -777,7 +821,7 @@ class ModelConfig(Config):
                 lower.append({'center_x': -1.2, 'center_y': -1.2,
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
-                              'beta': 0.18, 'n_max': 55})
+                              'beta': 0.20, 'n_max': 55})
                 band_index += 1
             else:
                 raise ValueError('{} not implemented as a source light'

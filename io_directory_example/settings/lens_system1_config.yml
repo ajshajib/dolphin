@@ -23,6 +23,7 @@ lens_option:
   constrain_position_angle_from_lens_light: 15
   # Maximum allowed position angle difference between lens mass and lens
   # light in degrees
+  max_qm/qi_ratio: 1.0
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile

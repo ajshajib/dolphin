@@ -199,7 +199,7 @@ source_light_option:
     - - beta
       - 0.15
       - 0.05
-  jeffreys_beta: true
+  shapelet_scale_logarithmic_prior: true
   n_max:
   - 2
   - 4

@@ -1,0 +1,77 @@
+Computing the PSO ...
+Max iteration reached! Stopping.
+-11.541869340220321 reduced X^2 of best position
+-45111.39631625113 logL
+7817 effective number of data points
+[{'theta_E': 1.0, 'gamma': 2.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}, {'gamma_ext': 0.001, 'psi_ext': 0.0, 'ra_0': 0, 'dec_0': 0}] lens result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 1.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.0, 'center_y': 0.0}] source result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 4.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}] lens light result
+[] point source result
+{} special param result
+0.29732823371887207 time used for  PSO
+===================
+Computing the PSO ...
+Max iteration reached! Stopping.
+-11.541869340220321 reduced X^2 of best position
+-45111.39631625113 logL
+7817 effective number of data points
+[{'theta_E': 1.0, 'gamma': 2.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}, {'gamma_ext': 0.001, 'psi_ext': 0.0, 'ra_0': 0, 'dec_0': 0}] lens result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 1.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.0, 'center_y': 0.0}] source result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 4.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}] lens light result
+[] point source result
+{} special param result
+0.29341983795166016 time used for  PSO
+===================
+Computing the PSO ...
+Max iteration reached! Stopping.
+-11.541869340220321 reduced X^2 of best position
+-45111.39631625113 logL
+7817 effective number of data points
+[{'theta_E': 1.0, 'gamma': 2.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}, {'gamma_ext': 0.001, 'psi_ext': 0.0, 'ra_0': 0, 'dec_0': 0}] lens result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 1.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.0, 'center_y': 0.0}] source result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 4.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}] lens light result
+[] point source result
+{} special param result
+0.26357102394104004 time used for  PSO
+===================
+Computing the PSO ...
+Max iteration reached! Stopping.
+-11.543346037935294 reduced X^2 of best position
+-45111.39631625113 logL
+7816 effective number of data points
+[{'theta_E': 1.0, 'gamma': 2.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}, {'gamma_ext': 0.001, 'psi_ext': 0.0, 'ra_0': 0, 'dec_0': 0}] lens result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 1.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.0, 'center_y': 0.0}] source result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 4.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}] lens light result
+[] point source result
+{} special param result
+0.2988128662109375 time used for  PSO
+===================
+Computing the PSO ...
+Max iteration reached! Stopping.
+-11.543346037935294 reduced X^2 of best position
+-45111.39631625113 logL
+7816 effective number of data points
+[{'theta_E': 1.0, 'gamma': 2.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}, {'gamma_ext': 0.001, 'psi_ext': 0.0, 'ra_0': 0, 'dec_0': 0}] lens result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 1.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.0, 'center_y': 0.0}] source result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 4.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}] lens light result
+[] point source result
+{} special param result
+0.30240392684936523 time used for  PSO
+===================
+Computing the PSO ...
+Max iteration reached! Stopping.
+-11.543346037935294 reduced X^2 of best position
+-45111.39631625113 logL
+7816 effective number of data points
+[{'theta_E': 1.0, 'gamma': 2.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}, {'gamma_ext': 0.001, 'psi_ext': 0.0, 'ra_0': 0, 'dec_0': 0}] lens result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 1.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.0, 'center_y': 0.0}] source result
+[{'amp': 1, 'R_sersic': 0.2, 'n_sersic': 4.0, 'e1': 0.0, 'e2': 0.0, 'center_x': 0.04, 'center_y': -0.04}] lens light result
+[] point source result
+{} special param result
+0.2794327735900879 time used for  PSO
+===================
+Computing the MCMC...
+Number of walkers =  34
+Burn-in iterations:  2
+Sampling iterations (in current run): 4
+6.823386192321777 time taken for MCMC sampling

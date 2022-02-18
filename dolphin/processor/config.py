@@ -295,11 +295,12 @@ class ModelConfig(Config):
             if 'constrain_position_angle_from_lens_light'\
                     in self.settings['lens_option']:
                 use_custom_logL_addition = True
-            if 'max_qm/qi_ratio' in self.settings['lens_option']:
+            if 'max_lens_qm_to_qL_ratio' in self.settings['lens_option']:
                 use_custom_logL_addition = True
 
         if 'source_light_option' in self.settings:
-            if 'jeffreys_beta' in self.settings['source_light_option']:
+            if 'shapelet_scale_logarithmic_prior' in\
+                    self.settings['source_light_option']:
                 use_custom_logL_addition = True
 
         if use_custom_logL_addition:
@@ -314,15 +315,19 @@ class ModelConfig(Config):
                              kwargs_extinction=None):
         """
         Add different types of custom log L funtions
-        1) Impose a Gaussian prior to limit the Maximum allowed position angle
-         difference between lens mass and lens light (in degrees).
-        2) Impose a Gaussian prior to limit the ratio between the lens mass and
-           less light
-        3) Impose a Jeffrey's prior and the beta of the system
+        1) Impose a tophat prior to limit the maximum allowed difference
+           between orientation angle of the lens mass profile and the lens
+           light profile (in degrees).
+        2) Impose a tophat prior to limit the ratio between q for the lens mass
+           profile and q for the lens light profile.The varaible q represents
+           the ratio between the minor axis and major axis of a profile.
+        3) Impose a logarithmic_prior on the source light profile shapelets
+           scale
         """
         prior = 0.0
 
-        # Allign pa_light and pa_mass
+        # Allign pa_light and pa_mass for the lensing galaxy, where pa is the
+        # orientation angle of the profile
         if 'lens_option' in self.settings and \
                 'constrain_position_angle_from_lens_light' \
                 in self.settings['lens_option']:
@@ -341,10 +346,11 @@ class ModelConfig(Config):
             else:
                 prior += -np.inf
 
-        # Ensure q_mass is smaller than q_light
+        # Ensure q_mass is smaller than q_light for the lensing galaxy, where
+        # q is the ratio between the minor axis to the major axis of a profile
         if 'lens_option' in self.settings and \
-                'max_qm/qi_ratio' in self.settings['lens_option']:
-            max_ratio = self.settings['lens_option']['max_qm/qi_ratio']
+                'max_lens_qm_to_qL_ratio' in self.settings['lens_option']:
+            max_ratio = self.settings['lens_option']['max_lens_qm_to_qL_ratio']
             q_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                         kwargs_lens[0]['e2'])[1]
             q_mass = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
@@ -354,11 +360,12 @@ class ModelConfig(Config):
             else:
                 prior += -np.inf
 
-        # Jeffrey's Prior for beta
+        # Provide logarithmic_prior on the source light profile
         if 'source_light_option' in self.settings and \
-                'jeffreys_beta' in self.settings['source_light_option']:
-            for i, pfl in enumerate(self.settings['model']['source_light']):
-                if pfl == "SHAPELETS":
+                'shapelet_scale_logarithmic_prior' in \
+                self.settings['source_light_option']:
+            for i, model in enumerate(self.settings['model']['source_light']):
+                if model == "SHAPELETS":
                     beta = kwargs_source[i]['beta']
                     prior += - np.log(beta)
 

@@ -266,10 +266,34 @@ class TestModelConfig(object):
             kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
         assert prior4 == 0
 
+        # Change setting data type
+        config3 = deepcopy(self.config)
+        config3.settings['lens_option'][
+            'constrain_position_angle_from_lens_light'] = True
+        config3.settings['lens_option'][
+            'limit_mass_eccentricity_from_light'] = 1.0
+        prior5 = config3.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+        assert prior5 == -np.inf
+
+        # Raise error when settings are not bool, int or float
+        config4 = deepcopy(self.config)
+        config4.settings['lens_option'][
+            'constrain_position_angle_from_lens_light'] = "Test"
+        with pytest.raises(TypeError):
+            config4.custom_logL_addition()
+
+        config5 = deepcopy(self.config)
+        config5.settings['lens_option'][
+            'limit_mass_eccentricity_from_light'] = "Test"
+        with pytest.raises(TypeError):
+            config5.custom_logL_addition()
+
         # Test Jeffrey's Prior
-        prior4 = self.config3.custom_logL_addition(
+        prior6 = self.config3.custom_logL_addition(
             kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
-        assert round(prior4, 2) == 4.61
+        assert round(prior6, 2) == 4.61
 
     def test_get_masks(self):
         """
@@ -307,7 +331,7 @@ class TestModelConfig(object):
 
         masks3 = self.config3.get_masks()
         # Test custom mask (Alternating Pixel Mask)
-        assert masks3[0][0, 0:6].tolist() == [1., 0., 1., 0., 1., 0.]
+        assert masks3[0][0, 0:6].tolist() == [0., 1., 0., 1., 0., 1.]
         # Test mask_edge_pixel (2 pixels border)
         assert masks3[1][5, 0:6].tolist() == [0., 0., 1., 1., 1., 1.]
         assert masks3[1][5, -6:].tolist() == [1., 1., 1., 1., 0., 0.]

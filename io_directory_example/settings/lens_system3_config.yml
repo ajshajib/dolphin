@@ -44,7 +44,7 @@ mask:
   dec_at_xy_0:
   - -2.4
   - -2.4
-  custom_mask:  #Alternating Pixel Mask (1 represent masking )
+  custom_mask:  #Alternating Pixel Mask (0 represent masking )
   - - 0
     - 1
     - 0

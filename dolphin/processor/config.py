@@ -507,8 +507,6 @@ class ModelConfig(Config):
                                 # make sure that mask consist of only 0 and 1
                                 provided_mask[provided_mask > 0.] = 1.
                                 provided_mask[provided_mask <= 0.] = 0.
-                                # Invert mask
-                                provided_mask = np.abs(provided_mask - 1)
                                 mask *= provided_mask
 
                         # sanity check

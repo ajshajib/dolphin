@@ -282,13 +282,17 @@ class TestModelConfig(object):
         config4.settings['lens_option'][
             'constrain_position_angle_from_lens_light'] = "Test"
         with pytest.raises(TypeError):
-            config4.custom_logL_addition()
+            config4.custom_logL_addition(
+                kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+                kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
 
         config5 = deepcopy(self.config)
         config5.settings['lens_option'][
             'limit_mass_eccentricity_from_light'] = "Test"
         with pytest.raises(TypeError):
-            config5.custom_logL_addition()
+            config5.custom_logL_addition(
+                kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+                kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
 
         # Test Jeffrey's Prior
         prior6 = self.config3.custom_logL_addition(

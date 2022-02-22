@@ -228,6 +228,77 @@ class TestModelConfig(object):
         assert kwargs_likelihood3['prior_ps'] == \
             [[0, 'ra_image', 0.21, 0.15]]
 
+    def test_custom_logL_addition(self):
+        """
+        Test `custom_logL_addition` method.
+        :return:
+        :rtype:
+        """
+        # phi_m = 0 deg, q_m = 0.8
+        # Satisfy both priors (phi_L = 10 deg, q_L = 0.8)
+        prior1 = self.config.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}])
+        assert prior1 == 0
+
+        # qm < qL (phi_L = 0 deg, q_L = 0.9)
+        prior2 = self.config.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
+        assert prior2 == -np.inf
+
+        # Angle out of sync (phi_L = 20 deg, q_L = 0.8)
+        prior3 = self.config.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
+        assert prior3 == -np.inf
+
+        # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
+        config2 = deepcopy(self.config)
+        config2.settings['lens_option'][
+            'constrain_position_angle_from_lens_light'] = False
+        config2.settings['lens_option'][
+            'limit_mass_eccentricity_from_light'] = False
+        config2.settings['source_light_option'][
+            'shapelet_scale_logarithmic_prior'] = False
+        prior4 = config2.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+        assert prior4 == 0
+
+        # Change setting data type
+        config3 = deepcopy(self.config)
+        config3.settings['lens_option'][
+            'constrain_position_angle_from_lens_light'] = True
+        config3.settings['lens_option'][
+            'limit_mass_eccentricity_from_light'] = 1.0
+        prior5 = config3.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+        assert prior5 == -np.inf
+
+        # Raise error when settings are not bool, int or float
+        config4 = deepcopy(self.config)
+        config4.settings['lens_option'][
+            'constrain_position_angle_from_lens_light'] = "Test"
+        with pytest.raises(TypeError):
+            config4.custom_logL_addition(
+                kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+                kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+
+        config5 = deepcopy(self.config)
+        config5.settings['lens_option'][
+            'limit_mass_eccentricity_from_light'] = "Test"
+        with pytest.raises(TypeError):
+            config5.custom_logL_addition(
+                kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+                kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+
+        # Test Jeffrey's Prior
+        prior6 = self.config3.custom_logL_addition(
+            kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
+        assert round(prior6, 2) == 4.61
+
     def test_get_masks(self):
         """
         Test `get_masks` method.
@@ -263,13 +334,11 @@ class TestModelConfig(object):
         masks2 = self.config2.get_masks()
 
         masks3 = self.config3.get_masks()
-        # Test custom mask (Alternating Pattern)
-        assert masks3[0][0][0] == 1.
-        assert masks3[0][0][1] == 0.
-        assert masks3[0][0][2] == 1.
-        # Test mask_edge_pixel
-        assert masks3[1][0][0] == 0.  # Edge Pixel
-        assert masks3[1][5][5] == 1.  # Middle Pixel
+        # Test custom mask (Alternating Pixel Mask)
+        assert masks3[0][0, 0:6].tolist() == [0., 1., 0., 1., 0., 1.]
+        # Test mask_edge_pixel (2 pixels border)
+        assert masks3[1][5, 0:6].tolist() == [0., 0., 1., 1., 1., 1.]
+        assert masks3[1][5, -6:].tolist() == [1., 1., 1., 1., 0., 0.]
 
     def test_get_kwargs_psf_iteration(self):
         """

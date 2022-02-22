@@ -289,10 +289,23 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood['prior_ps'].append(prior_param)
 
-        if 'lens_option' in self.settings and \
-            'constrain_position_angle_from_lens_light' \
-                in self.settings['lens_option']:
-            kwargs_likelihood['custom_logL_addition'] = \
+        use_custom_logL_addition = False
+
+        if 'lens_option' in self.settings:
+            if 'constrain_position_angle_from_lens_light'\
+                    in self.settings['lens_option']:
+                use_custom_logL_addition = True
+            if 'limit_mass_eccentricity_from_light'\
+                    in self.settings['lens_option']:
+                use_custom_logL_addition = True
+
+        if 'source_light_option' in self.settings:
+            if 'shapelet_scale_logarithmic_prior' in\
+                    self.settings['source_light_option']:
+                use_custom_logL_addition = True
+
+        if use_custom_logL_addition:
+            kwargs_likelihood['custom_logL_addition'] =\
                 self.custom_logL_addition
 
         return kwargs_likelihood
@@ -302,24 +315,98 @@ class ModelConfig(Config):
                              kwargs_special=None,
                              kwargs_extinction=None):
         """
-        Impose a Gaussian prior to limit the Maximum allowed position angle
-         difference between lens mass and lens light (in degrees).
+        Add different types of custom log L funtions
+        1) Impose a tophat prior to limit the maximum allowed difference
+           between orientation angle of the lens mass profile and the lens
+           light profile (in degrees).
+        2) Impose a tophat prior to limit the ratio between q for the lens mass
+           profile and q for the lens light profile. The varaible q represents
+           the ratio between the minor axis and major axis of a profile.
+        3) Impose a logarithmic prior on the source light profile shapelet
+           scale
         """
-        pa_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
-                                     kwargs_lens[0]['e2'])[0] * 180 / np.pi
-        pa_mass = \
-            ellipticity2phi_q(kwargs_lens_light[0]['e1'],
-                              kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+        prior = 0.0
 
-        max_delta = (self.settings['lens_option']
-                     ['constrain_position_angle_from_lens_light'])
+        # Allign pa_light and pa_mass for the lensing galaxy, where pa is the
+        # orientation angle of the profile
+        if 'lens_option' in self.settings and \
+                'constrain_position_angle_from_lens_light' \
+                in self.settings['lens_option']:
 
-        diff = min(abs(pa_light-pa_mass), 180 - abs(pa_light-pa_mass))
+            setting_input = self.settings['lens_option'][
+                            'constrain_position_angle_from_lens_light']
 
-        if diff < np.abs(max_delta):
-            return 0.0
-        else:
-            return -np.inf
+            if isinstance(setting_input, (bool)) and setting_input:
+                max_delta = 15
+            elif isinstance(setting_input, (bool)) and not setting_input:
+                max_delta = np.nan
+            elif isinstance(setting_input, (int, float)):
+                max_delta = setting_input
+            else:
+                raise(TypeError('constrain_position_angle_from_lens_light \
+                                 should be float, int or bool'))
+
+            if not np.isnan(max_delta):
+                pa_mass = ellipticity2phi_q(
+                            kwargs_lens[0]['e1'],
+                            kwargs_lens[0]['e2'])[0] * 180 / np.pi
+                pa_light = ellipticity2phi_q(
+                            kwargs_lens_light[0]['e1'],
+                            kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+
+                diff = min(abs(pa_light - pa_mass),
+                           180 - abs(pa_light - pa_mass))
+                if diff < np.abs(max_delta):
+                    prior += 0.0
+                else:
+                    prior += -np.inf
+
+        # Ensure q_mass is smaller than q_light for the lensing galaxy, where
+        # q is the ratio between the minor axis to the major axis of a profile
+        if 'lens_option' in self.settings and \
+                'limit_mass_eccentricity_from_light'\
+                in self.settings['lens_option']:
+
+            setting_input2 = self.settings['lens_option'][
+                             'limit_mass_eccentricity_from_light']
+
+            if isinstance(setting_input2, (bool)) and setting_input2:
+                max_ratio = 1.0
+            elif isinstance(setting_input2, (bool)) and not setting_input2:
+                max_ratio = np.nan
+            elif isinstance(setting_input2, (int, float)):
+                max_ratio = setting_input2
+            else:
+                raise(TypeError('limit_mass_eccentricity_from_light \
+                                 should be float, int or bool'))
+            q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                       kwargs_lens[0]['e2'])[1]
+            q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                                        kwargs_lens_light[0]['e2'])[1]
+            if not np.isnan(max_ratio):
+                q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                           kwargs_lens[0]['e2'])[1]
+                q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                                            kwargs_lens_light[0]['e2'])[1]
+                if q_mass / q_light >= max_ratio:
+                    prior += 0.0
+                else:
+                    prior += -np.inf
+
+        # Provide logarithmic_prior on the source light profile
+        if 'source_light_option' in self.settings and \
+                'shapelet_scale_logarithmic_prior' in \
+                self.settings['source_light_option']:
+            setting_input3 = self.settings['source_light_option'][
+                             'shapelet_scale_logarithmic_prior']
+            if setting_input3:
+                for i, model in enumerate(self.settings['model'][
+                                              'source_light']):
+                    if model == "SHAPELETS":
+                        beta = kwargs_source[i]['beta']
+                        prior += - np.log(beta)
+
+        return prior
 
     def get_masks(self):
         """
@@ -387,12 +474,12 @@ class ModelConfig(Config):
                             mask *= extra_region
                         # Mask Edge Pixels
                         try:
-                            self.settings['mask']['mask_edge_pixel']
+                            self.settings['mask']['mask_edge_pixels']
                         except (NameError, KeyError):
                             pass
                         else:
                             border_length = \
-                                self.settings['mask']['mask_edge_pixel'][n]
+                                self.settings['mask']['mask_edge_pixels'][n]
                             if border_length > 0:
                                 edge_mask = 0 * np.ones(
                                  (num_pixel, num_pixel), dtype=int)
@@ -420,8 +507,6 @@ class ModelConfig(Config):
                                 # make sure that mask consist of only 0 and 1
                                 provided_mask[provided_mask > 0.] = 1.
                                 provided_mask[provided_mask <= 0.] = 0.
-                                # Invert mask
-                                provided_mask = np.abs(provided_mask - 1)
                                 mask *= provided_mask
 
                         # sanity check
@@ -777,7 +862,7 @@ class ModelConfig(Config):
                 lower.append({'center_x': -1.2, 'center_y': -1.2,
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
-                              'beta': 0.18, 'n_max': 55})
+                              'beta': 0.20, 'n_max': 55})
                 band_index += 1
             else:
                 raise ValueError('{} not implemented as a source light'

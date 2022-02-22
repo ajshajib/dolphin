@@ -33,7 +33,8 @@ class TestProcessor(object):
         :return:
         :rtype:
         """
-        kwargs_data_joint = self.processor.get_kwargs_data_joint('lens_system1')
+        kwargs_data_joint = self.processor.get_kwargs_data_joint(
+                                'lens_system1')
 
         assert kwargs_data_joint['multi_band_type'] == 'multi-linear'
 

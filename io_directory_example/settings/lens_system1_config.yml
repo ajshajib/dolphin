@@ -19,12 +19,15 @@ model:
 
 lens_option:
   centroid_init: [0.04, -0.04]
-#  centroid_bound:
+  # Centroid_bound:
   constrain_position_angle_from_lens_light: 15
   # Maximum allowed position angle difference between lens mass and lens
-  # light in degrees
+  # light in degrees. A boolean value "true" can also be provided, and the
+  # maximum default position angle difference will be set to 15 degrees.
   limit_mass_eccentricity_from_light: true
-  # We can also specigy flt or int ratio
+  # A numerical value can also be provided, in which case q_m/q_l >
+  # `limit_mass_eccentricity_from_light` will be used. If 'true', q_m/q_l > 1
+  # will be used as default.
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile

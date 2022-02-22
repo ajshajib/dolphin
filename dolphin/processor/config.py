@@ -295,7 +295,8 @@ class ModelConfig(Config):
             if 'constrain_position_angle_from_lens_light'\
                     in self.settings['lens_option']:
                 use_custom_logL_addition = True
-            if 'max_lens_qm_to_qL_ratio' in self.settings['lens_option']:
+            if 'limit_mass_eccentricity_from_light'\
+                    in self.settings['lens_option']:
                 use_custom_logL_addition = True
 
         if 'source_light_option' in self.settings:
@@ -331,43 +332,79 @@ class ModelConfig(Config):
         if 'lens_option' in self.settings and \
                 'constrain_position_angle_from_lens_light' \
                 in self.settings['lens_option']:
-            max_delta = (self.settings['lens_option']
-                         ['constrain_position_angle_from_lens_light'])
 
-            pa_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
-                                        kwargs_lens[0]['e2'])[0] * 180 / np.pi
-            pa_light = \
-                ellipticity2phi_q(kwargs_lens_light[0]['e1'],
-                                  kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
-            diff = min(abs(pa_light - pa_mass), 180 - abs(pa_light - pa_mass))
+            setting_input = self.settings['lens_option'][
+                            'constrain_position_angle_from_lens_light']
 
-            if diff < np.abs(max_delta):
-                prior += 0.0
+            if isinstance(setting_input, (bool)) and setting_input:
+                max_delta = 15
+            elif isinstance(setting_input, (bool)) and not setting_input:
+                max_delta = np.nan
+            elif isinstance(setting_input, (int, float)):
+                max_delta = setting_input
             else:
-                prior += -np.inf
+                raise(TypeError('constrain_position_angle_from_lens_light \
+                                 should be float, int or bool'))
+
+            if not np.isnan(max_delta):
+                pa_mass = ellipticity2phi_q(
+                            kwargs_lens[0]['e1'],
+                            kwargs_lens[0]['e2'])[0] * 180 / np.pi
+                pa_light = ellipticity2phi_q(
+                            kwargs_lens_light[0]['e1'],
+                            kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+
+                diff = min(abs(pa_light - pa_mass),
+                           180 - abs(pa_light - pa_mass))
+                if diff < np.abs(max_delta):
+                    prior += 0.0
+                else:
+                    prior += -np.inf
 
         # Ensure q_mass is smaller than q_light for the lensing galaxy, where
         # q is the ratio between the minor axis to the major axis of a profile
         if 'lens_option' in self.settings and \
-                'max_lens_qm_to_qL_ratio' in self.settings['lens_option']:
-            max_ratio = self.settings['lens_option']['max_lens_qm_to_qL_ratio']
-            q_light = ellipticity2phi_q(kwargs_lens[0]['e1'],
-                                        kwargs_lens[0]['e2'])[1]
-            q_mass = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
-                                       kwargs_lens_light[0]['e2'])[1]
-            if q_mass / q_light <= max_ratio:
-                prior += 0.0
+                'limit_mass_eccentricity_from_light'\
+                in self.settings['lens_option']:
+
+            setting_input2 = self.settings['lens_option'][
+                             'limit_mass_eccentricity_from_light']
+
+            if isinstance(setting_input2, (bool)) and setting_input2:
+                max_ratio = 1.0
+            elif isinstance(setting_input2, (bool)) and not setting_input2:
+                max_ratio = np.nan
+            elif isinstance(setting_input2, (int, float)):
+                max_ratio = setting_input2
             else:
-                prior += -np.inf
+                raise(TypeError('limit_mass_eccentricity_from_light \
+                                 should be float, int or bool'))
+            q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                       kwargs_lens[0]['e2'])[1]
+            q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                                        kwargs_lens_light[0]['e2'])[1]
+            if not np.isnan(max_ratio):
+                q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
+                                           kwargs_lens[0]['e2'])[1]
+                q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
+                                            kwargs_lens_light[0]['e2'])[1]
+                if q_mass / q_light >= max_ratio:
+                    prior += 0.0
+                else:
+                    prior += -np.inf
 
         # Provide logarithmic_prior on the source light profile
         if 'source_light_option' in self.settings and \
                 'shapelet_scale_logarithmic_prior' in \
                 self.settings['source_light_option']:
-            for i, model in enumerate(self.settings['model']['source_light']):
-                if model == "SHAPELETS":
-                    beta = kwargs_source[i]['beta']
-                    prior += - np.log(beta)
+            setting_input3 = self.settings['source_light_option'][
+                             'shapelet_scale_logarithmic_prior']
+            if setting_input3:
+                for i, model in enumerate(self.settings['model'][
+                                              'source_light']):
+                    if model == "SHAPELETS":
+                        beta = kwargs_source[i]['beta']
+                        prior += - np.log(beta)
 
         return prior
 
@@ -437,12 +474,12 @@ class ModelConfig(Config):
                             mask *= extra_region
                         # Mask Edge Pixels
                         try:
-                            self.settings['mask']['mask_edge_pixel']
+                            self.settings['mask']['mask_edge_pixels']
                         except (NameError, KeyError):
                             pass
                         else:
                             border_length = \
-                                self.settings['mask']['mask_edge_pixel'][n]
+                                self.settings['mask']['mask_edge_pixels'][n]
                             if border_length > 0:
                                 edge_mask = 0 * np.ones(
                                  (num_pixel, num_pixel), dtype=int)

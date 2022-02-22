@@ -146,7 +146,7 @@ mask:
     - 0
     - 1
   - null
-  mask_edge_pixel:
+  mask_edge_pixels:
   - 0
   - 2
   ra_at_xy_0:

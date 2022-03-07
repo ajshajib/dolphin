@@ -281,7 +281,7 @@ class FileSystem(object):
                                             )
                     subgroup.create_dataset('param_list',
                                             data=np.array(single_output[2],
-                                                          dtype='S10')
+                                                          dtype='S25')
                                             )
                 elif single_output[0] == 'EMCEE':
                     subgroup.create_dataset('samples',
@@ -290,7 +290,7 @@ class FileSystem(object):
                                             )
                     subgroup.create_dataset('param_list',
                                             data=np.array(single_output[2],
-                                                          dtype='S10')
+                                                          dtype='S25')
                                             )
                     subgroup.create_dataset('log_likelihood',
                                             data=np.array(single_output[3],

@@ -234,7 +234,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        # phi_m = 0 deg, q_m = 0.8
+        # Mass paramters : (phi_m = 0 deg, q_m = 0.8)
         # Satisfy both priors (phi_L = 10 deg, q_L = 0.8)
         prior1 = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
@@ -245,13 +245,13 @@ class TestModelConfig(object):
         prior2 = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior2 == -np.inf
+        assert prior2 == -1e-15
 
         # Angle out of sync (phi_L = 20 deg, q_L = 0.8)
         prior3 = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert prior3 == -np.inf
+        assert prior3 == -1e-15
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config)
@@ -275,7 +275,7 @@ class TestModelConfig(object):
         prior5 = config3.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
-        assert prior5 == -np.inf
+        assert prior5 == -1e-15
 
         # Raise error when settings are not bool, int or float
         config4 = deepcopy(self.config)
@@ -284,7 +284,7 @@ class TestModelConfig(object):
         with pytest.raises(TypeError):
             config4.custom_logL_addition(
                 kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
-                kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+                kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}])
 
         config5 = deepcopy(self.config)
         config5.settings['lens_option'][
@@ -292,10 +292,12 @@ class TestModelConfig(object):
         with pytest.raises(TypeError):
             config5.custom_logL_addition(
                 kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
-                kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+                kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}])
 
-        # Test Jeffrey's Prior
+        # Test logarithmic shapelets prior
         prior6 = self.config3.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}],
             kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
         assert round(prior6, 2) == 4.61
 

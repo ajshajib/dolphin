@@ -35,6 +35,8 @@ lens_option:
     - - theta_E
       - 1.11
       - 0.13
+  constrain_position_angle_from_lens_light: 15
+  limit_mass_eccentricity_from_light: true
 mask:
   centroid_offset:
   - - 0.0

@@ -147,6 +147,13 @@ class TestOutput(object):
 
         plt.close(fig)
 
+        fig2 = self.output.plot_mcmc_trace('lens_system2', 'example', 2,
+                                          verbose=True, burn_in=0,
+                                          show_variables=["gamma_lens"])
+
+        plt.close(fig2)
+
+
     def test_get_reshaped_emcee_chain(self):
         """
         Test `get_reshaped_emcee_chain` method.

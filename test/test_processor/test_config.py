@@ -245,13 +245,13 @@ class TestModelConfig(object):
         prior = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior == -1e-15
+        assert prior == -10.**15
 
         # Angle out of sync (phi_L = 20 deg, q_L = 0.8)
         prior = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert prior == -1e-15
+        assert prior == -10.**15
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config)
@@ -273,7 +273,7 @@ class TestModelConfig(object):
         prior = config3a.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert prior == -1e-15
+        assert prior == -10.**15
 
         config3b = deepcopy(self.config)
         config3b.settings['lens_option'][
@@ -281,7 +281,7 @@ class TestModelConfig(object):
         prior = config3b.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior == -1e-15
+        assert prior == -10.**15
 
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config)

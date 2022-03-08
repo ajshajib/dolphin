@@ -235,6 +235,9 @@ class Output(Processor):
         :type v_min: `float` or `int`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
+        :param show_source_light: if true, replaces convergence plot with
+            source light convolved lens decomposition plot
+        :type show_source_light: `bool`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
@@ -404,7 +407,7 @@ class Output(Processor):
 
     def plot_mcmc_trace(self, lens_name, model_id, walker_ratio,
                         burn_in=-100, verbose=True, fig_width=16,
-                        show_variables=[]):
+                        parameters_to_plot=[]):
         """
         Plot the trace of MCMC walkers.
 
@@ -421,6 +424,8 @@ class Output(Processor):
         :type verbose: `bool`
         :param fig_width: width of the figure
         :type fig_width: `float`
+        :param parameters_to_plot: if not empty, list of parameters to plot
+        :type fig_width: `list`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
@@ -431,12 +436,12 @@ class Output(Processor):
         num_params = self.num_params_mcmc
         num_step = chain.shape[1]
 
-        if len(show_variables) == 0:
-            variable_list = np.arange(num_params)
+        if len(parameters_to_plot) == 0:
+            parameter_list = np.arange(num_params)
         else:
-            variable_list = []
-            for i in show_variables:
-                variable_list.append(self.params_mcmc.index(i))
+            parameter_list = []
+            for i in parameters_to_plot:
+                parameter_list.append(self.params_mcmc.index(i))
 
         mean_pos = np.zeros((num_params, num_step))
         median_pos = np.zeros((num_params, num_step))
@@ -445,7 +450,7 @@ class Output(Processor):
         q84_pos = np.zeros((num_params, num_step))
 
         # chain = np.empty((nwalker, nstep, ndim), dtype = np.double)
-        for i in variable_list:
+        for i in parameter_list:
             for j in np.arange(num_step):
                 mean_pos[i][j] = np.mean(chain[:, j, i])
                 median_pos[i][j] = np.median(chain[:, j, i])
@@ -453,19 +458,19 @@ class Output(Processor):
                 q16_pos[i][j] = np.percentile(chain[:, j, i], 16.)
                 q84_pos[i][j] = np.percentile(chain[:, j, i], 84.)
 
-        fig, ax = plt.subplots(len(variable_list), sharex='all',
+        fig, ax = plt.subplots(len(parameter_list), sharex='all',
                                figsize=(fig_width, int(fig_width/8) *
-                                        len(variable_list)))
+                                        len(parameter_list)))
         last = num_step
         medians = []
 
-        for n, i in enumerate(variable_list):
+        for n, i in enumerate(parameter_list):
             if verbose:
                 print(self.params_mcmc[i],
                       '{:.4f} ± {:.4f}'.format(median_pos[i][last - 1],
                                                (q84_pos[i][last - 1] -
                                                 q16_pos[i][last - 1]) / 2))
-            if len(show_variables) != 1:
+            if len(parameter_list) != 1:
                 # ax[i].plot(mean_pos[i][:3000], c='b')
                 ax[n].plot(median_pos[i][:last], c='g')
                 # ax[i].axhline(np.mean(mean_pos[i][burnin:2900]), c='b')

@@ -356,10 +356,8 @@ class ModelConfig(Config):
 
                 diff = min(abs(pa_light - pa_mass),
                            180 - abs(pa_light - pa_mass))
-                if diff < np.abs(max_delta):
-                    prior += 0.0
-                else:
-                    prior += -np.inf
+                if diff > np.abs(max_delta):
+                    prior += -(diff-np.abs(max_delta))**2/(1e-3)
 
         # Ensure q_mass is smaller than q_light for the lensing galaxy, where
         # q is the ratio between the minor axis to the major axis of a profile
@@ -388,10 +386,9 @@ class ModelConfig(Config):
                                            kwargs_lens[0]['e2'])[1]
                 q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
                                             kwargs_lens_light[0]['e2'])[1]
-                if q_mass / q_light >= max_ratio:
-                    prior += 0.0
-                else:
-                    prior += -np.inf
+                diff = q_light-q_mass
+                if diff > max_ratio:
+                    prior += -(diff-max_ratio)**2/(1e-4)
 
         # Provide logarithmic_prior on the source light profile
         if 'source_light_option' in self.settings and \
@@ -712,13 +709,13 @@ class ModelConfig(Config):
                 })
 
                 sigma.append({
-                    'theta_E': .1, 'e1': 0.1, 'e2': 0.1,
+                    'theta_E': .1, 'e1': 0.01, 'e2': 0.01,
                     'gamma': 0.02, 'center_x': 0.1,
                     'center_y': 0.1
                 })
 
                 lower.append({
-                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.5,
+                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.0,
                     'center_x': self.deflector_center_ra
                                     - self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -726,7 +723,7 @@ class ModelConfig(Config):
                 })
 
                 upper.append({
-                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.5,
+                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 3.0,
                     'center_x': self.deflector_center_ra
                     + self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -776,7 +773,7 @@ class ModelConfig(Config):
                     'center_x': np.max(self.pixel_size) / 10.,
                     'center_y': np.max(self.pixel_size) / 10.,
                     'R_sersic': 0.05, 'n_sersic': 0.5,
-                    'e1': 0.1, 'e2': 0.1
+                    'e1': 0.01, 'e2': 0.01
                 })
 
                 lower.append({
@@ -826,7 +823,7 @@ class ModelConfig(Config):
                 fixed.append({})
 
                 init.append({
-                    'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,
+                    'amp': 1., 'R_sersic': 0.05, 'n_sersic': 1.,    #change for center for the spirals 
                     'center_x': 0.,
                     'center_y': 0.,
                     'e1': 0., 'e2': 0.
@@ -840,13 +837,13 @@ class ModelConfig(Config):
                 })
 
                 lower.append({
-                    'R_sersic': 0.04, 'n_sersic': .5,
+                    'R_sersic': 0.005, 'n_sersic': .5,
                     'center_y': -2., 'center_x': -2.,
                     'e1': -0.5, 'e2': -0.5
                 })
 
                 upper.append({
-                    'R_sersic': .5, 'n_sersic': 8.,
+                    'R_sersic': .1, 'n_sersic': 8.,
                     'center_y': 2., 'center_x': 2.,
                     'e1': 0.5, 'e2': 0.5
                 })
@@ -863,7 +860,33 @@ class ModelConfig(Config):
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
                               'beta': 0.20, 'n_max': 55})
-                band_index += 1
+                band_index += 1  # Seems Hacky
+            elif model == 'POINT_LIKE_SERSIC':
+                fixed.append({})
+                init.append({
+                    'amp': 1.,
+                    'center_x': self.deflector_center_ra,
+                    'center_y': self.deflector_center_dec
+                })
+                sigma.append({
+                    'center_x': np.max(self.pixel_size) / 10.,
+                    'center_y': np.max(self.pixel_size) / 10.
+                })
+
+                lower.append({
+                    'center_x': self.deflector_center_ra
+                                - self.deflector_centroid_bound,
+                    'center_y': self.deflector_center_dec
+                                - self.deflector_centroid_bound
+                })
+
+                upper.append({
+                    'center_x': self.deflector_center_ra
+                                    + self.deflector_centroid_bound,
+                    'center_y': self.deflector_center_dec
+                                    + self.deflector_centroid_bound
+                })
+
             else:
                 raise ValueError('{} not implemented as a source light'
                                  'model!'.format(model))

@@ -871,7 +871,7 @@ class ModelConfig(Config):
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
                               'beta': 0.20, 'n_max': 55})
-                shapelets_index += 1  
+                shapelets_index += 1
         """
             elif model == 'POINT_LIKE_SERSIC':
                 fixed.append({})

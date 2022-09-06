@@ -143,7 +143,7 @@ class Output(Processor):
         self._model_settings = output['settings']
         self._kwargs_result = output['kwargs_result']
         self._fit_output = output['fit_output']
-       
+
         if self.fit_output[-1][0] == 'EMCEE':
             self._samples_mcmc = self.fit_output[-1][1]
             self._params_mcmc = self.fit_output[-1][2]

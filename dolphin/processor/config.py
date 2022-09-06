@@ -346,8 +346,8 @@ class ModelConfig(Config):
             elif isinstance(setting_input, (int, float)):
                 max_delta = setting_input
             else:
-                raise(TypeError('constrain_position_angle_from_lens_light \
-                                 should be float, int or bool'))
+                raise (TypeError('constrain_position_angle_from_lens_light \
+                                  should be float, int or bool'))
 
             if not np.isnan(max_delta):
                 pa_mass = ellipticity2phi_q(
@@ -378,8 +378,8 @@ class ModelConfig(Config):
             elif isinstance(setting_input2, (int, float)):
                 max_ratio = setting_input2
             else:
-                raise(TypeError('limit_mass_eccentricity_from_light \
-                                 should be float, int or bool'))
+                raise (TypeError('limit_mass_eccentricity_from_light \
+                                  should be float, int or bool'))
             q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                        kwargs_lens[0]['e2'])[1]
             q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],

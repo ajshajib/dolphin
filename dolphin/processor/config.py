@@ -952,7 +952,7 @@ class ModelConfig(Config):
 
         try:
             self.settings[option_str]['fix']
-        except(NameError, KeyError):
+        except (NameError, KeyError):
             pass
         else:
             if self.settings[option_str]['fix'] is not None:

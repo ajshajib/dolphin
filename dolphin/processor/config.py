@@ -16,6 +16,7 @@ import lenstronomy.Util.mask_util as mask_util
 from astropy.cosmology import Planck15
 from astropy import units as u
 
+
 class Config(object):
     """
     This class contains the methods to load an read YAML configuration
@@ -821,9 +822,9 @@ class ModelConfig(Config):
 
         # Adjust Sersic Ellipse R_Sersic based on Redshift
         if 'redshift' in self.settings:
-            r_ang = Planck15.kpc_proper_per_arcmin(self.settings['redshift'])  # phys. dist. per angle
-            angle =  1 * u.kpc / r_ang
-            inner_sersic = round((angle.to(u.arcsec).value),2)
+            r_ang = Planck15.kpc_proper_per_arcmin(self.settings['redshift'])
+            angle = 1 * u.kpc/r_ang
+            inner_sersic = round((angle.to(u.arcsec).value), 2)
         else:
             inner_sersic = 0.15
 
@@ -832,8 +833,9 @@ class ModelConfig(Config):
             if model == 'SERSIC_ELLIPSE':
                 fixed.append({})
 
+                # change for center for the spirals
                 init.append({
-                    'amp': 1., 'R_sersic': inner_sersic/2.,  #change for center for the spirals
+                    'amp': 1., 'R_sersic': inner_sersic/2.,
                     'n_sersic': 1.,
                     'center_x': 0.,
                     'center_y': 0.,
@@ -861,10 +863,11 @@ class ModelConfig(Config):
                     'e1': 0.5, 'e2': 0.5
                 })
             elif model == 'SHAPELETS':
-                fixed.append(
-                    {'n_max': self.settings['source_light_option']['n_max'][shapelets_index]})
+                fixed.append({'n_max': self.settings['source_light_option']
+                              ['n_max'][shapelets_index]})
                 init.append({'center_x': 0., 'center_y': 0., 'beta': 0.10,
-                             'n_max': self.settings['source_light_option']['n_max'][shapelets_index]})
+                             'n_max': self.settings['source_light_option']
+                             ['n_max'][shapelets_index]})
                 sigma.append({'center_x': 0.5, 'center_y': 0.5,
                               'beta': 0.010 / 10., 'n_max': 2})
                 lower.append({'center_x': -1.2, 'center_y': -1.2,
@@ -872,33 +875,6 @@ class ModelConfig(Config):
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
                               'beta': 0.20, 'n_max': 55})
                 shapelets_index += 1
-        """
-            elif model == 'POINT_LIKE_SERSIC':
-                fixed.append({})
-                init.append({
-                    'amp': 1.,
-                    'center_x': self.deflector_center_ra,
-                    'center_y': self.deflector_center_dec
-                })
-                sigma.append({
-                    'center_x': np.max(self.pixel_size) / 10.,
-                    'center_y': np.max(self.pixel_size) / 10.
-                })
-
-                lower.append({
-                    'center_x': self.deflector_center_ra
-                                - self.deflector_centroid_bound,
-                    'center_y': self.deflector_center_dec
-                                - self.deflector_centroid_bound
-                })
-
-                upper.append({
-                    'center_x': self.deflector_center_ra
-                                    + self.deflector_centroid_bound,
-                    'center_y': self.deflector_center_dec
-                                    + self.deflector_centroid_bound
-                })
-        """
             else:
                 raise ValueError('{} not implemented as a source light'
                                  'model!'.format(model))

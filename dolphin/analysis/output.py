@@ -273,24 +273,29 @@ class Output(Processor):
                                             cmap=residual_cmap, v_max=3,
                                             v_min=-3)
         if not show_source_light:
-            model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
-                       band_index=band_index, v_max=v_max, v_min=v_min)
+            model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02,
+                                   numPix=100, band_index=band_index,
+                                   v_max=v_max, v_min=v_min)
             model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
                                         cmap=convergence_cmap)
             model_plot.magnification_plot(ax=axes[1, 2],
                                           band_index=band_index,
                                           cmap=magnification_cmap)
         else:
-            ##Hacky way to get noise:
+            # Hacky way to get noise:
             import yaml
             import h5py
             import math
-            settings = yaml.load(open("../settings/{}_config.yml".format(lens_name)), yaml.FullLoader)
+            settings = yaml.load(open(
+                "../settings/{}_config.yml".format(lens_name)),
+                yaml.FullLoader)
             band_name = settings['band'][band_index]
-            f = h5py.File('../data/{}/image_{}_{}.h5'.format(lens_name,lens_name,band_name), 'r')
+            f = h5py.File('../data/{}/image_{}_{}.h5'.format(
+                lens_name, lens_name, band_name), 'r')
             source_vmin = (math.log(f['background_rms'][()], 10))-0.8
-            model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
-                       band_index=band_index, v_max=v_max, v_min=source_vmin-0.5)
+            model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02,
+                                   numPix=100, band_index=band_index,
+                                   v_max=v_max, v_min=source_vmin-0.5)
             model_plot.subtract_from_data_plot(ax=axes[1, 1],
                                                band_index=band_index,
                                                lens_light_add=True, )
@@ -299,8 +304,6 @@ class Output(Processor):
                                           source_add=True,
                                           band_index=band_index,
                                           v_max=v_max, v_min=source_vmin)
-
-
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)

@@ -372,11 +372,11 @@ class ModelConfig(Config):
                              'limit_mass_eccentricity_from_light']
 
             if isinstance(setting_input2, (bool)) and setting_input2:
-                max_ratio = 1.0
+                max_diff = 0.0
             elif isinstance(setting_input2, (bool)) and not setting_input2:
-                max_ratio = np.nan
+                max_diff = np.nan
             elif isinstance(setting_input2, (int, float)):
-                max_ratio = setting_input2
+                max_diff = setting_input2
             else:
                 raise (TypeError('limit_mass_eccentricity_from_light \
                                   should be float, int or bool'))
@@ -384,14 +384,14 @@ class ModelConfig(Config):
                                        kwargs_lens[0]['e2'])[1]
             q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
                                         kwargs_lens_light[0]['e2'])[1]
-            if not np.isnan(max_ratio):
+            if not np.isnan(max_diff):
                 q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                            kwargs_lens[0]['e2'])[1]
                 q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
                                             kwargs_lens_light[0]['e2'])[1]
                 diff = q_light-q_mass
-                if diff > max_ratio:
-                    prior += -(diff-max_ratio)**2/(1e-4)
+                if diff > max_diff:
+                    prior += -(diff-max_diff)**2/(1e-4)
 
         # Provide logarithmic_prior on the source light profile
         if 'source_light_option' in self.settings and \

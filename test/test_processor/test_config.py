@@ -245,13 +245,13 @@ class TestModelConfig(object):
         prior2 = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior2 == -np.inf
+        assert prior2 < -50. # Ensure large negative logL
 
         # Angle out of sync (phi_L = 20 deg, q_L = 0.8)
         prior3 = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert prior3 == -np.inf
+        assert prior3 < -50.
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config)
@@ -275,7 +275,7 @@ class TestModelConfig(object):
         prior5 = config3.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
-        assert prior5 == -np.inf
+        assert prior5 < -50.
 
         # Raise error when settings are not bool, int or float
         config4 = deepcopy(self.config)

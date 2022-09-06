@@ -194,7 +194,7 @@ class Output(Processor):
         model_plot = ModelPlot(multi_band_list_out, kwargs_model,
                                kwargs_result,
                                arrow_size=0.02, cmap_string=data_cmap,
-                               likelihood_mask_list=mask,
+                               image_likelihood_mask_list=mask,
                                multi_band_type='multi-linear')
 
         return model_plot, v_max
@@ -575,7 +575,8 @@ class Output(Processor):
                                    'multi-linear',
                                    kwargs_model,
                                    bands_compute=None,
-                                   likelihood_mask_list=config.get_masks(),
+                                   image_likelihood_mask_list=(
+                                       config.get_masks()),
                                    band_index=band_index)
 
             im_sim.image_linear_solve(**kwargs, inv_bool=True)

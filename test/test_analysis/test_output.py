@@ -112,7 +112,14 @@ class TestOutput(object):
         fig2 = self.output.plot_model_overview('lens_system2', 'example',
                                                v_min=-3.0, v_max=1.0,
                                                print_results=True,
-                                               show_source_light=True)
+                                               show_source_light=True,
+                                               background_v_min=True)
+
+        plt.close(fig2)
+
+        fig2 = self.output.plot_model_overview('lens_system2', 'example',
+                                               background_v_min=0.2,
+                                               source_v_min_offset=0.5)
 
         plt.close(fig2)
 

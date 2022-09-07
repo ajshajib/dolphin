@@ -205,7 +205,9 @@ class Output(Processor):
                             convergence_cmap='afmhot',
                             magnification_cmap='viridis',
                             v_min=None, v_max=None, print_results=False,
-                            show_source_light=False):
+                            show_source_light=False,
+                            background_v_min=False,
+                            source_v_min_offset=0.8):
         """
         Plot the model, residual, reconstructed source, convergence,
         and magnification profiles. Either `model_id` or `kwargs_result`
@@ -233,6 +235,12 @@ class Output(Processor):
         :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
         :param v_min: minimum plotting scale for the model, data, & source plot
         :type v_min: `float` or `int`
+        :param background_v_min: if true, use background rms for v_min, if
+            float or integer, use background rms plus and given offset for
+            v_min
+        :type background_v_min: `bool`, `float` or `int`
+        :param source_v_min_offset: offset for the source image v_min
+        :type source_v_min_offset: `float` or `int`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
         :param show_source_light: if true, replaces convergence plot with
@@ -247,6 +255,13 @@ class Output(Processor):
                 print_kwargs_result =\
                     self.load_output(lens_name, model_id)["kwargs_result"]
             print(print_kwargs_result)
+
+        bg_rms = (self.get_kwargs_data_joint(lens_name)['multi_band_list']
+                  [band_index][0]['background_rms'])
+        if type(background_v_min) == bool and background_v_min:
+            v_min = (np.log10(bg_rms))
+        elif type(background_v_min) != bool:
+            v_min = (np.log10(bg_rms))+background_v_min
 
         if v_max is None:
             model_plot, v_max = self.get_model_plot(
@@ -282,21 +297,20 @@ class Output(Processor):
                                           band_index=band_index,
                                           cmap=magnification_cmap)
         else:
-            bg = (self.get_kwargs_data_joint(lens_name)['multi_band_list']
-                  [band_index][0]['background_rms'])
-            source_vmin = (np.log10(bg))-0.8
 
             model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02,
                                    numPix=100, band_index=band_index,
-                                   v_max=v_max, v_min=source_vmin-0.5)
+                                   v_max=v_max,
+                                   v_min=v_min+source_v_min_offset)
             model_plot.subtract_from_data_plot(ax=axes[1, 1],
                                                band_index=band_index,
-                                               lens_light_add=True, )
+                                               lens_light_add=True,
+                                               v_max=v_max, v_min=v_min)
             model_plot.decomposition_plot(ax=axes[1, 2],
                                           text='Source light convolved',
                                           source_add=True,
                                           band_index=band_index,
-                                          v_max=v_max, v_min=source_vmin)
+                                          v_max=v_max, v_min=v_min)
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)

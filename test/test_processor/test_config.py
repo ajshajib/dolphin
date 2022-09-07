@@ -245,7 +245,7 @@ class TestModelConfig(object):
         prior2 = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior2 < -50. # Ensure large negative logL
+        assert prior2 < -50.  # Ensure large negative logL
 
         # Angle out of sync (phi_L = 20 deg, q_L = 0.8)
         prior3 = self.config.custom_logL_addition(

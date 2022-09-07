@@ -204,3 +204,5 @@ source_light_option:
   - 2
   - 4
 system_name: lens_system3
+
+source_redshift: 0.5

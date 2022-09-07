@@ -13,9 +13,6 @@ from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util
 
-from astropy.cosmology import Planck15
-from astropy import units as u
-
 
 class Config(object):
     """
@@ -820,9 +817,12 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        # Adjust Sersic Ellipse R_Sersic based on Redshift
-        if 'redshift' in self.settings:
-            r_ang = Planck15.kpc_proper_per_arcmin(self.settings['redshift'])
+        # Adjust Sersic Ellipse R_Sersic based on Source Redshift
+        if 'source_redshift' in self.settings:
+            from astropy.cosmology import Planck15
+            from astropy import units as u
+            r_ang = Planck15.kpc_proper_per_arcmin(
+                    self.settings['source_redshift'])
             angle = 1 * u.kpc/r_ang
             inner_sersic = round((angle.to(u.arcsec).value), 2)
         else:
@@ -833,7 +833,7 @@ class ModelConfig(Config):
             if model == 'SERSIC_ELLIPSE':
                 fixed.append({})
 
-                # change for center for the spirals
+                # change for center for the spirals galaxies
                 init.append({
                     'amp': 1., 'R_sersic': inner_sersic/2.,
                     'n_sersic': 1.,

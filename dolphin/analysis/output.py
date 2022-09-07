@@ -282,17 +282,10 @@ class Output(Processor):
                                           band_index=band_index,
                                           cmap=magnification_cmap)
         else:
-            # Hacky way to get noise:
-            import yaml
-            import h5py
-            import math
-            settings = yaml.load(open(
-                "../settings/{}_config.yml".format(lens_name)),
-                yaml.FullLoader)
-            band_name = settings['band'][band_index]
-            f = h5py.File('../data/{}/image_{}_{}.h5'.format(
-                lens_name, lens_name, band_name), 'r')
-            source_vmin = (math.log(f['background_rms'][()], 10))-0.8
+            bg = (self.get_kwargs_data_joint(lens_name)['multi_band_list']
+                  [band_index][0]['background_rms'])
+            source_vmin = (np.log10(bg))-0.8
+
             model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02,
                                    numPix=100, band_index=band_index,
                                    v_max=v_max, v_min=source_vmin-0.5)
@@ -457,8 +450,12 @@ class Output(Processor):
             parameter_list = np.arange(num_params)
         else:
             parameter_list = []
-            for i in parameters_to_plot:
-                parameter_list.append(self.params_mcmc.index(i))
+            try:
+                for i in parameters_to_plot:
+                    parameter_list.append(self.params_mcmc.index(i))
+            except ValueError:
+                raise Exception("Parameter not found. Available parameters \
+                                 : {}".format(self.params_mcmc))
 
         mean_pos = np.zeros((num_params, num_step))
         median_pos = np.zeros((num_params, num_step))

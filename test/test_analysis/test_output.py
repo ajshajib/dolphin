@@ -144,6 +144,14 @@ class TestOutput(object):
         fig = self.output.plot_mcmc_trace('lens_system2', 'example', 2,
                                           verbose=True, burn_in=0)
 
+        fig = self.output.plot_mcmc_trace('lens_system2', 'example', 2,
+                                          verbose=True, burn_in=0,
+                                          parameters_to_plot=['gamma_lens'])
+        with pytest.raises(Exception):
+            _ = self.output.plot_mcmc_trace('lens_system2', 'example', 2,
+                                            verbose=True, burn_in=0,
+                                            parameters_to_plot=['gamma_10'])
+
         plt.close(fig)
 
     def test_get_reshaped_emcee_chain(self):

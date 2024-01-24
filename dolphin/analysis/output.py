@@ -194,9 +194,8 @@ class Output(Processor):
         model_plot = ModelPlot(multi_band_list_out, kwargs_model,
                                kwargs_result,
                                arrow_size=0.02, cmap_string=data_cmap,
-                               likelihood_mask_list=mask,
+                               image_likelihood_mask_list=mask,
                                multi_band_type='multi-linear')
-
         return model_plot, v_max
 
     def plot_model_overview(self, lens_name, model_id=None,
@@ -236,7 +235,9 @@ class Output(Processor):
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
         :param show_source_light: if true, replaces convergence plot with
-            source light convolved lens decomposition plot
+            source light convolved lens decomposition plot and also replaces 
+            the magnification plot with the source-light subtracted data
+            plot
         :type show_source_light: `bool`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
@@ -277,16 +278,19 @@ class Output(Processor):
         if not show_source_light:
             model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
                                         cmap=convergence_cmap)
+            model_plot.magnification_plot(ax=axes[1, 2],
+                                          band_index=band_index,
+                                          cmap=magnification_cmap)
         else:
-            model_plot.decomposition_plot(ax=axes[1, 1],
+            model_plot.subtract_from_data_plot(ax=axes[1, 1],
+                                               band_index=band_index,
+                                               lens_light_add=True,
+                                               v_max=v_max, v_min=v_min)
+            model_plot.decomposition_plot(ax=axes[1, 2],
                                           text='Source light convolved',
                                           source_add=True,
                                           band_index=band_index,
                                           v_max=v_max, v_min=v_min)
-
-        model_plot.magnification_plot(ax=axes[1, 2],
-                                      band_index=band_index,
-                                      cmap=magnification_cmap)
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)
@@ -375,7 +379,7 @@ class Output(Processor):
         return fig
 
     def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio,
-                                 burn_in=-100, verbose=True):
+                                 burn_in=0, verbose=True):
         """
 
         :param lens_name:
@@ -402,6 +406,8 @@ class Output(Processor):
         for i in np.arange(num_params):
             samples = self.samples_mcmc[:, i].T
             chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
+        if burn_in !=0:   
+            chain = chain[:, burn_in:, :]
 
         return chain
 
@@ -440,8 +446,12 @@ class Output(Processor):
             parameter_list = np.arange(num_params)
         else:
             parameter_list = []
-            for i in parameters_to_plot:
-                parameter_list.append(self.params_mcmc.index(i))
+            try:
+                for i in parameters_to_plot:
+                    parameter_list.append(self.params_mcmc.index(i))
+            except ValueError:
+                raise Exception("Parameter not found. Available parameters \
+                                 : {}".format(self.params_mcmc))
 
         mean_pos = np.zeros((num_params, num_step))
         median_pos = np.zeros((num_params, num_step))
@@ -558,7 +568,8 @@ class Output(Processor):
                                    'multi-linear',
                                    kwargs_model,
                                    bands_compute=None,
-                                   likelihood_mask_list=config.get_masks(),
+                                   image_likelihood_mask_list=(
+                                       config.get_masks()),
                                    band_index=band_index)
 
             im_sim.image_linear_solve(**kwargs, inv_bool=True)

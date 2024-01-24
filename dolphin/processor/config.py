@@ -343,8 +343,8 @@ class ModelConfig(Config):
             elif isinstance(setting_input, (int, float)):
                 max_delta = setting_input
             else:
-                raise(TypeError('constrain_position_angle_from_lens_light \
-                                 should be float, int or bool'))
+                raise (TypeError('constrain_position_angle_from_lens_light \
+                                  should be float, int or bool'))
 
             if not np.isnan(max_delta):
                 pa_mass = ellipticity2phi_q(
@@ -357,7 +357,7 @@ class ModelConfig(Config):
                 diff = min(abs(pa_light - pa_mass),
                            180 - abs(pa_light - pa_mass))
                 if diff > np.abs(max_delta):
-                    prior += -1e15
+                    prior += -(diff-np.abs(max_delta))**2/(1e-3)
 
         # Ensure q_mass is smaller than q_light for the lensing galaxy, where
         # q is the ratio between the minor axis to the major axis of a profile
@@ -369,25 +369,26 @@ class ModelConfig(Config):
                              'limit_mass_eccentricity_from_light']
 
             if isinstance(setting_input2, (bool)) and setting_input2:
-                max_ratio = 1.0
+                max_diff = 0.0
             elif isinstance(setting_input2, (bool)) and not setting_input2:
-                max_ratio = np.nan
+                max_diff = np.nan
             elif isinstance(setting_input2, (int, float)):
-                max_ratio = setting_input2
+                max_diff = setting_input2
             else:
-                raise(TypeError('limit_mass_eccentricity_from_light \
-                                 should be float, int or bool'))
+                raise (TypeError('limit_mass_eccentricity_from_light \
+                                  should be float, int or bool'))
             q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                        kwargs_lens[0]['e2'])[1]
             q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
                                         kwargs_lens_light[0]['e2'])[1]
-            if not np.isnan(max_ratio):
+            if not np.isnan(max_diff):
                 q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
                                            kwargs_lens[0]['e2'])[1]
                 q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
                                             kwargs_lens_light[0]['e2'])[1]
-                if q_mass/q_light < max_ratio:
-                    prior += -1e15
+                diff = q_light-q_mass
+                if diff > max_diff:
+                    prior += -(diff-max_diff)**2/(1e-4)
 
         # Provide logarithmic_prior on the source light profile
         if 'source_light_option' in self.settings and \
@@ -714,7 +715,7 @@ class ModelConfig(Config):
                 })
 
                 lower.append({
-                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.5,
+                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.3,
                     'center_x': self.deflector_center_ra
                                     - self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -722,7 +723,7 @@ class ModelConfig(Config):
                 })
 
                 upper.append({
-                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.5,
+                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.8,
                     'center_x': self.deflector_center_ra
                     + self.deflector_centroid_bound,
                     'center_y': self.deflector_center_dec
@@ -731,8 +732,8 @@ class ModelConfig(Config):
 
             elif model == 'SHEAR_GAMMA_PSI':
                 fixed.append({'ra_0': 0, 'dec_0': 0})
-                init.append({'gamma_ext': 0.001, 'psi_ext': 0.0})
-                sigma.append({'gamma_ext': 0.001, 'psi_ext': np.pi / 90.})
+                init.append({'gamma_ext': 0.05, 'psi_ext': 0.0})
+                sigma.append({'gamma_ext': 0.05, 'psi_ext': np.pi / 90.})
                 lower.append({'gamma_ext': 0.0, 'psi_ext': -np.pi})
                 upper.append({'gamma_ext': 0.5, 'psi_ext': np.pi})
             else:
@@ -816,13 +817,14 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        band_index = 0
+        shapelets_index = 0
         for i, model in enumerate(source_light_model_list):
             if model == 'SERSIC_ELLIPSE':
                 fixed.append({})
 
                 init.append({
-                    'amp': 1., 'R_sersic': 0.2, 'n_sersic': 1.,
+                    'amp': 1., 'R_sersic': 0.2,
+                    'n_sersic': 1.,
                     'center_x': 0.,
                     'center_y': 0.,
                     'e1': 0., 'e2': 0.
@@ -836,30 +838,31 @@ class ModelConfig(Config):
                 })
 
                 lower.append({
-                    'R_sersic': 0.04, 'n_sersic': .5,
+                    'R_sersic': 0.04,
+                    'n_sersic': .5,
                     'center_y': -2., 'center_x': -2.,
                     'e1': -0.5, 'e2': -0.5
                 })
 
                 upper.append({
-                    'R_sersic': .5, 'n_sersic': 8.,
+                    'R_sersic': 0.5,
+                    'n_sersic': 8.,
                     'center_y': 2., 'center_x': 2.,
                     'e1': 0.5, 'e2': 0.5
                 })
             elif model == 'SHAPELETS':
-                fixed.append(
-                    {'n_max': self.settings['source_light_option'][
-                                                        'n_max'][band_index]})
+                fixed.append({'n_max': self.settings['source_light_option']
+                              ['n_max'][shapelets_index]})
                 init.append({'center_x': 0., 'center_y': 0., 'beta': 0.10,
-                             'n_max': self.settings['source_light_option'][
-                                                        'n_max'][band_index]})
+                             'n_max': self.settings['source_light_option']
+                             ['n_max'][shapelets_index]})
                 sigma.append({'center_x': 0.5, 'center_y': 0.5,
                               'beta': 0.010 / 10., 'n_max': 2})
                 lower.append({'center_x': -1.2, 'center_y': -1.2,
                               'beta': 0.02, 'n_max': -1})
                 upper.append({'center_x': 1.2, 'center_y': 1.2,
                               'beta': 0.20, 'n_max': 55})
-                band_index += 1
+                shapelets_index += 1
             else:
                 raise ValueError('{} not implemented as a source light'
                                  'model!'.format(model))
@@ -937,7 +940,7 @@ class ModelConfig(Config):
 
         try:
             self.settings[option_str]['fix']
-        except(NameError, KeyError):
+        except (NameError, KeyError):
             pass
         else:
             if self.settings[option_str]['fix'] is not None:

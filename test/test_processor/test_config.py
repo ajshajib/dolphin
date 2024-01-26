@@ -246,21 +246,19 @@ class TestModelConfig(object):
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
         assert round(prior) == round(-(0.1-0.0)**2/(1e-4))
- 
 
         # phi_m != phi_L (phi_L = 20 deg, q_L = 0.8)
         prior = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert round(prior,-3) == -(20-15)**2/(1e-3)
+        assert round(prior, -3) == -(20-15)**2/(1e-3)
 
         # Test logarithmic shapelets prior
         prior = self.config3.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}],
             kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
-        assert round(prior, 2) == round(-2*np.log(0.1),2)
-     
+        assert round(prior, 2) == round(-2*np.log(0.1), 2)
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config)
@@ -284,8 +282,7 @@ class TestModelConfig(object):
         prior = config3.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
-        assert round(prior,-3) == -(20-5)**2/(1e-3)
-
+        assert round(prior, -3) == -(20-5)**2/(1e-3)
 
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config)

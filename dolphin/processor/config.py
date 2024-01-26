@@ -82,7 +82,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if type(self.settings['pixel_size']) == float:
+        if isinstance(self.settings['pixel_size'], float):
             return [self.settings['pixel_size']] * self.band_number
         else:
             return self.settings['pixel_size']

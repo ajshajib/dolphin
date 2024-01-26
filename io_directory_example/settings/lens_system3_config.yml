@@ -202,6 +202,8 @@ source_light_option:
       - 0.15
       - 0.05
   shapelet_scale_logarithmic_prior: true
+    # If true, provide logarithmic_prior on the source light profile
+    # beta parameter
   n_max:
   - 2
   - 4

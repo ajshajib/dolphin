@@ -245,13 +245,22 @@ class TestModelConfig(object):
         prior = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior == -10.**15
+        assert round(prior) == round(-(0.1-0.0)**2/(1e-4))
+ 
 
-        # Angle out of sync (phi_L = 20 deg, q_L = 0.8)
+        # phi_m != phi_L (phi_L = 20 deg, q_L = 0.8)
         prior = self.config.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
             kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert prior == -10.**15
+        assert round(prior,-3) == -(20-15)**2/(1e-3)
+
+        # Test logarithmic shapelets prior
+        prior = self.config3.custom_logL_addition(
+            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
+            kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}],
+            kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
+        assert round(prior, 2) == round(-2*np.log(0.1),2)
+     
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config)
@@ -266,22 +275,17 @@ class TestModelConfig(object):
             kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
         assert prior == 0
 
-        # Change setting data type
-        config3a = deepcopy(self.config)
-        config3a.settings['lens_option'][
-            'constrain_position_angle_from_lens_light'] = True
-        prior = config3a.custom_logL_addition(
+        # Change setting data type (phi_L = 20 deg, q_L = 0.9)
+        config3 = deepcopy(self.config)
+        config3.settings['lens_option'][
+            'imit_mass_eccentricity_from_light'] = 0.2
+        config3.settings['lens_option'][
+            'constrain_position_angle_from_lens_light'] = 5
+        prior = config3.custom_logL_addition(
             kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
-            kwargs_lens_light=[{'e1': 0.0851, 'e2': 0.0714}])
-        assert prior == -10.**15
+            kwargs_lens_light=[{'e1': 0.0403, 'e2': 0.0338}])
+        assert round(prior,-3) == -(20-5)**2/(1e-3)
 
-        config3b = deepcopy(self.config)
-        config3b.settings['lens_option'][
-            'limit_mass_eccentricity_from_light'] = 1.0
-        prior = config3b.custom_logL_addition(
-            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
-            kwargs_lens_light=[{'e1': 0.0526, 'e2': 0.0}])
-        assert prior == -10.**15
 
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config)
@@ -299,13 +303,6 @@ class TestModelConfig(object):
             config4b.custom_logL_addition(
                 kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
                 kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}])
-
-        # Test logarithmic shapelets prior
-        prior = self.config3.custom_logL_addition(
-            kwargs_lens=[{'e1': 0.111, 'e2': 0.0}],
-            kwargs_lens_light=[{'e1': 0.166, 'e2': 0.060}],
-            kwargs_source=[{'beta': 0.1}, {'beta': 0.1}])
-        assert round(prior, 2) == 4.61
 
     def test_get_masks(self):
         """

@@ -235,7 +235,7 @@ class Output(Processor):
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
         :param show_source_light: if true, replaces convergence plot with
-            source light convolved lens decomposition plot and also replaces 
+            source light convolved lens decomposition plot and also replaces
             the magnification plot with the source-light subtracted data
             plot
         :type show_source_light: `bool`
@@ -406,7 +406,7 @@ class Output(Processor):
         for i in np.arange(num_params):
             samples = self.samples_mcmc[:, i].T
             chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
-        if burn_in !=0:   
+        if burn_in != 0:
             chain = chain[:, burn_in:, :]
 
         return chain

@@ -390,7 +390,7 @@ class ModelConfig(Config):
                 if diff > max_diff:
                     prior += -(diff-max_diff)**2/(1e-4)
 
-        # Provide logarithmic_prior on the source light profile
+        # Provide logarithmic_prior on the source light profile beta param
         if 'source_light_option' in self.settings and \
                 'shapelet_scale_logarithmic_prior' in \
                 self.settings['source_light_option']:

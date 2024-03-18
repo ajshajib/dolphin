@@ -21,8 +21,8 @@ lens_option:
   centroid_init: [0.04, -0.04]
   # Centroid_bound:
   constrain_position_angle_from_lens_light: 15
-  # Provides prior to discourage the position angle difference between 
-  # lens mass and lens light to be larger than a certain threshold. The 
+  # Provides a prior to push the position angle difference between 
+  # lens mass and lens light to be smaller than a certain threshold. The 
   # default position angle difference threshold is 15 degrees.
   limit_mass_eccentricity_from_light: true
   # Provides prior to discourage the lens light axis ratio to be bigger

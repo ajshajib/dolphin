@@ -10,9 +10,15 @@ Development Lead
 
 
 Co-developers
-------------
+-------------
 
 * Chin Yi Tan, |github| `chinyitan <https://github.com/chinyitan>`_
+
+
+Contributors
+------------
+
+* Simon Birrer, |github| `sibirrer <https://github.com/sibirrer>`_
 
 
 .. |mail| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mail.svg?sanitize=true

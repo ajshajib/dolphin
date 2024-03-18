@@ -26,5 +26,4 @@ processor.swim(lens_name, model_id=model_id)
 
 if pool.is_master():
     end_time = time.perf_counter()
-    print('Total time needed for computation: {:.2f} s'.format(end_time -
-                                                               start_time))
+    print("Total time needed for computation: {:.2f} s".format(end_time - start_time))

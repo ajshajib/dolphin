@@ -319,10 +319,10 @@ class ModelConfig(Config):
         limit the maximum allowed difference between orientation angle of the lens mass
         profile and the lens light profile (in degrees).
 
-        2) Impose a tophat prior to limit the ratio between q for the lens mass
-        profile and q for the lens light profile. The varaible q represents    the ratio
-        between the minor axis and major axis of a profile. 3) Impose a logarithmic
-        prior on the source light profile shapelet    scale
+        2) Impose a tophat prior to limit the ratio between q for the lens mass profile
+        and q for the lens light profile. The varaible q represents    the ratio between
+        the minor axis and major axis of a profile. 3) Impose a logarithmic prior on the
+        source light profile shapelet    scale
         """
         prior = 0.0
 

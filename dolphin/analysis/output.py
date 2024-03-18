@@ -333,9 +333,9 @@ class Output(Processor):
         v_min=None,
         v_max=None,
     ):
-        """Plot lens light and source light model decomposition, both with convolved
-        and unconvolved light. Either `model_id` or `kwargs_result` needs to be
-        provided. `kwargs_result` is prioritized for plotting if both are provided.
+        """Plot lens light and source light model decomposition, both with convolved and
+        unconvolved light. Either `model_id` or `kwargs_result` needs to be provided.
+        `kwargs_result` is prioritized for plotting if both are provided.
 
         :param lens_name: name of the lens
         :type lens_name: `str`

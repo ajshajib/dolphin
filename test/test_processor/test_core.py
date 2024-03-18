@@ -7,11 +7,10 @@ from pathlib import Path
 from dolphin.processor.core import Processor
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
-_TEST_IO_DIR = _ROOT_DIR / 'io_directory_example'
+_TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 
 class TestProcessor(object):
-
     def setup_class(self):
         self.processor = Processor(_TEST_IO_DIR)
 
@@ -25,7 +24,7 @@ class TestProcessor(object):
         :return:
         :rtype:
         """
-        self.processor.swim('lens_system1', 'test')
+        self.processor.swim("lens_system1", "test")
 
     def test_get_kwargs_data_joint(self):
         """
@@ -33,13 +32,12 @@ class TestProcessor(object):
         :return:
         :rtype:
         """
-        kwargs_data_joint = self.processor.get_kwargs_data_joint(
-                                'lens_system1')
+        kwargs_data_joint = self.processor.get_kwargs_data_joint("lens_system1")
 
-        assert kwargs_data_joint['multi_band_type'] == 'multi-linear'
+        assert kwargs_data_joint["multi_band_type"] == "multi-linear"
 
-        assert len(kwargs_data_joint['multi_band_list']) == 1
-        assert len(kwargs_data_joint['multi_band_list'][0]) == 3
+        assert len(kwargs_data_joint["multi_band_list"]) == 1
+        assert len(kwargs_data_joint["multi_band_list"][0]) == 3
 
     def test_get_image_data(self):
         """
@@ -47,7 +45,7 @@ class TestProcessor(object):
         :return:
         :rtype:
         """
-        image_data = self.processor.get_image_data('lens_system1', 'F390W')
+        image_data = self.processor.get_image_data("lens_system1", "F390W")
         assert image_data is not None
 
     def test_get_psf_data(self):
@@ -56,5 +54,5 @@ class TestProcessor(object):
         :return:
         :rtype:
         """
-        psf_data = self.processor.get_psf_data('lens_system1', 'F390W')
+        psf_data = self.processor.get_psf_data("lens_system1", "F390W")
         assert psf_data is not None

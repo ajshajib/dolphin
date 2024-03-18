@@ -2,7 +2,7 @@
 """
 This module loads settings from a configuration file.
 """
-__author__ = 'ajshajib'
+__author__ = "ajshajib"
 
 import yaml
 import numpy as np
@@ -33,7 +33,7 @@ class Config(object):
         :return:
         :rtype:
         """
-        with open(file, 'r') as f:
+        with open(file, "r") as f:
             settings = yaml.load(f, yaml.FullLoader)
 
         return settings
@@ -82,10 +82,10 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if isinstance(self.settings['pixel_size'], float):
-            return [self.settings['pixel_size']] * self.band_number
+        if isinstance(self.settings["pixel_size"], float):
+            return [self.settings["pixel_size"]] * self.band_number
         else:
-            return self.settings['pixel_size']
+            return self.settings["pixel_size"]
 
     @property
     def deflector_center_ra(self):
@@ -96,12 +96,13 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'lens_option' in self.settings and 'centroid_init' in \
-                self.settings['lens_option']:
-            return float(self.settings['lens_option'][
-                             'centroid_init'][0])
+        if (
+            "lens_option" in self.settings
+            and "centroid_init" in self.settings["lens_option"]
+        ):
+            return float(self.settings["lens_option"]["centroid_init"][0])
         else:
-            return 0.
+            return 0.0
 
     @property
     def deflector_center_dec(self):
@@ -112,12 +113,13 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'lens_option' in self.settings and 'centroid_init' in \
-                self.settings['lens_option']:
-            return float(self.settings['lens_option'][
-                             'centroid_init'][1])
+        if (
+            "lens_option" in self.settings
+            and "centroid_init" in self.settings["lens_option"]
+        ):
+            return float(self.settings["lens_option"]["centroid_init"][1])
         else:
-            return 0.
+            return 0.0
 
     @property
     def deflector_centroid_bound(self):
@@ -128,9 +130,9 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'lens_option' in self.settings:
-            if 'centroid_bound' in self.settings['lens_option']:
-                bound = self.settings['lens_option']['centroid_bound']
+        if "lens_option" in self.settings:
+            if "centroid_bound" in self.settings["lens_option"]:
+                bound = self.settings["lens_option"]["centroid_bound"]
                 if bound is not None:
                     return bound
 
@@ -145,9 +147,9 @@ class ModelConfig(Config):
         :rtype:
         """
         try:
-            num = len(self.settings['band'])
+            num = len(self.settings["band"])
         except (KeyError, TypeError, NameError):
-            raise ValueError('Name of band(s) not properly specified!')
+            raise ValueError("Name of band(s) not properly specified!")
         else:
             if num < 1:
                 raise ValueError("Number of bands less than 1!")
@@ -163,25 +165,24 @@ class ModelConfig(Config):
         """
 
         kwargs_model = {
-            'lens_model_list': self.get_lens_model_list(),
-            'source_light_model_list': self.get_source_light_model_list(),
-            'lens_light_model_list': self.get_lens_light_model_list(),
-            'point_source_model_list': self.get_point_source_model_list(),
-            'index_lens_light_model_list':
-                self.get_index_lens_light_model_list(),
-            'index_source_light_model_list':
-                self.get_index_source_light_model_list(),
+            "lens_model_list": self.get_lens_model_list(),
+            "source_light_model_list": self.get_source_light_model_list(),
+            "lens_light_model_list": self.get_lens_light_model_list(),
+            "point_source_model_list": self.get_point_source_model_list(),
+            "index_lens_light_model_list": self.get_index_lens_light_model_list(),
+            "index_source_light_model_list": self.get_index_source_light_model_list(),
         }
 
-        if 'kwargs_model' in self.settings and self.settings['kwargs_model'] \
-                is not None:
-            for key, value in self.settings['kwargs_model'].items():
+        if (
+            "kwargs_model" in self.settings
+            and self.settings["kwargs_model"] is not None
+        ):
+            for key, value in self.settings["kwargs_model"].items():
                 kwargs_model[key] = value
 
         return kwargs_model
 
     def get_kwargs_constraints(self):
-
         """
         Create `kwargs_constraints`.
 
@@ -193,38 +194,34 @@ class ModelConfig(Config):
 
         if num_source_profiles > 1:
             for n in range(1, num_source_profiles):
-                joint_source_with_source.append([
-                    0, n, ['center_x', 'center_y']
-                ])
+                joint_source_with_source.append([0, n, ["center_x", "center_y"]])
 
         joint_lens_light_with_lens_light = []
         num_lens_light_profiles = len(self.get_lens_light_model_list())
         if num_lens_light_profiles > 1:
             for n in range(1, num_lens_light_profiles):
-                joint_lens_light_with_lens_light.append([
-                    0, n, ['center_x', 'center_y']
-                ])
+                joint_lens_light_with_lens_light.append(
+                    [0, n, ["center_x", "center_y"]]
+                )
 
         joint_source_with_point_source = []
-        if len(self.get_point_source_model_list()) > 0 and \
-                num_source_profiles > 0:
+        if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
             for n in range(num_source_profiles):
-                joint_source_with_point_source.append([
-                    0, n
-                ])
+                joint_source_with_point_source.append([0, n])
 
         kwargs_constraints = {
-            'joint_source_with_source': joint_source_with_source,
-            'joint_lens_light_with_lens_light':
-                joint_lens_light_with_lens_light,
-            'joint_source_with_point_source': joint_source_with_point_source,
-            'joint_lens_with_light': [],
-            'joint_lens_with_lens': []
+            "joint_source_with_source": joint_source_with_source,
+            "joint_lens_light_with_lens_light": joint_lens_light_with_lens_light,
+            "joint_source_with_point_source": joint_source_with_point_source,
+            "joint_lens_with_light": [],
+            "joint_lens_with_lens": [],
         }
 
-        if 'kwargs_constraints' in self.settings and self.settings[
-                                            'kwargs_constraints'] is not None:
-            for key, value in self.settings['kwargs_constraints'].items():
+        if (
+            "kwargs_constraints" in self.settings
+            and self.settings["kwargs_constraints"] is not None
+        ):
+            for key, value in self.settings["kwargs_constraints"].items():
                 kwargs_constraints[key] = value
 
         return kwargs_constraints
@@ -237,83 +234,102 @@ class ModelConfig(Config):
         :rtype:
         """
         kwargs_likelihood = {
-            'force_no_add_image': False,
-            'source_marg': False,
+            "force_no_add_image": False,
+            "source_marg": False,
             # 'point_source_likelihood': True,
             # 'position_uncertainty': 0.00004,
             # 'check_solver': False,
             # 'solver_tolerance': 0.001,
-            'check_positive_flux': True,
-            'check_bounds': True,
-            'bands_compute': [True] * self.band_number,
-            'image_likelihood_mask_list': self.get_masks(),
-            'prior_lens': [],
-            'prior_lens_light': [],
-            'prior_ps': [],
-            'prior_source': [],
+            "check_positive_flux": True,
+            "check_bounds": True,
+            "bands_compute": [True] * self.band_number,
+            "image_likelihood_mask_list": self.get_masks(),
+            "prior_lens": [],
+            "prior_lens_light": [],
+            "prior_ps": [],
+            "prior_source": [],
         }
 
-        if 'lens_option' in self.settings and \
-           'gaussian_prior' in self.settings['lens_option']:
-            for index, param_dict in \
-              self.settings['lens_option']['gaussian_prior'].items():
+        if (
+            "lens_option" in self.settings
+            and "gaussian_prior" in self.settings["lens_option"]
+        ):
+            for index, param_dict in self.settings["lens_option"][
+                "gaussian_prior"
+            ].items():
                 for i in param_dict:
                     prior_param = [index]
                     prior_param.extend(i)
-                    kwargs_likelihood['prior_lens'].append(prior_param)
+                    kwargs_likelihood["prior_lens"].append(prior_param)
 
-        if 'lens_light_option' in self.settings and \
-           'gaussian_prior' in self.settings['lens_light_option']:
-            for index, param_dict in \
-              self.settings['lens_light_option']['gaussian_prior'].items():
+        if (
+            "lens_light_option" in self.settings
+            and "gaussian_prior" in self.settings["lens_light_option"]
+        ):
+            for index, param_dict in self.settings["lens_light_option"][
+                "gaussian_prior"
+            ].items():
                 for i in param_dict:
                     prior_param = [index]
                     prior_param.extend(i)
-                    kwargs_likelihood['prior_lens_light'].append(prior_param)
+                    kwargs_likelihood["prior_lens_light"].append(prior_param)
 
-        if 'source_light_option' in self.settings and \
-           'gaussian_prior' in self.settings['source_light_option']:
-            for index, param_dict in \
-              self.settings['source_light_option']['gaussian_prior'].items():
+        if (
+            "source_light_option" in self.settings
+            and "gaussian_prior" in self.settings["source_light_option"]
+        ):
+            for index, param_dict in self.settings["source_light_option"][
+                "gaussian_prior"
+            ].items():
                 for i in param_dict:
                     prior_param = [index]
                     prior_param.extend(i)
-                    kwargs_likelihood['prior_source'].append(prior_param)
+                    kwargs_likelihood["prior_source"].append(prior_param)
 
-        if 'point_source_option' in self.settings and \
-           'gaussian_prior' in self.settings['point_source_option']:
-            for index, param_dict in \
-              self.settings['point_source_option']['gaussian_prior'].items():
+        if (
+            "point_source_option" in self.settings
+            and "gaussian_prior" in self.settings["point_source_option"]
+        ):
+            for index, param_dict in self.settings["point_source_option"][
+                "gaussian_prior"
+            ].items():
                 for i in param_dict:
                     prior_param = [index]
                     prior_param.extend(i)
-                    kwargs_likelihood['prior_ps'].append(prior_param)
+                    kwargs_likelihood["prior_ps"].append(prior_param)
 
         use_custom_logL_addition = False
 
-        if 'lens_option' in self.settings:
-            if 'constrain_position_angle_from_lens_light'\
-                    in self.settings['lens_option']:
+        if "lens_option" in self.settings:
+            if (
+                "constrain_position_angle_from_lens_light"
+                in self.settings["lens_option"]
+            ):
                 use_custom_logL_addition = True
-            if 'limit_mass_eccentricity_from_light'\
-                    in self.settings['lens_option']:
+            if "limit_mass_eccentricity_from_light" in self.settings["lens_option"]:
                 use_custom_logL_addition = True
 
-        if 'source_light_option' in self.settings:
-            if 'shapelet_scale_logarithmic_prior' in\
-                    self.settings['source_light_option']:
+        if "source_light_option" in self.settings:
+            if (
+                "shapelet_scale_logarithmic_prior"
+                in self.settings["source_light_option"]
+            ):
                 use_custom_logL_addition = True
 
         if use_custom_logL_addition:
-            kwargs_likelihood['custom_logL_addition'] =\
-                self.custom_logL_addition
+            kwargs_likelihood["custom_logL_addition"] = self.custom_logL_addition
 
         return kwargs_likelihood
 
-    def custom_logL_addition(self, kwargs_lens=None, kwargs_source=None,
-                             kwargs_lens_light=None, kwargs_ps=None,
-                             kwargs_special=None,
-                             kwargs_extinction=None):
+    def custom_logL_addition(
+        self,
+        kwargs_lens=None,
+        kwargs_source=None,
+        kwargs_lens_light=None,
+        kwargs_ps=None,
+        kwargs_special=None,
+        kwargs_extinction=None,
+    ):
         """
         Add different types of custom log L funtions
         1) Impose a tophat prior to limit the maximum allowed difference
@@ -329,12 +345,14 @@ class ModelConfig(Config):
 
         # Allign pa_light and pa_mass for the lensing galaxy, where pa is the
         # orientation angle of the profile
-        if 'lens_option' in self.settings and \
-                'constrain_position_angle_from_lens_light' \
-                in self.settings['lens_option']:
-
-            setting_input = self.settings['lens_option'][
-                            'constrain_position_angle_from_lens_light']
+        if (
+            "lens_option" in self.settings
+            and "constrain_position_angle_from_lens_light"
+            in self.settings["lens_option"]
+        ):
+            setting_input = self.settings["lens_option"][
+                "constrain_position_angle_from_lens_light"
+            ]
 
             if isinstance(setting_input, (bool)) and setting_input:
                 max_delta = 15
@@ -343,30 +361,40 @@ class ModelConfig(Config):
             elif isinstance(setting_input, (int, float)):
                 max_delta = setting_input
             else:
-                raise (TypeError('constrain_position_angle_from_lens_light \
-                                  should be float, int or bool'))
+                raise (
+                    TypeError(
+                        "constrain_position_angle_from_lens_light \
+                                  should be float, int or bool"
+                    )
+                )
 
             if not np.isnan(max_delta):
-                pa_mass = ellipticity2phi_q(
-                            kwargs_lens[0]['e1'],
-                            kwargs_lens[0]['e2'])[0] * 180 / np.pi
-                pa_light = ellipticity2phi_q(
-                            kwargs_lens_light[0]['e1'],
-                            kwargs_lens_light[0]['e2'])[0] * 180 / np.pi
+                pa_mass = (
+                    ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[0]
+                    * 180
+                    / np.pi
+                )
+                pa_light = (
+                    ellipticity2phi_q(
+                        kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
+                    )[0]
+                    * 180
+                    / np.pi
+                )
 
-                diff = min(abs(pa_light - pa_mass),
-                           180 - abs(pa_light - pa_mass))
+                diff = min(abs(pa_light - pa_mass), 180 - abs(pa_light - pa_mass))
                 if diff > np.abs(max_delta):
-                    prior += -(diff-np.abs(max_delta))**2/(1e-3)
+                    prior += -((diff - np.abs(max_delta)) ** 2) / (1e-3)
 
         # Ensure q_mass is smaller than q_light for the lensing galaxy, where
         # q is the ratio between the minor axis to the major axis of a profile
-        if 'lens_option' in self.settings and \
-                'limit_mass_eccentricity_from_light'\
-                in self.settings['lens_option']:
-
-            setting_input2 = self.settings['lens_option'][
-                             'limit_mass_eccentricity_from_light']
+        if (
+            "lens_option" in self.settings
+            and "limit_mass_eccentricity_from_light" in self.settings["lens_option"]
+        ):
+            setting_input2 = self.settings["lens_option"][
+                "limit_mass_eccentricity_from_light"
+            ]
 
             if isinstance(setting_input2, (bool)) and setting_input2:
                 max_diff = 0.0
@@ -375,33 +403,41 @@ class ModelConfig(Config):
             elif isinstance(setting_input2, (int, float)):
                 max_diff = setting_input2
             else:
-                raise (TypeError('limit_mass_eccentricity_from_light \
-                                  should be float, int or bool'))
-            q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
-                                       kwargs_lens[0]['e2'])[1]
-            q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
-                                        kwargs_lens_light[0]['e2'])[1]
+                raise (
+                    TypeError(
+                        "limit_mass_eccentricity_from_light \
+                                  should be float, int or bool"
+                    )
+                )
+            q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
+            q_light = ellipticity2phi_q(
+                kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
+            )[1]
             if not np.isnan(max_diff):
-                q_mass = ellipticity2phi_q(kwargs_lens[0]['e1'],
-                                           kwargs_lens[0]['e2'])[1]
-                q_light = ellipticity2phi_q(kwargs_lens_light[0]['e1'],
-                                            kwargs_lens_light[0]['e2'])[1]
-                diff = q_light-q_mass
+                q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
+                    1
+                ]
+                q_light = ellipticity2phi_q(
+                    kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
+                )[1]
+                diff = q_light - q_mass
                 if diff > max_diff:
-                    prior += -(diff-max_diff)**2/(1e-4)
+                    prior += -((diff - max_diff) ** 2) / (1e-4)
 
         # Provide logarithmic_prior on the source light profile beta param
-        if 'source_light_option' in self.settings and \
-                'shapelet_scale_logarithmic_prior' in \
-                self.settings['source_light_option']:
-            setting_input3 = self.settings['source_light_option'][
-                             'shapelet_scale_logarithmic_prior']
+        if (
+            "source_light_option" in self.settings
+            and "shapelet_scale_logarithmic_prior"
+            in self.settings["source_light_option"]
+        ):
+            setting_input3 = self.settings["source_light_option"][
+                "shapelet_scale_logarithmic_prior"
+            ]
             if setting_input3:
-                for i, model in enumerate(self.settings['model'][
-                                              'source_light']):
+                for i, model in enumerate(self.settings["model"]["source_light"]):
                     if model == "SHAPELETS":
-                        beta = kwargs_source[i]['beta']
-                        prior += - np.log(beta)
+                        beta = kwargs_source[i]["beta"]
+                        prior += -np.log(beta)
 
         return prior
 
@@ -412,103 +448,106 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'mask' in self.settings:
-            if self.settings['mask'] is not None:
-                if 'provided' in self.settings['mask'] \
-                        and self.settings['mask']['provided'] is not None:
-                    return self.settings['mask']['provided']
+        if "mask" in self.settings:
+            if self.settings["mask"] is not None:
+                if (
+                    "provided" in self.settings["mask"]
+                    and self.settings["mask"]["provided"] is not None
+                ):
+                    return self.settings["mask"]["provided"]
                 else:
                     masks = []
-                    mask_options = deepcopy(self.settings['mask'])
+                    mask_options = deepcopy(self.settings["mask"])
 
                     for n in range(self.band_number):
-                        ra_at_xy_0 = mask_options['ra_at_xy_0'][n]
-                        dec_at_xy_0 = mask_options['dec_at_xy_0'][n]
+                        ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
+                        dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
                         transform_pix2angle = np.array(
-                            mask_options['transform_matrix'][n]
+                            mask_options["transform_matrix"][n]
                         )
-                        num_pixel = mask_options['size'][n]
-                        radius = mask_options['radius'][n]
-                        offset = mask_options['centroid_offset'][n]
+                        num_pixel = mask_options["size"][n]
+                        radius = mask_options["radius"][n]
+                        offset = mask_options["centroid_offset"][n]
 
-                        coords = Coordinates(transform_pix2angle,
-                                             ra_at_xy_0, dec_at_xy_0)
+                        coords = Coordinates(
+                            transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+                        )
 
-                        x_coords, y_coords = coords.coordinate_grid(num_pixel,
-                                                                    num_pixel)
+                        x_coords, y_coords = coords.coordinate_grid(
+                            num_pixel, num_pixel
+                        )
 
                         mask_outer = mask_util.mask_center_2d(
                             self.deflector_center_ra + offset[0],
                             self.deflector_center_dec + offset[1],
                             radius,
                             util.image2array(x_coords),
-                            util.image2array(y_coords)
+                            util.image2array(y_coords),
                         )
 
                         extra_masked_regions = []
                         try:
-                            self.settings['mask']['extra_regions']
+                            self.settings["mask"]["extra_regions"]
                         except (NameError, KeyError):
                             pass
                         else:
-                            if self.settings['mask']['extra_regions'] is \
-                                    not None:
-                                for reg in self.settings['mask'][
-                                                        'extra_regions'][n]:
+                            if self.settings["mask"]["extra_regions"] is not None:
+                                for reg in self.settings["mask"]["extra_regions"][n]:
                                     extra_masked_regions.append(
                                         mask_util.mask_center_2d(
                                             self.deflector_center_ra + reg[0],
                                             self.deflector_center_dec + reg[1],
                                             reg[2],
                                             util.image2array(x_coords),
-                                            util.image2array(y_coords)
+                                            util.image2array(y_coords),
                                         )
                                     )
 
-                        mask = 1. - mask_outer
+                        mask = 1.0 - mask_outer
 
                         for extra_region in extra_masked_regions:
                             mask *= extra_region
                         # Mask Edge Pixels
                         try:
-                            self.settings['mask']['mask_edge_pixels']
+                            self.settings["mask"]["mask_edge_pixels"]
                         except (NameError, KeyError):
                             pass
                         else:
-                            border_length = \
-                                self.settings['mask']['mask_edge_pixels'][n]
+                            border_length = self.settings["mask"]["mask_edge_pixels"][n]
                             if border_length > 0:
                                 edge_mask = 0 * np.ones(
-                                 (num_pixel, num_pixel), dtype=int)
+                                    (num_pixel, num_pixel), dtype=int
+                                )
 
-                                edge_mask[border_length:-border_length,
-                                          border_length:-border_length] = 1
+                                edge_mask[
+                                    border_length:-border_length,
+                                    border_length:-border_length,
+                                ] = 1
                                 edge_mask = (edge_mask.flatten()).tolist()
                             elif border_length == 0:
                                 edge_mask = 1 * np.ones(
-                                   (num_pixel, num_pixel), dtype=int)
+                                    (num_pixel, num_pixel), dtype=int
+                                )
                                 edge_mask = (edge_mask.flatten()).tolist()
 
                             mask *= edge_mask
                         # Add custom Mask
                         try:
-                            self.settings['mask']['custom_mask']
+                            self.settings["mask"]["custom_mask"]
                         except (NameError, KeyError):
                             pass
                         else:
-                            if self.settings['mask']['custom_mask'][n]\
-                                    is not None:
-                                provided_mask = \
-                                    self.settings['mask']['custom_mask'][n]
+                            if self.settings["mask"]["custom_mask"][n] is not None:
+                                provided_mask = self.settings["mask"]["custom_mask"][n]
                                 provided_mask = np.array(provided_mask)
                                 # make sure that mask consist of only 0 and 1
-                                provided_mask[provided_mask > 0.] = 1.
-                                provided_mask[provided_mask <= 0.] = 0.
+                                provided_mask[provided_mask > 0.0] = 1.0
+                                provided_mask[provided_mask <= 0.0] = 0.0
                                 mask *= provided_mask
 
                         # sanity check
-                        mask[mask >= 1.] = 1.
-                        mask[mask <= 0.] = 0.
+                        mask[mask >= 1.0] = 1.0
+                        mask[mask <= 0.0] = 0.0
 
                         masks.append(util.array2image(mask))
 
@@ -523,25 +562,32 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'psf_iteration' in self.settings['fitting'] \
-                and self.settings['fitting']['psf_iteration']:
+        if (
+            "psf_iteration" in self.settings["fitting"]
+            and self.settings["fitting"]["psf_iteration"]
+        ):
             kwargs_psf_iteration = {
-                'stacking_method': 'median',
-                'keep_psf_error_map': True,
-                'psf_symmetry': 4,
-                'block_center_neighbour': 0.,
-                'num_iter': 50,
-                'psf_iter_factor': 0.5
+                "stacking_method": "median",
+                "keep_psf_error_map": True,
+                "psf_symmetry": 4,
+                "block_center_neighbour": 0.0,
+                "num_iter": 50,
+                "psf_iter_factor": 0.5,
             }
 
-            if 'psf_iteration_settings' in self.settings['fitting']:
-                for key in ['stacking_method', 'keep_psf_error_map',
-                            'psf_symmetry', 'block_center_neighbour',
-                            'num_iter', 'psf_iter_factor']:
-                    if key in self.settings['fitting'][
-                                                    'psf_iteration_settings']:
-                        kwargs_psf_iteration[key] = self.settings['fitting'][
-                            'psf_iteration_settings'][key]
+            if "psf_iteration_settings" in self.settings["fitting"]:
+                for key in [
+                    "stacking_method",
+                    "keep_psf_error_map",
+                    "psf_symmetry",
+                    "block_center_neighbour",
+                    "num_iter",
+                    "psf_iter_factor",
+                ]:
+                    if key in self.settings["fitting"]["psf_iteration_settings"]:
+                        kwargs_psf_iteration[key] = self.settings["fitting"][
+                            "psf_iteration_settings"
+                        ][key]
 
             return kwargs_psf_iteration
         else:
@@ -555,26 +601,29 @@ class ModelConfig(Config):
         :rtype:
         """
         try:
-            self.settings['kwargs_numerics']['supersampling_factor']
+            self.settings["kwargs_numerics"]["supersampling_factor"]
         except (KeyError, NameError, TypeError):
             supersampling_factor = [3] * self.band_number
         else:
-            supersampling_factor = deepcopy(self.settings['kwargs_numerics'][
-                                                'supersampling_factor'])
+            supersampling_factor = deepcopy(
+                self.settings["kwargs_numerics"]["supersampling_factor"]
+            )
 
             if supersampling_factor is None:
                 supersampling_factor = [3] * self.band_number
 
         kwargs_numerics = []
         for n in range(self.band_number):
-            kwargs_numerics.append({
-                'supersampling_factor': supersampling_factor[n],
-                'supersampling_convolution': False,
-                'supersampling_kernel_size': 3,
-                'flux_evaluate_indexes': None,
-                'point_source_supersampling_factor': 1,
-                'compute_mode': 'regular',
-            })
+            kwargs_numerics.append(
+                {
+                    "supersampling_factor": supersampling_factor[n],
+                    "supersampling_convolution": False,
+                    "supersampling_kernel_size": 3,
+                    "flux_evaluate_indexes": None,
+                    "point_source_supersampling_factor": 1,
+                    "compute_mode": "regular",
+                }
+            )
 
         return kwargs_numerics
 
@@ -585,8 +634,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'lens' in self.settings['model']:
-            return self.settings['model']['lens']
+        if "lens" in self.settings["model"]:
+            return self.settings["model"]["lens"]
         else:
             return []
 
@@ -597,8 +646,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'source_light' in self.settings['model']:
-            return self.settings['model']['source_light']
+        if "source_light" in self.settings["model"]:
+            return self.settings["model"]["source_light"]
         else:
             return []
 
@@ -609,8 +658,8 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'lens_light' in self.settings['model']:
-            return self.settings['model']['lens_light']
+        if "lens_light" in self.settings["model"]:
+            return self.settings["model"]["lens_light"]
         else:
             return []
 
@@ -621,9 +670,11 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if 'point_source' in self.settings['model'] and \
-                self.settings['model']['point_source'] is not None:
-            return self.settings['model']['point_source']
+        if (
+            "point_source" in self.settings["model"]
+            and self.settings["model"]["point_source"] is not None
+        ):
+            return self.settings["model"]["point_source"]
         else:
             return []
 
@@ -632,25 +683,26 @@ class ModelConfig(Config):
         Create list with of index for the different lens light profile
          (for multiple filters)
         """
-        if 'lens_light' in self.settings['model']:
+        if "lens_light" in self.settings["model"]:
             if self.band_number == 1:
                 index_list = [[]]
-                for k, model in enumerate(
-                        self.settings['model']['lens_light']):
+                for k, model in enumerate(self.settings["model"]["lens_light"]):
                     index_list[0].append(k)
                 return index_list
             else:
-                if 'lens_light_band_indices' in self.settings['model']:
+                if "lens_light_band_indices" in self.settings["model"]:
                     index_list = [[] for _ in range(self.band_number)]
-                    for i, model in enumerate(self.settings['model'][
-                                                  'lens_light_band_indices']):
+                    for i, model in enumerate(
+                        self.settings["model"]["lens_light_band_indices"]
+                    ):
                         index_list[model].append(i)
                     for k in index_list:
                         assert k != [], "One of the bands have no lens light"
                     return index_list
                 else:
                     raise ValueError(
-                     'Missing "lens_light_band_indices" in the settings file!')
+                        'Missing "lens_light_band_indices" in the settings file!'
+                    )
         else:
             return []
 
@@ -660,26 +712,26 @@ class ModelConfig(Config):
          (for multiple filters)
 
         """
-        if 'source_light' in self.settings['model']:
+        if "source_light" in self.settings["model"]:
             if self.band_number == 1:
                 index_list = [[]]
-                for k, model in enumerate(
-                        self.settings['model']['source_light']):
+                for k, model in enumerate(self.settings["model"]["source_light"]):
                     index_list[0].append(k)
                 return index_list
             else:
-                if 'source_light_band_indices' in self.settings['model']:
+                if "source_light_band_indices" in self.settings["model"]:
                     index_list = [[] for _ in range(self.band_number)]
-                    for i, model in enumerate(self.settings['model'][
-                                                 'source_light_band_indices']):
+                    for i, model in enumerate(
+                        self.settings["model"]["source_light_band_indices"]
+                    ):
                         index_list[model].append(i)
                     for k in index_list:
                         assert k != [], "One of the bands have no source light"
                     return index_list
                 else:
                     raise ValueError(
-                        'Missing "source_light_band_indices" '
-                        'in the settings file!')
+                        'Missing "source_light_band_indices" ' "in the settings file!"
+                    )
         else:
             return []
 
@@ -699,48 +751,66 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_model_list):
-            if model in ['SPEP', 'PEMD']:
+            if model in ["SPEP", "PEMD"]:
                 fixed.append({})
-                init.append({
-                    'center_x': self.deflector_center_ra,
-                    'center_y': self.deflector_center_dec,
-                    'e1': 0., 'e2': 0.,
-                    'gamma': 2., 'theta_E': 1.
-                })
+                init.append(
+                    {
+                        "center_x": self.deflector_center_ra,
+                        "center_y": self.deflector_center_dec,
+                        "e1": 0.0,
+                        "e2": 0.0,
+                        "gamma": 2.0,
+                        "theta_E": 1.0,
+                    }
+                )
 
-                sigma.append({
-                    'theta_E': .1, 'e1': 0.01, 'e2': 0.01,
-                    'gamma': 0.02, 'center_x': 0.1,
-                    'center_y': 0.1
-                })
+                sigma.append(
+                    {
+                        "theta_E": 0.1,
+                        "e1": 0.01,
+                        "e2": 0.01,
+                        "gamma": 0.02,
+                        "center_x": 0.1,
+                        "center_y": 0.1,
+                    }
+                )
 
-                lower.append({
-                    'theta_E': 0.3, 'e1': -0.5, 'e2': -0.5, 'gamma': 1.3,
-                    'center_x': self.deflector_center_ra
-                                    - self.deflector_centroid_bound,
-                    'center_y': self.deflector_center_dec
-                                    - self.deflector_centroid_bound
-                })
+                lower.append(
+                    {
+                        "theta_E": 0.3,
+                        "e1": -0.5,
+                        "e2": -0.5,
+                        "gamma": 1.3,
+                        "center_x": self.deflector_center_ra
+                        - self.deflector_centroid_bound,
+                        "center_y": self.deflector_center_dec
+                        - self.deflector_centroid_bound,
+                    }
+                )
 
-                upper.append({
-                    'theta_E': 3., 'e1': 0.5, 'e2': 0.5, 'gamma': 2.8,
-                    'center_x': self.deflector_center_ra
-                    + self.deflector_centroid_bound,
-                    'center_y': self.deflector_center_dec
-                    + self.deflector_centroid_bound
-                })
+                upper.append(
+                    {
+                        "theta_E": 3.0,
+                        "e1": 0.5,
+                        "e2": 0.5,
+                        "gamma": 2.8,
+                        "center_x": self.deflector_center_ra
+                        + self.deflector_centroid_bound,
+                        "center_y": self.deflector_center_dec
+                        + self.deflector_centroid_bound,
+                    }
+                )
 
-            elif model == 'SHEAR_GAMMA_PSI':
-                fixed.append({'ra_0': 0, 'dec_0': 0})
-                init.append({'gamma_ext': 0.05, 'psi_ext': 0.0})
-                sigma.append({'gamma_ext': 0.05, 'psi_ext': np.pi / 90.})
-                lower.append({'gamma_ext': 0.0, 'psi_ext': -np.pi})
-                upper.append({'gamma_ext': 0.5, 'psi_ext': np.pi})
+            elif model == "SHEAR_GAMMA_PSI":
+                fixed.append({"ra_0": 0, "dec_0": 0})
+                init.append({"gamma_ext": 0.05, "psi_ext": 0.0})
+                sigma.append({"gamma_ext": 0.05, "psi_ext": np.pi / 90.0})
+                lower.append({"gamma_ext": 0.0, "psi_ext": -np.pi})
+                upper.append({"gamma_ext": 0.5, "psi_ext": np.pi})
             else:
-                raise ValueError('{} not implemented as a lens '
-                                 'model!'.format(model))
+                raise ValueError("{} not implemented as a lens " "model!".format(model))
 
-        fixed = self.fill_in_fixed_from_settings('lens', fixed)
+        fixed = self.fill_in_fixed_from_settings("lens", fixed)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -761,43 +831,61 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_light_model_list):
-            if model == 'SERSIC_ELLIPSE':
+            if model == "SERSIC_ELLIPSE":
                 fixed.append({})
-                init.append({
-                    'amp': 1., 'R_sersic': .2,
-                    'center_x': self.deflector_center_ra,
-                    'center_y': self.deflector_center_dec,
-                    'e1': 0, 'e2': 0, 'n_sersic': 4.0
-                })
-                sigma.append({
-                    'center_x': np.max(self.pixel_size) / 10.,
-                    'center_y': np.max(self.pixel_size) / 10.,
-                    'R_sersic': 0.05, 'n_sersic': 0.5,
-                    'e1': 0.01, 'e2': 0.01
-                })
+                init.append(
+                    {
+                        "amp": 1.0,
+                        "R_sersic": 0.2,
+                        "center_x": self.deflector_center_ra,
+                        "center_y": self.deflector_center_dec,
+                        "e1": 0,
+                        "e2": 0,
+                        "n_sersic": 4.0,
+                    }
+                )
+                sigma.append(
+                    {
+                        "center_x": np.max(self.pixel_size) / 10.0,
+                        "center_y": np.max(self.pixel_size) / 10.0,
+                        "R_sersic": 0.05,
+                        "n_sersic": 0.5,
+                        "e1": 0.01,
+                        "e2": 0.01,
+                    }
+                )
 
-                lower.append({
-                    'e1': -0.5, 'e2': -0.5,
-                    'n_sersic': .5, 'R_sersic': 0.1,
-                    'center_x': self.deflector_center_ra
-                                - self.deflector_centroid_bound,
-                    'center_y': self.deflector_center_dec
-                                - self.deflector_centroid_bound
-                })
+                lower.append(
+                    {
+                        "e1": -0.5,
+                        "e2": -0.5,
+                        "n_sersic": 0.5,
+                        "R_sersic": 0.1,
+                        "center_x": self.deflector_center_ra
+                        - self.deflector_centroid_bound,
+                        "center_y": self.deflector_center_dec
+                        - self.deflector_centroid_bound,
+                    }
+                )
 
-                upper.append({
-                    'e1': 0.5, 'e2': 0.5,
-                    'n_sersic': 8., 'R_sersic': 5.,
-                    'center_x': self.deflector_center_ra
-                                    + self.deflector_centroid_bound,
-                    'center_y': self.deflector_center_dec
-                                    + self.deflector_centroid_bound
-                })
+                upper.append(
+                    {
+                        "e1": 0.5,
+                        "e2": 0.5,
+                        "n_sersic": 8.0,
+                        "R_sersic": 5.0,
+                        "center_x": self.deflector_center_ra
+                        + self.deflector_centroid_bound,
+                        "center_y": self.deflector_center_dec
+                        + self.deflector_centroid_bound,
+                    }
+                )
             else:
-                raise ValueError('{} not implemented as a lens light'
-                                 'model!'.format(model))
+                raise ValueError(
+                    "{} not implemented as a lens light" "model!".format(model)
+                )
 
-        fixed = self.fill_in_fixed_from_settings('lens_light', fixed)
+        fixed = self.fill_in_fixed_from_settings("lens_light", fixed)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -819,55 +907,87 @@ class ModelConfig(Config):
 
         shapelets_index = 0
         for i, model in enumerate(source_light_model_list):
-            if model == 'SERSIC_ELLIPSE':
+            if model == "SERSIC_ELLIPSE":
                 fixed.append({})
 
-                init.append({
-                    'amp': 1., 'R_sersic': 0.2,
-                    'n_sersic': 1.,
-                    'center_x': 0.,
-                    'center_y': 0.,
-                    'e1': 0., 'e2': 0.
-                })
+                init.append(
+                    {
+                        "amp": 1.0,
+                        "R_sersic": 0.2,
+                        "n_sersic": 1.0,
+                        "center_x": 0.0,
+                        "center_y": 0.0,
+                        "e1": 0.0,
+                        "e2": 0.0,
+                    }
+                )
 
-                sigma.append({
-                    'center_x': 0.5,
-                    'center_y': 0.5,
-                    'R_sersic': 0.01, 'n_sersic': 0.5,
-                    'e1': 0.05, 'e2': 0.05
-                })
+                sigma.append(
+                    {
+                        "center_x": 0.5,
+                        "center_y": 0.5,
+                        "R_sersic": 0.01,
+                        "n_sersic": 0.5,
+                        "e1": 0.05,
+                        "e2": 0.05,
+                    }
+                )
 
-                lower.append({
-                    'R_sersic': 0.04,
-                    'n_sersic': .5,
-                    'center_y': -2., 'center_x': -2.,
-                    'e1': -0.5, 'e2': -0.5
-                })
+                lower.append(
+                    {
+                        "R_sersic": 0.04,
+                        "n_sersic": 0.5,
+                        "center_y": -2.0,
+                        "center_x": -2.0,
+                        "e1": -0.5,
+                        "e2": -0.5,
+                    }
+                )
 
-                upper.append({
-                    'R_sersic': 0.5,
-                    'n_sersic': 8.,
-                    'center_y': 2., 'center_x': 2.,
-                    'e1': 0.5, 'e2': 0.5
-                })
-            elif model == 'SHAPELETS':
-                fixed.append({'n_max': self.settings['source_light_option']
-                              ['n_max'][shapelets_index]})
-                init.append({'center_x': 0., 'center_y': 0., 'beta': 0.10,
-                             'n_max': self.settings['source_light_option']
-                             ['n_max'][shapelets_index]})
-                sigma.append({'center_x': 0.5, 'center_y': 0.5,
-                              'beta': 0.010 / 10., 'n_max': 2})
-                lower.append({'center_x': -1.2, 'center_y': -1.2,
-                              'beta': 0.02, 'n_max': -1})
-                upper.append({'center_x': 1.2, 'center_y': 1.2,
-                              'beta': 0.20, 'n_max': 55})
+                upper.append(
+                    {
+                        "R_sersic": 0.5,
+                        "n_sersic": 8.0,
+                        "center_y": 2.0,
+                        "center_x": 2.0,
+                        "e1": 0.5,
+                        "e2": 0.5,
+                    }
+                )
+            elif model == "SHAPELETS":
+                fixed.append(
+                    {
+                        "n_max": self.settings["source_light_option"]["n_max"][
+                            shapelets_index
+                        ]
+                    }
+                )
+                init.append(
+                    {
+                        "center_x": 0.0,
+                        "center_y": 0.0,
+                        "beta": 0.10,
+                        "n_max": self.settings["source_light_option"]["n_max"][
+                            shapelets_index
+                        ],
+                    }
+                )
+                sigma.append(
+                    {"center_x": 0.5, "center_y": 0.5, "beta": 0.010 / 10.0, "n_max": 2}
+                )
+                lower.append(
+                    {"center_x": -1.2, "center_y": -1.2, "beta": 0.02, "n_max": -1}
+                )
+                upper.append(
+                    {"center_x": 1.2, "center_y": 1.2, "beta": 0.20, "n_max": 55}
+                )
                 shapelets_index += 1
             else:
-                raise ValueError('{} not implemented as a source light'
-                                 'model!'.format(model))
+                raise ValueError(
+                    "{} not implemented as a source light" "model!".format(model)
+                )
 
-        fixed = self.fill_in_fixed_from_settings('source_light', fixed)
+        fixed = self.fill_in_fixed_from_settings("source_light", fixed)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -890,34 +1010,42 @@ class ModelConfig(Config):
         if len(point_source_model_list) > 0:
             fixed.append({})
 
-            init.append({
-                'ra_image': np.array(self.settings['point_source_option'][
-                                                                'ra_init']),
-                'dec_image': np.array(self.settings['point_source_option'][
-                                                                'dec_init']),
-            })
+            init.append(
+                {
+                    "ra_image": np.array(
+                        self.settings["point_source_option"]["ra_init"]
+                    ),
+                    "dec_image": np.array(
+                        self.settings["point_source_option"]["dec_init"]
+                    ),
+                }
+            )
 
-            num_point_sources = len(init[0]['ra_image'])
-            sigma.append({
-                'ra_image': np.max(self.pixel_size) * np.ones(
-                                                           num_point_sources),
-                'dec_image': np.max(self.pixel_size) * np.ones(
-                                                           num_point_sources),
-            })
+            num_point_sources = len(init[0]["ra_image"])
+            sigma.append(
+                {
+                    "ra_image": np.max(self.pixel_size) * np.ones(num_point_sources),
+                    "dec_image": np.max(self.pixel_size) * np.ones(num_point_sources),
+                }
+            )
 
-            lower.append({
-                'ra_image': init[0]['ra_image'] - self.settings[
-                                            'point_source_option']['bound'],
-                'dec_image': init[0]['dec_image'] - self.settings[
-                                            'point_source_option']['bound'],
-            })
+            lower.append(
+                {
+                    "ra_image": init[0]["ra_image"]
+                    - self.settings["point_source_option"]["bound"],
+                    "dec_image": init[0]["dec_image"]
+                    - self.settings["point_source_option"]["bound"],
+                }
+            )
 
-            upper.append({
-                'ra_image': init[0]['ra_image'] + self.settings[
-                                            'point_source_option']['bound'],
-                'dec_image': init[0]['dec_image'] + self.settings[
-                                            'point_source_option']['bound'],
-            })
+            upper.append(
+                {
+                    "ra_image": init[0]["ra_image"]
+                    + self.settings["point_source_option"]["bound"],
+                    "dec_image": init[0]["dec_image"]
+                    + self.settings["point_source_option"]["bound"],
+                }
+            )
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -935,17 +1063,16 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        assert component in ['lens', 'lens_light', 'source_light']
-        option_str = component + '_option'
+        assert component in ["lens", "lens_light", "source_light"]
+        option_str = component + "_option"
 
         try:
-            self.settings[option_str]['fix']
+            self.settings[option_str]["fix"]
         except (NameError, KeyError):
             pass
         else:
-            if self.settings[option_str]['fix'] is not None:
-                for index, param_dict in self.settings[option_str][
-                                                                'fix'].items():
+            if self.settings[option_str]["fix"] is not None:
+                for index, param_dict in self.settings[option_str]["fix"].items():
                     for key, value in param_dict.items():
                         fixed_list[int(index)][key] = value
         return fixed_list
@@ -958,10 +1085,10 @@ class ModelConfig(Config):
         :rtype:
         """
         kwargs_params = {
-            'lens_model': self.get_lens_model_params(),
-            'source_model': self.get_source_light_model_params(),
-            'lens_light_model': self.get_lens_light_model_params(),
-            'point_source_model': self.get_point_source_params(),
+            "lens_model": self.get_lens_model_params(),
+            "source_model": self.get_source_light_model_params(),
+            "lens_light_model": self.get_lens_light_model_params(),
+            "point_source_model": self.get_point_source_params(),
             # 'cosmography': []
         }
 
@@ -974,8 +1101,8 @@ class ModelConfig(Config):
         :rtype: `float`
         """
         try:
-            self.settings['psf_supersampled_factor']
+            self.settings["psf_supersampled_factor"]
         except (NameError, KeyError):
             return 1
         else:
-            return self.settings['psf_supersampled_factor']
+            return self.settings["psf_supersampled_factor"]

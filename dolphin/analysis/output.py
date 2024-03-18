@@ -2,7 +2,7 @@
 """
 This module provides classes to post process a model run output.
 """
-__author__ = 'ajshajib'
+__author__ = "ajshajib"
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,6 +19,7 @@ class Output(Processor):
     """
     This class lets
     """
+
     def __init__(self, io_directory):
         """
 
@@ -43,9 +44,11 @@ class Output(Processor):
         :rtype:
         """
         if self._fit_output is None:
-            raise ValueError('Model output not specified!'
-                             'Load an output using the `load_output()`'
-                             'method!')
+            raise ValueError(
+                "Model output not specified!"
+                "Load an output using the `load_output()`"
+                "method!"
+            )
         else:
             return self._fit_output
 
@@ -59,9 +62,11 @@ class Output(Processor):
         :rtype:
         """
         if self._kwargs_result is None:
-            raise ValueError('Model output not specified!'
-                             'Load an output using the `load_output()`'
-                             'method!')
+            raise ValueError(
+                "Model output not specified!"
+                "Load an output using the `load_output()`"
+                "method!"
+            )
         else:
             return self._kwargs_result
 
@@ -75,9 +80,11 @@ class Output(Processor):
         :rtype:
         """
         if self._model_settings is None:
-            raise ValueError('Model output not specified!'
-                             'Load an output using the `load_output()`'
-                             'method!')
+            raise ValueError(
+                "Model output not specified!"
+                "Load an output using the `load_output()`"
+                "method!"
+            )
         else:
             return self._model_settings
 
@@ -140,19 +147,24 @@ class Output(Processor):
         """
         output = self.file_system.load_output(lens_name, model_id)
 
-        self._model_settings = output['settings']
-        self._kwargs_result = output['kwargs_result']
-        self._fit_output = output['fit_output']
+        self._model_settings = output["settings"]
+        self._kwargs_result = output["kwargs_result"]
+        self._fit_output = output["fit_output"]
 
-        if self.fit_output[-1][0] == 'EMCEE':
+        if self.fit_output[-1][0] == "EMCEE":
             self._samples_mcmc = self.fit_output[-1][1]
             self._params_mcmc = self.fit_output[-1][2]
 
         return output
 
-    def get_model_plot(self, lens_name, model_id=None,
-                       kwargs_result=None, band_index=0,
-                       data_cmap='cubehelix'):
+    def get_model_plot(
+        self,
+        lens_name,
+        model_id=None,
+        kwargs_result=None,
+        band_index=0,
+        data_cmap="cubehelix",
+    ):
         """
         Get the `ModelPlot` instance from lenstronomy for the lens.
 
@@ -173,38 +185,49 @@ class Output(Processor):
         :rtype: `obj`, `float`
         """
         if model_id is None and kwargs_result is None:
-            raise ValueError('Either the `model_id` or the `kwargs_result` '
-                             'needs to be provided!')
+            raise ValueError(
+                "Either the `model_id` or the `kwargs_result` " "needs to be provided!"
+            )
 
         if kwargs_result is None:
             self.load_output(lens_name, model_id)
             kwargs_result = self.kwargs_result
 
-        multi_band_list_out = self.get_kwargs_data_joint(
-                                                lens_name)['multi_band_list']
+        multi_band_list_out = self.get_kwargs_data_joint(lens_name)["multi_band_list"]
 
         config = ModelConfig(settings=self.model_settings)
 
         mask = config.get_masks()
         kwargs_model = config.get_kwargs_model()
 
-        v_max = np.log10(
-            multi_band_list_out[band_index][0]['image_data'].max())
+        v_max = np.log10(multi_band_list_out[band_index][0]["image_data"].max())
 
-        model_plot = ModelPlot(multi_band_list_out, kwargs_model,
-                               kwargs_result,
-                               arrow_size=0.02, cmap_string=data_cmap,
-                               image_likelihood_mask_list=mask,
-                               multi_band_type='multi-linear')
+        model_plot = ModelPlot(
+            multi_band_list_out,
+            kwargs_model,
+            kwargs_result,
+            arrow_size=0.02,
+            cmap_string=data_cmap,
+            image_likelihood_mask_list=mask,
+            multi_band_type="multi-linear",
+        )
         return model_plot, v_max
 
-    def plot_model_overview(self, lens_name, model_id=None,
-                            kwargs_result=None, band_index=0,
-                            data_cmap='cubehelix', residual_cmap='RdBu_r',
-                            convergence_cmap='afmhot',
-                            magnification_cmap='viridis',
-                            v_min=None, v_max=None, print_results=False,
-                            show_source_light=False):
+    def plot_model_overview(
+        self,
+        lens_name,
+        model_id=None,
+        kwargs_result=None,
+        band_index=0,
+        data_cmap="cubehelix",
+        residual_cmap="RdBu_r",
+        convergence_cmap="afmhot",
+        magnification_cmap="viridis",
+        v_min=None,
+        v_max=None,
+        print_results=False,
+        show_source_light=False,
+    ):
         """
         Plot the model, residual, reconstructed source, convergence,
         and magnification profiles. Either `model_id` or `kwargs_result`
@@ -245,62 +268,87 @@ class Output(Processor):
         if print_results:
             print_kwargs_result = kwargs_result
             if kwargs_result is None:
-                print_kwargs_result =\
-                    self.load_output(lens_name, model_id)["kwargs_result"]
+                print_kwargs_result = self.load_output(lens_name, model_id)[
+                    "kwargs_result"
+                ]
             print(print_kwargs_result)
 
         if v_max is None:
             model_plot, v_max = self.get_model_plot(
-                                                 lens_name,
-                                                 model_id=model_id,
-                                                 kwargs_result=kwargs_result,
-                                                 band_index=band_index,
-                                                 data_cmap=data_cmap)
+                lens_name,
+                model_id=model_id,
+                kwargs_result=kwargs_result,
+                band_index=band_index,
+                data_cmap=data_cmap,
+            )
         else:
-            model_plot = self.get_model_plot(lens_name,
-                                             model_id=model_id,
-                                             kwargs_result=kwargs_result,
-                                             band_index=band_index,
-                                             data_cmap=data_cmap)[0]
+            model_plot = self.get_model_plot(
+                lens_name,
+                model_id=model_id,
+                kwargs_result=kwargs_result,
+                band_index=band_index,
+                data_cmap=data_cmap,
+            )[0]
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
-        model_plot.data_plot(ax=axes[0, 0], band_index=band_index,
-                             v_max=v_max, v_min=v_min)
-        model_plot.model_plot(ax=axes[0, 1], band_index=band_index,
-                              v_max=v_max, v_min=v_min)
-        model_plot.normalized_residual_plot(ax=axes[0, 2],
-                                            band_index=band_index,
-                                            cmap=residual_cmap, v_max=3,
-                                            v_min=-3)
-        model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
-                               band_index=band_index, v_max=v_max, v_min=v_min)
+        model_plot.data_plot(
+            ax=axes[0, 0], band_index=band_index, v_max=v_max, v_min=v_min
+        )
+        model_plot.model_plot(
+            ax=axes[0, 1], band_index=band_index, v_max=v_max, v_min=v_min
+        )
+        model_plot.normalized_residual_plot(
+            ax=axes[0, 2], band_index=band_index, cmap=residual_cmap, v_max=3, v_min=-3
+        )
+        model_plot.source_plot(
+            ax=axes[1, 0],
+            deltaPix_source=0.02,
+            numPix=100,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
         if not show_source_light:
-            model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
-                                        cmap=convergence_cmap)
-            model_plot.magnification_plot(ax=axes[1, 2],
-                                          band_index=band_index,
-                                          cmap=magnification_cmap)
+            model_plot.convergence_plot(
+                ax=axes[1, 1], band_index=band_index, cmap=convergence_cmap
+            )
+            model_plot.magnification_plot(
+                ax=axes[1, 2], band_index=band_index, cmap=magnification_cmap
+            )
         else:
-            model_plot.subtract_from_data_plot(ax=axes[1, 1],
-                                               band_index=band_index,
-                                               lens_light_add=True,
-                                               v_max=v_max, v_min=v_min)
-            model_plot.decomposition_plot(ax=axes[1, 2],
-                                          text='Source light convolved',
-                                          source_add=True,
-                                          band_index=band_index,
-                                          v_max=v_max, v_min=v_min)
+            model_plot.subtract_from_data_plot(
+                ax=axes[1, 1],
+                band_index=band_index,
+                lens_light_add=True,
+                v_max=v_max,
+                v_min=v_min,
+            )
+            model_plot.decomposition_plot(
+                ax=axes[1, 2],
+                text="Source light convolved",
+                source_add=True,
+                band_index=band_index,
+                v_max=v_max,
+                v_min=v_min,
+            )
         fig.tight_layout()
-        fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
-                            wspace=0., hspace=0.05)
+        fig.subplots_adjust(
+            left=None, bottom=None, right=None, top=None, wspace=0.0, hspace=0.05
+        )
 
         return fig
 
-    def plot_model_decomposition(self, lens_name, model_id=None,
-                                 kwargs_result=None, band_index=0,
-                                 data_cmap='cubehelix',
-                                 v_min=None, v_max=None):
+    def plot_model_decomposition(
+        self,
+        lens_name,
+        model_id=None,
+        kwargs_result=None,
+        band_index=0,
+        data_cmap="cubehelix",
+        v_min=None,
+        v_max=None,
+    ):
         """
         Plot lens light and source light model decomposition, both with
         convolved  and unconvolved light. Either `model_id` or `kwargs_result`
@@ -331,55 +379,86 @@ class Output(Processor):
 
         if v_max is None:
             model_plot, v_max = self.get_model_plot(
-                                                 lens_name,
-                                                 model_id=model_id,
-                                                 kwargs_result=kwargs_result,
-                                                 band_index=band_index,
-                                                 data_cmap=data_cmap)
+                lens_name,
+                model_id=model_id,
+                kwargs_result=kwargs_result,
+                band_index=band_index,
+                data_cmap=data_cmap,
+            )
         else:
-            model_plot = self.get_model_plot(lens_name,
-                                             model_id=model_id,
-                                             kwargs_result=kwargs_result,
-                                             band_index=band_index,
-                                             data_cmap=data_cmap)[0]
+            model_plot = self.get_model_plot(
+                lens_name,
+                model_id=model_id,
+                kwargs_result=kwargs_result,
+                band_index=band_index,
+                data_cmap=data_cmap,
+            )[0]
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
-        model_plot.decomposition_plot(ax=axes[0, 0], text='Lens light',
-                                      lens_light_add=True, unconvolved=True,
-                                      band_index=band_index,
-                                      v_max=v_max, v_min=v_min)
-        model_plot.decomposition_plot(ax=axes[1, 0],
-                                      text='Lens light convolved',
-                                      lens_light_add=True,
-                                      band_index=band_index,
-                                      v_max=v_max, v_min=v_min)
-        model_plot.decomposition_plot(ax=axes[0, 1], text='Source light',
-                                      source_add=True, unconvolved=True,
-                                      band_index=band_index,
-                                      v_max=v_max, v_min=v_min)
-        model_plot.decomposition_plot(ax=axes[1, 1],
-                                      text='Source light convolved',
-                                      source_add=True,
-                                      band_index=band_index,
-                                      v_max=v_max, v_min=v_min)
-        model_plot.decomposition_plot(ax=axes[0, 2], text='All components',
-                                      source_add=True, lens_light_add=True,
-                                      unconvolved=True, band_index=band_index,
-                                      v_max=v_max, v_min=v_min)
-        model_plot.decomposition_plot(ax=axes[1, 2],
-                                      text='All components convolved',
-                                      source_add=True, lens_light_add=True,
-                                      point_source_add=True,
-                                      band_index=band_index,
-                                      v_max=v_max, v_min=v_min)
+        model_plot.decomposition_plot(
+            ax=axes[0, 0],
+            text="Lens light",
+            lens_light_add=True,
+            unconvolved=True,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
+        model_plot.decomposition_plot(
+            ax=axes[1, 0],
+            text="Lens light convolved",
+            lens_light_add=True,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
+        model_plot.decomposition_plot(
+            ax=axes[0, 1],
+            text="Source light",
+            source_add=True,
+            unconvolved=True,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
+        model_plot.decomposition_plot(
+            ax=axes[1, 1],
+            text="Source light convolved",
+            source_add=True,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
+        model_plot.decomposition_plot(
+            ax=axes[0, 2],
+            text="All components",
+            source_add=True,
+            lens_light_add=True,
+            unconvolved=True,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
+        model_plot.decomposition_plot(
+            ax=axes[1, 2],
+            text="All components convolved",
+            source_add=True,
+            lens_light_add=True,
+            point_source_add=True,
+            band_index=band_index,
+            v_max=v_max,
+            v_min=v_min,
+        )
         fig.tight_layout()
-        fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
-                            wspace=0., hspace=0.05)
+        fig.subplots_adjust(
+            left=None, bottom=None, right=None, top=None, wspace=0.0, hspace=0.05
+        )
 
         return fig
 
-    def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio,
-                                 burn_in=0, verbose=True):
+    def get_reshaped_emcee_chain(
+        self, lens_name, model_id, walker_ratio, burn_in=0, verbose=True
+    ):
         """
 
         :param lens_name:
@@ -411,9 +490,16 @@ class Output(Processor):
 
         return chain
 
-    def plot_mcmc_trace(self, lens_name, model_id, walker_ratio,
-                        burn_in=-100, verbose=True, fig_width=16,
-                        parameters_to_plot=[]):
+    def plot_mcmc_trace(
+        self,
+        lens_name,
+        model_id,
+        walker_ratio,
+        burn_in=-100,
+        verbose=True,
+        fig_width=16,
+        parameters_to_plot=[],
+    ):
         """
         Plot the trace of MCMC walkers.
 
@@ -435,9 +521,9 @@ class Output(Processor):
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
-        chain = self.get_reshaped_emcee_chain(lens_name, model_id,
-                                              walker_ratio,
-                                              burn_in=burn_in, verbose=verbose)
+        chain = self.get_reshaped_emcee_chain(
+            lens_name, model_id, walker_ratio, burn_in=burn_in, verbose=verbose
+        )
 
         num_params = self.num_params_mcmc
         num_step = chain.shape[1]
@@ -450,8 +536,12 @@ class Output(Processor):
                 for i in parameters_to_plot:
                     parameter_list.append(self.params_mcmc.index(i))
             except ValueError:
-                raise Exception("Parameter not found. Available parameters \
-                                 : {}".format(self.params_mcmc))
+                raise Exception(
+                    "Parameter not found. Available parameters \
+                                 : {}".format(
+                        self.params_mcmc
+                    )
+                )
 
         mean_pos = np.zeros((num_params, num_step))
         median_pos = np.zeros((num_params, num_step))
@@ -465,39 +555,45 @@ class Output(Processor):
                 mean_pos[i][j] = np.mean(chain[:, j, i])
                 median_pos[i][j] = np.median(chain[:, j, i])
                 std_pos[i][j] = np.std(chain[:, j, i])
-                q16_pos[i][j] = np.percentile(chain[:, j, i], 16.)
-                q84_pos[i][j] = np.percentile(chain[:, j, i], 84.)
+                q16_pos[i][j] = np.percentile(chain[:, j, i], 16.0)
+                q84_pos[i][j] = np.percentile(chain[:, j, i], 84.0)
 
-        fig, ax = plt.subplots(len(parameter_list), sharex='all',
-                               figsize=(fig_width, int(fig_width/8) *
-                                        len(parameter_list)))
+        fig, ax = plt.subplots(
+            len(parameter_list),
+            sharex="all",
+            figsize=(fig_width, int(fig_width / 8) * len(parameter_list)),
+        )
         last = num_step
         medians = []
 
         for n, i in enumerate(parameter_list):
             if verbose:
-                print(self.params_mcmc[i],
-                      '{:.4f} ± {:.4f}'.format(median_pos[i][last - 1],
-                                               (q84_pos[i][last - 1] -
-                                                q16_pos[i][last - 1]) / 2))
+                print(
+                    self.params_mcmc[i],
+                    "{:.4f} ± {:.4f}".format(
+                        median_pos[i][last - 1],
+                        (q84_pos[i][last - 1] - q16_pos[i][last - 1]) / 2,
+                    ),
+                )
             if len(parameter_list) != 1:
                 # ax[i].plot(mean_pos[i][:3000], c='b')
-                ax[n].plot(median_pos[i][:last], c='g')
+                ax[n].plot(median_pos[i][:last], c="g")
                 # ax[i].axhline(np.mean(mean_pos[i][burnin:2900]), c='b')
-                ax[n].axhline(np.median(median_pos[i][burn_in:last]),
-                              c='r', lw=1)
-                ax[n].fill_between(np.arange(last), q84_pos[i][:last],
-                                   q16_pos[i][:last], alpha=0.4)
+                ax[n].axhline(np.median(median_pos[i][burn_in:last]), c="r", lw=1)
+                ax[n].fill_between(
+                    np.arange(last), q84_pos[i][:last], q16_pos[i][:last], alpha=0.4
+                )
                 # ax[i].fill_between(np.arange(last), mean_pos[i][:last] \
                 # +std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last],
                 # alpha=0.4)
                 ax[n].set_ylabel(self.params_mcmc[i], fontsize=8)
                 ax[n].set_xlim(0, last)
             else:
-                ax.plot(median_pos[i][:last], c='g')
-                ax.axhline(np.median(median_pos[i][burn_in:last]), c='r', lw=1)
-                ax.fill_between(np.arange(last), q84_pos[i][:last],
-                                q16_pos[i][:last], alpha=0.4)
+                ax.plot(median_pos[i][:last], c="g")
+                ax.axhline(np.median(median_pos[i][burn_in:last]), c="r", lw=1)
+                ax.fill_between(
+                    np.arange(last), q84_pos[i][:last], q16_pos[i][:last], alpha=0.4
+                )
                 ax.set_ylabel(self.params_mcmc[i], fontsize=8)
                 ax.set_xlim(0, last)
 
@@ -523,21 +619,23 @@ class Output(Processor):
         kwargs_model = config.get_kwargs_model()
         kwargs_constraints = config.get_kwargs_constraints()
 
-        param = Param(kwargs_model,
-                      kwargs_params['lens_model'][2],
-                      kwargs_params['source_model'][2],
-                      kwargs_params['lens_light_model'][2],
-                      kwargs_params['point_source_model'][2],
-                      # kwargs_params['special'][2],
-                      # kwargs_params['extinction_model'][2],
-                      # kwargs_lens_init=kwargs_result['kwargs_lens'],
-                      kwargs_lens_init=kwargs_params['lens_model'][0],
-                      **kwargs_constraints
-                      )
+        param = Param(
+            kwargs_model,
+            kwargs_params["lens_model"][2],
+            kwargs_params["source_model"][2],
+            kwargs_params["lens_light_model"][2],
+            kwargs_params["point_source_model"][2],
+            # kwargs_params['special'][2],
+            # kwargs_params['extinction_model'][2],
+            # kwargs_lens_init=kwargs_result['kwargs_lens'],
+            kwargs_lens_init=kwargs_params["lens_model"][0],
+            **kwargs_constraints
+        )
         return param
 
-    def get_kwargs_from_args(self, lens_name, model_id, args, band_index=0,
-                             linear_solve=False, param=None):
+    def get_kwargs_from_args(
+        self, lens_name, model_id, args, band_index=0, linear_solve=False, param=None
+    ):
         """
 
         :param lens_name:
@@ -558,19 +656,21 @@ class Output(Processor):
             # kwargs_numerics = config.get_kwargs_numerics()
             kwargs_model = config.get_kwargs_model()
 
-            multi_band_list_out = self.get_kwargs_data_joint(
-                lens_name)['multi_band_list']
+            multi_band_list_out = self.get_kwargs_data_joint(lens_name)[
+                "multi_band_list"
+            ]
 
             # kwargs_data = multi_band_list_out[band_index][0]
             # kwargs_psf = multi_band_list_out[band_index][1]
 
-            im_sim = create_im_sim(multi_band_list_out,
-                                   'multi-linear',
-                                   kwargs_model,
-                                   bands_compute=None,
-                                   image_likelihood_mask_list=(
-                                       config.get_masks()),
-                                   band_index=band_index)
+            im_sim = create_im_sim(
+                multi_band_list_out,
+                "multi-linear",
+                kwargs_model,
+                bands_compute=None,
+                image_likelihood_mask_list=(config.get_masks()),
+                band_index=band_index,
+            )
 
             im_sim.image_linear_solve(**kwargs, inv_bool=True)
 

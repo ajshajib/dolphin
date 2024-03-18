@@ -12,7 +12,6 @@ _ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 class TestData(object):
-
     @classmethod
     def setup_class(cls):
         pass
@@ -29,18 +28,25 @@ class TestData(object):
         """
         data = Data()
 
-        data_file = _ROOT_DIR / 'io_directory_example' \
-            / 'data' / 'lens_system1' \
-            / 'image_lens_system1_F390W.h5'
+        data_file = (
+            _ROOT_DIR
+            / "io_directory_example"
+            / "data"
+            / "lens_system1"
+            / "image_lens_system1_F390W.h5"
+        )
         data.load_from_file(data_file)
 
 
 class TestImageData(object):
-
     def setup_class(self):
-        data_file = _ROOT_DIR / 'io_directory_example' \
-                    / 'data' / 'lens_system1' \
-                    / 'image_lens_system1_F390W.h5'
+        data_file = (
+            _ROOT_DIR
+            / "io_directory_example"
+            / "data"
+            / "lens_system1"
+            / "image_lens_system1_F390W.h5"
+        )
         self.image_data = ImageData(data_file)
 
     @classmethod
@@ -53,8 +59,14 @@ class TestImageData(object):
         :return:
         :rtype:
         """
-        for key in ['image_data', 'background_rms', 'exposure_time',
-                    'ra_at_xy_0', 'dec_at_xy_0', 'transform_pix2angle']:
+        for key in [
+            "image_data",
+            "background_rms",
+            "exposure_time",
+            "ra_at_xy_0",
+            "dec_at_xy_0",
+            "transform_pix2angle",
+        ]:
             assert key in self.image_data.kwargs_data
 
     def test_get_image(self):
@@ -70,7 +82,6 @@ class TestImageData(object):
 
 
 class TestPSFData(object):
-
     @classmethod
     def setup_class(cls):
         pass
@@ -85,12 +96,20 @@ class TestPSFData(object):
         :return:
         :rtype:
         """
-        psf_file = _ROOT_DIR / 'io_directory_example' \
-            / 'data' / 'lens_system1' \
-            / 'psf_lens_system1_F390W.h5'
+        psf_file = (
+            _ROOT_DIR
+            / "io_directory_example"
+            / "data"
+            / "lens_system1"
+            / "psf_lens_system1_F390W.h5"
+        )
 
         psf = PSFData(psf_file)
 
-        for key in ['psf_type', 'kernel_point_source',
-                    'kernel_point_source_init', 'psf_error_map']:
+        for key in [
+            "psf_type",
+            "kernel_point_source",
+            "kernel_point_source_init",
+            "psf_error_map",
+        ]:
             assert key in psf.kwargs_psf

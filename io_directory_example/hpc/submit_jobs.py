@@ -18,7 +18,7 @@ the appropriate environment for running the jobs. These settings are marked by
 
 tags in the `create_job_{}.sh` files.
 """
-__author__ = 'ajshajib'
+__author__ = "ajshajib"
 
 import sys
 import os
@@ -26,14 +26,14 @@ import time
 
 from dolphin.processor.files import FileSystem
 
-job_system = 'sge' # 'sge' or 'slurm'
+job_system = "sge"  # 'sge' or 'slurm'
 
 try:
     str(sys.argv[1])
 except IndexError:
     print("run_id needed: python submit_jobs.py run_id")
 else:
-    run_id = str(sys.argv[1]) # identifier for modeling run
+    run_id = str(sys.argv[1])  # identifier for modeling run
 
     cwd = os.getcwd()
     base_path, _ = os.path.split(cwd)
@@ -43,9 +43,8 @@ else:
     lens_list = file_system.get_lens_list()
 
     for lens_name in lens_list:
-        os.system('./create_job_{}.sh {} {}'.format(job_system, run_id,
-                                                    lens_name))
-        print('./create_job_{}.sh {} {}'.format(job_system, run_id, lens_name))
+        os.system("./create_job_{}.sh {} {}".format(job_system, run_id, lens_name))
+        print("./create_job_{}.sh {} {}".format(job_system, run_id, lens_name))
         time.sleep(1)
 
-    print('{} jobs submitted!'.format(len(lens_list)))
+    print("{} jobs submitted!".format(len(lens_list)))

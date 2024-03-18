@@ -2,7 +2,7 @@
 """
 This module loads settings from a configuration file.
 """
-__author__ = 'ajshajib'
+__author__ = "ajshajib"
 
 import sys
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
@@ -20,6 +20,7 @@ class Processor(object):
     This class contains methods to model a single lens system or a bunch of
     systems from the config files.
     """
+
     def __init__(self, io_directory):
         """
 
@@ -31,8 +32,16 @@ class Processor(object):
         self.file_system = FileSystem(io_directory)
         self.lens_list = self.file_system.get_lens_list()
 
-    def swim(self, lens_name, model_id, log=True, mpi=False,
-             recipe_name='default', sampler='EMCEE', thread_count=1):
+    def swim(
+        self,
+        lens_name,
+        model_id,
+        log=True,
+        mpi=False,
+        recipe_name="default",
+        sampler="EMCEE",
+        thread_count=1,
+    ):
         """
         Run models for a single lens.
 
@@ -58,8 +67,9 @@ class Processor(object):
         pool = choose_pool(mpi=mpi)
 
         if log and pool.is_master():
-            log_file = open(self.file_system.get_log_file_path(lens_name,
-                                                               model_id), 'wt')
+            log_file = open(
+                self.file_system.get_log_file_path(lens_name, model_id), "wt"
+            )
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
@@ -67,8 +77,8 @@ class Processor(object):
 
         psf_supersampling_factor = config.get_psf_supersampled_factor()
         kwargs_data_joint = self.get_kwargs_data_joint(
-            lens_name,
-            psf_supersampled_factor=psf_supersampling_factor)
+            lens_name, psf_supersampled_factor=psf_supersampling_factor
+        )
 
         fitting_sequence = FittingSequence(
             kwargs_data_joint,
@@ -76,19 +86,19 @@ class Processor(object):
             config.get_kwargs_constraints(),
             config.get_kwargs_likelihood(),
             config.get_kwargs_params(),
-            mpi=mpi
+            mpi=mpi,
         )
 
         fitting_kwargs_list = recipe.get_recipe(
-                                    kwargs_data_joint=kwargs_data_joint,
-                                    recipe_name=recipe_name)
+            kwargs_data_joint=kwargs_data_joint, recipe_name=recipe_name
+        )
         fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
         kwargs_result = fitting_sequence.best_fit(bijective=False)
 
         output = {
-            'settings': config.settings,
-            'kwargs_result': kwargs_result,
-            'fit_output': fit_output,
+            "settings": config.settings,
+            "kwargs_result": kwargs_result,
+            "fit_output": fit_output,
         }
 
         if pool.is_master():
@@ -121,7 +131,7 @@ class Processor(object):
         """
         config = self.get_lens_config(lens_name)
 
-        bands = config.settings['band']
+        bands = config.settings["band"]
 
         kwargs_numerics = config.get_kwargs_numerics()
 
@@ -131,18 +141,17 @@ class Processor(object):
             image_data = self.get_image_data(lens_name, b)
             psf_data = self.get_psf_data(lens_name, b)
 
-            psf_data.kwargs_psf['point_source_supersampling_factor'] = \
-                psf_supersampled_factor
+            psf_data.kwargs_psf[
+                "point_source_supersampling_factor"
+            ] = psf_supersampled_factor
 
-            multi_band_list.append([
-                image_data.kwargs_data,
-                psf_data.kwargs_psf,
-                kwargs_num
-            ])
+            multi_band_list.append(
+                [image_data.kwargs_data, psf_data.kwargs_psf, kwargs_num]
+            )
 
         kwargs_data_joint = {
-            'multi_band_list': multi_band_list,
-            'multi_band_type': 'multi-linear'
+            "multi_band_list": multi_band_list,
+            "multi_band_type": "multi-linear",
         }
 
         return kwargs_data_joint

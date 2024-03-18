@@ -3,7 +3,7 @@
 This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()`
 with pre-defined recipes.
 """
-__author__ = 'ajshajib'
+__author__ = "ajshajib"
 
 from copy import deepcopy
 import numpy as np
@@ -19,7 +19,7 @@ class Recipe(object):
     point.
     """
 
-    def __init__(self, config, sampler='EMCEE', thread_count=1):
+    def __init__(self, config, sampler="EMCEE", thread_count=1):
         """
         Initiate the class from the given settings for a lens system.
 
@@ -33,37 +33,38 @@ class Recipe(object):
         """
         self._config = config
         try:
-            config.settings['fitting']['pso']
+            config.settings["fitting"]["pso"]
         except (NameError, KeyError):
             self.do_pso = False
         else:
-            self.do_pso = deepcopy(config.settings['fitting']['pso'])
+            self.do_pso = deepcopy(config.settings["fitting"]["pso"])
 
-            self._pso_num_particle = self._config.settings['fitting'][
-                'pso_settings']['num_particle']
-            self._pso_num_iteration = self._config.settings['fitting'][
-                'pso_settings']['num_iteration']
+            self._pso_num_particle = self._config.settings["fitting"]["pso_settings"][
+                "num_particle"
+            ]
+            self._pso_num_iteration = self._config.settings["fitting"]["pso_settings"][
+                "num_iteration"
+            ]
 
             if self.do_pso is None:
                 self.do_pso = False
 
         try:
-            config.settings['fitting']['psf_iteration']
+            config.settings["fitting"]["psf_iteration"]
         except (NameError, KeyError):
             self.reconstruct_psf = False
         else:
-            self.reconstruct_psf = deepcopy(config.settings['fitting'][
-                                                'psf_iteration'])
+            self.reconstruct_psf = deepcopy(config.settings["fitting"]["psf_iteration"])
 
             if self.reconstruct_psf is None:
                 self.reconstruct_psf = False
 
         try:
-            config.settings['fitting']['sampling']
+            config.settings["fitting"]["sampling"]
         except (NameError, KeyError):
             self.do_sampling = False
         else:
-            self.do_sampling = deepcopy(config.settings['fitting']['sampling'])
+            self.do_sampling = deepcopy(config.settings["fitting"]["sampling"])
 
             if self.do_sampling is None:
                 self.do_sampling = False
@@ -72,15 +73,15 @@ class Recipe(object):
         self._thread_count = thread_count
 
         self.guess_params = {}
-        for component in ['lens', 'source', 'lens_light', 'ps']:
+        for component in ["lens", "source", "lens_light", "ps"]:
             try:
-                self.guess_params[component] = deepcopy(config.settings[
-                                                            'guess_params'][
-                                                            component])
+                self.guess_params[component] = deepcopy(
+                    config.settings["guess_params"][component]
+                )
             except (NameError, KeyError):
                 self.guess_params[component] = None
 
-    def get_recipe(self, kwargs_data_joint=None, recipe_name='default'):
+    def get_recipe(self, kwargs_data_joint=None, recipe_name="default"):
         """
         Get `fitting_kwargs_list` according to the requested `recipe`.
         `default` will first search for specified recipe in the settings,
@@ -97,29 +98,28 @@ class Recipe(object):
         """
         fitting_kwargs_list = []
 
-        if recipe_name == 'default':
+        if recipe_name == "default":
             try:
                 # if this key exists then return it
-                self._config.settings['fitting_kwargs_list']
+                self._config.settings["fitting_kwargs_list"]
             except (KeyError, NameError):
                 fitting_kwargs_list += self.get_default_recipe()
             else:
-                if self._config.settings['fitting_kwargs_list'] is not None:
-                    fitting_kwargs_list += self._config.settings[
-                        'fitting_kwargs_list']
+                if self._config.settings["fitting_kwargs_list"] is not None:
+                    fitting_kwargs_list += self._config.settings["fitting_kwargs_list"]
                 else:
                     fitting_kwargs_list += self.get_default_recipe()
-        elif recipe_name == 'galaxy-galaxy':
+        elif recipe_name == "galaxy-galaxy":
             if kwargs_data_joint is None:
-                raise ValueError('kwargs_data_joint is necessary to use '
-                                 'galaxy-galaxy optimization recipe!')
-            fitting_kwargs_list += self.get_galaxy_galaxy_recipe(
-                kwargs_data_joint)
-        elif recipe_name == 'skip':
+                raise ValueError(
+                    "kwargs_data_joint is necessary to use "
+                    "galaxy-galaxy optimization recipe!"
+                )
+            fitting_kwargs_list += self.get_galaxy_galaxy_recipe(kwargs_data_joint)
+        elif recipe_name == "skip":
             pass
         else:
-            raise ValueError("Recipe name '{}' not recognized!!".format(
-                recipe_name))
+            raise ValueError("Recipe name '{}' not recognized!!".format(recipe_name))
 
         fitting_kwargs_list += self.get_sampling_sequence()
 
@@ -134,14 +134,17 @@ class Recipe(object):
         :rtype: `int`
         """
         lens_model_list = self._config.get_lens_model_list()
-        if 'SPEMD' in lens_model_list or 'PEMD' in lens_model_list or  \
-                'SPEP' in lens_model_list:
-            if 'SPEMD' in lens_model_list:
-                index = lens_model_list.index('SPEMD')
-            elif 'PEMD' in lens_model_list:
-                index = lens_model_list.index('PEMD')
+        if (
+            "SPEMD" in lens_model_list
+            or "PEMD" in lens_model_list
+            or "SPEP" in lens_model_list
+        ):
+            if "SPEMD" in lens_model_list:
+                index = lens_model_list.index("SPEMD")
+            elif "PEMD" in lens_model_list:
+                index = lens_model_list.index("PEMD")
             else:
-                index = lens_model_list.index('SPEP')
+                index = lens_model_list.index("SPEP")
         else:
             index = None
 
@@ -156,11 +159,11 @@ class Recipe(object):
         :rtype: `int`
         """
         lens_model_list = self._config.get_lens_model_list()
-        if 'SHEAR_GAMMA_PSI' in lens_model_list or 'SHEAR' in lens_model_list:
-            if 'SHEAR_GAMMA_PSI' in lens_model_list:
-                index = lens_model_list.index('SHEAR_GAMMA_PSI')
+        if "SHEAR_GAMMA_PSI" in lens_model_list or "SHEAR" in lens_model_list:
+            if "SHEAR_GAMMA_PSI" in lens_model_list:
+                index = lens_model_list.index("SHEAR_GAMMA_PSI")
             else:
-                index = lens_model_list.index('SHEAR')
+                index = lens_model_list.index("SHEAR")
         else:
             index = None
 
@@ -175,8 +178,8 @@ class Recipe(object):
         :rtype: `int`
         """
         source_model_list = self._config.get_source_light_model_list()
-        if 'SHAPELETS' in source_model_list:
-            index = source_model_list.index('SHAPELETS')
+        if "SHAPELETS" in source_model_list:
+            index = source_model_list.index("SHAPELETS")
         else:
             index = None
 
@@ -192,22 +195,25 @@ class Recipe(object):
         fitting_kwargs_list = []
 
         if self.do_pso:
-            pso_range_multipliers = [1., 0.1, 0.1]
+            pso_range_multipliers = [1.0, 0.1, 0.1]
 
             pl_model_index = self._get_power_law_model_index()
 
             for epoch in range(2):
                 if epoch == 0 and pl_model_index is not None:
-                    fitting_kwargs_list.append([
-                        'update_settings',
-                        {'lens_add_fixed': [[pl_model_index, ['gamma']]]}
-
-                    ])
+                    fitting_kwargs_list.append(
+                        [
+                            "update_settings",
+                            {"lens_add_fixed": [[pl_model_index, ["gamma"]]]},
+                        ]
+                    )
                 elif pl_model_index is not None:
-                    fitting_kwargs_list.append([
-                        'update_settings',
-                        {'lens_remove_fixed': [[pl_model_index, ['gamma']]]}
-                    ])
+                    fitting_kwargs_list.append(
+                        [
+                            "update_settings",
+                            {"lens_remove_fixed": [[pl_model_index, ["gamma"]]]},
+                        ]
+                    )
 
                 for multiplier in pso_range_multipliers:
                     # if multiplier in [10., 1.]:
@@ -222,20 +228,21 @@ class Recipe(object):
                     #         {'lens_remove_fixed': [[index, ['gamma']]]}
                     #     ])
 
-                    fitting_kwargs_list.append([
-                        'PSO',
-                        {
-                            'sigma_scale': multiplier,
-                            'n_particles': self._pso_num_particle,
-                            'n_iterations': self._pso_num_iteration,
-                            'threadCount': self._thread_count
-                        }
-                    ])
+                    fitting_kwargs_list.append(
+                        [
+                            "PSO",
+                            {
+                                "sigma_scale": multiplier,
+                                "n_particles": self._pso_num_particle,
+                                "n_iterations": self._pso_num_iteration,
+                                "threadCount": self._thread_count,
+                            },
+                        ]
+                    )
 
                     if self.reconstruct_psf:
                         fitting_kwargs_list.append(
-                            ['psf_iteration',
-                             self._config.get_kwargs_psf_iteration()]
+                            ["psf_iteration", self._config.get_kwargs_psf_iteration()]
                         )
 
         return fitting_kwargs_list
@@ -250,41 +257,50 @@ class Recipe(object):
         fitting_kwargs_list = []
 
         if self.do_sampling:
-            if self._config.settings['fitting']['sampler'] == 'MCMC':
+            if self._config.settings["fitting"]["sampler"] == "MCMC":
                 fitting_kwargs_list.append(
-                    ['MCMC',
-                     {
-                         'sampler_type': self._sampler,
-                         'n_burn': self._config.settings['fitting'][
-                             'mcmc_settings'][
-                             'burnin_step'],
-                         'n_run': self._config.settings['fitting'][
-                             'mcmc_settings'][
-                             'iteration_step'],
-                         'walkerRatio': self._config.settings['fitting'][
-                             'mcmc_settings']['walker_ratio'],
-                         'threadCount': self._thread_count
-                     }
-                     ]
+                    [
+                        "MCMC",
+                        {
+                            "sampler_type": self._sampler,
+                            "n_burn": self._config.settings["fitting"]["mcmc_settings"][
+                                "burnin_step"
+                            ],
+                            "n_run": self._config.settings["fitting"]["mcmc_settings"][
+                                "iteration_step"
+                            ],
+                            "walkerRatio": self._config.settings["fitting"][
+                                "mcmc_settings"
+                            ]["walker_ratio"],
+                            "threadCount": self._thread_count,
+                        },
+                    ]
                 )
 
                 try:
-                    self._config.settings['fitting']['mcmc_settings'][
-                                                            'init_samples']
+                    self._config.settings["fitting"]["mcmc_settings"]["init_samples"]
                 except (NameError, KeyError):
                     pass
                 else:
-                    if self._config.settings['fitting']['mcmc_settings'][
-                                                'init_samples'] is not None:
-                        fitting_kwargs_list[-1][1]['init_samples'] = \
-                                    np.array(self._config.settings['fitting'][
-                                                        'mcmc_settings'][
-                                                            'init_samples'])
+                    if (
+                        self._config.settings["fitting"]["mcmc_settings"][
+                            "init_samples"
+                        ]
+                        is not None
+                    ):
+                        fitting_kwargs_list[-1][1]["init_samples"] = np.array(
+                            self._config.settings["fitting"]["mcmc_settings"][
+                                "init_samples"
+                            ]
+                        )
 
-                        fitting_kwargs_list[-1][1]['re_use_samples'] = True
+                        fitting_kwargs_list[-1][1]["re_use_samples"] = True
             else:
-                raise ValueError("{} sampler not implemented yet!".format(
-                    self._config.settings['fitting']['sampler']))
+                raise ValueError(
+                    "{} sampler not implemented yet!".format(
+                        self._config.settings["fitting"]["sampler"]
+                    )
+                )
 
         return fitting_kwargs_list
 
@@ -305,9 +321,8 @@ class Recipe(object):
         if self.do_pso:
             arc_masks = []
             masks = self._config.get_masks()
-            for band_item, mask in zip(kwargs_data_joint['multi_band_list'],
-                                       masks):
-                image = band_item[0]['image_data']
+            for band_item, mask in zip(kwargs_data_joint["multi_band_list"], masks):
+                image = band_item[0]["image_data"]
                 arc_masks.append(self.get_arc_mask(image, mask=mask))
 
             pl_model_index = self._get_power_law_model_index()
@@ -320,118 +335,150 @@ class Recipe(object):
                 # mask to fit the lens light only. Join the centroids of lens
                 # and lens light
                 fitting_kwargs_list += [
-                    self.fix_params('lens'),
-                    self.fix_params('source'),
-                    ['update_settings',
-                     {'kwargs_likelihood': {
-                        'image_likelihood_mask_list': arc_masks}
-                      }],
-                    ['update_settings', {'kwargs_constraints': {
-                        'joint_lens_with_light': [[0, 0, ['center_x',
-                                                          'center_y']
-                                                   ]]}}],
-                    ['PSO', {'sigma_scale': 1.0,
-                             'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration,
-                             'threadCount': self._thread_count
-                             }]
+                    self.fix_params("lens"),
+                    self.fix_params("source"),
+                    [
+                        "update_settings",
+                        {
+                            "kwargs_likelihood": {
+                                "image_likelihood_mask_list": arc_masks
+                            }
+                        },
+                    ],
+                    [
+                        "update_settings",
+                        {
+                            "kwargs_constraints": {
+                                "joint_lens_with_light": [
+                                    [0, 0, ["center_x", "center_y"]]
+                                ]
+                            }
+                        },
+                    ],
+                    [
+                        "PSO",
+                        {
+                            "sigma_scale": 1.0,
+                            "n_particles": self._pso_num_particle,
+                            "n_iterations": self._pso_num_iteration,
+                            "threadCount": self._thread_count,
+                        },
+                    ],
                 ]
 
                 # unfix the source except for beta, keep lens fixed, fix lens
                 # light, use regular mask
-                fitting_kwargs_list += [
-                    self.unfix_params('source')
-                ]
+                fitting_kwargs_list += [self.unfix_params("source")]
 
                 # fix the shapelets beta parameter
                 if shapelets_index is not None:
                     fitting_kwargs_list += [
-                        ['update_settings',
-                         {'source_add_fixed': [[shapelets_index, ['beta'],
-                                                [0.1]]]}]
+                        [
+                            "update_settings",
+                            {"source_add_fixed": [[shapelets_index, ["beta"], [0.1]]]},
+                        ]
                     ]
 
                 fitting_kwargs_list += [
                     # self.unfix_params('lens'),
-                    self.fix_params('lens_light'),
-                    ['update_settings', {'kwargs_likelihood': {
-                        'image_likelihood_mask_list': masks}}],
+                    self.fix_params("lens_light"),
+                    [
+                        "update_settings",
+                        {"kwargs_likelihood": {"image_likelihood_mask_list": masks}},
+                    ],
                 ]
 
                 # set lens parameter values to guess values, if provided
-                if self.guess_params['lens'] is not None:
+                if self.guess_params["lens"] is not None:
                     param_list = []
-                    for index, params in self.guess_params['lens'].items():
-                        param_list.append([index, list(params.keys()),
-                                           list(params.values())])
+                    for index, params in self.guess_params["lens"].items():
+                        param_list.append(
+                            [index, list(params.keys()), list(params.values())]
+                        )
 
                     fitting_kwargs_list += [
-                        ['update_settings', {'lens_add_fixed': param_list}]
+                        ["update_settings", {"lens_add_fixed": param_list}]
                     ]
 
                 # optimize for the source only
                 fitting_kwargs_list += [
                     # self.fix_params('lens'),
-                    ['PSO', {'sigma_scale': 1.0,
-                             'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration,
-                             'threadCount': self._thread_count
-                             }],
+                    [
+                        "PSO",
+                        {
+                            "sigma_scale": 1.0,
+                            "n_particles": self._pso_num_particle,
+                            "n_iterations": self._pso_num_iteration,
+                            "threadCount": self._thread_count,
+                        },
+                    ],
                 ]
 
                 # unfix the central deflector parameters, keep beta fixed
                 fitting_kwargs_list += [
-                    self.unfix_params('lens'),
-                    self.fix_params('lens', external_shear_model_index)
+                    self.unfix_params("lens"),
+                    self.fix_params("lens", external_shear_model_index),
                 ]
 
                 # optimize for lens and source together, fix power-law gamma to
                 # 2, as all the lens parameters are unfixed
                 if pl_model_index is not None:
-                    fitting_kwargs_list += [['update_settings',
-                                             {'lens_add_fixed': [
-                                                 [pl_model_index, ['gamma'],
-                                                  [2.]]
-                                             ]}]]
+                    fitting_kwargs_list += [
+                        [
+                            "update_settings",
+                            {"lens_add_fixed": [[pl_model_index, ["gamma"], [2.0]]]},
+                        ]
+                    ]
 
                 fitting_kwargs_list += [
-                    ['PSO', {'sigma_scale': 1.0,
-                             'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration,
-                             'threadCount': self._thread_count
-                             }],
+                    [
+                        "PSO",
+                        {
+                            "sigma_scale": 1.0,
+                            "n_particles": self._pso_num_particle,
+                            "n_iterations": self._pso_num_iteration,
+                            "threadCount": self._thread_count,
+                        },
+                    ],
                 ]
 
                 # unfix the shapelets beta parameter
                 if shapelets_index is not None:
                     fitting_kwargs_list += [
-                        ['update_settings',
-                         {'source_remove_fixed': [
-                             [shapelets_index, ['beta']]]}]
+                        [
+                            "update_settings",
+                            {"source_remove_fixed": [[shapelets_index, ["beta"]]]},
+                        ]
                     ]
 
                 # finally optimize with all of lens, lens light and source free
                 fitting_kwargs_list += [
-                    ['PSO', {'sigma_scale': 1.0,
-                             'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration,
-                             'threadCount': self._thread_count
-                             }],
-                    self.unfix_params('lens_light'),
-                    ['PSO', {'sigma_scale': 1.0,
-                             'n_particles': self._pso_num_particle,
-                             'n_iterations': self._pso_num_iteration,
-                             'threadCount': self._thread_count
-                             }],
+                    [
+                        "PSO",
+                        {
+                            "sigma_scale": 1.0,
+                            "n_particles": self._pso_num_particle,
+                            "n_iterations": self._pso_num_iteration,
+                            "threadCount": self._thread_count,
+                        },
+                    ],
+                    self.unfix_params("lens_light"),
+                    [
+                        "PSO",
+                        {
+                            "sigma_scale": 1.0,
+                            "n_particles": self._pso_num_particle,
+                            "n_iterations": self._pso_num_iteration,
+                            "threadCount": self._thread_count,
+                        },
+                    ],
                 ]
 
                 # finally, relax shear parameters for MCMC later
                 # disjoin lens and lens light centroids
                 fitting_kwargs_list += [
-                    self.unfix_params('lens'),
-                    ['update_settings',
-                     {'kwargs_constraints': temp_constraints}
-                     ],
+                    self.unfix_params("lens"),
+                    ["update_settings", {"kwargs_constraints": temp_constraints}],
                 ]
 
             # fitting_kwargs_list += self.get_default_recipe()
@@ -460,14 +507,15 @@ class Recipe(object):
         y_diff = np.diff(image, axis=0)[:, 1:]
 
         w = len(x_diff) - 1
-        x, y = np.meshgrid(np.linspace(-w / 2, w / 2, int(w + 1)),
-                           np.linspace(-w / 2, w / 2, int(w + 1)))
+        x, y = np.meshgrid(
+            np.linspace(-w / 2, w / 2, int(w + 1)),
+            np.linspace(-w / 2, w / 2, int(w + 1)),
+        )
         r = np.sqrt(x * x + y * y)
 
         # compute the radial gradient of the image
         softening = 1e-10
-        radial_gradient = -(x_diff * x / (r + softening)
-                            + y_diff * y / (r + softening))
+        radial_gradient = -(x_diff * x / (r + softening) + y_diff * y / (r + softening))
 
         # convert radial_gradient to binary map (+ve to 0 and -ve to 1).
         # where the arc starts when going radially outward, the gradient
@@ -478,17 +526,17 @@ class Recipe(object):
         radial_gradient = 1 - radial_gradient
 
         # unmark any marked pixels from the central region
-        radial_gradient[r < int(clear_center /
-                                np.max(self._config.pixel_size))] = 0
+        radial_gradient[r < int(clear_center / np.max(self._config.pixel_size))] = 0
 
         # remove connected regions with area less than 5 pixels to remove
         # masked regions created by noise
         structure = np.ones((3, 3))
         filtered_map = deepcopy(radial_gradient)
         id_regions, num_ids = ndimage.label(filtered_map, structure=structure)
-        id_sizes = np.array(ndimage.sum(radial_gradient, id_regions,
-                                        range(num_ids + 1)))
-        area_mask = (id_sizes < 5)
+        id_sizes = np.array(
+            ndimage.sum(radial_gradient, id_regions, range(num_ids + 1))
+        )
+        area_mask = id_sizes < 5
         filtered_map[area_mask[id_regions]] = 0
 
         # dilate the binary marked-pixel map
@@ -510,7 +558,7 @@ class Recipe(object):
 
         # increase the size by 1 along both axes to match the image size
         # the mask is the negative of the marked pixel-map
-        arc_mask = 1 - np.pad(dilated, ((0, 1), (0, 1)), 'minimum')
+        arc_mask = 1 - np.pad(dilated, ((0, 1), (0, 1)), "minimum")
 
         # check for bad values
         arc_mask[arc_mask > 0] = 1
@@ -520,12 +568,13 @@ class Recipe(object):
             arc_mask *= mask
 
             w = len(arc_mask) - 1
-            x, y = np.meshgrid(np.linspace(-w / 2, w / 2, int(w + 1)),
-                               np.linspace(-w / 2, w / 2, int(w + 1)))
+            x, y = np.meshgrid(
+                np.linspace(-w / 2, w / 2, int(w + 1)),
+                np.linspace(-w / 2, w / 2, int(w + 1)),
+            )
             r = np.sqrt(x * x + y * y)
 
-            arc_mask[r < int(clear_center /
-                             np.max(self._config.pixel_size))] = 1
+            arc_mask[r < int(clear_center / np.max(self._config.pixel_size))] = 1
 
         return arc_mask
 
@@ -540,17 +589,19 @@ class Recipe(object):
         :return: formatted fit-sequence code to go into `fitting_kwargs_list`
         :rtype: `list`
         """
-        if model_component == 'lens':
+        if model_component == "lens":
             kwargs_params = self._config.get_lens_model_params()
         # elif model_component == 'point_source':
         #    kwargs_params = self.get_point_source_params()
-        elif model_component == 'lens_light':
+        elif model_component == "lens_light":
             kwargs_params = self._config.get_lens_light_model_params()
-        elif model_component == 'source':
+        elif model_component == "source":
             kwargs_params = self._config.get_source_light_model_params()
         else:
-            raise ValueError('{} not recognized! Must be lens or '
-                             'lens_light or source.'.format(model_component))
+            raise ValueError(
+                "{} not recognized! Must be lens or "
+                "lens_light or source.".format(model_component)
+            )
 
         lower_list = kwargs_params[3]
         fixed_list = kwargs_params[2]
@@ -572,9 +623,9 @@ class Recipe(object):
 
                 param_list_with_index.append([i, param_list])
 
-        key = '{}_add_fixed'.format(model_component)
+        key = "{}_add_fixed".format(model_component)
 
-        return ['update_settings', {key: param_list_with_index}]
+        return ["update_settings", {key: param_list_with_index}]
 
     def unfix_params(self, model_component, index=None):
         """
@@ -589,8 +640,8 @@ class Recipe(object):
         """
         code = self.fix_params(model_component, index=index)
 
-        old_key = '{}_add_fixed'.format(model_component)
-        key = '{}_remove_fixed'.format(model_component)
+        old_key = "{}_add_fixed".format(model_component)
+        key = "{}_remove_fixed".format(model_component)
 
         code[1][key] = deepcopy(code[1][old_key])
         del code[1][old_key]

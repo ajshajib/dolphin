@@ -2,7 +2,7 @@
 """
 This module loads data and psfs from data files.
 """
-__author__ = 'ajshajib'
+__author__ = "ajshajib"
 
 import h5py
 from copy import deepcopy
@@ -12,6 +12,7 @@ class Data(object):
     """
     This is a superclass to load datafiles.
     """
+
     def __init__(self):
         pass
 
@@ -25,7 +26,7 @@ class Data(object):
         :return:
         :rtype:
         """
-        f = h5py.File(file_path, 'r')
+        f = h5py.File(file_path, "r")
 
         data = {}
         for key in f:
@@ -40,6 +41,7 @@ class ImageData(Data):
     """
     This class contains the image of a lens system.
     """
+
     def __init__(self, data_file_path):
         """
 
@@ -69,13 +71,14 @@ class ImageData(Data):
         :return: image
         :rtype: `ndarray`
         """
-        return deepcopy(self._data['image_data'])
+        return deepcopy(self._data["image_data"])
 
 
 class PSFData(Data):
     """
     This class contains the PSF for a lens system.
     """
+
     def __init__(self, psf_file_path):
         """
 
@@ -95,7 +98,8 @@ class PSFData(Data):
         :rtype: `dict`
         """
         kwargs_psf = deepcopy(self._data)
-        kwargs_psf['psf_type'] = 'PIXEL'
-        kwargs_psf['kernel_point_source_init'] = deepcopy(
-                                        kwargs_psf['kernel_point_source'])
+        kwargs_psf["psf_type"] = "PIXEL"
+        kwargs_psf["kernel_point_source_init"] = deepcopy(
+            kwargs_psf["kernel_point_source"]
+        )
         return kwargs_psf

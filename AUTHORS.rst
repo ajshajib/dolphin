@@ -9,7 +9,7 @@ Development Lead
 
 
 
-Contributors
+Co-developers
 ------------
 
 * Chin Yi Tan, |github| `sibirrer <https://github.com/chinyitan>`_

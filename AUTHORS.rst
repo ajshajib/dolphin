@@ -12,7 +12,7 @@ Development Lead
 Co-developers
 ------------
 
-* Chin Yi Tan, |github| `sibirrer <https://github.com/chinyitan>`_
+* Chin Yi Tan, |github| `chinyitan <https://github.com/chinyitan>`_
 
 
 .. |mail| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mail.svg?sanitize=true

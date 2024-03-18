@@ -35,6 +35,8 @@ lens_option:
     - - theta_E
       - 1.11
       - 0.13
+  constrain_position_angle_from_lens_light: 15
+  limit_mass_eccentricity_from_light: true
 mask:
   centroid_offset:
   - - 0.0
@@ -200,6 +202,8 @@ source_light_option:
       - 0.15
       - 0.05
   shapelet_scale_logarithmic_prior: true
+    # If true, provide logarithmic_prior on the source light profile
+    # beta parameter
   n_max:
   - 2
   - 4

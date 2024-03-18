@@ -111,7 +111,8 @@ class TestOutput(object):
 
         fig2 = self.output.plot_model_overview('lens_system2', 'example',
                                                v_min=-3.0, v_max=1.0,
-                                               print_results=True)
+                                               print_results=True,
+                                               show_source_light=True)
 
         plt.close(fig2)
 
@@ -145,6 +146,12 @@ class TestOutput(object):
                                           verbose=True, burn_in=0)
 
         plt.close(fig)
+
+        fig2 = self.output.plot_mcmc_trace('lens_system2', 'example', 2,
+                                           verbose=True, burn_in=0,
+                                           parameters_to_plot=["gamma_lens"])
+
+        plt.close(fig2)
 
     def test_get_reshaped_emcee_chain(self):
         """

@@ -194,9 +194,8 @@ class Output(Processor):
         model_plot = ModelPlot(multi_band_list_out, kwargs_model,
                                kwargs_result,
                                arrow_size=0.02, cmap_string=data_cmap,
-                               likelihood_mask_list=mask,
+                               image_likelihood_mask_list=mask,
                                multi_band_type='multi-linear')
-
         return model_plot, v_max
 
     def plot_model_overview(self, lens_name, model_id=None,
@@ -204,7 +203,8 @@ class Output(Processor):
                             data_cmap='cubehelix', residual_cmap='RdBu_r',
                             convergence_cmap='afmhot',
                             magnification_cmap='viridis',
-                            v_min=None, v_max=None, print_results=False):
+                            v_min=None, v_max=None, print_results=False,
+                            show_source_light=False):
         """
         Plot the model, residual, reconstructed source, convergence,
         and magnification profiles. Either `model_id` or `kwargs_result`
@@ -234,6 +234,11 @@ class Output(Processor):
         :type v_min: `float` or `int`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
+        :param show_source_light: if true, replaces convergence plot with
+            source light convolved lens decomposition plot and also replaces
+            the magnification plot with the source-light subtracted data
+            plot
+        :type show_source_light: `bool`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
@@ -270,11 +275,22 @@ class Output(Processor):
                                             v_min=-3)
         model_plot.source_plot(ax=axes[1, 0], deltaPix_source=0.02, numPix=100,
                                band_index=band_index, v_max=v_max, v_min=v_min)
-        model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
-                                    cmap=convergence_cmap)
-        model_plot.magnification_plot(ax=axes[1, 2],
-                                      band_index=band_index,
-                                      cmap=magnification_cmap)
+        if not show_source_light:
+            model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index,
+                                        cmap=convergence_cmap)
+            model_plot.magnification_plot(ax=axes[1, 2],
+                                          band_index=band_index,
+                                          cmap=magnification_cmap)
+        else:
+            model_plot.subtract_from_data_plot(ax=axes[1, 1],
+                                               band_index=band_index,
+                                               lens_light_add=True,
+                                               v_max=v_max, v_min=v_min)
+            model_plot.decomposition_plot(ax=axes[1, 2],
+                                          text='Source light convolved',
+                                          source_add=True,
+                                          band_index=band_index,
+                                          v_max=v_max, v_min=v_min)
         fig.tight_layout()
         fig.subplots_adjust(left=None, bottom=None, right=None, top=None,
                             wspace=0., hspace=0.05)
@@ -363,7 +379,7 @@ class Output(Processor):
         return fig
 
     def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio,
-                                 burn_in=-100, verbose=True):
+                                 burn_in=0, verbose=True):
         """
 
         :param lens_name:
@@ -390,11 +406,14 @@ class Output(Processor):
         for i in np.arange(num_params):
             samples = self.samples_mcmc[:, i].T
             chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
+        if burn_in != 0:
+            chain = chain[:, burn_in:, :]
 
         return chain
 
     def plot_mcmc_trace(self, lens_name, model_id, walker_ratio,
-                        burn_in=-100, verbose=True, fig_width=16):
+                        burn_in=-100, verbose=True, fig_width=16,
+                        parameters_to_plot=[]):
         """
         Plot the trace of MCMC walkers.
 
@@ -411,6 +430,8 @@ class Output(Processor):
         :type verbose: `bool`
         :param fig_width: width of the figure
         :type fig_width: `float`
+        :param parameters_to_plot: if not empty, list of parameters to plot
+        :type fig_width: `list`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
@@ -421,6 +442,17 @@ class Output(Processor):
         num_params = self.num_params_mcmc
         num_step = chain.shape[1]
 
+        if len(parameters_to_plot) == 0:
+            parameter_list = np.arange(num_params)
+        else:
+            parameter_list = []
+            try:
+                for i in parameters_to_plot:
+                    parameter_list.append(self.params_mcmc.index(i))
+            except ValueError:
+                raise Exception("Parameter not found. Available parameters \
+                                 : {}".format(self.params_mcmc))
+
         mean_pos = np.zeros((num_params, num_step))
         median_pos = np.zeros((num_params, num_step))
         std_pos = np.zeros((num_params, num_step))
@@ -428,7 +460,7 @@ class Output(Processor):
         q84_pos = np.zeros((num_params, num_step))
 
         # chain = np.empty((nwalker, nstep, ndim), dtype = np.double)
-        for i in np.arange(num_params):
+        for i in parameter_list:
             for j in np.arange(num_step):
                 mean_pos[i][j] = np.mean(chain[:, j, i])
                 median_pos[i][j] = np.median(chain[:, j, i])
@@ -436,29 +468,38 @@ class Output(Processor):
                 q16_pos[i][j] = np.percentile(chain[:, j, i], 16.)
                 q84_pos[i][j] = np.percentile(chain[:, j, i], 84.)
 
-        fig, ax = plt.subplots(num_params, sharex='all',
+        fig, ax = plt.subplots(len(parameter_list), sharex='all',
                                figsize=(fig_width, int(fig_width/8) *
-                                        num_params))
+                                        len(parameter_list)))
         last = num_step
         medians = []
 
-        for i in range(num_params):
+        for n, i in enumerate(parameter_list):
             if verbose:
                 print(self.params_mcmc[i],
                       '{:.4f} ± {:.4f}'.format(median_pos[i][last - 1],
                                                (q84_pos[i][last - 1] -
                                                 q16_pos[i][last - 1]) / 2))
-            # ax[i].plot(mean_pos[i][:3000], c='b')
-            ax[i].plot(median_pos[i][:last], c='g')
-            # ax[i].axhline(np.mean(mean_pos[i][burnin:2900]), c='b')
-            ax[i].axhline(np.median(median_pos[i][burn_in:last]), c='r', lw=1)
-            ax[i].fill_between(np.arange(last), q84_pos[i][:last],
-                               q16_pos[i][:last], alpha=0.4)
-            # ax[i].fill_between(np.arange(last), mean_pos[i][:last] \
-            # +std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last],
-            # alpha=0.4)
-            ax[i].set_ylabel(self.params_mcmc[i], fontsize=10)
-            ax[i].set_xlim(0, last)
+            if len(parameter_list) != 1:
+                # ax[i].plot(mean_pos[i][:3000], c='b')
+                ax[n].plot(median_pos[i][:last], c='g')
+                # ax[i].axhline(np.mean(mean_pos[i][burnin:2900]), c='b')
+                ax[n].axhline(np.median(median_pos[i][burn_in:last]),
+                              c='r', lw=1)
+                ax[n].fill_between(np.arange(last), q84_pos[i][:last],
+                                   q16_pos[i][:last], alpha=0.4)
+                # ax[i].fill_between(np.arange(last), mean_pos[i][:last] \
+                # +std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last],
+                # alpha=0.4)
+                ax[n].set_ylabel(self.params_mcmc[i], fontsize=8)
+                ax[n].set_xlim(0, last)
+            else:
+                ax.plot(median_pos[i][:last], c='g')
+                ax.axhline(np.median(median_pos[i][burn_in:last]), c='r', lw=1)
+                ax.fill_between(np.arange(last), q84_pos[i][:last],
+                                q16_pos[i][:last], alpha=0.4)
+                ax.set_ylabel(self.params_mcmc[i], fontsize=8)
+                ax.set_xlim(0, last)
 
             medians.append(np.median(median_pos[i][burn_in:last]))
 
@@ -527,7 +568,8 @@ class Output(Processor):
                                    'multi-linear',
                                    kwargs_model,
                                    bands_compute=None,
-                                   likelihood_mask_list=config.get_masks(),
+                                   image_likelihood_mask_list=(
+                                       config.get_masks()),
                                    band_index=band_index)
 
             im_sim.image_linear_solve(**kwargs, inv_bool=True)

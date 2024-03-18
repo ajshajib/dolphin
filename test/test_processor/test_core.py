@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Tests for data module.
-"""
+"""Tests for data module."""
 from pathlib import Path
 
 from dolphin.processor.core import Processor
@@ -19,16 +17,16 @@ class TestProcessor(object):
         pass
 
     def test_swim(self):
-        """
-        Test `swim` method.
+        """Test `swim` method.
+
         :return:
         :rtype:
         """
         self.processor.swim("lens_system1", "test")
 
     def test_get_kwargs_data_joint(self):
-        """
-        Test `get_kwargs_data_joint` method.
+        """Test `get_kwargs_data_joint` method.
+
         :return:
         :rtype:
         """
@@ -40,8 +38,8 @@ class TestProcessor(object):
         assert len(kwargs_data_joint["multi_band_list"][0]) == 3
 
     def test_get_image_data(self):
-        """
-        Test `get_image_data` method.
+        """Test `get_image_data` method.
+
         :return:
         :rtype:
         """
@@ -49,8 +47,8 @@ class TestProcessor(object):
         assert image_data is not None
 
     def test_get_psf_data(self):
-        """
-        Test `get_image_data` method.
+        """Test `get_image_data` method.
+
         :return:
         :rtype:
         """

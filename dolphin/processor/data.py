@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module loads data and psfs from data files.
-"""
+"""This module loads data and psfs from data files."""
 __author__ = "ajshajib"
 
 import h5py
@@ -9,17 +7,14 @@ from copy import deepcopy
 
 
 class Data(object):
-    """
-    This is a superclass to load datafiles.
-    """
+    """This is a superclass to load datafiles."""
 
     def __init__(self):
         pass
 
     @staticmethod
     def load_from_file(file_path):
-        """
-        Load data from h5py file.
+        """Load data from h5py file.
 
         :param file_path: path to a file
         :type file_path: `str`
@@ -38,9 +33,7 @@ class Data(object):
 
 
 class ImageData(Data):
-    """
-    This class contains the image of a lens system.
-    """
+    """This class contains the image of a lens system."""
 
     def __init__(self, data_file_path):
         """
@@ -54,8 +47,7 @@ class ImageData(Data):
 
     @property
     def kwargs_data(self):
-        """
-        Get `kwargs_data` dictionary.
+        """Get `kwargs_data` dictionary.
 
         :return: `kwargs_data`
         :rtype: `dict`
@@ -65,8 +57,7 @@ class ImageData(Data):
         return kwargs_data
 
     def get_image(self):
-        """
-        Get image `ndarray` from the saved in the class instance.
+        """Get image `ndarray` from the saved in the class instance.
 
         :return: image
         :rtype: `ndarray`
@@ -75,9 +66,7 @@ class ImageData(Data):
 
 
 class PSFData(Data):
-    """
-    This class contains the PSF for a lens system.
-    """
+    """This class contains the PSF for a lens system."""
 
     def __init__(self, psf_file_path):
         """
@@ -91,8 +80,7 @@ class PSFData(Data):
 
     @property
     def kwargs_psf(self):
-        """
-        Get `kwargs_psf` dictionary.
+        """Get `kwargs_psf` dictionary.
 
         :return: `kwargs_psf`
         :rtype: `dict`

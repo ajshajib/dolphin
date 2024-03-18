@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Tests for data module.
-"""
+"""Tests for data module."""
 from pathlib import Path
 
 from dolphin.processor.data import Data
@@ -21,8 +19,8 @@ class TestData(object):
         pass
 
     def test_load_from_file(self):
-        """
-        Test `load_from_file` method.
+        """Test `load_from_file` method.
+
         :return:
         :rtype:
         """
@@ -54,8 +52,8 @@ class TestImageData(object):
         pass
 
     def test_kwargs_data(self):
-        """
-        Test `kwargs_data` property.
+        """Test `kwargs_data` property.
+
         :return:
         :rtype:
         """
@@ -70,8 +68,8 @@ class TestImageData(object):
             assert key in self.image_data.kwargs_data
 
     def test_get_image(self):
-        """
-        Test `get_image` method.
+        """Test `get_image` method.
+
         :return:
         :rtype:
         """
@@ -91,8 +89,8 @@ class TestPSFData(object):
         pass
 
     def test_kwargs_psf(self):
-        """
-        Test `kwargs_psf` property.
+        """Test `kwargs_psf` property.
+
         :return:
         :rtype:
         """

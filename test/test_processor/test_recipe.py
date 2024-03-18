@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Tests for Recipe module.
-"""
+"""Tests for Recipe module."""
 
 import pytest
 from pathlib import Path
@@ -17,9 +15,7 @@ _ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 class TestRecipe(object):
-    """
-    Test the `Recipe` module.
-    """
+    """Test the `Recipe` module."""
 
     def setup_class(self):
         self.test_setting_file = (
@@ -33,8 +29,8 @@ class TestRecipe(object):
         pass
 
     def test_init(self):
-        """
-        Test `__init__` method.
+        """Test `__init__` method.
+
         :return:
         :rtype:
         """
@@ -57,8 +53,8 @@ class TestRecipe(object):
         assert recipe.reconstruct_psf is False
 
     def test_get_recipe(self):
-        """
-        Test `get_recipe` method.
+        """Test `get_recipe` method.
+
         :return:
         :rtype:
         """
@@ -87,8 +83,8 @@ class TestRecipe(object):
         assert recipe.get_recipe(recipe_name="skip")[0][0] == "MCMC"
 
     def test_get_power_law_model_index(self):
-        """
-        Test `get_power_law_model_index` method.
+        """Test `get_power_law_model_index` method.
+
         :return:
         :rtype:
         """
@@ -106,8 +102,8 @@ class TestRecipe(object):
         assert Recipe(config)._get_power_law_model_index() is None
 
     def test_get_external_shear_model_index(self):
-        """
-        Test `_get_external_shear_model_index` method.
+        """Test `_get_external_shear_model_index` method.
+
         :return:
         :rtype:
         """
@@ -122,8 +118,8 @@ class TestRecipe(object):
         assert Recipe(config)._get_external_shear_model_index() is None
 
     def test_get_shapelet_model_index(self):
-        """
-        Test `get_power_law_model_index` method.
+        """Test `get_power_law_model_index` method.
+
         :return:
         :rtype:
         """
@@ -135,8 +131,8 @@ class TestRecipe(object):
         assert Recipe(config)._get_shapelet_model_index() is None
 
     def test_get_default_recipe(self):
-        """
-        Test `get_default_recipe` method.
+        """Test `get_default_recipe` method.
+
         :return:
         :rtype:
         """
@@ -145,8 +141,8 @@ class TestRecipe(object):
         assert isinstance(fitting_kwargs_list, list)
 
     def test_get_sampling_sequence(self):
-        """
-        Test `get_sampling_sequence` method.
+        """Test `get_sampling_sequence` method.
+
         :return:
         :rtype:
         """
@@ -176,8 +172,8 @@ class TestRecipe(object):
         )
 
     def test_get_galaxy_galaxy_recipe(self):
-        """
-        Test `get_galaxy_galaxy_recipe` method.
+        """Test `get_galaxy_galaxy_recipe` method.
+
         :return:
         :rtype:
         """
@@ -223,8 +219,8 @@ class TestRecipe(object):
         fitting_sequence.fit_sequence(fitting_kwargs_list)
 
     def test_get_arc_mask(self):
-        """
-        Test `get_arc_mask` method.
+        """Test `get_arc_mask` method.
+
         :return:
         :rtype:
         """
@@ -234,8 +230,8 @@ class TestRecipe(object):
         assert mask.shape == (100, 100)
 
     def test_fix_params(self):
-        """
-        Test `fix_params` method.
+        """Test `fix_params` method.
+
         :return:
         :rtype:
         """
@@ -275,8 +271,8 @@ class TestRecipe(object):
             self.recipe.fix_params("observer")
 
     def test_unfix_params(self):
-        """
-        Test `unfix_params` method.
+        """Test `unfix_params` method.
+
         :return:
         :rtype:
         """

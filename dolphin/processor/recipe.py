@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()`
-with pre-defined recipes.
-"""
+"""This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()` with
+pre-defined recipes."""
 __author__ = "ajshajib"
 
 from copy import deepcopy
@@ -11,17 +9,15 @@ from scipy import ndimage
 
 
 class Recipe(object):
-    """
-    This class contains methods to create fitting recipes. It builds an
-    optimization workflow (currently using particle-swarm optimization) to
-    first find a good enough lens model within the total parameter space.
-    Then, the sampling can be done starting from the neighborhood of this
-    point.
+    """This class contains methods to create fitting recipes.
+
+    It builds an optimization workflow (currently using particle-swarm optimization) to
+    first find a good enough lens model within the total parameter space. Then, the
+    sampling can be done starting from the neighborhood of this point.
     """
 
     def __init__(self, config, sampler="EMCEE", thread_count=1):
-        """
-        Initiate the class from the given settings for a lens system.
+        """Initiate the class from the given settings for a lens system.
 
         :param config: `ModelConfig` instance
         :type config: `class`
@@ -82,10 +78,9 @@ class Recipe(object):
                 self.guess_params[component] = None
 
     def get_recipe(self, kwargs_data_joint=None, recipe_name="default"):
-        """
-        Get `fitting_kwargs_list` according to the requested `recipe`.
-        `default` will first search for specified recipe in the settings,
-        if not will provide the most basic set of fitting sequence.
+        """Get `fitting_kwargs_list` according to the requested `recipe`. `default` will
+        first search for specified recipe in the settings, if not will provide the most
+        basic set of fitting sequence.
 
         :param config: `ModelConfig` instance
         :type config:
@@ -126,9 +121,7 @@ class Recipe(object):
         return fitting_kwargs_list
 
     def _get_power_law_model_index(self):
-        """
-        Get the index of the power-law model, if included in the lens model
-        list.
+        """Get the index of the power-law model, if included in the lens model list.
 
         :return: index or `None`
         :rtype: `int`
@@ -151,9 +144,8 @@ class Recipe(object):
         return index
 
     def _get_external_shear_model_index(self):
-        """
-        Get the index of the external shear model, if included in the lens
-        model list.
+        """Get the index of the external shear model, if included in the lens model
+        list.
 
         :return: index or `None`
         :rtype: `int`
@@ -170,9 +162,7 @@ class Recipe(object):
         return index
 
     def _get_shapelet_model_index(self):
-        """
-        Get the index of the shapelets model, if included in the source model
-        list.
+        """Get the index of the shapelets model, if included in the source model list.
 
         :return: index or `None`
         :rtype: `int`
@@ -186,8 +176,7 @@ class Recipe(object):
         return index
 
     def get_default_recipe(self):
-        """
-        Get the default pre-sampling optimization routine.
+        """Get the default pre-sampling optimization routine.
 
         :return: fitting kwargs list
         :rtype: `list`
@@ -248,8 +237,7 @@ class Recipe(object):
         return fitting_kwargs_list
 
     def get_sampling_sequence(self):
-        """
-        Get the sampling sequence. Currently only MCMC with emcee is supported.
+        """Get the sampling sequence. Currently only MCMC with emcee is supported.
 
         :return:
         :rtype:
@@ -305,9 +293,8 @@ class Recipe(object):
         return fitting_kwargs_list
 
     def get_galaxy_galaxy_recipe(self, kwargs_data_joint, epochs=2):
-        """
-        Get the pre-sampling optimization routine for a galaxy-galaxy lens.
-        PSF iteration is not added.
+        """Get the pre-sampling optimization routine for a galaxy-galaxy lens. PSF
+        iteration is not added.
 
         :param kwargs_data_joint:
         :type kwargs_data_joint:
@@ -486,10 +473,8 @@ class Recipe(object):
         return fitting_kwargs_list
 
     def get_arc_mask(self, image, clear_center=0.4, mask=None):
-        """
-        Create a mask for lensed galaxy arcs from the image of the lens. The
-        lens galaxy is required to be close to the center (within a few
-        pixels) of the image.
+        """Create a mask for lensed galaxy arcs from the image of the lens. The lens
+        galaxy is required to be close to the center (within a few pixels) of the image.
 
         :param image: image of the lensing system
         :type image: `ndarray`
@@ -579,8 +564,7 @@ class Recipe(object):
         return arc_mask
 
     def fix_params(self, model_component, index=None):
-        """
-        Fix all the params in `name` that are not fixed by settings.
+        """Fix all the params in `name` that are not fixed by settings.
 
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
@@ -628,8 +612,7 @@ class Recipe(object):
         return ["update_settings", {key: param_list_with_index}]
 
     def unfix_params(self, model_component, index=None):
-        """
-        Unfix all the params in `name` that are not fixed from settings.
+        """Unfix all the params in `name` that are not fixed from settings.
 
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`

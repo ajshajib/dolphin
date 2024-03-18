@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module loads settings from a configuration file.
-"""
+"""This module loads settings from a configuration file."""
 __author__ = "ajshajib"
 
 import sys
@@ -16,10 +14,8 @@ from .recipe import Recipe
 
 
 class Processor(object):
-    """
-    This class contains methods to model a single lens system or a bunch of
-    systems from the config files.
-    """
+    """This class contains methods to model a single lens system or a bunch of systems
+    from the config files."""
 
     def __init__(self, io_directory):
         """
@@ -42,8 +38,7 @@ class Processor(object):
         sampler="EMCEE",
         thread_count=1,
     ):
-        """
-        Run models for a single lens.
+        """Run models for a single lens.
 
         :param lens_name: lens name
         :type lens_name: `str`
@@ -108,8 +103,7 @@ class Processor(object):
             log_file.close()
 
     def get_lens_config(self, lens_name):
-        """
-        Get the `ModelConfig` object for a lens.
+        """Get the `ModelConfig` object for a lens.
 
         :param lens_name: lens name
         :type lens_name: `str`
@@ -119,8 +113,7 @@ class Processor(object):
         return ModelConfig(self.file_system.get_config_file_path(lens_name))
 
     def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
-        """
-        Create `kwargs_data` for a lens and given filters.
+        """Create `kwargs_data` for a lens and given filters.
 
         :param lens_name: lens name
         :type lens_name: `str`
@@ -141,9 +134,9 @@ class Processor(object):
             image_data = self.get_image_data(lens_name, b)
             psf_data = self.get_psf_data(lens_name, b)
 
-            psf_data.kwargs_psf[
-                "point_source_supersampling_factor"
-            ] = psf_supersampled_factor
+            psf_data.kwargs_psf["point_source_supersampling_factor"] = (
+                psf_supersampled_factor
+            )
 
             multi_band_list.append(
                 [image_data.kwargs_data, psf_data.kwargs_psf, kwargs_num]
@@ -157,8 +150,7 @@ class Processor(object):
         return kwargs_data_joint
 
     def get_image_data(self, lens_name, band):
-        """
-        Get the `ImageData` instance.
+        """Get the `ImageData` instance.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
@@ -170,8 +162,7 @@ class Processor(object):
         return ImageData(self.file_system.get_image_file_path(lens_name, band))
 
     def get_psf_data(self, lens_name, band):
-        """
-        Get the `PSFData` instance.
+        """Get the `PSFData` instance.
 
         :param lens_name: lens name
         :type lens_name: `str`

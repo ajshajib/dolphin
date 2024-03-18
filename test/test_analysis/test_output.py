@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Tests for output module.
-"""
+"""Tests for output module."""
 from pathlib import Path
 import pytest
 import numpy as np
@@ -24,8 +22,8 @@ class TestOutput(object):
         pass
 
     def test_swim(self):
-        """
-        Test that `swim` method is not accessible.
+        """Test that `swim` method is not accessible.
+
         :return:
         :rtype:
         """
@@ -33,8 +31,8 @@ class TestOutput(object):
             self.output.swim()
 
     def test_properties(self):
-        """
-        Test class properties.
+        """Test class properties.
+
         :return:
         :rtype:
         """
@@ -63,9 +61,7 @@ class TestOutput(object):
         self.output._params_mcmc = None
 
     def test_load_output(self):
-        """
-        Test that outputs are saved and corresponding class variables
-        are not None.
+        """Test that outputs are saved and corresponding class variables are not None.
 
         :return:
         :rtype:
@@ -88,8 +84,7 @@ class TestOutput(object):
         assert self.output.model_settings == save_dict["settings"]
 
     def test_plot_model_overview(self):
-        """
-        Test `plot_model_overview` method.
+        """Test `plot_model_overview` method.
 
         :return:
         :rtype:
@@ -113,8 +108,7 @@ class TestOutput(object):
         plt.close(fig2)
 
     def test_plot_model_decomposition(self):
-        """
-        Test `plot_model_decomposition` method.
+        """Test `plot_model_decomposition` method.
 
         :return:
         :rtype:
@@ -133,8 +127,7 @@ class TestOutput(object):
         plt.close(fig2)
 
     def test_plot_mcmc_trace(self):
-        """
-        Test `plot_mcmc_trace` method.
+        """Test `plot_mcmc_trace` method.
 
         :return:
         :rtype:
@@ -157,16 +150,16 @@ class TestOutput(object):
         plt.close(fig2)
 
     def test_get_reshaped_emcee_chain(self):
-        """
-        Test `get_reshaped_emcee_chain` method.
+        """Test `get_reshaped_emcee_chain` method.
+
         :return:
         :rtype:
         """
         self.output.get_reshaped_emcee_chain("lens_system2", "example", 2)
 
     def test_get_param_class(self):
-        """
-        Test `get_param_class` method.
+        """Test `get_param_class` method.
+
         :return:
         :rtype:
         """
@@ -175,8 +168,8 @@ class TestOutput(object):
         param_class.num_param()
 
     def test_get_kwargs_from_args(self):
-        """
-        Test `get_kwargs_from_args` method.
+        """Test `get_kwargs_from_args` method.
+
         :return:
         :rtype:
         """

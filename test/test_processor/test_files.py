@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Tests for files module.
-"""
+"""Tests for files module."""
 
 import pytest
 from pathlib import Path
@@ -23,17 +21,16 @@ class TestFileSystem(object):
         pass
 
     def test_path2str(self):
-        """
-        Test `path2str` method.
+        """Test `path2str` method.
+
         :return:
         :rtype:
         """
         assert Path(self.file_system.path2str(_TEST_IO_DIR)) == _TEST_IO_DIR
 
     def test_get_lens_list_file_path(self):
-        """
-        Test `get_lens_list_file_path`
-        :return:
+        """Test `get_lens_list_file_path` :return:
+
         :rtype:
         """
         lens_list_file_path = _TEST_IO_DIR / "lens_list.txt"
@@ -41,8 +38,8 @@ class TestFileSystem(object):
         assert Path(self.file_system.get_lens_list_file_path()) == lens_list_file_path
 
     def test_get_lens_list(self):
-        """
-        Test `get_lens_list` method.
+        """Test `get_lens_list` method.
+
         :return:
         :rtype:
         """
@@ -51,8 +48,8 @@ class TestFileSystem(object):
         assert self.file_system.get_lens_list() == lens_list
 
     def test_get_config_file_path(self):
-        """
-        Test `get_config_file_path` method.
+        """Test `get_config_file_path` method.
+
         :return:
         :rtype:
         """
@@ -64,8 +61,8 @@ class TestFileSystem(object):
         )
 
     def test_get_logs_directory(self):
-        """
-        Test `get_logs_directory` method.
+        """Test `get_logs_directory` method.
+
         :return:
         :rtype:
         """
@@ -74,8 +71,8 @@ class TestFileSystem(object):
         assert Path(self.file_system.get_logs_directory()) == logs_directory
 
     def test_get_settings_directory(self):
-        """
-        Test `get_settings_directory` method.
+        """Test `get_settings_directory` method.
+
         :return:
         :rtype:
         """
@@ -84,8 +81,8 @@ class TestFileSystem(object):
         assert Path(self.file_system.get_settings_directory()) == settings_dir
 
     def test_get_outputs_directory(self):
-        """
-        Test `get_outputs_directory` method.
+        """Test `get_outputs_directory` method.
+
         :return:
         :rtype:
         """
@@ -94,8 +91,8 @@ class TestFileSystem(object):
         assert Path(self.file_system.get_outputs_directory()) == outputs_dir
 
     def test_get_data_directory(self):
-        """
-        Test `get_data_directory` method.
+        """Test `get_data_directory` method.
+
         :return:
         :rtype:
         """
@@ -104,8 +101,8 @@ class TestFileSystem(object):
         assert Path(self.file_system.get_data_directory()) == data_dir
 
     def test_get_image_file_path(self):
-        """
-        Test `get_image_file_path` method.
+        """Test `get_image_file_path` method.
+
         :return:
         :rtype:
         """
@@ -116,8 +113,8 @@ class TestFileSystem(object):
         )
 
     def test_get_psf_file_path(self):
-        """
-        Test `get_psf_file_path` method.
+        """Test `get_psf_file_path` method.
+
         :return:
         :rtype:
         """
@@ -126,8 +123,8 @@ class TestFileSystem(object):
         assert Path(self.file_system.get_psf_file_path("lens_system1", "F390W")) == path
 
     def test_get_log_file_path(self):
-        """
-        Test `get_log_file_path` method.
+        """Test `get_log_file_path` method.
+
         :return:
         :rtype:
         """
@@ -141,8 +138,8 @@ class TestFileSystem(object):
         os.remove(str(path.resolve()))
 
     def test_get_output_file_path(self):
-        """
-        Test `get_output_file_path` method.
+        """Test `get_output_file_path` method.
+
         :return:
         :rtype:
         """
@@ -156,10 +153,9 @@ class TestFileSystem(object):
         os.remove(str(path.resolve()))
 
     def test_save_load_output(self):
-        """
-        Test for the `save_output()` and `load_output()` will be covered by
-        `test_save_load_output_json()` and `test_save_load_output_h5()`
-        methods.
+        """Test for the `save_output()` and `load_output()` will be covered by
+        `test_save_load_output_json()` and `test_save_load_output_h5()` methods.
+
         :return:
         :rtype:
         """
@@ -170,8 +166,8 @@ class TestFileSystem(object):
             self.file_system.load_output("test", "save_test", file_type="invalid")
 
     def test_save_load_output_json(self):
-        """
-        Test `save_output_json` and `load_output_json` methods.
+        """Test `save_output_json` and `load_output_json` methods.
+
         :return:
         :rtype:
         """
@@ -188,8 +184,8 @@ class TestFileSystem(object):
         )
 
     def test_save_load_output_h5(self):
-        """
-        Test `save_output` and `load_output` methods.
+        """Test `save_output` and `load_output` methods.
+
         :return:
         :rtype:
         """
@@ -239,8 +235,8 @@ class TestFileSystem(object):
             self.file_system.save_output("test", "save_test", save_dict, file_type="h5")
 
     def test_numpy_to_json_encoding(self):
-        """
-        Test `class NumpyEncoder` and `hook_json_to_numpy` function.
+        """Test `class NumpyEncoder` and `hook_json_to_numpy` function.
+
         :return:
         :rtype:
         """

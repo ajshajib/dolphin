@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module provides classes to post process a model run output.
-"""
+"""This module provides classes to post process a model run output."""
 __author__ = "ajshajib"
 
 import numpy as np
@@ -16,9 +14,7 @@ from dolphin.processor.config import ModelConfig
 
 
 class Output(Processor):
-    """
-    This class lets
-    """
+    """This class lets."""
 
     def __init__(self, io_directory):
         """
@@ -37,8 +33,7 @@ class Output(Processor):
 
     @property
     def fit_output(self):
-        """
-        The output from the `lenstronomy...Fitting_sequence.fit_sequence()`.
+        """The output from the `lenstronomy...Fitting_sequence.fit_sequence()`.
 
         :return:
         :rtype:
@@ -54,8 +49,7 @@ class Output(Processor):
 
     @property
     def kwargs_result(self):
-        """
-        The `kwargs_result` after running a model by calling
+        """The `kwargs_result` after running a model by calling
         `lenstronomy...Fitting_sequence.fit_sequence()`.
 
         :return:
@@ -72,8 +66,7 @@ class Output(Processor):
 
     @property
     def model_settings(self):
-        """
-        The `kwargs_result` after running a model by calling
+        """The `kwargs_result` after running a model by calling
         `lenstronomy...Fitting_sequence.fit_sequence()`.
 
         :return:
@@ -90,8 +83,7 @@ class Output(Processor):
 
     @property
     def samples_mcmc(self):
-        """
-        The array of MCMC samples from the model run.
+        """The array of MCMC samples from the model run.
 
         :return:
         :rtype:
@@ -103,8 +95,7 @@ class Output(Processor):
 
     @property
     def params_mcmc(self):
-        """
-        The non-linear parameters sampled with MCMC.
+        """The non-linear parameters sampled with MCMC.
 
         :return:
         :rtype:
@@ -116,8 +107,7 @@ class Output(Processor):
 
     @property
     def num_params_mcmc(self):
-        """
-        Number of sampled non-linear parameters in MCMC.
+        """Number of sampled non-linear parameters in MCMC.
 
         :return:
         :rtype:
@@ -128,15 +118,12 @@ class Output(Processor):
             return len(self._params_mcmc)
 
     def swim(self, *args, **kwargs):
-        """
-        Override the `swim` method of the `Processor` class to make it
-        not callable.
-        """
+        """Override the `swim` method of the `Processor` class to make it not
+        callable."""
         raise NotImplementedError
 
     def load_output(self, lens_name, model_id):
-        """
-        Load output from file and save in class variables.
+        """Load output from file and save in class variables.
 
         :param lens_name: lens name
         :type lens_name: `str`
@@ -165,8 +152,7 @@ class Output(Processor):
         band_index=0,
         data_cmap="cubehelix",
     ):
-        """
-        Get the `ModelPlot` instance from lenstronomy for the lens.
+        """Get the `ModelPlot` instance from lenstronomy for the lens.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
@@ -228,11 +214,9 @@ class Output(Processor):
         print_results=False,
         show_source_light=False,
     ):
-        """
-        Plot the model, residual, reconstructed source, convergence,
-        and magnification profiles. Either `model_id` or `kwargs_result`
-        needs to be provided. `kwargs_result` is prioritized for plotting if
-        both are provided.
+        """Plot the model, residual, reconstructed source, convergence, and
+        magnification profiles. Either `model_id` or `kwargs_result` needs to be
+        provided. `kwargs_result` is prioritized for plotting if both are provided.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
@@ -349,11 +333,9 @@ class Output(Processor):
         v_min=None,
         v_max=None,
     ):
-        """
-        Plot lens light and source light model decomposition, both with
-        convolved  and unconvolved light. Either `model_id` or `kwargs_result`
-        needs to be provided. `kwargs_result` is prioritized for plotting if
-        both are provided.
+        """Plot lens light and source light model decomposition, both with convolved
+        and unconvolved light. Either `model_id` or `kwargs_result` needs to be
+        provided. `kwargs_result` is prioritized for plotting if both are provided.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
@@ -374,7 +356,6 @@ class Output(Processor):
         :type v_max: `float` or `int`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
-
         """
 
         if v_max is None:
@@ -500,8 +481,7 @@ class Output(Processor):
         fig_width=16,
         parameters_to_plot=[],
     ):
-        """
-        Plot the trace of MCMC walkers.
+        """Plot the trace of MCMC walkers.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
@@ -602,8 +582,7 @@ class Output(Processor):
         return fig
 
     def get_param_class(self, lens_name, model_id):
-        """
-        Get `Param` instance for the lens model.
+        """Get `Param` instance for the lens model.
 
         :param lens_name: name of the lens
         :type lens_name: `str`

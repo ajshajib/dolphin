@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module loads settings from a configuration file.
-"""
+"""This module loads settings from a configuration file."""
 __author__ = "ajshajib"
 
 import yaml
@@ -15,11 +13,11 @@ import lenstronomy.Util.mask_util as mask_util
 
 
 class Config(object):
-    """
-    This class contains the methods to load an read YAML configuration
-    files. This is a parent class for other classes that needs to load
-    a configuration file. If the file type of the configuration files
-    changes, then only this class needs to be modified.
+    """This class contains the methods to load an read YAML configuration files.
+
+    This is a parent class for other classes that needs to load a configuration file. If
+    the file type of the configuration files changes, then only this class needs to be
+    modified.
     """
 
     def __init__(self):
@@ -27,8 +25,7 @@ class Config(object):
 
     @classmethod
     def load(cls, file):
-        """
-        Load configuration from `file`.
+        """Load configuration from `file`.
 
         :return:
         :rtype:
@@ -40,16 +37,13 @@ class Config(object):
 
 
 class ModelConfig(Config):
-    """
-    This class contains the methods to load and interact with modeling
-    settings for a particular system.
-    """
+    """This class contains the methods to load and interact with modeling settings for a
+    particular system."""
 
     def __init__(self, file=None, settings=None):
-        """
-        Initiate a Model Config object. If the file path is given, `settings`
-        will be loaded from it. Otherwise, the `settings` can be
-        loaded/reloaded later with the `load_settings_from_file` method.
+        """Initiate a Model Config object. If the file path is given, `settings` will be
+        loaded from it. Otherwise, the `settings` can be loaded/reloaded later with the
+        `load_settings_from_file` method.
 
         :param file: path to a settings file, file will
         :type file: `str`
@@ -64,8 +58,7 @@ class ModelConfig(Config):
             self.load_settings_from_file(file)
 
     def load_settings_from_file(self, file):
-        """
-        Load the settings.
+        """Load the settings.
 
         :param file: path to a settings file
         :type file: `str`
@@ -76,8 +69,7 @@ class ModelConfig(Config):
 
     @property
     def pixel_size(self):
-        """
-        The pixel size.
+        """The pixel size.
 
         :return:
         :rtype:
@@ -89,9 +81,8 @@ class ModelConfig(Config):
 
     @property
     def deflector_center_ra(self):
-        """
-        The RA offset for the deflector's center from the zero-point
-        in the coordinate system of the data. Default is 0.
+        """The RA offset for the deflector's center from the zero-point in the
+        coordinate system of the data. Default is 0.
 
         :return:
         :rtype:
@@ -106,9 +97,8 @@ class ModelConfig(Config):
 
     @property
     def deflector_center_dec(self):
-        """
-        The dec offset for the deflector's center from the zero-point
-        in the coordinate system of the data. Default is 0.
+        """The dec offset for the deflector's center from the zero-point in the
+        coordinate system of the data. Default is 0.
 
         :return:
         :rtype:
@@ -123,9 +113,8 @@ class ModelConfig(Config):
 
     @property
     def deflector_centroid_bound(self):
-        """
-        Half of the box width to constrain the deflector's centroid.
-        Default is 0.5 arcsec.
+        """Half of the box width to constrain the deflector's centroid. Default is 0.5
+        arcsec.
 
         :return:
         :rtype:
@@ -140,8 +129,7 @@ class ModelConfig(Config):
 
     @property
     def band_number(self):
-        """
-        The number of bands.
+        """The number of bands.
 
         :return:
         :rtype:
@@ -157,8 +145,7 @@ class ModelConfig(Config):
                 return num
 
     def get_kwargs_model(self):
-        """
-        Create `kwargs_model`.
+        """Create `kwargs_model`.
 
         :return:
         :rtype:
@@ -183,8 +170,7 @@ class ModelConfig(Config):
         return kwargs_model
 
     def get_kwargs_constraints(self):
-        """
-        Create `kwargs_constraints`.
+        """Create `kwargs_constraints`.
 
         :return:
         :rtype:
@@ -227,8 +213,7 @@ class ModelConfig(Config):
         return kwargs_constraints
 
     def get_kwargs_likelihood(self):
-        """
-        Create `kwargs_likelihood`.
+        """Create `kwargs_likelihood`.
 
         :return:
         :rtype:
@@ -330,16 +315,14 @@ class ModelConfig(Config):
         kwargs_special=None,
         kwargs_extinction=None,
     ):
-        """
-        Add different types of custom log L funtions
-        1) Impose a tophat prior to limit the maximum allowed difference
-           between orientation angle of the lens mass profile and the lens
-           light profile (in degrees).
+        """Add different types of custom log L funtions 1) Impose a tophat prior to
+        limit the maximum allowed difference between orientation angle of the lens mass
+        profile and the lens light profile (in degrees).
+
         2) Impose a tophat prior to limit the ratio between q for the lens mass
-           profile and q for the lens light profile. The varaible q represents
-           the ratio between the minor axis and major axis of a profile.
-        3) Impose a logarithmic prior on the source light profile shapelet
-           scale
+        profile and q for the lens light profile. The varaible q represents    the ratio
+        between the minor axis and major axis of a profile. 3) Impose a logarithmic
+        prior on the source light profile shapelet    scale
         """
         prior = 0.0
 
@@ -442,8 +425,7 @@ class ModelConfig(Config):
         return prior
 
     def get_masks(self):
-        """
-        Create masks.
+        """Create masks.
 
         :return:
         :rtype:
@@ -556,8 +538,7 @@ class ModelConfig(Config):
         return None
 
     def get_kwargs_psf_iteration(self):
-        """
-        Create `kwargs_psf_iteration`.
+        """Create `kwargs_psf_iteration`.
 
         :return:
         :rtype:
@@ -594,8 +575,7 @@ class ModelConfig(Config):
             return {}
 
     def get_kwargs_numerics(self):
-        """
-        Create `kwargs_numerics`.
+        """Create `kwargs_numerics`.
 
         :return:
         :rtype:
@@ -628,8 +608,7 @@ class ModelConfig(Config):
         return kwargs_numerics
 
     def get_lens_model_list(self):
-        """
-        Return `lens_model_list`.
+        """Return `lens_model_list`.
 
         :return:
         :rtype:
@@ -640,8 +619,7 @@ class ModelConfig(Config):
             return []
 
     def get_source_light_model_list(self):
-        """
-        Return `source_model_list`.
+        """Return `source_model_list`.
 
         :return:
         :rtype:
@@ -652,8 +630,7 @@ class ModelConfig(Config):
             return []
 
     def get_lens_light_model_list(self):
-        """
-        Return `lens_light_model_list`.
+        """Return `lens_light_model_list`.
 
         :return:
         :rtype:
@@ -664,8 +641,7 @@ class ModelConfig(Config):
             return []
 
     def get_point_source_model_list(self):
-        """
-        Return `ps_model_list`.
+        """Return `ps_model_list`.
 
         :return:
         :rtype:
@@ -679,10 +655,8 @@ class ModelConfig(Config):
             return []
 
     def get_index_lens_light_model_list(self):
-        """
-        Create list with of index for the different lens light profile
-         (for multiple filters)
-        """
+        """Create list with of index for the different lens light profile (for multiple
+        filters)"""
         if "lens_light" in self.settings["model"]:
             if self.band_number == 1:
                 index_list = [[]]
@@ -707,11 +681,8 @@ class ModelConfig(Config):
             return []
 
     def get_index_source_light_model_list(self):
-        """
-        Create list with of index for the different source light profiles
-         (for multiple filters)
-
-        """
+        """Create list with of index for the different source light profiles (for
+        multiple filters)"""
         if "source_light" in self.settings["model"]:
             if self.band_number == 1:
                 index_list = [[]]
@@ -736,8 +707,7 @@ class ModelConfig(Config):
             return []
 
     def get_lens_model_params(self):
-        """
-        Create `lens_params`.
+        """Create `lens_params`.
 
         :return:
         :rtype:
@@ -816,8 +786,7 @@ class ModelConfig(Config):
         return params
 
     def get_lens_light_model_params(self):
-        """
-        Create `lens_light_params`.
+        """Create `lens_light_params`.
 
         :return:
         :rtype:
@@ -891,8 +860,7 @@ class ModelConfig(Config):
         return params
 
     def get_source_light_model_params(self):
-        """
-        Create `source_params`.
+        """Create `source_params`.
 
         :return:
         :rtype:
@@ -993,8 +961,7 @@ class ModelConfig(Config):
         return params
 
     def get_point_source_params(self):
-        """
-        Create `ps_params`.
+        """Create `ps_params`.
 
         :return:
         :rtype:
@@ -1051,9 +1018,7 @@ class ModelConfig(Config):
         return params
 
     def fill_in_fixed_from_settings(self, component, fixed_list):
-        """
-        Fill in fixed values from settings for lens, source light and lens
-        light.
+        """Fill in fixed values from settings for lens, source light and lens light.
 
         :param component: name of component, 'lens', 'lens_light', or
             'source_light'
@@ -1078,8 +1043,7 @@ class ModelConfig(Config):
         return fixed_list
 
     def get_kwargs_params(self):
-        """
-        Create `kwargs_params`.
+        """Create `kwargs_params`.
 
         :return:
         :rtype:
@@ -1095,8 +1059,8 @@ class ModelConfig(Config):
         return kwargs_params
 
     def get_psf_supersampled_factor(self):
-        """
-        Retrieve PSF supersampling factor if specified in the config file.
+        """Retrieve PSF supersampling factor if specified in the config file.
+
         :return: PSF supersampling factor
         :rtype: `float`
         """

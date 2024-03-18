@@ -25,8 +25,8 @@ lens_option:
   # lens mass and lens light to be smaller than a certain threshold. The 
   # default position angle difference threshold is 15 degrees.
   limit_mass_eccentricity_from_light: true
-  # Provides prior to discourage the lens light axis ratio to be bigger
-  # than the lens mass, i.e. penalizes qL-qM > threshold). The
+  # Provides a prior to push the lens light axis ratio to be smaller
+  # than the lens mass, i.e., penalizes q_L - q_M > threshold). The
   # default threshold is 0.0
 
 lens_light_option:

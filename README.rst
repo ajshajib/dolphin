@@ -7,7 +7,7 @@
     :align: center
     :width: 50
 
-|tests| |docs| |coverage|
+|tests| |docs| |coverage| |black| |docformatter| |docstyle|
 
 .. |tests| image:: https://travis-ci.com/ajshajib/dolphin.svg?branch=master
     :target: https://travis-ci.com/ajshajib/dolphin
@@ -20,6 +20,18 @@
 .. |coverage| image:: https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1 
     :target: https://codecov.io/gh/ajshajib/dolphin
     :alt: codecov
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: black
+
+.. |docformatter| image:: https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg
+    :target: https://github.com/PyCQA/docformatter
+    :alt: docformatter
+
+.. |docstyle| image:: https://img.shields.io/badge/%20style-sphinx-0a507a.svg
+    :target: https://www.sphinx-doc.org/en/master/usage/index.html
+    :alt: sphinx
 
 Semi-automated pipeline for lens modeling based on `lenstronomy`_.
 

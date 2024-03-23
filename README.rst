@@ -1,25 +1,27 @@
 
 =================
-|logo| `dolphin`
+|logo| dolphin
 =================
 
-.. |logo| raw:: html
+.. |logo| image:: ./logo.png
+    :align: center
+    :width: 50
 
-  <img src="./logo.png" width="50"></img>
+|tests| |docs| |coverage|
 
-
-
-.. image:: https://travis-ci.com/ajshajib/dolphin.svg?branch=master
+.. |tests| image:: https://travis-ci.com/ajshajib/dolphin.svg?branch=master
     :target: https://travis-ci.com/ajshajib/dolphin
+    :alt: build
 
-.. image:: https://readthedocs.org/projects/dolphin-docs/badge/?version=latest
+.. |docs| image:: https://readthedocs.org/projects/dolphin-docs/badge/?version=latest
     :target: https://dolphin-docs.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
+    :alt: docs
 
-.. image:: https://coveralls.io/repos/github/ajshajib/dolphin/badge.svg?branch=master&service=github
-    :target: https://coveralls.io/github/ajshajib/dolphin?branch=master
+.. |coverage| image:: https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1 
+    :target: https://codecov.io/gh/ajshajib/dolphin
+    :alt: codecov
 
-Automated pipeline for lens modeling based on lenstronomy_.
+Semi-automated pipeline for lens modeling based on `lenstronomy`_.
 
 .. _lenstronomy: https://github.com/sibirrer/lenstronomy
 
@@ -27,8 +29,10 @@ Automated pipeline for lens modeling based on lenstronomy_.
 Features
 ***************
 
-* (Semi-)automated modeling of a large sample of quasar and galaxy-galaxy lenses.
-* Easy portability between local and MPI environments.
+* Semi-automated modeling of a large sample of quasar and galaxy-galaxy lenses.
+* Joint multi-band lens modeling.
+* Easy portability between local and HPCC environments.
+* Initial fitting recipe for galaxy-galaxy lenses for faster convergence.
 
 
 ***************
@@ -36,4 +40,4 @@ Citation
 ***************
 
 If you use `dolphin` in your research, please cite `Shajib et al. (2021)
-<https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract>`_.
+<https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract>`_ and `Tan et al. (2024) <https://ui.adsabs.harvard.edu/abs/2023arXiv231109307T/abstract>`_.

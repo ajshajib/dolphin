@@ -3,6 +3,6 @@ numpy>1.13
 scipy>=0.19.1
 pyyaml
 h5py
-lenstronomy==1.11.5
+lenstronomy<=1.11.5
 schwimmbad
 corner

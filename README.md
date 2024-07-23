@@ -1,6 +1,6 @@
 # <img src="logo.png" alt="logo" width="30"/> dolphin
 
-[![GitHub](https://github.com/ajshajib/dolphin/workflows/CI/badge.svg)]([https://travis-ci.com/ajshajib/dolphin](https://github.com/ajshajib/dolphin/actions))
+[![GitHub](https://github.com/ajshajib/dolphin/workflows/CI/badge.svg)](https://github.com/ajshajib/dolphin/actions)
 [![docs](https://readthedocs.org/projects/dolphin-docs/badge/?version=latest)](https://dolphin-docs.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)

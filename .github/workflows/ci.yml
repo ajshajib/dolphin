@@ -29,7 +29,7 @@ jobs:
           python -m pip install codecov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [ -f test_requirements.txt ]; then pip install -r test_requirements.txt; fi
-          python -m pip install .
+          pip install -e .
 
       - name: Test with pytest
         run: |

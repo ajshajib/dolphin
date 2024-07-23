@@ -149,7 +149,7 @@ class TestModelConfig(object):
         self.config_2.settings["band"] = []
 
         kwargs_model_4 = self.config_4.get_kwargs_model()
-        assert kwargs_model_4["lens_model_list"] == ["SIE", "SHEAR_GAMMA_PSI"]
+        assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
 
     def test_get_kwargs_constraints(self):
         """Test `get_kwargs_constraints` method.

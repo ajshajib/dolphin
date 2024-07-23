@@ -150,9 +150,13 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+        lens_model_list = self.get_lens_model_list()
+        if "SIE" in lens_model_list:
+            index = lens_model_list.index("SIE")
+            lens_model_list[index] = "EPL"
 
         kwargs_model = {
-            "lens_model_list": self.get_lens_model_list(),
+            "lens_model_list": lens_model_list,
             "source_light_model_list": self.get_source_light_model_list(),
             "lens_light_model_list": self.get_lens_light_model_list(),
             "point_source_model_list": self.get_point_source_model_list(),
@@ -721,8 +725,11 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_model_list):
-            if model in ["SPEP", "PEMD", "EPL"]:
-                fixed.append({})
+            if model in ["SPEP", "PEMD", "EPL", "SIE"]:
+                if model == "SIE":
+                    fixed.append({"gamma": 2.0})
+                else:
+                    fixed.append({})
                 init.append(
                     {
                         "center_x": self.deflector_center_ra,

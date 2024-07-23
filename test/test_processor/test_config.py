@@ -497,7 +497,7 @@ class TestModelConfig(object):
         self.config_2.get_lens_model_params()
 
         params = self.config_4.get_lens_model_params()
-        assert params[2] == {"gamma": 2.0}
+        assert params[2][0] == {"gamma": 2.0}
 
     def test_get_lens_light_model_params(self):
         """Test `get_lens_light_model_params` method.

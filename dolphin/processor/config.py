@@ -721,7 +721,7 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_model_list):
-            if model in ["SPEP", "PEMD"]:
+            if model in ["SPEP", "PEMD", "EPL"]:
                 fixed.append({})
                 init.append(
                     {

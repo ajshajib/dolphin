@@ -150,7 +150,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        lens_model_list = self.get_lens_model_list()
+        lens_model_list = deepcopy(self.get_lens_model_list())
         if "SIE" in lens_model_list:
             index = lens_model_list.index("SIE")
             lens_model_list[index] = "EPL"

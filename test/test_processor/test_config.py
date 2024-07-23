@@ -130,7 +130,7 @@ class TestModelConfig(object):
         :rtype:
         """
         kwargs_model = {
-            "lens_model_list": ["SPEP", "SHEAR_GAMMA_PSI"],
+            "lens_model_list": ["EPL", "SHEAR_GAMMA_PSI"],
             "source_light_model_list": ["SERSIC_ELLIPSE"],
             "lens_light_model_list": ["SERSIC_ELLIPSE"],
             "point_source_model_list": [],

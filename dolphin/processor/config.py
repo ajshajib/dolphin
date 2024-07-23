@@ -724,9 +724,10 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        for i, model in enumerate(lens_model_list):
+        for model in lens_model_list:
             if model in ["SPEP", "PEMD", "EPL", "SIE"]:
                 if model == "SIE":
+                    raise ValueError("SIE is not supported as a lens model!")
                     fixed.append({"gamma": 2.0})
                 else:
                     fixed.append({})

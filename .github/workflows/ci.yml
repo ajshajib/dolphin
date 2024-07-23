@@ -27,14 +27,15 @@ jobs:
           python -m pip install --upgrade pytest
           python -m pip install pytest pytest-cov
           python -m pip install codecov
-          pip install -r requirements.txt
-          pip install -r test_requirements.txt
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f test_requirements.txt ]; then pip install -r test_requirements.txt; fi
           python -m pip install .
 
       - name: Test with pytest
         run: |
           pytest --cov=./ --cov-report=xml
           codecov
+          
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v3
         env:

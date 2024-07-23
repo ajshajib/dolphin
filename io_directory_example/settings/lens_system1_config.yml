@@ -8,7 +8,7 @@ pixel_size : 0.04
 
 model:
   lens:
-    - 'SPEP' # the first mass profile needs to be for the deflector
+    - 'SIE' # the first mass profile needs to be for the deflector
              # as required by `lenstronomy`
     - 'SHEAR_GAMMA_PSI'
   lens_light:

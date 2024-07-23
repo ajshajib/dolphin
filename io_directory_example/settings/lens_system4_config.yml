@@ -1,5 +1,5 @@
 ---
-system_name: 'lens_system1'
+system_name: 'lens_system4'
 
 band:
   - 'F390W'
@@ -8,7 +8,7 @@ pixel_size : 0.04
 
 model:
   lens:
-    - 'EPL' # the first mass profile needs to be for the deflector
+    - 'SIE' # the first mass profile needs to be for the deflector
              # as required by `lenstronomy`
     - 'SHEAR_GAMMA_PSI'
   lens_light:

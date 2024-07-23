@@ -1,55 +1,44 @@
 #!/usr/bin/env python
 
-import os
-import sys
+"""The setup script."""
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
+with open("README.md") as readme_file:
+    readme = readme_file.read()
 
-if sys.argv[-1] == "publish":
-    os.system("python setup.py sdist upload")
-    sys.exit()
+with open("HISTORY.rst") as history_file:
+    history = history_file.read()
 
-readme = open("README.rst").read()
-doclink = """
-Documentation
--------------
+requirements = []
 
-The full documentation is at http://dolphin.rtfd.org."""
-history = open("HISTORY.rst").read().replace(".. :changelog:", "")
+test_requirements = []
 
 setup(
-    name="dolphin",
-    version="0.0.0",
-    description="Automated pipeline for lens modeling based on lenstronomy.",
-    long_description=readme + "\n\n" + doclink + "\n\n" + history,
-    author="Anowar J. Shajib",
+    author="Anowar Shajib",
     author_email="ajshajib@gmail.com",
-    url="https://github.com/ajshajib/dolphin",
-    packages=[
-        "dolphin",
-    ],
-    package_dir={"dolphin": "dolphin"},
-    include_package_data=True,
-    install_requires=[],
-    license="MIT",
-    zip_safe=False,
-    keywords="dolphin",
+    python_requires=">=3.6",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
-        "Intended Audience :: Developers",
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Users",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        # 'Programming Language :: Python :: 2',
-        # 'Programming Language :: Python :: 2.6',
-        #'Programming Language :: Python :: 2.7',
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
+        # "Programming Language :: Python :: 3",
+        # "Programming Language :: Python :: 3.6",
+        # "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        #'Programming Language :: Python :: Implementation :: PyPy',
     ],
+    description="Automated pipeline for lens modeling based on lenstronomy",
+    install_requires=requirements,
+    license="MIT license",
+    long_description=readme + "\n\n" + history,
+    include_package_data=True,
+    keywords="dolphin",
+    name="dolphin",
+    packages=find_packages(include=["dolphin", "dolphin.*"]),
+    test_suite="tests",
+    tests_require=test_requirements,
+    url="https://github.com/ajshajib/dolphin",
+    version="0.0.1",
+    zip_safe=False,
 )

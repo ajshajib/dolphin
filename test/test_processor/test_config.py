@@ -356,6 +356,33 @@ class TestModelConfig(object):
         assert masks3[1][5, 0:6].tolist() == [0.0, 0.0, 1.0, 1.0, 1.0, 1.0]
         assert masks3[1][5, -6:].tolist() == [1.0, 1.0, 1.0, 1.0, 0.0, 0.0]
 
+        # test elliptical mask
+        config_elliptial_mask = deepcopy(self.config_1)
+        del config_elliptial_mask.settings["mask"]["radius"]
+
+        with pytest.raises(ValueError):
+            config_elliptial_mask.get_masks()
+
+        config_elliptial_mask.settings["mask"]["a"] = [1]
+
+        with pytest.raises(ValueError):
+            config_elliptial_mask.get_masks()
+
+        config_elliptial_mask.settings["mask"]["b"] = [0.5]
+
+        with pytest.raises(ValueError):
+            config_elliptial_mask.get_masks()
+
+        config_elliptial_mask.settings["mask"]["angle"] = [np.pi / 4.0]
+
+        masks_elliptical = config_elliptial_mask.get_masks()
+        assert len(masks_elliptical) == self.config_elliptial_mask.band_number
+        for n in range(self.config_elliptial_mask.band_number):
+            assert masks_elliptical[n].shape == (
+                self.config_elliptial_mask.settings["mask"]["size"][n],
+                self.config_elliptial_mask.settings["mask"]["size"][n],
+            )
+
     def test_get_kwargs_psf_iteration(self):
         """Test `get_psf_iteration` method.
 

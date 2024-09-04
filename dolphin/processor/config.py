@@ -452,24 +452,41 @@ class ModelConfig(Config):
                             mask_options["transform_matrix"][n]
                         )
                         num_pixel = mask_options["size"][n]
-                        radius = mask_options["radius"][n]
                         offset = mask_options["centroid_offset"][n]
 
                         coords = Coordinates(
                             transform_pix2angle, ra_at_xy_0, dec_at_xy_0
                         )
-
                         x_coords, y_coords = coords.coordinate_grid(
                             num_pixel, num_pixel
                         )
 
-                        mask_outer = mask_util.mask_center_2d(
-                            self.deflector_center_ra + offset[0],
-                            self.deflector_center_dec + offset[1],
-                            radius,
-                            util.image2array(x_coords),
-                            util.image2array(y_coords),
-                        )
+                        if "radius" in mask_options:
+                            radius = mask_options["radius"][n]
+                            mask_outer = mask_util.mask_center_2d(
+                                self.deflector_center_ra + offset[0],
+                                self.deflector_center_dec + offset[1],
+                                radius,
+                                util.image2array(x_coords),
+                                util.image2array(y_coords),
+                            )
+                        elif (
+                            "a" in mask_options
+                            and "b" in mask_options
+                            and "angle" in mask_options
+                        ):
+                            a = mask_options["a"][n]
+                            b = mask_options["b"][n]
+                            angle = mask_options["angle"][n]
+                            mask_outer = mask_util.ellipse(
+                                self.deflector_center_ra + offset[0],
+                                self.deflector_center_dec + offset[1],
+                                a,
+                                b,
+                                angle,
+                            )
+                        else:
+                            raise ValueError("Mask shape not properly specified!")
 
                         extra_masked_regions = []
                         try:

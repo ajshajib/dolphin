@@ -463,12 +463,12 @@ class ModelConfig(Config):
 
                         if "radius" in mask_options:
                             radius = mask_options["radius"][n]
-                            mask_outer = mask_util.mask_center_2d(
+                            mask = mask_util.mask_azimuthal(
+                                util.image2array(x_coords),
+                                util.image2array(y_coords),
                                 self.deflector_center_ra + offset[0],
                                 self.deflector_center_dec + offset[1],
                                 radius,
-                                util.image2array(x_coords),
-                                util.image2array(y_coords),
                             )
                         elif (
                             "a" in mask_options
@@ -478,7 +478,9 @@ class ModelConfig(Config):
                             a = mask_options["a"][n]
                             b = mask_options["b"][n]
                             angle = mask_options["angle"][n]
-                            mask_outer = mask_util.mask_ellipse(
+                            mask = mask_util.mask_ellipse(
+                                util.image2array(x_coords),
+                                util.image2array(y_coords),
                                 self.deflector_center_ra + offset[0],
                                 self.deflector_center_dec + offset[1],
                                 a,
@@ -497,16 +499,15 @@ class ModelConfig(Config):
                             if self.settings["mask"]["extra_regions"] is not None:
                                 for reg in self.settings["mask"]["extra_regions"][n]:
                                     extra_masked_regions.append(
-                                        mask_util.mask_center_2d(
+                                        1
+                                        - mask_util.mask_azimuthal(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
                                             self.deflector_center_ra + reg[0],
                                             self.deflector_center_dec + reg[1],
                                             reg[2],
-                                            util.image2array(x_coords),
-                                            util.image2array(y_coords),
                                         )
                                     )
-
-                        mask = 1.0 - mask_outer
 
                         for extra_region in extra_masked_regions:
                             mask *= extra_region

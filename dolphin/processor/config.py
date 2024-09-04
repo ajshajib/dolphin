@@ -478,7 +478,7 @@ class ModelConfig(Config):
                             a = mask_options["a"][n]
                             b = mask_options["b"][n]
                             angle = mask_options["angle"][n]
-                            mask_outer = mask_util.ellipse(
+                            mask_outer = mask_util.mask_ellipse(
                                 self.deflector_center_ra + offset[0],
                                 self.deflector_center_dec + offset[1],
                                 a,

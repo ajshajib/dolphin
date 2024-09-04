@@ -243,25 +243,26 @@ class Recipe(object):
         fitting_kwargs_list = []
 
         if self.do_sampling:
-            if self._config.settings["fitting"]["sampler"] == "MCMC":
-                fitting_kwargs_list.append(
-                    [
-                        "MCMC",
-                        {
-                            "sampler_type": self._sampler,
-                            "n_burn": self._config.settings["fitting"]["mcmc_settings"][
-                                "burnin_step"
-                            ],
-                            "n_run": self._config.settings["fitting"]["mcmc_settings"][
-                                "iteration_step"
-                            ],
-                            "walkerRatio": self._config.settings["fitting"][
-                                "mcmc_settings"
-                            ]["walker_ratio"],
-                            "threadCount": self._thread_count,
-                        },
-                    ]
+            supported_samplers = [ 
+                "MCMC",
+                "emcee",
+                "zeus",
+                "dynesty",
+                "dyPolyChord",
+                "MultiNest",
+                "nested_sampling",
+                "Nautilus"
+                ]
+            if self._config.settings["fitting"]["sampler"] not in supported_samplers:
+                raise ValueError(
+                    f"{self._config.settings["fitting"]["sampler"]} sampler not supported!"
+                    f"Must be one of {supported_samplers}."                    
                 )
+
+            sampling_kwargs = self._config.settings["fitting"]["sampler_settings"]
+            if self._config.settings["fitting"]["sampler"] in ["MCMC", "emcee", "zeus"]:
+                if "threadCount" not in sampling_kwargs:
+                    sampling_kwargs["threadCount"] = self._thread_count
 
                 try:
                     self._config.settings["fitting"]["mcmc_settings"]["init_samples"]
@@ -274,19 +275,15 @@ class Recipe(object):
                         ]
                         is not None
                     ):
-                        fitting_kwargs_list[-1][1]["init_samples"] = np.array(
+                        sampling_kwargs["init_samples"] = np.array(
                             self._config.settings["fitting"]["mcmc_settings"][
                                 "init_samples"
                             ]
                         )
 
-                        fitting_kwargs_list[-1][1]["re_use_samples"] = True
-            else:
-                raise ValueError(
-                    "{} sampler not implemented yet!".format(
-                        self._config.settings["fitting"]["sampler"]
-                    )
-                )
+                        sampling_kwargs["re_use_samples"] = True
+
+            fitting_kwargs_list.append([self._sampler, sampling_kwargs])
 
         return fitting_kwargs_list
 

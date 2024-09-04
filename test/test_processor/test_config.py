@@ -376,11 +376,11 @@ class TestModelConfig(object):
         config_elliptial_mask.settings["mask"]["angle"] = [np.pi / 4.0]
 
         masks_elliptical = config_elliptial_mask.get_masks()
-        assert len(masks_elliptical) == self.config_elliptial_mask.band_number
-        for n in range(self.config_elliptial_mask.band_number):
+        assert len(masks_elliptical) == config_elliptial_mask.band_number
+        for n in range(config_elliptial_mask.band_number):
             assert masks_elliptical[n].shape == (
-                self.config_elliptial_mask.settings["mask"]["size"][n],
-                self.config_elliptial_mask.settings["mask"]["size"][n],
+                config_elliptial_mask.settings["mask"]["size"][n],
+                config_elliptial_mask.settings["mask"]["size"][n],
             )
 
     def test_get_kwargs_psf_iteration(self):

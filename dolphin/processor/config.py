@@ -318,15 +318,26 @@ class ModelConfig(Config):
         kwargs_ps=None,
         kwargs_special=None,
         kwargs_extinction=None,
+        kwargs_tracer_source=None,
     ):
-        """Add different types of custom log L funtions 1) Impose a tophat prior to
-        limit the maximum allowed difference between orientation angle of the lens mass
-        profile and the lens light profile (in degrees).
+        """
+        Provide additional likelihood terms to be sent to `lenstronomy`.
 
-        2) Impose a tophat prior to limit the ratio between q for the lens mass profile
-        and q for the lens light profile. The varaible q represents    the ratio between
-        the minor axis and major axis of a profile. 3) Impose a logarithmic prior on the
-        source light profile shapelet    scale
+        :param kwargs_lens: dictionary containing lens model keyword arguments
+        :type kwargs_lens: `dict`
+        :param kwargs_source: dictionary containing source model keyword arguments
+        :type kwargs_source: `dict`
+        :param kwargs_lens_light: dictionary containing lens light model keyword arguments
+        :type kwargs_lens_light: `dict`
+        :param kwargs_ps: dictionary containing point source model keyword arguments
+        :type kwargs_ps: `dict`
+        :param kwargs_special: dictionary containing special model keyword arguments
+        :type kwargs_special: `dict`
+        :param kwargs_extinction: dictionary containing extinction model keyword arguments
+        :type kwargs_extinction: `dict`
+        :param kwargs_tracer_source: dictionary containing tracer source model keyword
+        :return: prior
+        :rtype: float
         """
         prior = 0.0
 

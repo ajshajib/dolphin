@@ -31,11 +31,11 @@ fitting:
     num_iteration: 50
 
   sampling: true
-  sampler: 'MCMC'
-  mcmc_settings:
-    burnin_step: 0
-    iteration_step: 100
-    walker_ratio: 2
+  sampler: emcee
+  sampler_settings: # keywords to be sent to lenstronomy.Workflow.fitting_sequence.FittingSequence.mcmc()
+    n_burn : 0
+    n_run: 100
+    walkerRatio: 2
 
 numeric_option:
   supersampling_factor: [2]

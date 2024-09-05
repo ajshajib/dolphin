@@ -138,7 +138,7 @@ class Output(Processor):
         self._kwargs_result = output["kwargs_result"]
         self._fit_output = output["fit_output"]
 
-        if self.fit_output[-1][0] == "EMCEE":
+        if self.fit_output[-1][0] == "emcee":
             self._samples_mcmc = self.fit_output[-1][1]
             self._params_mcmc = self.fit_output[-1][2]
 
@@ -651,6 +651,14 @@ class Output(Processor):
                 band_index=band_index,
             )
 
-            im_sim.image_linear_solve(**kwargs, inv_bool=True)
+            im_sim.image_linear_solve(
+                kwargs_lens=kwargs["kwargs_lens"],
+                kwargs_source=kwargs["kwargs_source"],
+                kwargs_lens_light=kwargs["kwargs_lens_light"],
+                kwargs_ps=kwargs["kwargs_ps"],
+                kwargs_extinction=kwargs["kwargs_extinction"],
+                kwargs_special=kwargs["kwargs_special"],
+                inv_bool=True,
+            )
 
         return kwargs

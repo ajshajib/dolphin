@@ -35,7 +35,6 @@ class Processor(object):
         log=True,
         mpi=False,
         recipe_name="default",
-        sampler="EMCEE",
         thread_count=1,
     ):
         """Run models for a single lens.
@@ -68,7 +67,7 @@ class Processor(object):
             sys.stdout = log_file
 
         config = self.get_lens_config(lens_name)
-        recipe = Recipe(config, sampler=sampler, thread_count=thread_count)
+        recipe = Recipe(config, thread_count=thread_count)
 
         psf_supersampling_factor = config.get_psf_supersampled_factor()
         kwargs_data_joint = self.get_kwargs_data_joint(

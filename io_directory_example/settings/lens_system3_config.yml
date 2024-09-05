@@ -1,17 +1,54 @@
+---
+system_name: lens_system3
+
 band:
-- F475X
-- F600LP
-fitting:
-  mcmc_settings:
-    burnin_step: 0
-    iteration_step: 10
-    walker_ratio: 2
-  pso: true
-  pso_settings:
-    num_iteration: 10
-    num_particle: 10
-  sampler: MCMC
-  sampling: true
+  - F475X
+  - F600LP
+
+pixel_size:
+  - 0.04
+  - 0.08
+
+model:
+  lens:
+    - EPL
+    - SHEAR_GAMMA_PSI
+  lens_light:
+    - SERSIC_ELLIPSE
+    - SERSIC_ELLIPSE
+    - SERSIC_ELLIPSE
+    - SERSIC_ELLIPSE
+  lens_light_band_indices:
+    - 0
+    - 0
+    - 1
+    - 1
+  source_light:
+    - SHAPELETS
+    - SHAPELETS
+  source_light_band_indices:
+    - 0
+    - 1
+
+numeric_option:
+  supersampling_factor:
+    - 2
+
+lens_option:
+  centroid_init:
+    - 0.04
+    - -0.04
+  gaussian_prior:
+    0:
+    - - gamma
+      - 2.11
+      - 0.03
+    - - theta_E
+      - 1.11
+      - 0.13
+  constrain_position_angle_from_lens_light: 15
+  limit_mass_eccentricity_from_light: true
+
 lens_light_option:
   fix:
     0:
@@ -23,20 +60,33 @@ lens_light_option:
     - - R_sersic
       - 0.21
       - 0.15
-lens_option:
-  centroid_init:
-  - 0.04
-  - -0.04
+
+source_light_option:
   gaussian_prior:
     0:
-    - - gamma
-      - 2.11
-      - 0.03
-    - - theta_E
-      - 1.11
-      - 0.13
-  constrain_position_angle_from_lens_light: 15
-  limit_mass_eccentricity_from_light: true
+    - - beta
+      - 0.15
+      - 0.05
+  shapelet_scale_logarithmic_prior: true
+    # If true, provide logarithmic_prior on the source light profile
+    # beta parameter
+  n_max:
+    - 2
+    - 4
+
+fitting:
+  pso: true
+  pso_settings:
+    num_iteration: 10
+    num_particle: 10
+  
+  sampling: true
+  sampler: emcee
+  sampler_settings: # keywords to be sent to FittingSequence.mcmc() or FittingSequence.nested_sampling()
+    n_burn : 2
+    n_run: 2
+    walkerRatio: 2
+
 mask:
   centroid_offset:
   - - 0.0
@@ -149,17 +199,17 @@ mask:
     - 1
   - null
   mask_edge_pixels:
-  - 0
-  - 2
+    - 0
+    - 2
   ra_at_xy_0:
-  - 2.4
-  - 2.4
+    - 2.4
+    - 2.4
   radius:
-  - 20.0
-  - 20.0
+    - 20.0
+    - 20.0
   size:
-  - 10
-  - 10
+    - 10
+    - 10
   transform_matrix:
   - - - -0.0400004004
       - -2.74607936e-07
@@ -169,42 +219,3 @@ mask:
       - -2.74607936e-07
     - - -2.67119793e-07
       - 0.0399999886
-model:
-  lens:
-  - SPEP
-  - SHEAR_GAMMA_PSI
-  lens_light:
-  - SERSIC_ELLIPSE
-  - SERSIC_ELLIPSE
-  - SERSIC_ELLIPSE
-  - SERSIC_ELLIPSE
-  lens_light_band_indices:
-  - 0
-  - 0
-  - 1
-  - 1
-  source_light:
-  - SHAPELETS
-  - SHAPELETS
-  source_light_band_indices:
-  - 0
-  - 1
-numeric_option:
-  supersampling_factor:
-  - 2
-pixel_size:
-- 0.04
-- 0.08
-source_light_option:
-  gaussian_prior:
-    0:
-    - - beta
-      - 0.15
-      - 0.05
-  shapelet_scale_logarithmic_prior: true
-    # If true, provide logarithmic_prior on the source light profile
-    # beta parameter
-  n_max:
-  - 2
-  - 4
-system_name: lens_system3

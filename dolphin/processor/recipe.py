@@ -16,7 +16,7 @@ class Recipe(object):
     sampling can be done starting from the neighborhood of this point.
     """
 
-    def __init__(self, config, sampler="EMCEE", thread_count=1):
+    def __init__(self, config, thread_count=1):
         """Initiate the class from the given settings for a lens system.
 
         :param config: `ModelConfig` instance
@@ -65,7 +65,6 @@ class Recipe(object):
             if self.do_sampling is None:
                 self.do_sampling = False
 
-        self._sampler = sampler
         self._thread_count = thread_count
 
         self.guess_params = {}
@@ -243,50 +242,50 @@ class Recipe(object):
         fitting_kwargs_list = []
 
         if self.do_sampling:
-            if self._config.settings["fitting"]["sampler"] == "MCMC":
-                fitting_kwargs_list.append(
-                    [
-                        "MCMC",
-                        {
-                            "sampler_type": self._sampler,
-                            "n_burn": self._config.settings["fitting"]["mcmc_settings"][
-                                "burnin_step"
-                            ],
-                            "n_run": self._config.settings["fitting"]["mcmc_settings"][
-                                "iteration_step"
-                            ],
-                            "walkerRatio": self._config.settings["fitting"][
-                                "mcmc_settings"
-                            ]["walker_ratio"],
-                            "threadCount": self._thread_count,
-                        },
-                    ]
+            supported_samplers = [
+                "emcee",
+                # "zeus",
+                # "dynesty",
+                # "dyPolyChord",
+                # "MultiNest",
+                # "nested_sampling",
+                # "Nautilus",
+            ]
+            if self._config.settings["fitting"]["sampler"] not in supported_samplers:
+                raise ValueError(
+                    "Sampler '{}' not supported! ".format(
+                        self._config.settings["fitting"]["sampler"]
+                    )
+                    + "Supported ones are: {}".format(supported_samplers)
                 )
 
+            sampling_kwargs = self._config.settings["fitting"]["sampler_settings"]
+            if self._config.settings["fitting"]["sampler"] in ["emcee"]:
+                if "threadCount" not in sampling_kwargs:
+                    sampling_kwargs["threadCount"] = self._thread_count
+
                 try:
-                    self._config.settings["fitting"]["mcmc_settings"]["init_samples"]
+                    self._config.settings["fitting"]["sampler_settings"]["init_samples"]
                 except (NameError, KeyError):
                     pass
                 else:
                     if (
-                        self._config.settings["fitting"]["mcmc_settings"][
+                        self._config.settings["fitting"]["sampler_settings"][
                             "init_samples"
                         ]
                         is not None
                     ):
-                        fitting_kwargs_list[-1][1]["init_samples"] = np.array(
-                            self._config.settings["fitting"]["mcmc_settings"][
+                        sampling_kwargs["init_samples"] = np.array(
+                            self._config.settings["fitting"]["sampler_settings"][
                                 "init_samples"
                             ]
                         )
 
-                        fitting_kwargs_list[-1][1]["re_use_samples"] = True
-            else:
-                raise ValueError(
-                    "{} sampler not implemented yet!".format(
-                        self._config.settings["fitting"]["sampler"]
-                    )
-                )
+                        sampling_kwargs["re_use_samples"] = True
+
+            fitting_kwargs_list.append(
+                [self._config.settings["fitting"]["sampler"], sampling_kwargs]
+            )
 
         return fitting_kwargs_list
 

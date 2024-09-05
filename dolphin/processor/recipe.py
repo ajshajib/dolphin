@@ -230,7 +230,6 @@ class Recipe(object):
                         fitting_kwargs_list.append(
                             ["psf_iteration", self._config.get_kwargs_psf_iteration()]
                         )
-
         return fitting_kwargs_list
 
     def get_sampling_sequence(self):

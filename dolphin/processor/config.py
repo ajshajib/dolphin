@@ -207,6 +207,13 @@ class ModelConfig(Config):
             "joint_lens_with_lens": [],
         }
 
+        if len(self.get_point_source_model_list()) > 0:
+            num_image = len(self.settings["point_source_option"]["ra_init"])
+            kwargs_constraints["num_point_source_list"] = [num_image]
+            kwargs_constraints["solver_type"] = (
+                "PROFILE_SHEAR" if num_image > 2 else "CENTER"
+            )
+
         if (
             "kwargs_constraints" in self.settings
             and self.settings["kwargs_constraints"] is not None
@@ -584,6 +591,7 @@ class ModelConfig(Config):
                 "keep_psf_error_map": True,
                 "psf_symmetry": 4,
                 "block_center_neighbour": 0.0,
+                "new_procedure": False,
                 "num_iter": 50,
                 "psf_iter_factor": 0.5,
             }

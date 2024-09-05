@@ -320,8 +320,7 @@ class ModelConfig(Config):
         kwargs_extinction=None,
         kwargs_tracer_source=None,
     ):
-        """
-        Provide additional likelihood terms to be sent to `lenstronomy`.
+        """Provide additional likelihood terms to be sent to `lenstronomy`.
 
         :param kwargs_lens: dictionary containing lens model keyword arguments
         :type kwargs_lens: `dict`

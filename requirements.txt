@@ -1,9 +1,10 @@
+numpy<2
+astropy
+scipy>=0.19.1
+emcee>=3.0.0
 matplotlib
-numpy
-scipy
+lenstronomy
+schwimmbad>=0.3.2
+corner>=2.2.1
 pyyaml
 h5py
-lenstronomy
-schwimmbad
-emcee
-corner

@@ -207,6 +207,13 @@ class ModelConfig(Config):
             "joint_lens_with_lens": [],
         }
 
+        if len(self.get_point_source_model_list()) > 0:
+            num_image = len(self.settings["point_source_option"]["ra_init"])
+            kwargs_constraints["num_point_source_list"] = [num_image]
+            kwargs_constraints["solver_type"] = (
+                "PROFILE_SHEAR" if num_image > 2 else "CENTER"
+            )
+
         if (
             "kwargs_constraints" in self.settings
             and self.settings["kwargs_constraints"] is not None

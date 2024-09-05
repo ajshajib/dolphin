@@ -80,7 +80,7 @@ class TestRecipe(object):
 
         # check that the first sequence is 'MCMC' when
         # recipe 'skip' is used
-        assert recipe.get_recipe(recipe_name="skip")[0][0] == "MCMC"
+        assert recipe.get_recipe(recipe_name="skip")[0][0] == "emcee"
 
     def test_get_power_law_model_index(self):
         """Test `get_power_law_model_index` method.
@@ -159,7 +159,7 @@ class TestRecipe(object):
 
         # test initiating from given `init_samples`
         config = deepcopy(self.config)
-        config.settings["fitting"]["mcmc_settings"]["init_samples"] = np.ones(20)
+        config.settings["fitting"]["sampler_settings"]["init_samples"] = np.ones(20)
 
         recipe = Recipe(config)
         sequence = recipe.get_sampling_sequence()

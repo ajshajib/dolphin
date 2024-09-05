@@ -199,7 +199,7 @@ class TestFileSystem(object):
                     np.array(["{}".format(i) for i in range(4)]),
                 ],
                 [
-                    "EMCEE",
+                    "emcee",
                     np.ones((50, 4)),
                     ["{}".format(i) for i in range(4)],
                     np.ones(50),

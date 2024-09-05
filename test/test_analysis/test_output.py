@@ -70,7 +70,7 @@ class TestOutput(object):
             "settings": {"some": "settings"},
             "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
             "fit_output": [
-                ["EMCEE", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
+                ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
         }
 

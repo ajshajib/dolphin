@@ -608,7 +608,7 @@ class Output(Processor):
             # kwargs_params['extinction_model'][2],
             # kwargs_lens_init=kwargs_result['kwargs_lens'],
             kwargs_lens_init=kwargs_params["lens_model"][0],
-            **kwargs_constraints
+            **kwargs_constraints,
         )
         return param
 

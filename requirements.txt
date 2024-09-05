@@ -1,8 +1,9 @@
 matplotlib
-numpy>1.13
-scipy>=0.19.1
+numpy
+scipy
 pyyaml
 h5py
 lenstronomy
 schwimmbad
+emcee
 corner

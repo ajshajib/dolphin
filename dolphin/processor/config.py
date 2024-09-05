@@ -591,7 +591,6 @@ class ModelConfig(Config):
                 "keep_psf_error_map": True,
                 "psf_symmetry": 4,
                 "block_center_neighbour": 0.0,
-                "new_procedure": False,
                 "num_iter": 50,
                 "psf_iter_factor": 0.5,
             }

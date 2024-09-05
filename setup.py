@@ -26,7 +26,7 @@ setup(
         # "Programming Language :: Python :: 3",
         # "Programming Language :: Python :: 3.6",
         # "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.11",
     ],
     description="Automated pipeline for lens modeling based on lenstronomy",
     install_requires=requirements,

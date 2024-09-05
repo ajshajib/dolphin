@@ -263,7 +263,7 @@ class FileSystem(object):
                     subgroup.create_dataset(
                         "param_list", data=np.array(single_output[2], dtype="S25")
                     )
-                elif single_output[0] == "EMCEE":
+                elif single_output[0] == "emcee":
                     subgroup.create_dataset(
                         "samples",
                         data=np.array(
@@ -362,7 +362,7 @@ class FileSystem(object):
                             for s in group[index]["param_list"][:]
                         ]
                     )
-                elif fitting_step[0] == "EMCEE":
+                elif fitting_step[0] == "emcee":
                     fitting_step.append(group[index]["samples"][:])
                     fitting_step.append(
                         [

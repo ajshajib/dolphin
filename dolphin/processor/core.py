@@ -43,7 +43,7 @@ class Processor(object):
         :type lens_name: `str`
         :param model_id: identifier for the model run
         :type model_id: `str`
-        :param log: if `True`, all `print` statements will be logged
+        :param log: if `True`, all `print` statements will be logged. This should be `False` if running in a notebook.
         :type log: `bool`
         :param mpi: MPI option
         :type mpi: `bool`

@@ -302,10 +302,7 @@ class Recipe(object):
             arc_masks = []
             masks = self._config.get_masks()
             for i, band_item in enumerate(kwargs_data_joint["multi_band_list"]):
-                if masks is not None:
-                    mask = masks[i]
-                else:
-                    mask = None
+                mask = masks[i] if masks is not None else None
                 image = band_item[0]["image_data"]
                 arc_masks.append(self.get_arc_mask(image, mask=mask))
 

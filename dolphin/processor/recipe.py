@@ -21,9 +21,6 @@ class Recipe(object):
 
         :param config: `ModelConfig` instance
         :type config: `class`
-        :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for
-            legacy
-        :type sampler: `str`
         :param thread_count: number of threads if `multiprocess` is used
         :type thread_count: `int`
         """
@@ -304,7 +301,11 @@ class Recipe(object):
         if self.do_pso:
             arc_masks = []
             masks = self._config.get_masks()
-            for band_item, mask in zip(kwargs_data_joint["multi_band_list"], masks):
+            for i, band_item in enumerate(kwargs_data_joint["multi_band_list"]):
+                if masks is not None:
+                    mask = masks[i]
+                else:
+                    mask = None
                 image = band_item[0]["image_data"]
                 arc_masks.append(self.get_arc_mask(image, mask=mask))
 

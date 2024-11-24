@@ -78,6 +78,26 @@ class TestImageData(object):
         assert len(image.shape) == 2
         assert image.shape == (120, 120)
 
+    def test_get_image_coordinate_system(self):
+        """Test `get_image_coordinate_system` method.
+
+        :return:
+        :rtype:
+        """
+        coord_sys = self.image_data.get_image_coordinate_system()
+
+        x0, y0 = coord_sys.map_pix2coords(0, 0)
+        assert x0 == self.image_data.kwargs_data["ra_at_xy_0"]
+        assert y0 == self.image_data.kwargs_data["dec_at_xy_0"]
+
+    def test_get_image_pixel_number(self):
+        """Test `get_image_pixel_number` method.
+
+        :return:
+        :rtype:
+        """
+        assert self.image_data.get_image_pixel_number() == 120
+
 
 class TestPSFData(object):
     @classmethod

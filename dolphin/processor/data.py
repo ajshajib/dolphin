@@ -3,7 +3,9 @@
 __author__ = "ajshajib"
 
 import h5py
+import numpy as np
 from copy import deepcopy
+from lenstronomy.Util.coordinates import Coordinates
 
 
 class Data(object):
@@ -63,6 +65,28 @@ class ImageData(Data):
         :rtype: `ndarray`
         """
         return deepcopy(self._data["image_data"])
+
+    def get_image_coordinate_system(self):
+        """Get the coordinate system of the image data.
+
+        :return: coordinate system
+        :rtype: `str`
+        """
+        ra_at_xy_0 = self.kwargs_data["ra_at_xy_0"]
+        dec_at_xy_0 = self.kwargs_data["dec_at_xy_0"]
+        transform_pix2angle = np.array(self.kwargs_data["transform_matrix"])
+
+        coordinate_system = Coordinates(transform_pix2angle, ra_at_xy_0, dec_at_xy_0)
+
+        return coordinate_system
+
+    def get_image_pixel_number(self):
+        """Get the number of pixels in the image.
+
+        :return: number of pixels
+        :rtype: `int`
+        """
+        return self.kwargs_data["image_data"].shape[0]
 
 
 class PSFData(Data):

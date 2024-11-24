@@ -5,7 +5,7 @@ __author__ = "ajshajib"
 import h5py
 import numpy as np
 from copy import deepcopy
-from lenstronomy.Util.coordinates import Coordinates
+from lenstronomy.Data.coord_transforms import Coordinates
 
 
 class Data(object):

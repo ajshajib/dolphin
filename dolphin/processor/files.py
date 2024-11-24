@@ -462,7 +462,7 @@ class FileSystem(object):
         :return: semantic segmentation array
         :rtype: `numpy.ndarray`
         """
-        semantic_segmentaion = np.load(
+        semantic_segmentation = np.load(
             self.get_semantic_segmentation_file_path(lens_name, band)
         )
 

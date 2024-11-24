@@ -435,3 +435,50 @@ class FileSystem(object):
             return decoded
         else:
             return obj
+
+    def get_semantic_segmentation_file_path(self, lens_name, band):
+        """Get the file path for the semantic segmentation data for `lens_name`.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: band name
+        :type band: `str`
+        :return: file path
+        :rtype: `str`
+        """
+        return self.path2str(
+            Path(self.self.get_outputs_directory())
+            / f"{lens_name}"
+            / f"semantic_segmentation_{lens_name}_{band}.npy"
+        )
+
+    def load_semantic_segmentation(self, lens_name, band):
+        """Load semantic segmentation data from file.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: band name
+        :type band: `str`
+        :return: semantic segmentation array
+        :rtype: `numpy.ndarray`
+        """
+        semantic_segmentaion = np.load(
+            self.get_semantic_segmentation_file_path(lens_name, band)
+        )
+
+        return semantic_segmentation
+
+    def save_semantic_segmentation(self, lens_name, band, semantic_segmentation):
+        """Save semantic segmentation data to file.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: band name
+        :type band: `str`
+        :param semantic_segmentation: semantic segmentation array
+        :type semantic_segmentation: `numpy.ndarray`
+        :return: None
+        :rtype:
+        """
+        save_file = self.get_semantic_segmentation_file_path(lens_name, band)
+        np.save(save_file, semantic_segmentation)

@@ -74,7 +74,7 @@ class ImageData(Data):
         """
         ra_at_xy_0 = self.kwargs_data["ra_at_xy_0"]
         dec_at_xy_0 = self.kwargs_data["dec_at_xy_0"]
-        transform_pix2angle = np.array(self.kwargs_data["transform_matrix"])
+        transform_pix2angle = np.array(self.kwargs_data["transform_pix2angle"])
 
         coordinate_system = Coordinates(transform_pix2angle, ra_at_xy_0, dec_at_xy_0)
 

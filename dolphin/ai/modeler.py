@@ -279,7 +279,8 @@ class Modeler(AI):
 
     @classmethod
     def list_region_centers(cls, matrix, target_value):
-        """List the central pixel (x, y) for all regions in a matrix with the target value.
+        """List the central pixel (x, y) for all regions in a matrix with the target
+        value.
 
         :param matrix: input matrix
         :type matrix: `List[List[int]]`

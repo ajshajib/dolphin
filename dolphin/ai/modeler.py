@@ -11,7 +11,8 @@ from .ai import AI
 
 
 class Modeler(AI):
-    """This class creates a configuration file from the output of the visual recognition model."""
+    """This class creates a configuration file from the output of the visual recognition
+    model."""
 
     def __init__(self, io_directory_path):
         """Initialize the Configure object."""

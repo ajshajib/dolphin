@@ -316,8 +316,6 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        path = _TEST_IO_DIR / "outputs" / "semantic_segmentation_test_system_test.npy"
-
         segmentation = np.zeros((43, 43))
 
         self.file_system.save_semantic_segmentation("test_system", "test", segmentation)

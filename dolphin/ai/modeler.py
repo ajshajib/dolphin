@@ -7,14 +7,15 @@ import numpy as np
 import yaml
 from ..processor.files import FileSystem
 from ..processor.data import ImageData
+from .ai import AI
 
 
-class Modeler(object):
+class Modeler(AI):
     """This class creates a configuration file from the output of the visual recognition model."""
 
-    def __init__(self, io_directory):
+    def __init__(self, io_directory_path):
         """Initialize the Configure object."""
-        self.file_system = FileSystem(io_directory)
+        super(Modeler, self).__init__(io_directory_path)
 
     def create_configuration_for_all_lenses(self, band_name):
         """Create configuration files for all lenses.
@@ -42,19 +43,6 @@ class Modeler(object):
         :type band_name: `str`
         """
         return self.file_system.load_semantic_segmentation(lens_name, band_name)
-
-    def get_image_data(self, lens_name, band_name):
-        """Get the image data.
-
-        :param lens_name: lens name
-        :type lens_name: `str`
-        :param band_name: band name
-        :type band_name: `str`
-        """
-        image_path = self.file_system.get_image_file_path(lens_name, band_name)
-        image_data = ImageData(image_path)
-
-        return image_data
 
     def save_configuration(self, config, lens_name):
         """Save the configuration to a YAML file.

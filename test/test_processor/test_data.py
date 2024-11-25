@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for data module."""
 from pathlib import Path
-
+import numpy.testing as npt
 from dolphin.processor.data import Data
 from dolphin.processor.data import ImageData
 from dolphin.processor.data import PSFData
@@ -104,7 +104,9 @@ class TestImageData(object):
         :return:
         :rtype:
         """
-        assert self.image_data.get_image_pixel_scale() == 0.04
+        npt.assert_almost_equal(
+            self.image_data.get_image_pixel_scale(), 0.04, decimal=6
+        )
 
 
 class TestPSFData(object):

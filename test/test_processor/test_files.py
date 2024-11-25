@@ -290,3 +290,39 @@ class TestFileSystem(object):
             )
             == d[2][1]
         )
+
+    def test_get_semantic_segmentation_file_path(self):
+        """Test `get_semantic_segmentation_file_path` method.
+
+        :return:
+        :rtype:
+        """
+        path = (
+            _TEST_IO_DIR / "outputs" / "semantic_segmentation_lensed_quasar_F814W.npy"
+        )
+
+        assert (
+            Path(
+                self.file_system.get_semantic_segmentation_file_path(
+                    "lensed_quasar", "F814W"
+                )
+            )
+            == path
+        )
+
+    def test_load_save_semantic_segmentation(self):
+        """Test `load_semantic_segmentation` method.
+
+        :return:
+        :rtype:
+        """
+        path = _TEST_IO_DIR / "outputs" / "semantic_segmentation_test_system_test.npy"
+
+        segmentation = np.zeros((43, 43))
+
+        self.file_system.save_semantic_segmentation("test_system", "test", segmentation)
+
+        assert (
+            self.file_system.load_semantic_segmentation("test_system", "test").shape[0]
+            == 43
+        )

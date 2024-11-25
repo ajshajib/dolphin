@@ -447,8 +447,7 @@ class FileSystem(object):
         :rtype: `str`
         """
         return self.path2str(
-            Path(self.self.get_outputs_directory())
-            / f"{lens_name}"
+            Path(self.get_outputs_directory())
             / f"semantic_segmentation_{lens_name}_{band}.npy"
         )
 

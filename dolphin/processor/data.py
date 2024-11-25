@@ -95,7 +95,7 @@ class ImageData(Data):
         :rtype: `float`
         """
         transformation_matrix = np.array(self.kwargs_data["transform_pix2angle"])
-        pixel_scale = np.abs(np.linalg.det(transformation_matrix))
+        pixel_scale = np.sqrt(np.abs(np.linalg.det(transformation_matrix)))
 
         return pixel_scale
 

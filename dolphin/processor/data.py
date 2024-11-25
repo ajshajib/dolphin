@@ -88,6 +88,17 @@ class ImageData(Data):
         """
         return self.kwargs_data["image_data"].shape[0]
 
+    def get_image_pixel_scale(self):
+        """Get the pixel scale of the image.
+
+        :return: pixel scale
+        :rtype: `float`
+        """
+        transformation_matrix = np.array(self.kwargs_data["transform_pix2angle"])
+        pixel_scale = np.abs(np.linalg.det(transformation_matrix))
+
+        return pixel_scale
+
 
 class PSFData(Data):
     """This class contains the PSF for a lens system."""

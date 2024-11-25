@@ -10,7 +10,8 @@ from ..processor.data import ImageData
 
 
 class Modeler(object):
-    """This class creates a configuration file from the output of the visual recognition model."""
+    """This class creates a configuration file from the output of the visual recognition
+    model."""
 
     def __init__(self, io_directory):
         """Initialize the Configure object."""
@@ -291,7 +292,8 @@ class Modeler(object):
 
     @classmethod
     def list_region_centers(cls, matrix, target_value):
-        """List the central pixel (x, y) for all regions in a matrix with the target value.
+        """List the central pixel (x, y) for all regions in a matrix with the target
+        value.
 
         :param matrix: input matrix
         :type matrix: `List[List[int]]`

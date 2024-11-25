@@ -86,7 +86,7 @@ class TestImageData(object):
         """
         coord_sys = self.image_data.get_image_coordinate_system()
 
-        x0, y0 = coord_sys.map_pix2coords(0, 0)
+        x0, y0 = coord_sys.map_pix2coord(0, 0)
         assert x0 == self.image_data.kwargs_data["ra_at_xy_0"]
         assert y0 == self.image_data.kwargs_data["dec_at_xy_0"]
 

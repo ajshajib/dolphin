@@ -5,8 +5,7 @@
 
 import numpy as np
 import yaml
-from ..processor.files import FileSystem
-from ..processor.data import ImageData
+
 from .ai import AI
 
 
@@ -56,8 +55,7 @@ class Modeler(AI):
         config_file_path = self.file_system.get_config_file_path(lens_name)
 
         with open(config_file_path, "w") as config_file:
-            # dump in human-readable format
-            yaml.dump(config, config_file)
+            yaml.dump(config, config_file, default_flow_style=False, sort_keys=False)
 
     def get_configuration(
         self,
@@ -74,7 +72,7 @@ class Modeler(AI):
         },
         supersampling_factor=[2],
     ):
-        """Get configuration from the semantic segmentation output.
+        """Get configuration from the semantic segmentation output. This method currently works only for the single-band case.
 
         :param lens_name: lens name
         :type lens_name: `str`
@@ -95,7 +93,7 @@ class Modeler(AI):
 
         config = {}
         config["lens_name"] = lens_name
-        config["band"] = band_name
+        config["band"] = [band_name]
 
         config["pixel_size"] = image_data.get_image_pixel_scale().item()
 
@@ -124,6 +122,8 @@ class Modeler(AI):
             "bound": 0.1,
         }
 
+        config["numeric_option"] = {"supersampling_factor": supersampling_factor}
+
         config["fitting"] = {
             "pso": psf_iteration_settings is not None,
             "pso_settings": pso_settings,
@@ -138,11 +138,15 @@ class Modeler(AI):
         config["sampler"] = sampler_name
         config["sampler_settings"] = sampler_settings
 
-        config["mask"] = self.get_mask_from_semantic_segmentation(
-            semantic_segmentation, coordinate_system
-        ).tolist()
-
-        config["numeric_option"] = {"supersampling_factor": supersampling_factor}
+        config["mask"] = {}
+        config["mask"]["provided"] = True
+        self.file_system.save_mask(
+            lens_name,
+            band_name,
+            self.get_mask_from_semantic_segmentation(
+                semantic_segmentation, coordinate_system
+            ),
+        )
 
         return config
 

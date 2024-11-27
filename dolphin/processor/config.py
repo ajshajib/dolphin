@@ -10,7 +10,9 @@ from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util
+import os
 
+from .data import ImageData
 
 class Config(object):
     """This class contains the methods to load an read YAML configuration files.
@@ -40,13 +42,13 @@ class ModelConfig(Config):
     """This class contains the methods to load and interact with modeling settings for a
     particular system."""
 
-    def __init__(self, file=None, settings=None):
+    def __init__(self, file_path=None, settings=None):
         """Initiate a Model Config object. If the file path is given, `settings` will be
         loaded from it. Otherwise, the `settings` can be loaded/reloaded later with the
         `load_settings_from_file` method.
 
-        :param file: path to a settings file, file will
-        :type file: `str`
+        :param file_path: path to a settings file, file will
+        :type file_path: `str`
         :param settings: a dictionary containing settings. If both `file`
             and `settings` are provided, `file` will be prioritized.
         :type settings: `dict`
@@ -54,8 +56,11 @@ class ModelConfig(Config):
         super(ModelConfig, self).__init__()
 
         self.settings = settings
-        if file is not None:
-            self.load_settings_from_file(file)
+        self._file = file_path
+         # get the directory path from the file
+        self.settings_dir = os.path.dirname(file_path)
+        if file_path is not None:
+            self.load_settings_from_file(file_path)
 
     def load_settings_from_file(self, file):
         """Load the settings.
@@ -463,18 +468,31 @@ class ModelConfig(Config):
                     mask_options = deepcopy(self.settings["mask"])
 
                     for n in range(self.band_number):
-                        ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
-                        dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
-                        transform_pix2angle = np.array(
-                            mask_options["transform_matrix"][n]
-                        )
-                        num_pixel = mask_options["size"][n]
-                        offset = mask_options["centroid_offset"][n]
+                        band_name = self.settings["band"][n]
 
-                        coords = Coordinates(
-                            transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+                        # go to ../data/system_name from settings_dir 
+                        image_file_path = os.path.join(
+                            self.settings_dir, f"../data/{self.settings['system_name']}/image_{self.settings["system_name"]}_{self.settings['band'][n]}.h5", 
                         )
-                        x_coords, y_coords = coords.coordinate_grid(
+
+                        image_data = ImageData(image_file_path)
+
+                        coordinate_system = image_data.get_image_coordinate_system()
+                        num_pixel = image_data.get_image_size()
+
+                        # ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
+                        # dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
+                        # transform_pix2angle = np.array(
+                        #     mask_options["transform_matrix"][n]
+                        # )
+                        # num_pixel = mask_options["size"][n]
+                        # coords = Coordinates(
+                        #     transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+                        # )
+
+                        offset = mask_options["centroid_offset"][n]
+                        
+                        x_coords, y_coords = coordinate_system.coordinate_grid(
                             num_pixel, num_pixel
                         )
 

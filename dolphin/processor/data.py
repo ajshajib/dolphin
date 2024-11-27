@@ -80,7 +80,7 @@ class ImageData(Data):
 
         return coordinate_system
 
-    def get_image_pixel_number(self):
+    def get_image_size(self):
         """Get the number of pixels in the image.
 
         :return: number of pixels

@@ -96,7 +96,7 @@ class TestImageData(object):
         :return:
         :rtype:
         """
-        assert self.image_data.get_image_pixel_number() == 120
+        assert self.image_data.get_image_size() == 120
 
     def test_get_image_pixel_scale(self):
         """Test `get_image_pixel_scale` method.

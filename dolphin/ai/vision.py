@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """This module takes an image data and create semantic segmentation for it."""
 
 import numpy as np

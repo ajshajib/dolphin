@@ -14,6 +14,7 @@ import os
 
 from .data import ImageData
 
+
 class Config(object):
     """This class contains the methods to load an read YAML configuration files.
 
@@ -57,7 +58,7 @@ class ModelConfig(Config):
 
         self.settings = settings
         self._file = file_path
-         # get the directory path from the file
+        # get the directory path from the file
         self.settings_dir = os.path.dirname(file_path)
         if file_path is not None:
             self.load_settings_from_file(file_path)
@@ -470,9 +471,10 @@ class ModelConfig(Config):
                     for n in range(self.band_number):
                         band_name = self.settings["band"][n]
 
-                        # go to ../data/system_name from settings_dir 
+                        # go to ../data/system_name from settings_dir
                         image_file_path = os.path.join(
-                            self.settings_dir, f"../data/{self.settings['system_name']}/image_{self.settings["system_name"]}_{self.settings['band'][n]}.h5", 
+                            self.settings_dir,
+                            f"../data/{self.settings['system_name']}/image_{self.settings["system_name"]}_{self.settings['band'][n]}.h5",
                         )
 
                         image_data = ImageData(image_file_path)
@@ -491,7 +493,7 @@ class ModelConfig(Config):
                         # )
 
                         offset = mask_options["centroid_offset"][n]
-                        
+
                         x_coords, y_coords = coordinate_system.coordinate_grid(
                             num_pixel, num_pixel
                         )

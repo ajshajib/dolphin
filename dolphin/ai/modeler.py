@@ -72,7 +72,8 @@ class Modeler(AI):
         },
         supersampling_factor=[2],
     ):
-        """Get configuration from the semantic segmentation output. This method currently works only for the single-band case.
+        """Get configuration from the semantic segmentation output. This method
+        currently works only for the single-band case.
 
         :param lens_name: lens name
         :type lens_name: `str`

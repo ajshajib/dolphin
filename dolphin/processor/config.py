@@ -6,10 +6,13 @@ import yaml
 import numpy as np
 from copy import deepcopy
 
-from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util
+import os
+
+from .data import ImageData
+from .files import FileSystem
 
 
 class Config(object):
@@ -24,7 +27,7 @@ class Config(object):
         pass
 
     @classmethod
-    def load(cls, file):
+    def load_config_from_yaml(cls, file):
         """Load configuration from `file`.
 
         :return:
@@ -40,32 +43,43 @@ class ModelConfig(Config):
     """This class contains the methods to load and interact with modeling settings for a
     particular system."""
 
-    def __init__(self, file=None, settings=None):
+    def __init__(
+        self, lens_name=None, file_system=None, io_directory=None, settings=None
+    ):
         """Initiate a Model Config object. If the file path is given, `settings` will be
         loaded from it. Otherwise, the `settings` can be loaded/reloaded later with the
         `load_settings_from_file` method.
 
-        :param file: path to a settings file, file will
-        :type file: `str`
+        :param lens_name: name of the lens system
+        :type lens_name: `str`
+        :param file_system: a FileSystem object
+        :type file_system: `FileSystem`
+        :param io_directory: path to the input-output directory
+        :type io_directory: `str`
         :param settings: a dictionary containing settings. If both `file`
             and `settings` are provided, `file` will be prioritized.
         :type settings: `dict`
         """
         super(ModelConfig, self).__init__()
 
-        self.settings = settings
-        if file is not None:
-            self.load_settings_from_file(file)
+        if file_system is not None:
+            self._file_system = file_system
+        elif io_directory is not None:
+            self._file_system = FileSystem(io_directory)
+        else:
+            raise ValueError("Either `file_system` or `io_directory` must be provided!")
 
-    def load_settings_from_file(self, file):
-        """Load the settings.
+        self._lens_name = lens_name
 
-        :param file: path to a settings file
-        :type file: `str`
-        :return:
-        :rtype:
-        """
-        self.settings = self.load(file)
+        if settings is not None:
+            self.settings = settings
+        else:
+            self._config_file_path = self.file_system.get_config_file_path(lens_name)
+
+            self._settings_dir = os.path.dirname(self.config_file_path)
+
+            if self._config_file_path is not None:
+                self.settings = self.load_config_from_yaml(self._config_file_path)
 
     @property
     def pixel_size(self):
@@ -445,6 +459,16 @@ class ModelConfig(Config):
 
         return prior
 
+    @staticmethod
+    def load_mask(mask_file_path):
+        """Load mask from file.
+
+        :param mask_file_path: path to the mask file
+        :type mask_file_path: `str`
+        :return: mask
+        :rtype: `numpy.ndarray`
+        """
+
     def get_masks(self):
         """Create masks.
 
@@ -455,26 +479,48 @@ class ModelConfig(Config):
             if self.settings["mask"] is not None:
                 if (
                     "provided" in self.settings["mask"]
-                    and self.settings["mask"]["provided"] is not None
+                    and self.settings["mask"]["provided"]
                 ):
-                    return self.settings["mask"]["provided"]
+                    masks = []
+                    for n in range(self.band_number):
+                        masks.append(
+                            self._file_system.load_mask(
+                                self.lens_name, self.settings["band"][n]
+                            )
+                        )
                 else:
                     masks = []
                     mask_options = deepcopy(self.settings["mask"])
 
                     for n in range(self.band_number):
-                        ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
-                        dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
-                        transform_pix2angle = np.array(
-                            mask_options["transform_matrix"][n]
+                        band_name = self.settings["band"][n]
+
+                        # go to ../data/system_name from settings_dir
+                        image_file_path = self._file_system.get_image_file_path(
+                            self.lens_name, band_name
                         )
-                        num_pixel = mask_options["size"][n]
+                        # os.path.join(
+                        #     self._settings_dir,
+                        #     f"../data/{self.settings['lens_name']}/image_{self.settings['lens_name']}_{self.settings['band'][n]}.h5",
+                        # )
+
+                        image_data = ImageData(image_file_path)
+                        coordinate_system = image_data.get_image_coordinate_system()
+                        num_pixel = image_data.get_image_size()
+
+                        # ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
+                        # dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
+                        # transform_pix2angle = np.array(
+                        #     mask_options["transform_matrix"][n]
+                        # )
+                        # num_pixel = mask_options["size"][n]
+                        # coords = Coordinates(
+                        #     transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+                        # )
+
                         offset = mask_options["centroid_offset"][n]
 
-                        coords = Coordinates(
-                            transform_pix2angle, ra_at_xy_0, dec_at_xy_0
-                        )
-                        x_coords, y_coords = coords.coordinate_grid(
+                        x_coords, y_coords = coordinate_system.coordinate_grid(
                             num_pixel, num_pixel
                         )
 

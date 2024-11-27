@@ -109,7 +109,7 @@ class Processor(object):
         :return: `ModelConfig` instance
         :rtype:
         """
-        return ModelConfig(self.file_system.get_config_file_path(lens_name))
+        return ModelConfig(lens_name, file_system=self.file_system)
 
     def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
         """Create `kwargs_data` for a lens and given filters.

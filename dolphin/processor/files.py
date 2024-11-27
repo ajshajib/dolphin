@@ -62,7 +62,7 @@ class FileSystem(object):
         :return: path to the config file
         :rtype: `str`
         """
-        return self.path2str(self._root_path / "settings" / f"{lens_name}_config.yml")
+        return self.path2str(self.get_settings_directory() / f"{lens_name}_config.yml")
 
     def get_logs_directory(self):
         """Get directory for logs folder. If the directory doesn't exist, a folder is
@@ -481,3 +481,51 @@ class FileSystem(object):
         """
         save_file = self.get_semantic_segmentation_file_path(lens_name, band)
         np.save(save_file, semantic_segmentation)
+
+    def get_mask_file_path(self, lens_name, band):
+        """Get the file path for the mask data for `lens_name`.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: band name
+        :type band: `str`
+        :return: file path
+        :rtype: `str`
+        """
+        return self.path2str(
+            self.get_settings_directory() / "masks" / f"mask_{lens_name}_{band}.npy"
+        )
+
+    def load_mask(self, lens_name, band):
+        """Load mask data from file.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: band name
+        :type band: `str`
+        :return: mask array
+        :rtype: `numpy.ndarray`
+        """
+        mask = np.load(self.get_mask_file_path(lens_name, band))
+
+        return mask
+
+    def save_mask(self, lens_name, band, mask):
+        """Save mask data to file.
+
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band: band name
+        :type band: `str`
+        :param mask: mask array
+        :type mask: `numpy.ndarray`
+        :return: None
+        :rtype:
+        """
+        # create the masks directory if it doesn't exist
+        masks_dir = self.get_settings_directory() / "masks"
+        if not masks_dir.exists():
+            masks_dir.mkdir()
+
+        save_file = self.get_mask_file_path(lens_name, band)
+        np.save(save_file, mask)

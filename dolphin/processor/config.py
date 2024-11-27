@@ -6,7 +6,6 @@ import yaml
 import numpy as np
 from copy import deepcopy
 
-from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util

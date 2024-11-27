@@ -2,7 +2,8 @@
 """This module takes an image data and create semantic segmentation for it."""
 
 import numpy as np
-import tensorflow as tf
+
+# import tensorflow as tf
 
 from .ai import AI
 

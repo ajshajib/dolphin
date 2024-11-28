@@ -127,6 +127,6 @@ class Vision(AI):
         :return: semantic segmentation
         :rtype: `numpy.ndarray`
         """
-        prediction = self.nn_model.predict(image)
+        prediction = self.nn_model.predict(resized_image)
 
         return prediction

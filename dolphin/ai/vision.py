@@ -3,7 +3,7 @@
 
 import numpy as np
 
-# import tensorflow as tf
+import tensorflow as tf
 
 from .ai import AI
 
@@ -21,7 +21,7 @@ class Vision(AI):
 
         # To-DO: Load the trained NN model.
         if source_type == "quasar":
-            self.nn_model = None  # This is a placeholder for the trained NN model.
+            self.nn_model = load_model("/content/drive/MyDrive/Final Ring/Galaxy-quasar/Final_Galaxy_Quasar_unet_model.h5")  # This is a placeholder for the trained NN model.
         # elif source_type == "galaxy":
         #     self.nn_model = None  # This is a placeholder for the trained NN model.
         else:

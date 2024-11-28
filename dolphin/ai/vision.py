@@ -79,7 +79,7 @@ class Vision(AI):
         self.file_system.save_semantic_segmentation(segmentation_path, segmentation)
 
     @staticmethod
-        def resize_image(image):
+    def resize_image(image):
         """Resize the image to the required size.
 
         :param image: image data

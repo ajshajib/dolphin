@@ -22,12 +22,12 @@ class Vision(AI):
         super(Vision, self).__init__(io_directory_path)
 
         # To-DO: Load the trained NN model.
+        
         if source_type == "quasar":
-            if source_type == "quasar":
             data_file_path = os.path.join("dolphin", "ai", "Final_Galaxy_Quasar_unet_model.h5")
             self.nn_model = load_model(data_file_path)  # This is a placeholder for the trained NN model.
         # elif source_type == "galaxy":
-        #     self.nn_model = None  # This is a placeholder for the trained NN model.
+        #   self.nn_model = None  # This is a placeholder for the trained NN model.
         else:
             raise ValueError("Invalid source type.")  # This is a placeholder for the trained NN model.
 

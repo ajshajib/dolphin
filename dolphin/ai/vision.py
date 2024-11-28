@@ -21,11 +21,13 @@ class Vision(AI):
 
         # To-DO: Load the trained NN model.
         if source_type == "quasar":
-            self.nn_model = load_model("Final_Galaxy_Quasar_unet_model.h5")  # This is a placeholder for the trained NN model.
+            if source_type == "quasar":
+            data_file_path=  "Final_Galaxy_Quasar_unet_model.h5"
+            self.nn_model = load_model(data_file_path)  # This is a placeholder for the trained NN model.
         # elif source_type == "galaxy":
         #     self.nn_model = None  # This is a placeholder for the trained NN model.
         else:
-            raise ValueError("Invalid source type.")
+            raise ValueError("Invalid source type.")  # This is a placeholder for the trained NN model.
 
     def create_segmentation_for_all_lenses(self, band_name):
         """Create semantic segmentation for all lenses.
@@ -75,7 +77,7 @@ class Vision(AI):
         self.file_system.save_semantic_segmentation(segmentation_path, segmentation)
 
     @staticmethod
-    def resize_image(image):
+        def resize_image(image):
         """Resize the image to the required size.
 
         :param image: image data
@@ -83,8 +85,11 @@ class Vision(AI):
         :return: resized image
         :rtype: `numpy.ndarray`
         """
-        # TO-DO
-        # resample image to have the dimension of 128x128
+        target_shape=(128, 128)
+        zoom_factors = [target_shape[0] / image.shape[0], target_shape[1] / image.shape[1]]
+        resized_image = zoom(image, zoom_factors, order=1)
+        resized_image= np.array(resized_image)
+        return resized_image
         pass
 
     @staticmethod

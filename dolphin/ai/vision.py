@@ -98,10 +98,7 @@ class Vision(AI):
         resampled_image = zoom(image, zoom_factors, order=1)  # order=1 for bilinear interpolation
     
         # If the image does not have a channel dimension, add one
-        if resampled_image.ndim == 2:  # Grayscale without a channel dimension
-            resized_image = np.expand_dims(resampled_image, axis=-1)
-        else:  # If it already has a channel dimension
-            resized_image = resampled_image
+        resampled_image = np.expand_dims(resampled_image, axis=-1)
 
         return resized_image
 

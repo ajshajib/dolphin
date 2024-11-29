@@ -146,13 +146,13 @@ class Vision(AI):
         image = self.resize_image(image)  
 
         # Add batch dimension for model prediction (1, height, width, channels)
-        image_batch = np.expand_dims(image, axis=0)  
+          
 
         # Predict segmentation using the neural network model
-        prediction = self.nn_model.predict(image_batch)
+        prediction = self.nn_model.predict(image)
 
         # Remove the batch dimension from the result
-        return np.squeeze(prediction)
+        return prediction
 
 
         

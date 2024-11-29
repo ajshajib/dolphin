@@ -79,32 +79,29 @@ class Vision(AI):
         self.file_system.save_semantic_segmentation(segmentation_path, segmentation)
 
     @staticmethod
-
-
     def resize_image(image):
-        """Resize the image to (128, 128, 1).
+        """
+        Resize the image to (128, 128, 1).
 
         :param image: image data
         :type image: `numpy.ndarray`
         :return: resized image
         :rtype: `numpy.ndarray`
         """
+        # Target shape for spatial dimensions
         target_shape = (128, 128)
-
-        # Convert RGB to grayscale if needed
-        if len(image.shape) == 3 and image.shape[2] == 3:
-        # Average over the color channels to convert to grayscale
-            image = np.mean(image, axis=2)
-        elif len(image.shape) == 3 and image.shape[2] == 1:
-        # Squeeze the single channel dimension
-            image = image.squeeze()
-
+    
         # Calculate zoom factors for resizing
         zoom_factors = [target_shape[0] / image.shape[0], target_shape[1] / image.shape[1]]
-        resized_image = zoom(image, zoom_factors, order=1)
-
-        # Add a single channel dimension
-        resized_image = resized_image[..., np.newaxis]
+    
+        # Resample the image to the target spatial dimensions
+        resampled_image = zoom(image, zoom_factors, order=1)  # order=1 for bilinear interpolation
+    
+        # If the image does not have a channel dimension, add one
+        if resampled_image.ndim == 2:  # Grayscale without a channel dimension
+            resized_image = np.expand_dims(resampled_image, axis=-1)
+        else:  # If it already has a channel dimension
+            resized_image = resampled_image
 
         return resized_image
 

@@ -145,7 +145,7 @@ class Vision(AI):
 
         # Get predictions from the model
         prediction = self.nn_model.predict(resized_image)  # Shape: (1, 128, 128, 1)
-        return np.squeeze(prediction)  
+        return prediction 
 
 
 

@@ -82,16 +82,16 @@ class Vision(AI):
 
 
     def resize_image(image):
-    """Resize the image to (128, 128, 1).
+        """Resize the image to (128, 128, 1).
 
-    :param image: image data
-    :type image: `numpy.ndarray`
-    :return: resized image
-    :rtype: `numpy.ndarray`
-    """
-    target_shape = (128, 128)
+        :param image: image data
+        :type image: `numpy.ndarray`
+        :return: resized image
+        :rtype: `numpy.ndarray`
+        """
+        target_shape = (128, 128)
 
-    # Convert RGB to grayscale if needed
+        # Convert RGB to grayscale if needed
         if len(image.shape) == 3 and image.shape[2] == 3:
         # Average over the color channels to convert to grayscale
             image = np.mean(image, axis=2)
@@ -99,11 +99,11 @@ class Vision(AI):
         # Squeeze the single channel dimension
             image = image.squeeze()
 
-    # Calculate zoom factors for resizing
+        # Calculate zoom factors for resizing
         zoom_factors = [target_shape[0] / image.shape[0], target_shape[1] / image.shape[1]]
         resized_image = zoom(image, zoom_factors, order=1)
 
-    # Add a single channel dimension
+        # Add a single channel dimension
         resized_image = resized_image[..., np.newaxis]
 
         return resized_image

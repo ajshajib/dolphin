@@ -91,17 +91,9 @@ class Vision(AI):
         # Target shape for spatial dimensions
         target_shape = (128, 128)
     
-        # Calculate zoom factors for resizing
         zoom_factors = [target_shape[0] / image.shape[0], target_shape[1] / image.shape[1]]
-    
-        # Resample the image to the target spatial dimensions
         resampled_image = zoom(image, zoom_factors, order=1)  # order=1 for bilinear interpolation
-    
-        # If the image does not have a channel dimension, add one
-        resized_image = np.expand_dims(resampled_image, axis=-1)
-
-        return resized_image
-
+        return resampled_image
         pass
 
     @staticmethod
@@ -128,6 +120,7 @@ class Vision(AI):
         return segmentation_reshaped
 
         #def get_semantic_segmentation_from_nn(self, image):
+    
     def get_semantic_segmentation_from_nn(self, image):
         
         """Get semantic segmentation for the image from the trained neural network.
@@ -138,13 +131,10 @@ class Vision(AI):
         :rtype: `numpy.ndarray`
         """
         # Resize the image to match the model input size
-        resized_image = self.resize_image(image)  # Shape: (128, 128, 1)
-
-        # Expand dimensions to include the batch axis: (1, 128, 128, 1)
-        resized_image_expanded = tf.expand_dims(resized_image, axis=0)
-        
+        resized_image = resize_image(image)
+        image_input = np.expand_dims(resized_image, axis=0)        
         # Get predictions from the model
-        prediction = self.nn_model.predict(resized_image_expanded)  # Shape: (1, 128, 128, 1)
+        prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 1)
         return prediction 
 
 

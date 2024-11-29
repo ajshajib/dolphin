@@ -131,7 +131,7 @@ class Vision(AI):
         :rtype: `numpy.ndarray`
         """
         # Resize the image to match the model input size
-        resized_image = resize_image(image)
+        resized_image = self.resize_image(image)
         image_input = np.expand_dims(resized_image, axis=0)        
         # Get predictions from the model
         prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 1)

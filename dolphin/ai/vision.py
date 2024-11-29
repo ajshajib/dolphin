@@ -141,10 +141,10 @@ class Vision(AI):
         resized_image = self.resize_image(image)  # Shape: (128, 128, 1)
 
         # Expand dimensions to include the batch axis: (1, 128, 128, 1)
-         
-
+        resized_image_expanded = tf.expand_dims(resized_image, axis=0)
+        
         # Get predictions from the model
-        prediction = self.nn_model.predict(resized_image)  # Shape: (1, 128, 128, 1)
+        prediction = self.nn_model.predict(resized_image_expanded)  # Shape: (1, 128, 128, 1)
         return prediction 
 
 

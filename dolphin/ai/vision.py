@@ -134,18 +134,25 @@ class Vision(AI):
         return segmentation_reshaped
 
         #def get_semantic_segmentation_from_nn(self, image):
-    def get_semantic_segmentation_from_nn(image):
+    def get_semantic_segmentation_from_nn(self, image):
+    """Get semantic segmentation for the image from the trained neural network.
 
-        """Get semantic segmentation for the image from trained NN.
+    :param image: image data
+    :type image: `numpy.ndarray`
+    :return: semantic segmentation
+    :rtype: `numpy.ndarray`
+    """
+    # Resize the image using the instance method
+        image = self.resize_image(image)  
 
-        :param lens_name: name of the lens system
-        :type lens_name: `str`
-        :param band_name: name of the band
-        :type band_name: `str`
-        :return: semantic segmentation
-        :rtype: `numpy.ndarray`
-        """
-        image = resize_image(image)
-        prediction = self.nn_model.predict(image)
+    # Add batch dimension for model prediction (1, height, width, channels)
+        image_batch = np.expand_dims(image, axis=0)  
 
-        return prediction
+    # Predict segmentation using the neural network model
+        prediction = self.nn_model.predict(image_batch)
+
+    # Remove the batch dimension from the result
+        return np.squeeze(prediction)
+
+
+        

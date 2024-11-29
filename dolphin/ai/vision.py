@@ -24,7 +24,7 @@ class Vision(AI):
         # To-DO: Load the trained NN model.
         
         if source_type == "quasar":
-            data_file_path = os.path.join("dolphin", "dolphin", "ai", "Final_Galaxy_Quasar_unet_model.h5")
+            data_file_path = os.path.join("dolphin", "dolphin", "ai", "Github_GQ_unet_model_with_weights.h5")
             self.nn_model = load_model(data_file_path)  # This is a placeholder for the trained NN model.
         # elif source_type == "galaxy":
         #   self.nn_model = None  # This is a placeholder for the trained NN model.

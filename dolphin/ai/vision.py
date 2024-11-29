@@ -135,6 +135,7 @@ class Vision(AI):
 
         #def get_semantic_segmentation_from_nn(self, image):
     def get_semantic_segmentation_from_nn(self, image):
+        
         """Get semantic segmentation for the image from the trained neural network.
 
         :param image: image data
@@ -142,17 +143,16 @@ class Vision(AI):
         :return: semantic segmentation
         :rtype: `numpy.ndarray`
         """
-        # Resize the image using the instance method
-        image = self.resize_image(image)  
+        # Resize the image to match the model input size
+        resized_image = self.resize_image(image)  # Shape: (128, 128, 1)
 
-        # Add batch dimension for model prediction (1, height, width, channels)
-          
+        # Expand dimensions to include the batch axis: (1, 128, 128, 1)
+        image_batch = np.expand_dims(resized_image, axis=0)  
 
-        # Predict segmentation using the neural network model
-        prediction = self.nn_model.predict(image)
+        # Get predictions from the model
+        prediction = self.nn_model.predict(image_batch)  # Shape: (1, 128, 128, 1)
+        return np.squeeze(prediction)  
 
-        # Remove the batch dimension from the result
-        return prediction
 
 
         

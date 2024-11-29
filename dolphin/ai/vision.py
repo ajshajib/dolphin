@@ -134,7 +134,7 @@ class Vision(AI):
         return segmentation_reshaped
 
         #def get_semantic_segmentation_from_nn(self, image):
-        def get_semantic_segmentation_from_nn(image):
+    def get_semantic_segmentation_from_nn(image):
 
         """Get semantic segmentation for the image from trained NN.
 

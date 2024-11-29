@@ -133,7 +133,9 @@ class Vision(AI):
 
         return segmentation_reshaped
 
-    def get_semantic_segmentation_from_nn(self, image):
+        #def get_semantic_segmentation_from_nn(self, image):
+        def get_semantic_segmentation_from_nn(image):
+
         """Get semantic segmentation for the image from trained NN.
 
         :param lens_name: name of the lens system

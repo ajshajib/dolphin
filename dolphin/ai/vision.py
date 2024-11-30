@@ -94,7 +94,6 @@ class Vision(AI):
         zoom_factors = [target_shape[0] / image.shape[0], target_shape[1] / image.shape[1]]
         resampled_image = zoom(image, zoom_factors, order=1)  # order=1 for bilinear interpolation
         return resampled_image
-        pass
 
     @staticmethod
     def resize_segmentation_to_original_size(segmentation, original_size):

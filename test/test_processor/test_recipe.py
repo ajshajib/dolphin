@@ -18,10 +18,12 @@ class TestRecipe(object):
     """Test the `Recipe` module."""
 
     def setup_class(self):
-        self.test_setting_file = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+        # self.test_setting_file = (
+        #     _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+        # )
+        self.config = ModelConfig(
+            "lens_system1", io_directory=(_ROOT_DIR / "io_directory_example").resolve()
         )
-        self.config = ModelConfig(str(self.test_setting_file.resolve()))
         self.recipe = Recipe(self.config)
 
     @classmethod

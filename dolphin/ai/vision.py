@@ -4,7 +4,6 @@
 import numpy as np
 from tensorflow.keras.models import load_model
 from scipy.ndimage import zoom
-import os
 from .ai import AI
 
 
@@ -22,12 +21,7 @@ class Vision(AI):
         # To-DO: Load the trained NN model.
 
         if source_type == "quasar":
-            data_file_path = os.path.join(
-                "dolphin", "dolphin", "ai", "lensed_quasar_segmentation_model.h5"
-            )
-            self.nn_model = load_model(
-                data_file_path
-            )  # This is a placeholder for the trained NN model.
+            self.nn_model = load_model("./lensed_quasar_segmentation_model.h5")
         # elif source_type == "galaxy":
         #   self.nn_model = None  # This is a placeholder for the trained NN model.
         else:

@@ -266,9 +266,7 @@ class TestModelConfig(object):
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config_1)
-        config2.settings["lens_option"][
-            "limit_mass_pa_from_light"
-        ] = np.inf
+        config2.settings["lens_option"]["limit_mass_pa_from_light"] = np.inf
         config2.settings["lens_option"]["limit_mass_q_from_light"] = np.inf
         config2.settings["source_light_option"][
             "shapelet_scale_logarithmic_prior"
@@ -291,9 +289,7 @@ class TestModelConfig(object):
 
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config_1)
-        config4a.settings["lens_option"][
-            "limit_mass_pa_from_light"
-        ] = "Test"
+        config4a.settings["lens_option"]["limit_mass_pa_from_light"] = "Test"
         with pytest.raises(ValueError):
             config4a.custom_logL_addition(
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],

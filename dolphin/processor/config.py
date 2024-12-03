@@ -6,10 +6,13 @@ import yaml
 import numpy as np
 from copy import deepcopy
 
-from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util
+import os
+
+from .data import ImageData
+from .files import FileSystem
 
 
 class Config(object):
@@ -24,7 +27,7 @@ class Config(object):
         pass
 
     @classmethod
-    def load(cls, file):
+    def load_config_from_yaml(cls, file):
         """Load configuration from `file`.
 
         :return:
@@ -40,32 +43,52 @@ class ModelConfig(Config):
     """This class contains the methods to load and interact with modeling settings for a
     particular system."""
 
-    def __init__(self, file=None, settings=None):
+    def __init__(
+        self, lens_name=None, file_system=None, io_directory=None, settings=None
+    ):
         """Initiate a Model Config object. If the file path is given, `settings` will be
         loaded from it. Otherwise, the `settings` can be loaded/reloaded later with the
         `load_settings_from_file` method.
 
-        :param file: path to a settings file, file will
-        :type file: `str`
+        :param lens_name: name of the lens system
+        :type lens_name: `str`
+        :param file_system: a FileSystem object
+        :type file_system: `FileSystem`
+        :param io_directory: path to the input-output directory
+        :type io_directory: `str`
         :param settings: a dictionary containing settings. If both `file`
             and `settings` are provided, `file` will be prioritized.
         :type settings: `dict`
         """
         super(ModelConfig, self).__init__()
 
-        self.settings = settings
-        if file is not None:
-            self.load_settings_from_file(file)
+        if file_system is not None:
+            self._file_system = file_system
+        elif io_directory is not None:
+            self._file_system = FileSystem(io_directory)
 
-    def load_settings_from_file(self, file):
-        """Load the settings.
+        self._lens_name = lens_name
 
-        :param file: path to a settings file
-        :type file: `str`
+        if settings is not None:
+            self.settings = settings
+        else:
+            self._config_file_path = self._file_system.get_config_file_path(lens_name)
+
+            self._settings_dir = os.path.dirname(self._config_file_path)
+
+            if self._config_file_path is not None:
+                self.settings = self.load_config_from_yaml(self._config_file_path)
+            else:
+                raise ValueError("Configuration file not found!")
+
+    @property
+    def lens_name(self):
+        """The name of the lens system.
+
         :return:
         :rtype:
         """
-        self.settings = self.load(file)
+        return self._lens_name
 
     @property
     def pixel_size(self):
@@ -74,10 +97,30 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if isinstance(self.settings["pixel_size"], float):
-            return [self.settings["pixel_size"]] * self.band_number
-        else:
-            return self.settings["pixel_size"]
+        # if isinstance(self.settings["pixel_size"], float):
+        #     return [self.settings["pixel_size"]] * self.band_number
+        # else:
+        #     return self.settings["pixel_size"]
+        if "pixel_size" not in self.settings:
+            pixel_size = []
+
+            for band in self.settings["band"]:
+                image_data = self.get_image_data(band)
+                pixel_size.append(image_data.get_image_pixel_scale())
+
+            self.settings["pixel_size"] = pixel_size
+
+        return self.settings["pixel_size"]
+
+    def get_image_data(self, band):
+        """Get image data.
+
+        :param band: name of the band
+        :type band: `str`
+        :return: image data
+        :rtype: `ImageData`
+        """
+        return ImageData(self._file_system.get_image_file_path(self._lens_name, band))
 
     @property
     def deflector_center_ra(self):
@@ -128,21 +171,13 @@ class ModelConfig(Config):
         return 0.5
 
     @property
-    def band_number(self):
+    def number_of_bands(self):
         """The number of bands.
 
         :return:
         :rtype:
         """
-        try:
-            num = len(self.settings["band"])
-        except (KeyError, TypeError, NameError):
-            raise ValueError("Name of band(s) not properly specified!")
-        else:
-            if num < 1:
-                raise ValueError("Number of bands less than 1!")
-            else:
-                return num
+        return len(self.settings["band"])
 
     def get_kwargs_model(self):
         """Create `kwargs_model`.
@@ -238,7 +273,7 @@ class ModelConfig(Config):
             # 'solver_tolerance': 0.001,
             "check_positive_flux": True,
             "check_bounds": True,
-            "bands_compute": [True] * self.band_number,
+            "bands_compute": [True] * self.number_of_bands,
             "image_likelihood_mask_list": self.get_masks(),
             "prior_lens": [],
             "prior_lens_light": [],
@@ -445,136 +480,138 @@ class ModelConfig(Config):
 
         return prior
 
+    @staticmethod
+    def load_mask(mask_file_path):
+        """Load mask from file.
+
+        :param mask_file_path: path to the mask file
+        :type mask_file_path: `str`
+        :return: mask
+        :rtype: `numpy.ndarray`
+        """
+
     def get_masks(self):
         """Create masks.
 
         :return:
         :rtype:
         """
-        if "mask" in self.settings:
-            if self.settings["mask"] is not None:
-                if (
-                    "provided" in self.settings["mask"]
-                    and self.settings["mask"]["provided"] is not None
-                ):
-                    return self.settings["mask"]["provided"]
-                else:
-                    masks = []
-                    mask_options = deepcopy(self.settings["mask"])
-
-                    for n in range(self.band_number):
-                        ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
-                        dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
-                        transform_pix2angle = np.array(
-                            mask_options["transform_matrix"][n]
+        if "mask" in self.settings and self.settings["mask"] is not None:
+            if (
+                "provided" in self.settings["mask"]
+                and self.settings["mask"]["provided"]
+            ):
+                masks = []
+                for n in range(self.number_of_bands):
+                    masks.append(
+                        self._file_system.load_mask(
+                            self.lens_name, self.settings["band"][n]
                         )
-                        num_pixel = mask_options["size"][n]
-                        offset = mask_options["centroid_offset"][n]
+                    )
+            else:
+                masks = []
+                mask_options = deepcopy(self.settings["mask"])
 
-                        coords = Coordinates(
-                            transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+                for n in range(self.number_of_bands):
+                    band_name = self.settings["band"][n]
+
+                    image_data = self.get_image_data(band_name)
+                    coordinate_system = image_data.get_image_coordinate_system()
+                    num_pixel = image_data.get_image_size()
+
+                    # ra_at_xy_0 = mask_options["ra_at_xy_0"][n]
+                    # dec_at_xy_0 = mask_options["dec_at_xy_0"][n]
+                    # transform_pix2angle = np.array(
+                    #     mask_options["transform_matrix"][n]
+                    # )
+                    # num_pixel = mask_options["size"][n]
+                    # coords = Coordinates(
+                    #     transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+                    # )
+
+                    offset = mask_options["centroid_offset"][n]
+
+                    x_coords, y_coords = coordinate_system.coordinate_grid(
+                        num_pixel, num_pixel
+                    )
+
+                    if "radius" in mask_options:
+                        radius = mask_options["radius"][n]
+                        mask = mask_util.mask_azimuthal(
+                            util.image2array(x_coords),
+                            util.image2array(y_coords),
+                            self.deflector_center_ra + offset[0],
+                            self.deflector_center_dec + offset[1],
+                            radius,
                         )
-                        x_coords, y_coords = coords.coordinate_grid(
-                            num_pixel, num_pixel
+                    elif (
+                        "a" in mask_options
+                        and "b" in mask_options
+                        and "angle" in mask_options
+                    ):
+                        a = mask_options["a"][n]
+                        b = mask_options["b"][n]
+                        angle = mask_options["angle"][n]
+                        mask = mask_util.mask_ellipse(
+                            util.image2array(x_coords),
+                            util.image2array(y_coords),
+                            self.deflector_center_ra + offset[0],
+                            self.deflector_center_dec + offset[1],
+                            a,
+                            b,
+                            angle,
                         )
+                    else:
+                        raise ValueError("Mask shape not properly specified!")
 
-                        if "radius" in mask_options:
-                            radius = mask_options["radius"][n]
-                            mask = mask_util.mask_azimuthal(
-                                util.image2array(x_coords),
-                                util.image2array(y_coords),
-                                self.deflector_center_ra + offset[0],
-                                self.deflector_center_dec + offset[1],
-                                radius,
-                            )
-                        elif (
-                            "a" in mask_options
-                            and "b" in mask_options
-                            and "angle" in mask_options
-                        ):
-                            a = mask_options["a"][n]
-                            b = mask_options["b"][n]
-                            angle = mask_options["angle"][n]
-                            mask = mask_util.mask_ellipse(
-                                util.image2array(x_coords),
-                                util.image2array(y_coords),
-                                self.deflector_center_ra + offset[0],
-                                self.deflector_center_dec + offset[1],
-                                a,
-                                b,
-                                angle,
-                            )
-                        else:
-                            raise ValueError("Mask shape not properly specified!")
-
-                        extra_masked_regions = []
-                        try:
-                            self.settings["mask"]["extra_regions"]
-                        except (NameError, KeyError):
-                            pass
-                        else:
-                            if self.settings["mask"]["extra_regions"] is not None:
-                                for reg in self.settings["mask"]["extra_regions"][n]:
-                                    extra_masked_regions.append(
-                                        1
-                                        - mask_util.mask_azimuthal(
-                                            util.image2array(x_coords),
-                                            util.image2array(y_coords),
-                                            self.deflector_center_ra + reg[0],
-                                            self.deflector_center_dec + reg[1],
-                                            reg[2],
-                                        )
+                    extra_masked_regions = []
+                    try:
+                        self.settings["mask"]["extra_regions"]
+                    except (NameError, KeyError):
+                        pass
+                    else:
+                        if self.settings["mask"]["extra_regions"] is not None:
+                            for reg in self.settings["mask"]["extra_regions"][n]:
+                                extra_masked_regions.append(
+                                    1
+                                    - mask_util.mask_azimuthal(
+                                        util.image2array(x_coords),
+                                        util.image2array(y_coords),
+                                        self.deflector_center_ra + reg[0],
+                                        self.deflector_center_dec + reg[1],
+                                        reg[2],
                                     )
-
-                        for extra_region in extra_masked_regions:
-                            mask *= extra_region
-                        # Mask Edge Pixels
-                        try:
-                            self.settings["mask"]["mask_edge_pixels"]
-                        except (NameError, KeyError):
-                            pass
-                        else:
-                            border_length = self.settings["mask"]["mask_edge_pixels"][n]
-                            if border_length > 0:
-                                edge_mask = 0 * np.ones(
-                                    (num_pixel, num_pixel), dtype=int
                                 )
 
-                                edge_mask[
-                                    border_length:-border_length,
-                                    border_length:-border_length,
-                                ] = 1
-                                edge_mask = (edge_mask.flatten()).tolist()
-                            elif border_length == 0:
-                                edge_mask = 1 * np.ones(
-                                    (num_pixel, num_pixel), dtype=int
-                                )
-                                edge_mask = (edge_mask.flatten()).tolist()
+                    for extra_region in extra_masked_regions:
+                        mask *= extra_region
 
-                            mask *= edge_mask
-                        # Add custom Mask
-                        try:
-                            self.settings["mask"]["custom_mask"]
-                        except (NameError, KeyError):
-                            pass
-                        else:
-                            if self.settings["mask"]["custom_mask"][n] is not None:
-                                provided_mask = self.settings["mask"]["custom_mask"][n]
-                                provided_mask = np.array(provided_mask)
-                                # make sure that mask consist of only 0 and 1
-                                provided_mask[provided_mask > 0.0] = 1.0
-                                provided_mask[provided_mask <= 0.0] = 0.0
-                                mask *= provided_mask
+                    # Mask Edge Pixels
+                    if "mask_edge_pixels" in self.settings["mask"]:
+                        border_length = self.settings["mask"]["mask_edge_pixels"][n]
+                        if border_length > 0:
+                            edge_mask = 0 * np.ones((num_pixel, num_pixel), dtype=int)
 
-                        # sanity check
-                        mask[mask >= 1.0] = 1.0
-                        mask[mask <= 0.0] = 0.0
+                            edge_mask[
+                                border_length:-border_length,
+                                border_length:-border_length,
+                            ] = 1
+                            edge_mask = (edge_mask.flatten()).tolist()
+                        elif border_length == 0:
+                            edge_mask = 1 * np.ones((num_pixel, num_pixel), dtype=int)
+                            edge_mask = (edge_mask.flatten()).tolist()
 
-                        masks.append(util.array2image(mask))
+                        mask *= edge_mask
 
-                return masks
+                    # sanity check
+                    mask[mask >= 1.0] = 1.0
+                    mask[mask <= 0.0] = 0.0
 
-        return None
+                    masks.append(util.array2image(mask))
+
+            return masks
+        else:
+            return None
 
     def get_kwargs_psf_iteration(self):
         """Create `kwargs_psf_iteration`.
@@ -622,17 +659,17 @@ class ModelConfig(Config):
         try:
             self.settings["kwargs_numerics"]["supersampling_factor"]
         except (KeyError, NameError, TypeError):
-            supersampling_factor = [3] * self.band_number
+            supersampling_factor = [3] * self.number_of_bands
         else:
             supersampling_factor = deepcopy(
                 self.settings["kwargs_numerics"]["supersampling_factor"]
             )
 
             if supersampling_factor is None:
-                supersampling_factor = [3] * self.band_number
+                supersampling_factor = [3] * self.number_of_bands
 
         kwargs_numerics = []
-        for n in range(self.band_number):
+        for n in range(self.number_of_bands):
             kwargs_numerics.append(
                 {
                     "supersampling_factor": supersampling_factor[n],
@@ -697,14 +734,14 @@ class ModelConfig(Config):
         """Create list with of index for the different lens light profile (for multiple
         filters)"""
         if "lens_light" in self.settings["model"]:
-            if self.band_number == 1:
+            if self.number_of_bands == 1:
                 index_list = [[]]
                 for k, model in enumerate(self.settings["model"]["lens_light"]):
                     index_list[0].append(k)
                 return index_list
             else:
                 if "lens_light_band_indices" in self.settings["model"]:
-                    index_list = [[] for _ in range(self.band_number)]
+                    index_list = [[] for _ in range(self.number_of_bands)]
                     for i, model in enumerate(
                         self.settings["model"]["lens_light_band_indices"]
                     ):
@@ -723,14 +760,14 @@ class ModelConfig(Config):
         """Create list with of index for the different source light profiles (for
         multiple filters)"""
         if "source_light" in self.settings["model"]:
-            if self.band_number == 1:
+            if self.number_of_bands == 1:
                 index_list = [[]]
                 for k, model in enumerate(self.settings["model"]["source_light"]):
                     index_list[0].append(k)
                 return index_list
             else:
                 if "source_light_band_indices" in self.settings["model"]:
-                    index_list = [[] for _ in range(self.band_number)]
+                    index_list = [[] for _ in range(self.number_of_bands)]
                     for i, model in enumerate(
                         self.settings["model"]["source_light_band_indices"]
                     ):

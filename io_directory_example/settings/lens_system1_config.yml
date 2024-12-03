@@ -4,8 +4,6 @@ system_name: 'lens_system1'
 band:
   - 'F390W'
 
-pixel_size : 0.04
-
 model:
   lens:
     - 'EPL' # the first mass profile needs to be for the deflector
@@ -19,7 +17,9 @@ model:
 
 lens_option:
   centroid_init: [0.04, -0.04]
-  # Centroid_bound:
+  # initial guess for the deflector centroid in arcsec
+  centroid_bound: 0.2
+  # uniform bound (plus/minus from the init values) for the deflector centroid in arcsec
   constrain_position_angle_from_lens_light: 15
   # Provides a prior to push the position angle difference between 
   # lens mass and lens light to be smaller than a certain threshold. The 
@@ -76,18 +76,13 @@ guess_params:
       e2: -0.05
 
 mask:
-  size: [120] # 1d array, number of pixel for each band
-  ra_at_xy_0: [2.4] # 1d array, for each band
-  dec_at_xy_0: [-2.4] # 1d array, for each band
   centroid_offset: [[0., 0]]
   # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid
   radius: [2.] # 1d array, radius in arcsec for each band
-  transform_matrix: [[[-4.00004004e-02, -2.74607936e-07],
-                     [-2.67119793e-07,  3.99999886e-02]]]
   # same transform_pix2angle` in kwargs_data, 3d array, for each band
-  provided:
-  # actual masks, 3d array with dimension (band, x, y), if
-  # provided everything above will be ignored
+  provided: False
+  # if actual masks is provided in the masks folder, in individual .npy files for each filter 
+  # if provided everything the mask specifications will be ignored 
 
 
 

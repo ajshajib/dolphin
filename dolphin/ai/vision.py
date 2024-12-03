@@ -2,10 +2,8 @@
 """This module takes an image data and create semantic segmentation for it."""
 
 import numpy as np
-import tensorflow as tf
 from tensorflow.keras.models import load_model
 from scipy.ndimage import zoom
-import numpy as np
 import os
 from .ai import AI
 

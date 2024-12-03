@@ -1,5 +1,4 @@
 from pathlib import Path
-import pytest
 import numpy as np
 from dolphin.ai.vision import Vision
 

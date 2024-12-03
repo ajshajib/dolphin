@@ -313,7 +313,7 @@ class TestModelConfig(object):
             assert masks[n].shape == (120, 120)
 
         masks2 = self.config_2.get_masks()
-        assert masks2 == None
+        assert masks2 is None
 
         self.config_2.settings["mask"] = None
         assert self.config_2.get_masks() is None

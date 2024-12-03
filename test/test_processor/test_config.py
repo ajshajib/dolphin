@@ -68,6 +68,15 @@ class TestModelConfig(object):
         config.settings["pixel_size"] = 0.04
         npt.assert_almost_equal(config.pixel_size, [0.04, 0.04], decimal=6)
 
+    def test_lens_name(self):
+        """Test the `lens_name` property.
+
+        :return:
+        :rtype:
+        """
+        assert self.config_1.lens_name == "lens_system1"
+        assert self.config_2.lens_name == "lens_system2"
+
     def test_deflector_center_ra(self):
         """Test the `deflector_center_ra` property.
 

@@ -267,9 +267,9 @@ class TestModelConfig(object):
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config_1)
         config2.settings["lens_option"][
-            "constrain_position_angle_from_lens_light"
-        ] = False
-        config2.settings["lens_option"]["limit_mass_eccentricity_from_light"] = False
+            "limit_mass_pa_from_light"
+        ] = np.inf
+        config2.settings["lens_option"]["limit_mass_q_from_light"] = np.inf
         config2.settings["source_light_option"][
             "shapelet_scale_logarithmic_prior"
         ] = False
@@ -281,8 +281,8 @@ class TestModelConfig(object):
 
         # Change setting data type (phi_L = 20 deg, q_L = 0.9)
         config3 = deepcopy(self.config_1)
-        config3.settings["lens_option"]["imit_mass_eccentricity_from_light"] = 0.2
-        config3.settings["lens_option"]["constrain_position_angle_from_lens_light"] = 5
+        config3.settings["lens_option"]["limit_mass_q_from_light"] = 0.2
+        config3.settings["lens_option"]["limit_mass_pa_from_light"] = 5
         prior = config3.custom_logL_addition(
             kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
             kwargs_lens_light=[{"e1": 0.0403, "e2": 0.0338}],
@@ -292,17 +292,17 @@ class TestModelConfig(object):
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config_1)
         config4a.settings["lens_option"][
-            "constrain_position_angle_from_lens_light"
+            "limit_mass_pa_from_light"
         ] = "Test"
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError):
             config4a.custom_logL_addition(
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
                 kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
             )
 
         config4b = deepcopy(self.config_1)
-        config4b.settings["lens_option"]["limit_mass_eccentricity_from_light"] = "Test"
-        with pytest.raises(TypeError):
+        config4b.settings["lens_option"]["limit_mass_q_from_light"] = "Test"
+        with pytest.raises(ValueError):
             config4b.custom_logL_addition(
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
                 kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],

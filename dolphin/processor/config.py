@@ -332,12 +332,10 @@ class ModelConfig(Config):
         use_custom_logL_addition = False
 
         if "lens_option" in self.settings:
-            if (
-                "constrain_position_angle_from_lens_light"
-                in self.settings["lens_option"]
+            if any(
+                key in self.settings["lens_option"]
+                for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
             ):
-                use_custom_logL_addition = True
-            if "limit_mass_eccentricity_from_light" in self.settings["lens_option"]:
                 use_custom_logL_addition = True
 
         if "source_light_option" in self.settings:
@@ -382,86 +380,68 @@ class ModelConfig(Config):
         """
         prior = 0.0
 
-        # Allign pa_light and pa_mass for the lensing galaxy, where pa is the
-        # orientation angle of the profile
+        # Limit the difference between pa_light and pa_mass for the deflector, where pa is the
+        # position angle of the major axis
         if (
             "lens_option" in self.settings
-            and "constrain_position_angle_from_lens_light"
+            and "limit_mass_pa_from_light"
             in self.settings["lens_option"]
         ):
-            setting_input = self.settings["lens_option"][
-                "constrain_position_angle_from_lens_light"
+            max_mass_pa_difference = self.settings["lens_option"][
+                "limit_mass_pa_from_light"
             ]
 
-            if isinstance(setting_input, (bool)) and setting_input:
-                max_delta = 15
-            elif isinstance(setting_input, (bool)) and not setting_input:
-                max_delta = np.nan
-            elif isinstance(setting_input, (int, float)):
-                max_delta = setting_input
-            else:
-                raise (
-                    TypeError(
-                        "constrain_position_angle_from_lens_light \
-                                  should be float, int or bool"
-                    )
+            if not isinstance(max_mass_pa_difference, (int, float)):
+                raise ValueError(
+                    "The value for limit_mass_pa_from_light should be a number!"
                 )
 
-            if not np.isnan(max_delta):
-                pa_mass = (
-                    ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[0]
-                    * 180
-                    / np.pi
-                )
-                pa_light = (
-                    ellipticity2phi_q(
-                        kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
-                    )[0]
-                    * 180
-                    / np.pi
-                )
+            pa_mass = (
+                ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[0]
+                * 180
+                / np.pi
+            )
+            pa_light = (
+                ellipticity2phi_q(
+                    kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
+                )[0]
+                * 180
+                / np.pi
+            )
 
-                diff = min(abs(pa_light - pa_mass), 180 - abs(pa_light - pa_mass))
-                if diff > np.abs(max_delta):
-                    prior += -((diff - np.abs(max_delta)) ** 2) / (1e-3)
+            diff = min(abs(pa_light - pa_mass), 180 - abs(pa_light - pa_mass))
+            if diff > np.abs(max_mass_pa_difference):
+                prior += -((diff - np.abs(max_mass_pa_difference)) ** 2) / 1e-3
 
-        # Ensure q_mass is smaller than q_light for the lensing galaxy, where
-        # q is the ratio between the minor axis to the major axis of a profile
+        # Limit the difference between q_light and q_mass for the deflector, where q is the axis
+        # ratio of the elliptical profile
         if (
             "lens_option" in self.settings
-            and "limit_mass_eccentricity_from_light" in self.settings["lens_option"]
+            and "limit_mass_q_from_light" in self.settings["lens_option"]
         ):
-            setting_input2 = self.settings["lens_option"][
-                "limit_mass_eccentricity_from_light"
+            max_mass_q_difference = self.settings["lens_option"][
+                "limit_mass_q_from_light"
             ]
 
-            if isinstance(setting_input2, (bool)) and setting_input2:
-                max_diff = 0.0
-            elif isinstance(setting_input2, (bool)) and not setting_input2:
-                max_diff = np.nan
-            elif isinstance(setting_input2, (int, float)):
-                max_diff = setting_input2
-            else:
-                raise (
-                    TypeError(
-                        "limit_mass_eccentricity_from_light \
-                                  should be float, int or bool"
-                    )
+            if not isinstance(max_mass_q_difference, (int, float)):
+                raise ValueError(
+                    "The value for limit_mass_q_from_light should be a number!"
                 )
+            
             q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
             q_light = ellipticity2phi_q(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]
-            if not np.isnan(max_diff):
-                q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
-                    1
-                ]
-                q_light = ellipticity2phi_q(
-                    kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
-                )[1]
-                diff = q_light - q_mass
-                if diff > max_diff:
-                    prior += -((diff - max_diff) ** 2) / (1e-4)
+
+            q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
+                1
+            ]
+            q_light = ellipticity2phi_q(
+                kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
+            )[1]
+            diff = q_light - q_mass
+            if diff > max_mass_q_difference:
+                prior += -((diff - max_mass_q_difference) ** 2) / 1e-4
 
         # Provide logarithmic_prior on the source light profile beta param
         if (

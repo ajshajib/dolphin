@@ -86,13 +86,11 @@ class FileSystem(object):
         :return:
         :rtype:
         """
-        settings_dir = self.path2str(self._root_path / "settings")
+        return self._root_path / "settings"
 
         # commenting out, as this directory needs to be created by user
         # if not os.path.isdir(settings_dir):
         #     os.mkdir(settings_dir)
-
-        return settings_dir
 
     def get_outputs_directory(self):
         """Get directory for settings folder. If the directory doesn't exist, a folder
@@ -523,7 +521,8 @@ class FileSystem(object):
         :rtype:
         """
         # create the masks directory if it doesn't exist
-        masks_dir = self.get_settings_directory() / "masks"
+        masks_dir = self.path2str(self.get_settings_directory() / "masks")
+
         if not masks_dir.exists():
             masks_dir.mkdir()
 

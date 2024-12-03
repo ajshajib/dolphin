@@ -585,14 +585,12 @@ class ModelConfig(Config):
 
                     for extra_region in extra_masked_regions:
                         mask *= extra_region
-                    
+
                     # Mask Edge Pixels
                     if "mask_edge_pixels" in self.settings["mask"]:
                         border_length = self.settings["mask"]["mask_edge_pixels"][n]
                         if border_length > 0:
-                            edge_mask = 0 * np.ones(
-                                (num_pixel, num_pixel), dtype=int
-                            )
+                            edge_mask = 0 * np.ones((num_pixel, num_pixel), dtype=int)
 
                             edge_mask[
                                 border_length:-border_length,
@@ -600,9 +598,7 @@ class ModelConfig(Config):
                             ] = 1
                             edge_mask = (edge_mask.flatten()).tolist()
                         elif border_length == 0:
-                            edge_mask = 1 * np.ones(
-                                (num_pixel, num_pixel), dtype=int
-                            )
+                            edge_mask = 1 * np.ones((num_pixel, num_pixel), dtype=int)
                             edge_mask = (edge_mask.flatten()).tolist()
 
                         mask *= edge_mask

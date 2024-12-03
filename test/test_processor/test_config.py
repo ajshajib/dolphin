@@ -160,9 +160,9 @@ class TestModelConfig(object):
             "joint_lens_with_light": [],
             "joint_lens_with_lens": [],
         }
-        
+
         assert kwargs_constraints == self.config_1.get_kwargs_constraints()
-        
+
         self.config_2.settings["kwargs_constraints"] = {
             "joint_source_with_source": [[0, 1, ["center_x", "center_y"]]],
             "joint_source_with_point_source": [[0, 0], [0, 1]],
@@ -310,9 +310,7 @@ class TestModelConfig(object):
         assert len(masks) == self.config_1.number_of_bands
 
         for n in range(self.config_1.number_of_bands):
-            assert masks[n].shape == (
-                120, 120
-            )
+            assert masks[n].shape == (120, 120)
 
         masks2 = self.config_2.get_masks()
         assert masks2 == None

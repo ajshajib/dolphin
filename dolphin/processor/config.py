@@ -384,8 +384,7 @@ class ModelConfig(Config):
         # position angle of the major axis
         if (
             "lens_option" in self.settings
-            and "limit_mass_pa_from_light"
-            in self.settings["lens_option"]
+            and "limit_mass_pa_from_light" in self.settings["lens_option"]
         ):
             max_mass_pa_difference = self.settings["lens_option"][
                 "limit_mass_pa_from_light"
@@ -427,15 +426,13 @@ class ModelConfig(Config):
                 raise ValueError(
                     "The value for limit_mass_q_from_light should be a number!"
                 )
-            
+
             q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
             q_light = ellipticity2phi_q(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]
 
-            q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
-                1
-            ]
+            q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
             q_light = ellipticity2phi_q(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]

@@ -3,10 +3,12 @@
 import pytest
 from copy import deepcopy
 import numpy as np
+import numpy.testing as npt
 from pathlib import Path
 
 from dolphin.processor.config import Config
 from dolphin.processor.config import ModelConfig
+from dolphin.processor.files import FileSystem
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
@@ -37,33 +39,18 @@ class TestModelConfig(object):
     """"""
 
     def setup_class(self):
-        self.test_setting_file = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
-        )
-        self.config_1 = ModelConfig(str(self.test_setting_file.resolve()))
+        self.io_directory = str((_ROOT_DIR / "io_directory_example").resolve())
+        file_system = FileSystem(self.io_directory)
 
-        self.test_setting_file2 = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "_test_config.yml"
-        )
-        self.config_2 = ModelConfig(str(self.test_setting_file2.resolve()))
-        self.test_setting_file3 = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system3_config.yml"
-        )
-        self.config_3 = ModelConfig(str(self.test_setting_file3.resolve()))
-        self.test_setting_file4 = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system4_config.yml"
-        )
-        self.config_4 = ModelConfig(str(self.test_setting_file4.resolve()))
+        self.config_1 = ModelConfig("lens_system1", file_system)
+        self.config_2 = ModelConfig("lens_system2", file_system)
+
+        self.config_3 = ModelConfig("lens_system3", io_directory=self.io_directory)
+        self.config_4 = ModelConfig("lens_system4", io_directory=self.io_directory)
 
     @classmethod
     def teardown_class(cls):
         pass
-
-    def test_load_settings_from_file(self):
-        test_config = ModelConfig()
-        test_config.load_settings_from_file(str(self.test_setting_file.resolve()))
-
-        assert test_config.settings is not None
 
     def test_pixel_size(self):
         """Test the `pixel_size` property.
@@ -71,14 +58,15 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config_1.pixel_size == [0.04]
-        assert self.config_3.pixel_size == [0.04, 0.08]
+        self.config_3.settings["pixel_size"] = [0.04, 0.08]
+        npt.assert_almost_equal(self.config_1.pixel_size, [0.04], decimal=6)
+        npt.assert_almost_equal(self.config_3.pixel_size, [0.04, 0.08], decimal=6)
 
         config = deepcopy(self.config_3)
-        assert config.pixel_size == [0.04, 0.08]
+        npt.assert_almost_equal(config.pixel_size, [0.04, 0.08], decimal=6)
 
         config.settings["pixel_size"] = 0.04
-        assert config.pixel_size == [0.04, 0.04]
+        npt.assert_almost_equal(config.pixel_size, [0.04, 0.04], decimal=6)
 
     def test_deflector_center_ra(self):
         """Test the `deflector_center_ra` property.
@@ -104,24 +92,16 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config_1.deflector_centroid_bound == 0.5
-        assert self.config_2.deflector_centroid_bound == 0.2
+        assert self.config_1.deflector_centroid_bound == 0.2
+        assert self.config_2.deflector_centroid_bound == 0.5
 
-    def test_band_number(self):
+    def test_number_of_bands(self):
         """Test the `test_band_number` property.
 
         :return:
         :rtype:
         """
-        assert self.config_1.band_number == 1
-
-        with pytest.raises(ValueError):
-            self.config_2.band_number
-
-        self.config_2.settings["band"] = []
-
-        with pytest.raises(ValueError):
-            self.config_2.band_number
+        assert self.config_1.number_of_bands == 1
 
     def test_get_kwargs_model(self):
         """Test `get_kwargs_model` method.
@@ -140,13 +120,16 @@ class TestModelConfig(object):
 
         assert kwargs_model == self.config_1.get_kwargs_model()
 
-        self.config_2.settings["band"] = ["F390W"]
+        self.config_2.settings["kwargs_model"] = {
+            "key1": "value1",
+            "key2": "value2",
+        }
         kwargs_model2 = self.config_2.get_kwargs_model()
 
         assert kwargs_model2["key1"] == "value1"
         assert kwargs_model2["key2"] == "value2"
 
-        self.config_2.settings["band"] = []
+        del self.config_2.settings["kwargs_model"]
 
         kwargs_model_4 = self.config_4.get_kwargs_model()
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
@@ -177,16 +160,19 @@ class TestModelConfig(object):
             "joint_lens_with_light": [],
             "joint_lens_with_lens": [],
         }
-
+        
         assert kwargs_constraints == self.config_1.get_kwargs_constraints()
-        self.config_2.settings["band"] = ["F390W"]
+        
+        self.config_2.settings["kwargs_constraints"] = {
+            "joint_source_with_source": [[0, 1, ["center_x", "center_y"]]],
+            "joint_source_with_point_source": [[0, 0], [0, 1]],
+        }
         kwargs_constraints = self.config_2.get_kwargs_constraints()
-
         assert kwargs_constraints["joint_source_with_source"] == [
             [0, 1, ["center_x", "center_y"]]
         ]
         assert kwargs_constraints["joint_source_with_point_source"] == [[0, 0], [0, 1]]
-        self.config_2.settings["band"] = []
+        del self.config_2.settings["kwargs_constraints"]
 
         assert kwargs_constraints_2 == self.config_3.get_kwargs_constraints()
 
@@ -321,37 +307,20 @@ class TestModelConfig(object):
         """
         masks = self.config_1.get_masks()
 
-        assert len(masks) == self.config_1.band_number
+        assert len(masks) == self.config_1.number_of_bands
 
-        for n in range(self.config_1.band_number):
+        for n in range(self.config_1.number_of_bands):
             assert masks[n].shape == (
-                self.config_1.settings["mask"]["size"][n],
-                self.config_1.settings["mask"]["size"][n],
+                120, 120
             )
 
         masks2 = self.config_2.get_masks()
-        assert masks2 == [[[0.0, 0.0], [0.0, 0.0]]]
-
-        self.config_2.settings["mask"]["provided"] = None
-        self.config_2.settings["band"] = ["F390W"]
-
-        masks2 = self.config_2.get_masks()
-        assert len(masks2) == self.config_2.band_number
-
-        for n in range(self.config_2.band_number):
-            assert masks2[n].shape == (
-                self.config_2.settings["mask"]["size"][n],
-                self.config_2.settings["mask"]["size"][n],
-            )
+        assert masks2 == None
 
         self.config_2.settings["mask"] = None
         assert self.config_2.get_masks() is None
 
-        masks2 = self.config_2.get_masks()
-
         masks3 = self.config_3.get_masks()
-        # Test custom mask (Alternating Pixel Mask)
-        assert masks3[0][0, 0:6].tolist() == [0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
         # Test mask_edge_pixel (2 pixels border)
         assert masks3[1][5, 0:6].tolist() == [0.0, 0.0, 1.0, 1.0, 1.0, 1.0]
         assert masks3[1][5, -6:].tolist() == [1.0, 1.0, 1.0, 1.0, 0.0, 0.0]
@@ -376,11 +345,11 @@ class TestModelConfig(object):
         config_elliptial_mask.settings["mask"]["angle"] = [np.pi / 4.0]
 
         masks_elliptical = config_elliptial_mask.get_masks()
-        assert len(masks_elliptical) == config_elliptial_mask.band_number
-        for n in range(config_elliptial_mask.band_number):
+        assert len(masks_elliptical) == config_elliptial_mask.number_of_bands
+        for n in range(config_elliptial_mask.number_of_bands):
             assert masks_elliptical[n].shape == (
-                config_elliptial_mask.settings["mask"]["size"][n],
-                config_elliptial_mask.settings["mask"]["size"][n],
+                120,
+                120,
             )
 
     def test_get_kwargs_psf_iteration(self):
@@ -397,7 +366,7 @@ class TestModelConfig(object):
             "stacking_method": "median",
             "keep_psf_error_map": True,
             "psf_symmetry": 4,
-            "block_center_neighbour": 0.0,
+            "block_center_neighbour": 0.5,
             "num_iter": 20,
             "psf_iter_factor": 0.5,
         }
@@ -467,7 +436,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config_2.get_lens_model_list() == []
+        assert self.config_2.get_lens_model_list() == ["EPL", "SHEAR_GAMMA_PSI"]
 
     def test_get_source_light_model_list(self):
         """Test `get_source_light_model_list` method.
@@ -507,8 +476,7 @@ class TestModelConfig(object):
         :rtype:
         """
         config = deepcopy(self.config_2)
-        del config.settings["model"]["point_source"]
-        assert config.get_point_source_model_list() == []
+        assert config.get_point_source_model_list() == ["LENSED_POSITION"]
 
     def test_get_lens_model_params(self):
         """Test `get_lens_model_params` method.

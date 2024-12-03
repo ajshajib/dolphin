@@ -4,6 +4,8 @@
 import numpy as np
 from tensorflow.keras.models import load_model
 from scipy.ndimage import zoom
+import os
+
 from .ai import AI
 
 
@@ -19,15 +21,16 @@ class Vision(AI):
         super(Vision, self).__init__(io_directory_path)
 
         # To-DO: Load the trained NN model.
-
+        current_dir = os.path.dirname(__file__)
         if source_type == "quasar":
-            self.nn_model = load_model("./lensed_quasar_segmentation_model.h5")
+            model_path = os.path.join(current_dir, "lensed_quasar_segmentation_model.h5")
+            self.nn_model = load_model(model_path)
         # elif source_type == "galaxy":
         #   self.nn_model = None  # This is a placeholder for the trained NN model.
         else:
             raise ValueError(
                 "Invalid source type."
-            )  # This is a placeholder for the trained NN model.
+            )
 
     def create_segmentation_for_all_lenses(self, band_name):
         """Create semantic segmentation for all lenses.

@@ -32,6 +32,6 @@ class TestVision:
         expected_shape = (128, 128)
 
         # Assert the shape of the resized image
-        assert resized_image.shape == expected_shape, (
-            f"Expected shape {expected_shape}, but got {resized_image.shape}"
-        )
+        assert (
+            resized_image.shape == expected_shape
+        ), f"Expected shape {expected_shape}, but got {resized_image.shape}"

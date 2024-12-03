@@ -22,14 +22,20 @@ class Vision(AI):
         super(Vision, self).__init__(io_directory_path)
 
         # To-DO: Load the trained NN model.
-        
+
         if source_type == "quasar":
-            data_file_path = os.path.join("dolphin", "dolphin", "ai", "lensed_quasar_segmentation_model.h5")
-            self.nn_model = load_model(data_file_path)  # This is a placeholder for the trained NN model.
+            data_file_path = os.path.join(
+                "dolphin", "dolphin", "ai", "lensed_quasar_segmentation_model.h5"
+            )
+            self.nn_model = load_model(
+                data_file_path
+            )  # This is a placeholder for the trained NN model.
         # elif source_type == "galaxy":
         #   self.nn_model = None  # This is a placeholder for the trained NN model.
         else:
-            raise ValueError("Invalid source type.")  # This is a placeholder for the trained NN model.
+            raise ValueError(
+                "Invalid source type."
+            )  # This is a placeholder for the trained NN model.
 
     def create_segmentation_for_all_lenses(self, band_name):
         """Create semantic segmentation for all lenses.
@@ -80,8 +86,7 @@ class Vision(AI):
 
     @staticmethod
     def resize_image(image):
-        """
-        Resize the image to (128, 128, 1).
+        """Resize the image to (128, 128, 1).
 
         :param image: image data
         :type image: `numpy.ndarray`
@@ -90,9 +95,14 @@ class Vision(AI):
         """
         # Target shape for spatial dimensions
         target_shape = (128, 128)
-    
-        zoom_factors = [target_shape[0] / image.shape[0], target_shape[1] / image.shape[1]]
-        resampled_image = zoom(image, zoom_factors, order=1)  # order=1 for bilinear interpolation
+
+        zoom_factors = [
+            target_shape[0] / image.shape[0],
+            target_shape[1] / image.shape[1],
+        ]
+        resampled_image = zoom(
+            image, zoom_factors, order=1
+        )  # order=1 for bilinear interpolation
         return resampled_image
 
     @staticmethod
@@ -118,10 +128,9 @@ class Vision(AI):
 
         return segmentation_reshaped
 
-        #def get_semantic_segmentation_from_nn(self, image):
-    
+        # def get_semantic_segmentation_from_nn(self, image):
+
     def get_semantic_segmentation_from_nn(self, image):
-        
         """Get semantic segmentation for the image from the trained neural network.
 
         :param image: image data
@@ -131,11 +140,7 @@ class Vision(AI):
         """
         # Resize the image to match the model input size
         resized_image = self.resize_image(image)
-        image_input = np.expand_dims(resized_image, axis=0)        
+        image_input = np.expand_dims(resized_image, axis=0)
         # Get predictions from the model
         prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 1)
-        return prediction[0] 
-
-
-
-        
+        return prediction[0]

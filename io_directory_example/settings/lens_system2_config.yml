@@ -14,8 +14,8 @@ model:
     - 'SHAPELETS'
   point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
-lens_option:
-  centroid_init: [0.0, 0.0]
+# lens_option:
+#   centroid_init: [0.0, 0.0]
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile

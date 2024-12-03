@@ -1,9 +1,6 @@
 band:
 - F814W
 
-pixel_size : 
-  - 0.04
-
 model:
   lens:
     - 'EPL' # the first mass profile needs to be for the deflector as required by `lenstronomy`

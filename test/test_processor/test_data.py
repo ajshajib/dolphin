@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for data module."""
 from pathlib import Path
-
+import numpy.testing as npt
 from dolphin.processor.data import Data
 from dolphin.processor.data import ImageData
 from dolphin.processor.data import PSFData
@@ -77,6 +77,36 @@ class TestImageData(object):
 
         assert len(image.shape) == 2
         assert image.shape == (120, 120)
+
+    def test_get_image_coordinate_system(self):
+        """Test `get_image_coordinate_system` method.
+
+        :return:
+        :rtype:
+        """
+        coord_sys = self.image_data.get_image_coordinate_system()
+
+        x0, y0 = coord_sys.map_pix2coord(0, 0)
+        assert x0 == self.image_data.kwargs_data["ra_at_xy_0"]
+        assert y0 == self.image_data.kwargs_data["dec_at_xy_0"]
+
+    def test_get_image_pixel_number(self):
+        """Test `get_image_pixel_number` method.
+
+        :return:
+        :rtype:
+        """
+        assert self.image_data.get_image_size() == 120
+
+    def test_get_image_pixel_scale(self):
+        """Test `get_image_pixel_scale` method.
+
+        :return:
+        :rtype:
+        """
+        npt.assert_almost_equal(
+            self.image_data.get_image_pixel_scale(), 0.04, decimal=6
+        )
 
 
 class TestPSFData(object):

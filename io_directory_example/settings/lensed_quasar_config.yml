@@ -12,7 +12,7 @@ model:
   point_source: ["LENSED_POSITION"] # "LENSED_POSITION", "SOURCE_POSITION"
 
 lens_option:
-  centroid_init: [0.04, -0.04]
+  centroid_init: [-0.2, 0.04]
 
 lens_light_option:
   fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
@@ -35,6 +35,7 @@ fitting:
   psf_iteration_settings: # optional, keywords in **kwargs_psf_update can be specified to send to lenstronomy.Workflow.psf_fitting.PsfFitting.update_iterative()
     stacking_method: "median"
     num_iter: 20
+    psf_iter_factor: 0.5
 
   sampling: true
   sampler: emcee

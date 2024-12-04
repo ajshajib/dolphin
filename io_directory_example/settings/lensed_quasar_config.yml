@@ -36,6 +36,9 @@ fitting:
     stacking_method: "median"
     num_iter: 20
     psf_iter_factor: 0.5
+    keep_psf_error_map: true
+    psf_symmetry: 4
+    block_center_neighbour: 0.2
 
   sampling: true
   sampler: emcee

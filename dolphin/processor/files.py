@@ -3,6 +3,7 @@
 __author__ = "ajshajib"
 
 from pathlib import Path
+import os
 import json
 import numpy as np
 import h5py
@@ -245,6 +246,11 @@ class FileSystem(object):
                 self.encode_numpy_arrays(output["kwargs_result"]), ensure_ascii=False
             )
 
+            f.attrs["multi_band_list_out"] = json.dumps(
+                self.encode_numpy_arrays(output["multi_band_list_out"]),
+                ensure_ascii=False,
+            )
+
             group = f.create_group("fit_output")
             for i, single_output in enumerate(output["fit_output"]):
                 subgroup = group.create_group(f"{i}")
@@ -337,6 +343,10 @@ class FileSystem(object):
                 json.loads(str(f.attrs["kwargs_result"]))
             )
 
+            multi_band_list_out = self.decode_numpy_arrays(
+                json.loads(str(f.attrs["multi_band_list_out"]))
+            )
+
             fit_output = []
             group = f["fit_output"]
 
@@ -380,6 +390,7 @@ class FileSystem(object):
                 "settings": settings,
                 "kwargs_result": kwargs_result,
                 "fit_output": fit_output,
+                "multi_band_list_out": multi_band_list_out,
             }
 
             return output
@@ -523,8 +534,8 @@ class FileSystem(object):
         # create the masks directory if it doesn't exist
         masks_dir = self.path2str(self.get_settings_directory() / "masks")
 
-        if not masks_dir.exists():
-            masks_dir.mkdir()
+        if not os.path.isdir(masks_dir):
+            os.mkdir(masks_dir)
 
         save_file = self.get_mask_file_path(lens_name, band)
         np.save(save_file, mask)

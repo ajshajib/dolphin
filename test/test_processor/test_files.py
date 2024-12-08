@@ -205,6 +205,7 @@ class TestFileSystem(object):
                     np.ones(50),
                 ],
             ],
+            "multi_band_list_out": ["band1", "band2"],
         }
 
         self.file_system.save_output("test", "save_test", save_dict, file_type="h5")

@@ -17,22 +17,41 @@ class Modeler(AI):
         """Initialize the Configure object."""
         super(Modeler, self).__init__(io_directory_path)
 
-    def create_configuration_for_all_lenses(self, band_name):
+    def create_configuration_for_all_lenses(self, band_name, **kwargs):
         """Create configuration files for all lenses.
 
         :param band_name: band name
         :type band_name: `str`
+        :param kwargs: additional keyword arguments to be passed to `get_configuration`
+        :type kwargs: `dict`
         """
         lens_list = self.file_system.get_lens_list()
 
         for lens_name in lens_list:
-            configuration = self.get_configuration(
-                lens_name,
-                band_name,
-            )
-            self.save_configuration(configuration, lens_name)
+            self.create_config_for_single_lens(lens_name, band_name, **kwargs)
 
         print(f"Done creating configuration files for {len(lens_list)} lenses.")
+
+    def create_config_for_single_lens(self, lens_name, band_name, **kwargs):
+        """Create configuration file for a single lens.
+        
+        :param lens_name: lens name
+        :type lens_name: `str`
+        :param band_name: band name
+        :type band_name: `str`
+        :param kwargs: additional keyword arguments to be passed to `get_configuration`
+        :type kwargs: `dict`
+        :return: configuration
+        :rtype: `dict`
+        """
+        configuration = self.get_configuration(
+            lens_name,
+            band_name,
+            **kwargs,
+        )
+        self.save_configuration(configuration, lens_name)
+
+        return configuration
 
     def load_semantic_segmentation(self, lens_name, band_name):
         """Load semantic segmentation output from the visual recognition model.
@@ -62,8 +81,13 @@ class Modeler(AI):
         lens_name,
         band_name,
         type="quasar",
-        pso_settings={"num_particle": 20, "num_iteration": 50},
-        psf_iteration_settings={"stacking_method": "median", "num_iter": 20},
+        pso_settings={"num_particle": 50, "num_iteration": 50},
+        psf_iteration_settings={"stacking_method": "median", 
+                                "num_iter": 20,
+                                "psf_iter_factor": 0.5,
+                                "keep_psf_error_map": True,
+                                "psf_symmetry": 4
+                                },
         sampler_name="emcee",
         sampler_settings={
             "n_burn": 0,
@@ -110,6 +134,7 @@ class Modeler(AI):
         )
         config["lens_option"] = {
             "centroid_init": [galaxy_center_x.item(), galaxy_center_y.item()],
+            "centroid_bound": 0.2,
         }
         config["lens_light_option"] = {"fix": {0: {"n_sersic": 4.0}}}
         config["source_light_option"] = {"n_max": [4]}
@@ -120,7 +145,7 @@ class Modeler(AI):
         config["point_source_option"] = {
             "ra_init": point_source_init[0].tolist(),
             "dec_init": point_source_init[1].tolist(),
-            "bound": 0.1,
+            "bound": 0.2,
         }
 
         config["numeric_option"] = {"supersampling_factor": supersampling_factor}
@@ -130,14 +155,23 @@ class Modeler(AI):
             "pso_settings": pso_settings,
         }
 
-        config["psf_iteration"] = (
+        config["fitting"]["psf_iteration"] = (
             True if psf_iteration_settings is not None and type == "quasar" else False
         )
-        config["psf_iteration_settings"] = psf_iteration_settings
+        config["fitting"]["psf_iteration_settings"] = psf_iteration_settings
+        # second minimum distance between the four quasar images
+        distances = []
+        for i in range(len(point_source_init[0])):
+            for j in range(i + 1, len(point_source_init[0])):
+                distances.append(np.sqrt((point_source_init[0][i] - point_source_init[0][j]) ** 2 + (point_source_init[1][i] - point_source_init[1][j]) ** 2))
+        if "block_center_neighbour" not in config["fitting"]["psf_iteration_settings"]:
+            config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = float(np.sort(distances)[1] / 2.0)
+        if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
+            config["fitting"]["psf_iteration_settings"]["error_map_radius"] = float(np.sort(distances)[1] / 2.0)
 
-        config["sampling"] = sampler_settings is not None
-        config["sampler"] = sampler_name
-        config["sampler_settings"] = sampler_settings
+        config["fitting"]["sampling"] = sampler_settings is not None
+        config["fitting"]["sampler"] = sampler_name
+        config["fitting"]["sampler_settings"] = sampler_settings
 
         config["mask"] = {}
         config["mask"]["provided"] = True
@@ -182,13 +216,14 @@ class Modeler(AI):
         )
 
         mask = np.zeros(semantic_segmentation.shape)
-        print(theta_E_init)
+        
         for i in range(mask.shape[0]):
             for j in range(mask.shape[1]):
                 if (i - galaxy_center_x) ** 2 + (j - galaxy_center_y) ** 2 < (
                     2 * theta_E_init
                 ) ** 2:
                     mask[i, j] = 1
+
         return mask
 
     @staticmethod
@@ -221,7 +256,7 @@ class Modeler(AI):
         galaxy_center_pixels = cls.list_region_centers(semantic_segmentation, 1)
 
         galaxy_center_ra, galaxy_center_dec = coordinate_system.map_pix2coord(
-            galaxy_center_pixels[0][0], galaxy_center_pixels[0][1]
+            galaxy_center_pixels[0][1], galaxy_center_pixels[0][0]
         )
 
         return [galaxy_center_ra, galaxy_center_dec]
@@ -242,7 +277,7 @@ class Modeler(AI):
         quasar_ra, quasar_dec = [], []
 
         for position in quasar_positions:
-            ra, dec = coordinate_system.map_pix2coord(position[0], position[1])
+            ra, dec = coordinate_system.map_pix2coord(position[1], position[0])
             quasar_ra.append(ra)
             quasar_dec.append(dec)
 

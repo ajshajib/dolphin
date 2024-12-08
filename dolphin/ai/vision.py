@@ -64,6 +64,8 @@ class Vision(AI):
 
         self.save_segmentation(lens_name, band_name, reshaped_segmentation)
 
+        return reshaped_segmentation
+
     def save_segmentation(self, lens_name, band_name, segmentation):
         """Save the segmentation to a file.
 
@@ -74,10 +76,7 @@ class Vision(AI):
         :param segmentation: semantic segmentation
         :type segmentation: `numpy.ndarray`
         """
-        segmentation_path = self.file_system.get_semantic_segmentation_file_path(
-            lens_name, band_name
-        )
-        self.file_system.save_semantic_segmentation(segmentation_path, segmentation)
+        self.file_system.save_semantic_segmentation(lens_name, band_name, segmentation)
 
     @staticmethod
     def resize_image(image):
@@ -133,9 +132,12 @@ class Vision(AI):
         :return: semantic segmentation
         :rtype: `numpy.ndarray`
         """
-        # Resize the image to match the model input size
-        resized_image = self.resize_image(image)
+        resized_image = self.resize_image(image)        
         image_input = np.expand_dims(resized_image, axis=0)
+        
         # Get predictions from the model
-        prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 1)
-        return prediction[0]
+        prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 5)
+
+        segmentation = np.argmax(prediction[0], axis=-1)  # Shape: (128, 128)
+
+        return segmentation

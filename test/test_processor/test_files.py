@@ -214,6 +214,7 @@ class TestFileSystem(object):
 
         assert save_dict["settings"] == out["settings"]
         assert save_dict["kwargs_result"] == out["kwargs_result"]
+        assert save_dict["multi_band_list_out"] == out["multi_band_list_out"]
 
         for i in [0, 2]:
             assert np.all(save_dict["fit_output"][0][i] == out["fit_output"][0][i])

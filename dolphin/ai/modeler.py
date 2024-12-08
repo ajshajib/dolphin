@@ -34,7 +34,7 @@ class Modeler(AI):
 
     def create_config_for_single_lens(self, lens_name, band_name, **kwargs):
         """Create configuration file for a single lens.
-        
+
         :param lens_name: lens name
         :type lens_name: `str`
         :param band_name: band name
@@ -82,12 +82,13 @@ class Modeler(AI):
         band_name,
         type="quasar",
         pso_settings={"num_particle": 50, "num_iteration": 50},
-        psf_iteration_settings={"stacking_method": "median", 
-                                "num_iter": 20,
-                                "psf_iter_factor": 0.5,
-                                "keep_psf_error_map": True,
-                                "psf_symmetry": 4
-                                },
+        psf_iteration_settings={
+            "stacking_method": "median",
+            "num_iter": 20,
+            "psf_iter_factor": 0.5,
+            "keep_psf_error_map": True,
+            "psf_symmetry": 4,
+        },
         sampler_name="emcee",
         sampler_settings={
             "n_burn": 0,
@@ -163,11 +164,20 @@ class Modeler(AI):
         distances = []
         for i in range(len(point_source_init[0])):
             for j in range(i + 1, len(point_source_init[0])):
-                distances.append(np.sqrt((point_source_init[0][i] - point_source_init[0][j]) ** 2 + (point_source_init[1][i] - point_source_init[1][j]) ** 2))
+                distances.append(
+                    np.sqrt(
+                        (point_source_init[0][i] - point_source_init[0][j]) ** 2
+                        + (point_source_init[1][i] - point_source_init[1][j]) ** 2
+                    )
+                )
         if "block_center_neighbour" not in config["fitting"]["psf_iteration_settings"]:
-            config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = float(np.sort(distances)[1] / 2.0)
+            config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = (
+                float(np.sort(distances)[1] / 2.0)
+            )
         if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
-            config["fitting"]["psf_iteration_settings"]["error_map_radius"] = float(np.sort(distances)[1] / 2.0)
+            config["fitting"]["psf_iteration_settings"]["error_map_radius"] = float(
+                np.sort(distances)[1] / 2.0
+            )
 
         config["fitting"]["sampling"] = sampler_settings is not None
         config["fitting"]["sampler"] = sampler_name
@@ -216,7 +226,7 @@ class Modeler(AI):
         )
 
         mask = np.zeros(semantic_segmentation.shape)
-        
+
         for i in range(mask.shape[0]):
             for j in range(mask.shape[1]):
                 if (i - galaxy_center_x) ** 2 + (j - galaxy_center_y) ** 2 < (

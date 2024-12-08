@@ -86,8 +86,8 @@ class Processor(object):
         fitting_kwargs_list = recipe.get_recipe(
             kwargs_data_joint=kwargs_data_joint, recipe_name=recipe_name
         )
-        print(f"Optimizing model for {lens_name} with recipe: {recipe_name}.") 
-        
+        print(f"Optimizing model for {lens_name} with recipe: {recipe_name}.")
+
         fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
         kwargs_result = fitting_sequence.best_fit(bijective=False)
         multi_band_list_out = fitting_sequence.multi_band_list

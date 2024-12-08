@@ -182,7 +182,11 @@ class Output(Processor):
 
         multi_band_list_out = self._multi_band_list_out
 
-        config = ModelConfig(lens_name=lens_name, io_directory=self.io_directory, settings=self.model_settings)
+        config = ModelConfig(
+            lens_name=lens_name,
+            io_directory=self.io_directory,
+            settings=self.model_settings,
+        )
 
         mask = config.get_masks()
         kwargs_model = config.get_kwargs_model()

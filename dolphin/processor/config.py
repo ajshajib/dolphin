@@ -88,7 +88,10 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        return self._lens_name
+        if self._lens_name:
+            return self._lens_name
+        else:
+            return self.settings["system_name"]
 
     @property
     def pixel_size(self):
@@ -120,7 +123,7 @@ class ModelConfig(Config):
         :return: image data
         :rtype: `ImageData`
         """
-        return ImageData(self._file_system.get_image_file_path(self._lens_name, band))
+        return ImageData(self._file_system.get_image_file_path(self.lens_name, band))
 
     @property
     def deflector_center_ra(self):
@@ -610,18 +613,10 @@ class ModelConfig(Config):
             }
 
             if "psf_iteration_settings" in self.settings["fitting"]:
-                for key in [
-                    "stacking_method",
-                    "keep_psf_error_map",
-                    "psf_symmetry",
-                    "block_center_neighbour",
-                    "num_iter",
-                    "psf_iter_factor",
-                ]:
-                    if key in self.settings["fitting"]["psf_iteration_settings"]:
-                        kwargs_psf_iteration[key] = self.settings["fitting"][
-                            "psf_iteration_settings"
-                        ][key]
+                for key in self.settings["fitting"]["psf_iteration_settings"].keys():
+                    kwargs_psf_iteration[key] = self.settings["fitting"][
+                        "psf_iteration_settings"
+                    ][key]
 
             return kwargs_psf_iteration
         else:
@@ -796,8 +791,8 @@ class ModelConfig(Config):
                         "e1": 0.01,
                         "e2": 0.01,
                         "gamma": 0.02,
-                        "center_x": 0.1,
-                        "center_y": 0.1,
+                        "center_x": self.deflector_centroid_bound / 3,
+                        "center_y": self.deflector_centroid_bound / 3,
                     }
                 )
 

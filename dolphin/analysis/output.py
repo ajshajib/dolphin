@@ -137,6 +137,7 @@ class Output(Processor):
         self._model_settings = output["settings"]
         self._kwargs_result = output["kwargs_result"]
         self._fit_output = output["fit_output"]
+        self._multi_band_list_out = output["multi_band_list_out"]
 
         if self.fit_output[-1][0] == "emcee":
             self._samples_mcmc = self.fit_output[-1][1]
@@ -179,9 +180,9 @@ class Output(Processor):
             self.load_output(lens_name, model_id)
             kwargs_result = self.kwargs_result
 
-        multi_band_list_out = self.get_kwargs_data_joint(lens_name)["multi_band_list"]
+        multi_band_list_out = self._multi_band_list_out
 
-        config = ModelConfig(settings=self.model_settings)
+        config = ModelConfig(lens_name=lens_name, io_directory=self.io_directory, settings=self.model_settings)
 
         mask = config.get_masks()
         kwargs_model = config.get_kwargs_model()
@@ -635,9 +636,7 @@ class Output(Processor):
             # kwargs_numerics = config.get_kwargs_numerics()
             kwargs_model = config.get_kwargs_model()
 
-            multi_band_list_out = self.get_kwargs_data_joint(lens_name)[
-                "multi_band_list"
-            ]
+            multi_band_list_out = self._multi_band_list_out
 
             # kwargs_data = multi_band_list_out[band_index][0]
             # kwargs_psf = multi_band_list_out[band_index][1]

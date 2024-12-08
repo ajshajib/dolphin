@@ -42,14 +42,12 @@ kwargs_constraints:
   joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
 
 fitting:
-  psf_iteration: true
+  psf_iteration: false
   psf_iteration_settings:
-    stacking_method: median
-    num_iter: 20
-    psf_iter_factor: 0.5
-    psf_symmetry: 4
-    block_center_neighbour: 0.5
-    keep_psf_error_map: true
+    # num_iter: 20
+    # psf_iter_factor: 0.5
+    # psf_symmetry: 4
+    # block_center_neighbour: 0.
 
   pso: true
   pso_settings:

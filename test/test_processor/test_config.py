@@ -43,10 +43,9 @@ class TestModelConfig(object):
         file_system = FileSystem(self.io_directory)
 
         self.config_1 = ModelConfig("lens_system1", file_system)
-        self.config_2 = ModelConfig("lens_system2", file_system)
-
         self.config_3 = ModelConfig("lens_system3", io_directory=self.io_directory)
         self.config_4 = ModelConfig("lens_system4", io_directory=self.io_directory)
+        self.config_5 = ModelConfig("lens_system5", file_system)
 
     @classmethod
     def teardown_class(cls):
@@ -75,7 +74,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config_1.lens_name == "lens_system1"
-        assert self.config_2.lens_name == "lens_system2"
+        assert self.config_5.lens_name == "lens_system5"
 
     def test_deflector_center_ra(self):
         """Test the `deflector_center_ra` property.
@@ -84,7 +83,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config_1.deflector_center_ra == 0.04
-        assert self.config_2.deflector_center_ra == 0.0
+        assert self.config_5.deflector_center_ra == 0.0
 
     def test_deflector_center_dec(self):
         """Test the `deflector_center_ra` property.
@@ -93,7 +92,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config_1.deflector_center_dec == -0.04
-        assert self.config_2.deflector_center_dec == 0.0
+        assert self.config_5.deflector_center_dec == 0.0
 
     def test_deflector_centroid_bound(self):
         """Test the `deflector_centroid_bound` property.
@@ -102,7 +101,7 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config_1.deflector_centroid_bound == 0.2
-        assert self.config_2.deflector_centroid_bound == 0.5
+        assert self.config_5.deflector_centroid_bound == 0.5
 
     def test_number_of_bands(self):
         """Test the `test_band_number` property.
@@ -129,16 +128,16 @@ class TestModelConfig(object):
 
         assert kwargs_model == self.config_1.get_kwargs_model()
 
-        self.config_2.settings["kwargs_model"] = {
+        self.config_5.settings["kwargs_model"] = {
             "key1": "value1",
             "key2": "value2",
         }
-        kwargs_model2 = self.config_2.get_kwargs_model()
+        kwargs_model2 = self.config_5.get_kwargs_model()
 
         assert kwargs_model2["key1"] == "value1"
         assert kwargs_model2["key2"] == "value2"
 
-        del self.config_2.settings["kwargs_model"]
+        del self.config_5.settings["kwargs_model"]
 
         kwargs_model_4 = self.config_4.get_kwargs_model()
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
@@ -172,16 +171,16 @@ class TestModelConfig(object):
 
         assert kwargs_constraints == self.config_1.get_kwargs_constraints()
 
-        self.config_2.settings["kwargs_constraints"] = {
+        self.config_5.settings["kwargs_constraints"] = {
             "joint_source_with_source": [[0, 1, ["center_x", "center_y"]]],
             "joint_source_with_point_source": [[0, 0], [0, 1]],
         }
-        kwargs_constraints = self.config_2.get_kwargs_constraints()
+        kwargs_constraints = self.config_5.get_kwargs_constraints()
         assert kwargs_constraints["joint_source_with_source"] == [
             [0, 1, ["center_x", "center_y"]]
         ]
         assert kwargs_constraints["joint_source_with_point_source"] == [[0, 0], [0, 1]]
-        del self.config_2.settings["kwargs_constraints"]
+        del self.config_5.settings["kwargs_constraints"]
 
         assert kwargs_constraints_2 == self.config_3.get_kwargs_constraints()
 
@@ -317,11 +316,11 @@ class TestModelConfig(object):
         for n in range(self.config_1.number_of_bands):
             assert masks[n].shape == (120, 120)
 
-        masks2 = self.config_2.get_masks()
+        masks2 = self.config_5.get_masks()
         assert masks2 is None
 
-        self.config_2.settings["mask"] = None
-        assert self.config_2.get_masks() is None
+        self.config_5.settings["mask"] = None
+        assert self.config_5.get_masks() is None
 
         masks3 = self.config_3.get_masks()
         # Test mask_edge_pixel (2 pixels border)
@@ -361,9 +360,9 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config_2.get_kwargs_psf_iteration() == {}
+        assert self.config_1.get_kwargs_psf_iteration() == {}
 
-        kwargs_psf_iteration = self.config_1.get_kwargs_psf_iteration()
+        kwargs_psf_iteration = self.config_5.get_kwargs_psf_iteration()
 
         assert kwargs_psf_iteration == {
             "stacking_method": "median",
@@ -411,8 +410,8 @@ class TestModelConfig(object):
 
         assert test_numerics == self.config_1.get_kwargs_numerics()
 
-        self.config_2.settings["band"] = ["F390W"]
-        assert test_numerics == self.config_2.get_kwargs_numerics()
+        self.config_5.settings["band"] = ["F390W"]
+        assert test_numerics == self.config_5.get_kwargs_numerics()
 
         config = deepcopy(self.config_1)
         config.settings["kwargs_numerics"]["supersampling_factor"] = None
@@ -429,7 +428,7 @@ class TestModelConfig(object):
         ps_params = self.config_1.get_point_source_params()
         assert ps_params == [[]] * 5
 
-        ps_params = self.config_2.get_point_source_params()
+        ps_params = self.config_5.get_point_source_params()
         assert np.all(ps_params[0][0]["ra_image"] == [1.0, 0.0, 1.0, 0.0])
         assert np.all(ps_params[0][0]["dec_image"] == [0.0, 1.0, 0.0, -1.0])
 
@@ -439,7 +438,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config_2.get_lens_model_list() == ["EPL", "SHEAR_GAMMA_PSI"]
+        assert self.config_5.get_lens_model_list() == ["EPL", "SHEAR_GAMMA_PSI"]
 
     def test_get_source_light_model_list(self):
         """Test `get_source_light_model_list` method.
@@ -447,7 +446,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        config = deepcopy(self.config_2)
+        config = deepcopy(self.config_5)
         del config.settings["model"]["source_light"]
         assert config.get_source_light_model_list() == []
 
@@ -460,7 +459,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        config = deepcopy(self.config_2)
+        config = deepcopy(self.config_5)
         del config.settings["model"]["lens_light"]
         assert config.get_lens_light_model_list() == []
 
@@ -478,7 +477,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        config = deepcopy(self.config_2)
+        config = deepcopy(self.config_5)
         assert config.get_point_source_model_list() == ["LENSED_POSITION"]
 
     def test_get_lens_model_params(self):
@@ -487,12 +486,12 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        self.config_2.settings["model"]["lens"] = ["INVALID"]
+        self.config_5.settings["model"]["lens"] = ["INVALID"]
         with pytest.raises(ValueError):
-            self.config_2.get_lens_model_params()
+            self.config_5.get_lens_model_params()
 
-        self.config_2.settings["model"]["lens"] = ["SPEP"]
-        self.config_2.get_lens_model_params()
+        self.config_5.settings["model"]["lens"] = ["SPEP"]
+        self.config_5.get_lens_model_params()
 
         params = self.config_4.get_lens_model_params()
         assert self.config_4.settings["model"]["lens"][0] == "SIE"
@@ -504,7 +503,7 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        config = deepcopy(self.config_2)
+        config = deepcopy(self.config_5)
         config.settings["model"]["lens_light"] = ["INVALID"]
         with pytest.raises(ValueError):
             config.get_lens_light_model_params()
@@ -557,11 +556,11 @@ class TestModelConfig(object):
         """
         assert self.config_1.get_index_lens_light_model_list() == [[0]]
         assert self.config_3.get_index_lens_light_model_list() == [[0, 1], [2, 3]]
-        config = deepcopy(self.config_2)
+        config = deepcopy(self.config_5)
         del config.settings["model"]["lens_light"]
         assert config.get_index_lens_light_model_list() == []
 
-        config2 = deepcopy(self.config_2)
+        config2 = deepcopy(self.config_5)
         config2.settings["band"] = ["F390W", "F555W"]
         with pytest.raises(ValueError):
             config2.get_index_lens_light_model_list()
@@ -575,11 +574,11 @@ class TestModelConfig(object):
         assert self.config_1.get_index_source_light_model_list() == [[0]]
         assert self.config_3.get_index_source_light_model_list() == [[0], [1]]
 
-        config = deepcopy(self.config_2)
+        config = deepcopy(self.config_5)
         del config.settings["model"]["source_light"]
         assert config.get_index_source_light_model_list() == []
 
-        config2 = deepcopy(self.config_2)
+        config2 = deepcopy(self.config_5)
         config2.settings["band"] = ["F390W", "F555W"]
         with pytest.raises(ValueError):
             config2.get_index_source_light_model_list()

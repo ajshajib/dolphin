@@ -72,6 +72,7 @@ class TestOutput(object):
             "fit_output": [
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
+            "multi_band_list_out": ["band1", "band2"],
         }
 
         self.processor.file_system.save_output("test", "post_process_load", save_dict)
@@ -81,6 +82,7 @@ class TestOutput(object):
         assert np.all(self.output.fit_output[0][1] == save_dict["fit_output"][0][1])
         assert np.all(self.output.fit_output[0][3] == save_dict["fit_output"][0][3])
         assert self.output.kwargs_result == save_dict["kwargs_result"]
+        assert self.output._multi_band_list_out == save_dict["multi_band_list_out"]
         assert self.output.model_settings == save_dict["settings"]
 
     def test_plot_model_overview(self):
@@ -90,7 +92,7 @@ class TestOutput(object):
         :rtype:
         """
         with pytest.raises(ValueError):
-            _ = self.output.plot_model_overview("lens_system2")
+            _ = self.output.plot_model_overview("lens_system1")
 
         fig = self.output.plot_model_overview("lens_system2", "example")
 
@@ -144,7 +146,7 @@ class TestOutput(object):
             2,
             verbose=True,
             burn_in=0,
-            parameters_to_plot=["gamma_lens"],
+            parameters_to_plot=["gamma_lens0"],
         )
 
         plt.close(fig2)

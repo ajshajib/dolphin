@@ -29,15 +29,6 @@ point_source_option:
   bound: 0.1
 
 fitting:
-  psf_iteration: true
-  psf_iteration_settings:
-    stacking_method: median
-    num_iter: 20
-    psf_iter_factor: 0.5
-    psf_symmetry: 4
-    block_center_neighbour: 0.5
-    keep_psf_error_map: true
-
   pso: true
   pso_settings:
     num_particle: 20

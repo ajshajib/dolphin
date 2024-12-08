@@ -361,9 +361,9 @@ class TestModelConfig(object):
         :return:
         :rtype:
         """
-        assert self.config_1.get_kwargs_psf_iteration() == {}
+        assert self.config_2.get_kwargs_psf_iteration() == {}
 
-        kwargs_psf_iteration = self.config_2.get_kwargs_psf_iteration()
+        kwargs_psf_iteration = self.config_1.get_kwargs_psf_iteration()
 
         assert kwargs_psf_iteration == {
             "stacking_method": "median",

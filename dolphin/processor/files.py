@@ -3,7 +3,6 @@
 __author__ = "ajshajib"
 
 from pathlib import Path
-import os
 import json
 import numpy as np
 import h5py
@@ -533,9 +532,6 @@ class FileSystem(object):
         """
         # create the masks directory if it doesn't exist
         masks_dir = self.path2str(self.get_settings_directory() / "masks")
-
-        if not os.path.isdir(masks_dir):
-            os.mkdir(masks_dir)
 
         save_file = self.get_mask_file_path(lens_name, band)
         np.save(save_file, mask)

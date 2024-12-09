@@ -121,7 +121,7 @@ class Modeler(AI):
         config["lens_name"] = lens_name
         config["band"] = [band_name]
 
-        config["pixel_size"] = image_data.get_image_pixel_scale().item()
+        # config["pixel_size"] = image_data.get_image_pixel_scale().item()
 
         config["model"] = {
             "lens": ["EPL", "SHEAR_GAMMA_PSI"],

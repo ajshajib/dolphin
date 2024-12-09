@@ -24,7 +24,7 @@ class TestVision:
         # Expected output
         with pytest.raises(ValueError):
             Vision(_TEST_IO_DIR, source_type="invalid")
-        
+
     def test_resize_image(self):
         """Test the resize_image method to ensure it resizes images correctly."""
         # Create a sample image (e.g., 256x256)
@@ -50,12 +50,11 @@ class TestVision:
             resized_image.shape == expected_shape
         ), f"Resized image shape: {resized_image.shape}, Expected shape: {expected_shape}"
 
-
     def create_segmentation_for_single_lens(self):
         """Test the create_segmentation_for_single_lens method."""
         # Call the create_segmentation_for_single_lens function
-        segmentation = self.vision.create_segmentation_for_single_lens("lensed_quasar", "F814W")
+        segmentation = self.vision.create_segmentation_for_single_lens(
+            "lensed_quasar", "F814W"
+        )
 
         assert segmentation.shape == (120, 120)
-
-    

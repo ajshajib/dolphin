@@ -39,11 +39,11 @@ class TestModeler:
         :return:
         :rtype:
         """
-        
+
         lens_systems = ["lensed_quasar_2"]
         for lens_system in lens_systems:
             config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
-            
+
             if config_file_path.exists():
                 config_file_path.unlink()
 

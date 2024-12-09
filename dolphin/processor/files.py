@@ -530,8 +530,5 @@ class FileSystem(object):
         :return: None
         :rtype:
         """
-        # create the masks directory if it doesn't exist
-        masks_dir = self.path2str(self.get_settings_directory() / "masks")
-
         save_file = self.get_mask_file_path(lens_name, band)
         np.save(save_file, mask)

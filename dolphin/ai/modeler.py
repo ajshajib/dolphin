@@ -306,8 +306,8 @@ class Modeler(AI):
         :param pixels: list of pixels
         :type pixels: `List[Tuple[int, int]]`
         """
-        if x < 0 or x >= rows or y < 0 or y >= cols:
-            return
+        # if x < 0 or x >= rows or y < 0 or y >= cols:
+        #     return
         if visited[x][y] or matrix[x][y] != target_value:
             return
 

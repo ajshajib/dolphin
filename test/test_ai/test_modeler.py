@@ -21,12 +21,38 @@ class TestModeler:
         :return:
         :rtype:
         """
-        lens_system = "lensed_quasar"
+        lens_system = "lensed_quasar_2"
         config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+
+        if config_file_path.exists():
+            config_file_path.unlink()
 
         self.modeler.create_config_for_single_lens(lens_system, "F814W")
 
-        assert Path(config_file_path).exists()
+        assert config_file_path.exists()
+
+        config_file_path.unlink()
+
+    def test_create_configuration_for_all_lenses(self):
+        """Test `create_configuration_for_all_lenses` method.
+
+        :return:
+        :rtype:
+        """
+        
+        lens_systems = ["lensed_quasar_2"]
+        for lens_system in lens_systems:
+            config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+            
+            if config_file_path.exists():
+                config_file_path.unlink()
+
+        self.modeler.create_configuration_for_all_lenses("F814W")
+        for lens_system in lens_systems:
+            config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+            assert config_file_path.exists()
+
+            config_file_path.unlink()
 
     def test_load_semantic_segmentation(self):
         """Test `load_semantic_segmentation` method.
@@ -45,14 +71,15 @@ class TestModeler:
         :return:
         :rtype:
         """
-        lens_system = "lensed_quasar"
+        lens_system = "lensed_quasar_2"
         config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
 
         config = {"lens_system": lens_system, "band": "F814W"}
-
+        if config_file_path.exists():
+            config_file_path.unlink()
         self.modeler.save_configuration(config, lens_system)
 
-        assert Path(config_file_path).exists()
+        assert config_file_path.exists()
 
     def test_get_configuration(self):
         """Test `get_configuration` method.

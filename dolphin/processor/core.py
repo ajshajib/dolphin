@@ -86,13 +86,17 @@ class Processor(object):
         fitting_kwargs_list = recipe.get_recipe(
             kwargs_data_joint=kwargs_data_joint, recipe_name=recipe_name
         )
+        print(f"Optimizing model for {lens_name} with recipe: {recipe_name}.")
+
         fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
         kwargs_result = fitting_sequence.best_fit(bijective=False)
+        multi_band_list_out = fitting_sequence.multi_band_list
 
         output = {
             "settings": config.settings,
             "kwargs_result": kwargs_result,
             "fit_output": fit_output,
+            "multi_band_list_out": multi_band_list_out,
         }
 
         if pool.is_master():
@@ -109,7 +113,7 @@ class Processor(object):
         :return: `ModelConfig` instance
         :rtype:
         """
-        return ModelConfig(self.file_system.get_config_file_path(lens_name))
+        return ModelConfig(lens_name, file_system=self.file_system)
 
     def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
         """Create `kwargs_data` for a lens and given filters.

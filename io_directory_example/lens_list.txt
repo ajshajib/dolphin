@@ -1,4 +1,2 @@
-lens_system1
-lens_system2
-lens_system3
-#null_system
+lensed_quasar_2
+#lens_system2 ; commented out names will be ignored

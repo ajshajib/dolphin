@@ -9,3 +9,4 @@ corner>=2.2.1
 pyyaml
 h5py
 tqdm
+tensorflow

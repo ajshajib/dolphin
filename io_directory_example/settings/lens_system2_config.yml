@@ -1,10 +1,8 @@
 ---
-system_name: 'lens_system2'
+lens_name: 'lens_system2'
 
 band:
   - 'F390W'
-
-pixel_size : 0.04
 
 model:
   lens:

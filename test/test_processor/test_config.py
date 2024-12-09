@@ -362,9 +362,9 @@ class TestModelConfig(object):
         mask = config_mask_provided.get_masks()
         assert mask[0].shape == (120, 120)
 
-        # test extra regions 
+        # test extra regions
         config_extra_regions = deepcopy(self.config_1)
-        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.]]]
+        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.0]]]
         mask = config_extra_regions.get_masks()
         assert np.sum(mask[0]) == 0
 

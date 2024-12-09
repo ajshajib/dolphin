@@ -74,7 +74,7 @@ class TestModeler:
             "point_source_option",
             "numeric_option",
             "fitting",
-            "mask"
+            "mask",
         ]
         for keyword in keywords:
             assert keyword in config
@@ -89,9 +89,13 @@ class TestModeler:
         band_name = "F814W"
         image_data = self.modeler.get_image_data(lens_name, band_name)
         coordinate_system = image_data.get_image_coordinate_system()
-        semantic_segmentation = self.modeler.load_semantic_segmentation(lens_name, band_name)
-        mask = self.modeler.get_mask_from_semantic_segmentation(semantic_segmentation=semantic_segmentation, 
-                                                                coordinate_system=coordinate_system)
+        semantic_segmentation = self.modeler.load_semantic_segmentation(
+            lens_name, band_name
+        )
+        mask = self.modeler.get_mask_from_semantic_segmentation(
+            semantic_segmentation=semantic_segmentation,
+            coordinate_system=coordinate_system,
+        )
         assert mask.shape == image_data.get_image().shape
 
     def test_get_theta_E_init(self):
@@ -119,14 +123,16 @@ class TestModeler:
         mask = np.zeros((image_size, image_size))
         center_pix = [40, 80]
         center_coords = coordinate_system.map_pix2coord(center_pix[0], center_pix[1])
-        
+
         # make a circle with radius 10 around the center
         for i in range(image_size):
             for j in range(image_size):
-                if (i - center_pix[0]) ** 2 + (j - center_pix[1]) ** 2 < 10 ** 2:
+                if (i - center_pix[0]) ** 2 + (j - center_pix[1]) ** 2 < 10**2:
                     mask[j, i] = 1
 
-        lens_galaxy_center_init = self.modeler.get_lens_galaxy_center_init(mask, coordinate_system)
+        lens_galaxy_center_init = self.modeler.get_lens_galaxy_center_init(
+            mask, coordinate_system
+        )
 
         assert lens_galaxy_center_init == list(center_coords)
 
@@ -147,24 +153,14 @@ class TestModeler:
 
         for i in range(image_size):
             for j in range(image_size):
-                if (i - quasar_pixel_x[0]) ** 2 + (j - quasar_pixel_y[0]) ** 2 < 7 ** 2:
+                if (i - quasar_pixel_x[0]) ** 2 + (j - quasar_pixel_y[0]) ** 2 < 7**2:
                     mask[j, i] = 3
-                if (i - quasar_pixel_x[1]) ** 2 + (j - quasar_pixel_y[1]) ** 2 < 7 ** 2:
+                if (i - quasar_pixel_x[1]) ** 2 + (j - quasar_pixel_y[1]) ** 2 < 7**2:
                     mask[j, i] = 3
 
-        quasar_image_positions = self.modeler.get_quasar_image_position(mask, coordinate_system)
+        quasar_image_positions = self.modeler.get_quasar_image_position(
+            mask, coordinate_system
+        )
 
         assert np.allclose(sorted(quasar_image_positions[0]), sorted(quasar_coords[0]))
         assert np.allclose(sorted(quasar_image_positions[1]), sorted(quasar_coords[1]))
-
-
-
-
-        
-
-
-
-
-
-
-    

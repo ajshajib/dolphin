@@ -356,7 +356,7 @@ class TestModelConfig(object):
 
         # test mask provided
         config_mask_provided = deepcopy(self.config_1)
-        config_mask_provided.settings["system_name"] = "lensed_quasar"
+        config_mask_provided.settings["lens_name"] = "lensed_quasar"
         config_mask_provided.settings["band"] = ["F814W"]
         config_mask_provided.settings["mask"]["provided"] = True
         mask = config_mask_provided.get_masks()

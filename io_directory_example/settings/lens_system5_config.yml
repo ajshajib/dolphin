@@ -1,5 +1,5 @@
 ---
-system_name: 'lens_system5'
+lens_name: 'lens_system5'
 
 band:
   - 'F390W'

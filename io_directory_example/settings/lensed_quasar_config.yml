@@ -1,4 +1,4 @@
-system_name: 'lensed_quasar'
+lens_name: 'lensed_quasar'
 
 band:
 - F814W

@@ -75,7 +75,7 @@ class ModelConfig(Config):
             self._settings_dir = os.path.dirname(self._config_file_path)
             self.settings = self.load_config_from_yaml(self._config_file_path)
 
-        assert self.settings["system_name"] == self._lens_name
+        assert self.settings["lens_name"] == self._lens_name
 
     @property
     def lens_name(self):
@@ -478,7 +478,7 @@ class ModelConfig(Config):
                 for n in range(self.number_of_bands):
                     masks.append(
                         self._file_system.load_mask(
-                            self.settings["system_name"], self.settings["band"][n]
+                            self.settings["lens_name"], self.settings["band"][n]
                         )
                     )
             else:

@@ -44,7 +44,7 @@ class ModelConfig(Config):
     particular system."""
 
     def __init__(
-        self, lens_name=None, file_system=None, io_directory=None, settings=None
+        self, lens_name, file_system=None, io_directory=None, settings=None
     ):
         """Initiate a Model Config object. If the file path is given, `settings` will be
         loaded from it. Otherwise, the `settings` can be loaded/reloaded later with the

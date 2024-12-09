@@ -598,7 +598,7 @@ class Output(Processor):
         """
         self.load_output(lens_name, model_id=model_id)
 
-        config = ModelConfig(settings=self._model_settings)
+        config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
         kwargs_params = config.get_kwargs_params()
         kwargs_model = config.get_kwargs_model()
         kwargs_constraints = config.get_kwargs_constraints()
@@ -635,7 +635,7 @@ class Output(Processor):
         kwargs = param.args2kwargs(args)
 
         if linear_solve:
-            config = ModelConfig(settings=self._model_settings)
+            config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
 
             # kwargs_numerics = config.get_kwargs_numerics()
             kwargs_model = config.get_kwargs_model()

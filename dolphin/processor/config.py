@@ -75,11 +75,9 @@ class ModelConfig(Config):
             self._config_file_path = self._file_system.get_config_file_path(lens_name)
 
             self._settings_dir = os.path.dirname(self._config_file_path)
+            self.settings = self.load_config_from_yaml(self._config_file_path)
 
-            if self._config_file_path is not None:
-                self.settings = self.load_config_from_yaml(self._config_file_path)
-            else:
-                raise ValueError("Configuration file not found!")
+        assert self.settings["system_name"] == self._lens_name
 
     @property
     def lens_name(self):
@@ -88,10 +86,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if self._lens_name:
-            return self._lens_name
-        else:
-            return self.settings["system_name"]
+        return self._lens_name
 
     @property
     def pixel_size(self):
@@ -485,7 +480,7 @@ class ModelConfig(Config):
                 for n in range(self.number_of_bands):
                     masks.append(
                         self._file_system.load_mask(
-                            self.lens_name, self.settings["band"][n]
+                            self.settings["system_name"], self.settings["band"][n]
                         )
                     )
             else:

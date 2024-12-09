@@ -354,6 +354,20 @@ class TestModelConfig(object):
                 120,
             )
 
+        # test mask provided
+        config_mask_provided = deepcopy(self.config_1)
+        config_mask_provided.settings["system_name"] = "lensed_quasar"
+        config_mask_provided.settings["band"] = ["F814W"]
+        config_mask_provided.settings["mask"]["provided"] = True
+        mask = config_mask_provided.get_masks()
+        assert mask[0].shape == (120, 120)
+
+        # test extra regions 
+        config_extra_regions = deepcopy(self.config_1)
+        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.]]]
+        mask = config_extra_regions.get_masks()
+        assert np.sum(mask[0]) == 0
+
     def test_get_kwargs_psf_iteration(self):
         """Test `get_psf_iteration` method.
 

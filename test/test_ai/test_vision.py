@@ -52,9 +52,37 @@ class TestVision:
 
     def create_segmentation_for_single_lens(self):
         """Test the create_segmentation_for_single_lens method."""
-        # Call the create_segmentation_for_single_lens function
+        lens_system = "lensed_quasar_2"
+        segm_path_file = _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_F814W.npy"
+
+        if segm_path_file.exists():
+            segm_path_file.unlink()
         segmentation = self.vision.create_segmentation_for_single_lens(
-            "lensed_quasar", "F814W"
+            lens_system, "F814W"
         )
+        assert segm_path_file.exists()
 
         assert segmentation.shape == (120, 120)
+
+    def test_create_segmentation_for_all_lenses(self):
+        """Test the create_segmentation_for_all_lenses method."""
+        lens_system = "lensed_quasar_2"
+        segm_path_file = _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_F814W.npy"
+
+        if segm_path_file.exists():
+            segm_path_file.unlink()
+        
+        self.vision.create_segmentation_for_all_lenses("F814W")
+        assert segm_path_file.exists()
+
+    def test_save_segmenation(self):
+        """Test the save_segmentation method."""
+        lens_system = "lensed_quasar_2"
+        segmentation = np.zeros((120, 120))
+        segm_path_file = _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_F814W.npy"
+
+        if segm_path_file.exists():
+            segm_path_file.unlink()
+
+        self.vision.save_segmentation(lens_system, "F814W", segmentation)
+        assert segm_path_file.exists()

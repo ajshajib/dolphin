@@ -43,7 +43,7 @@ class Vision(AI):
         for lens_name in lens_list:
             self.create_segmentation_for_single_lens(lens_name, band_name)
 
-        print(f"Semantic segmentation for {len(list)} lenses has been created.")
+        print(f"Semantic segmentation for {len(lens_list)} lenses has been created.")
 
     def create_segmentation_for_single_lens(self, lens_name, band_name):
         """Create semantic segmentation for a single lens.

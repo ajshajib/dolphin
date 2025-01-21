@@ -4,7 +4,6 @@ import os
 import copy
 import yaml
 from tqdm import trange
-from matplotlib import pyplot as plt
 
 import lenstronomy.Util.util as util
 import lenstronomy.Util.param_util as param_util

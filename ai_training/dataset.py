@@ -81,7 +81,6 @@ class TrainingData(object):
         :return: PSF
         :rtype: `numpy.ndarray`
         """
-        # get the filename by adding the current file directory to the filename
         filename = os.path.join(os.path.dirname(__file__), filename)
         return np.load(filename)
 
@@ -98,18 +97,17 @@ class TrainingData(object):
 
         dataset = np.zeros(shape=(num_system, self.num_pixel, self.num_pixel))
         masks = np.zeros(shape=(num_system, self.num_pixel, self.num_pixel))
-        labels = np.zeros(shape=(num_system, self.num_pixel, self.num_pixel, 5))
 
         for i in trange(num_system):
             relative_probability = np.ones(max_satellite_num + 1) / (
                 np.arange(max_satellite_num + 1) + 1
             )
-            satellite_list = np.random.choice(
+            num_satellites = np.random.choice(
                 np.arange(max_satellite_num + 1),
                 p=relative_probability / np.sum(relative_probability),
             )
             if self.verbose:
-                print("Number of satellites:", satellite_list)
+                print("Number of satellites:", num_satellites)
 
             theta_E_multiplier = np.linspace(0.1, 0.7, 100)
             relative_prob_theta_E_sat = 1 / theta_E_multiplier
@@ -117,7 +115,7 @@ class TrainingData(object):
                 relative_prob_theta_E_sat
             )
 
-            # Randomized settings for the lens
+            ## Randomized settings for the lens
             phi_epl = np.random.uniform(0, np.pi)
             q_epl = np.random.uniform(0.65, 0.98)
             theta_E = np.random.uniform(0.8, 1.1)
@@ -127,27 +125,42 @@ class TrainingData(object):
             x_lens = np.random.uniform(-0.1, 0.1)
             y_lens = np.random.uniform(-0.1, 0.1)
 
-            # Randomized settings for the source
+            ## Randomized settings for the source galaxy
             e1_source = np.random.uniform(-0.2, 0.2)
             e2_source = np.random.uniform(-0.2, 0.2)
             source_r_sersic = np.random.uniform(0.1, 0.2)
             n_sersic_source = 1  # np.random.uniform(0.8, 2.5)
-
             r = np.random.uniform(0.05, 0.35) * theta_E
             phi = np.random.uniform(-np.pi, np.pi)
             x_source = r * np.cos(phi)
             y_source = r * np.sin(phi)
             mag_ps = np.random.uniform(19.5, 23) + np.random.uniform(-1.5, 0.1)
 
-            satellite_present = satellite_list
+            ## Randomized settings for the lens light
+            phi = np.random.uniform(0, np.pi)
+            q = np.random.uniform(0.6, 1)
+            e1, e2 = param_util.phi_q2_ellipticity(phi=phi, q=q)
+            n_sersic = np.random.uniform(0.6, 6)
+            # truncated normal distribution for r_sersic
+            mu = 1.5  # mean
+            sigma = 0.3  # standard deviation
+            a, b = 1.0, 1.8  # truncation limits
+            trunc_norm = stats.truncnorm(
+                (a - mu) / sigma, (b - mu) / sigma, loc=mu, scale=sigma
+            )
+            r_sersic = trunc_norm.rvs()
 
+            mag_lens = np.random.uniform(17, 19.5)  # np.random.uniform(16,20.5)
+            mag_source = min(
+                24 + np.random.normal(0, 1), mag_lens + np.random.normal(4.5, 0.2)
+            )  # np.random.normal(3.8, 1.95)
+            # mag_sat = mag + np.random.normal(2.5, 0.5)
+
+            lens_model_list = ["EPL", "SHEAR"]
             e1_epl, e2_epl = param_util.phi_q2_ellipticity(phi=phi_epl, q=q_epl)
             e1_shear, e2_shear = param_util.shear_polar2cartesian(
                 phi=phi_shear, gamma=gamma_shear
             )
-
-            lens_model_list = ["EPL", "SHEAR"]
-
             kwargs_epl = {
                 "theta_E": theta_E,
                 "e1": e1_epl,
@@ -158,28 +171,6 @@ class TrainingData(object):
             }
             kwargs_shear = {"gamma1": e1_shear, "gamma2": e2_shear}
             kwargs_lens = [kwargs_epl, kwargs_shear]
-
-            # Randomized settings for the lens light
-            phi = np.random.uniform(0, np.pi)
-            q = np.random.uniform(0.6, 1)
-            e1, e2 = param_util.phi_q2_ellipticity(phi=phi, q=q)
-            n_sersic = np.random.uniform(0.6, 6)
-
-            # truncated normal distribution
-            mu = 1.5  # mean
-            sigma = 0.3  # standard deviation
-            a, b = 1.0, 1.8  # truncation limits
-            trunc_norm = stats.truncnorm(
-                (a - mu) / sigma, (b - mu) / sigma, loc=mu, scale=sigma
-            )
-            # Generate random samples
-            r_sersic = trunc_norm.rvs()
-
-            mag_lens = np.random.uniform(17, 19.5)  # np.random.uniform(16,20.5)
-            mag_source = min(
-                24 + np.random.normal(0, 1), mag_lens + np.random.normal(4.5, 0.2)
-            )  # np.random.normal(3.8, 1.95)
-            # mag_sat = mag + np.random.normal(2.5, 0.5)
 
             lens_light_model_list = ["SERSIC_ELLIPSE"]
             kwargs_lens_light_mag = [
@@ -194,11 +185,11 @@ class TrainingData(object):
                 }
             ]
 
-            if satellite_present != 0:
+            if num_satellites != 0:
                 r_eff = 1.2 * r_sersic  # 1.2 is a hyperparameter
 
             x_sats, y_sats = [], []
-            for j in range(satellite_present):
+            for j in range(num_satellites):
                 lens_model_list.append("EPL")
 
                 theta_E_sat = theta_E * np.random.choice(
@@ -247,11 +238,6 @@ class TrainingData(object):
                 "point_source_model_list": ["SOURCE_POSITION"],
             }
 
-            # here we define the numerical options used in the ImSim module.
-            # Have a look at the ImageNumerics class for detailed descriptions.
-            # If not further specified, the default settings are used.
-            kwargs_numerics = {"point_source_supersampling_factor": 1}
-
             sim_api = SimAPI(
                 numpix=self.num_pixel,
                 kwargs_single_band=self.filter_settings,
@@ -267,6 +253,7 @@ class TrainingData(object):
                 kwargs_model=kwargs_model_copy,
             )
 
+            kwargs_numerics = {"point_source_supersampling_factor": 1}
             im_sim = sim_api.image_model_class(kwargs_numerics)
 
             lens_model_class = LensModel(lens_model_list=lens_model_list)
@@ -341,12 +328,12 @@ class TrainingData(object):
             kwargs_source[0]["center_x"] = x_source
             kwargs_source[0]["center_y"] = y_source
 
-            if satellite_present != 0:
+            if num_satellites != 0:
                 kwargs_sat_light = copy.deepcopy(kwargs_lens_light)
 
-                for j in range(satellite_present):
+                for j in range(num_satellites):
                     kwargs_lens_light[-1 - j]["amp"] = 0
-                for j in range(len(kwargs_lens_light) - satellite_present):
+                for j in range(len(kwargs_lens_light) - num_satellites):
                     kwargs_sat_light[j]["amp"] = 0
 
             if np.random.uniform() > no_lens_light_fracion:
@@ -383,7 +370,7 @@ class TrainingData(object):
             else:
                 ps_image = 0
 
-            if satellite_present != 0:
+            if num_satellites != 0:
                 sat_light_image = im_sim.image(
                     kwargs_lens,
                     kwargs_source,
@@ -400,7 +387,7 @@ class TrainingData(object):
             mask = np.zeros_like(image)
             xs, ys = np.meshgrid(np.arange(self.num_pixel), np.arange(self.num_pixel))
 
-            # host light label
+            ########## source galaxy mask ##########
             #  mask[(source_light_images[1] > 3*sim.background_noise) &
             #      (source_light_images[1] > 0.5*lens_light_images[1])] = 2
 
@@ -433,7 +420,7 @@ class TrainingData(object):
 
             mask[source_mask] = 2
 
-            # lens light label
+            ########## lens light mask ##########
             if np.sum(lens_light_image) > 0:
                 galaxy_x_pixel = int(x_lens / sim_api.pixel_scale) + self.num_pixel // 2
                 galaxy_y_pixel = int(y_lens / sim_api.pixel_scale) + self.num_pixel // 2
@@ -446,7 +433,7 @@ class TrainingData(object):
 
             # mask[np.array(image) < 5 * sim_api.background_noise] = 0
 
-            # point source label
+            ########### point source mask ##########
             if self.source_type == "quasar":
                 # mask[
                 #     (ps_image > 10 * sim_api.background_noise)
@@ -471,15 +458,15 @@ class TrainingData(object):
             else:
                 ps_image = 0
 
-            # satellite light label
-            if satellite_present != 0:
+            ########## satellite masks ##########
+            if num_satellites != 0:
                 # mask[
                 #     (sat_light_image > 5 * sim_api.background_noise)
                 #     & (sat_light_image > lens_light_image)
                 #     #  & (sat_light_images[0] > source_light_images[0])
                 # ] = 3
 
-                for j in range(satellite_present):
+                for j in range(num_satellites):
                     x_pixel = int(x_sats[j] / sim_api.pixel_scale) + self.num_pixel // 2
                     y_pixel = int(y_sats[j] / sim_api.pixel_scale) + self.num_pixel // 2
 
@@ -488,16 +475,7 @@ class TrainingData(object):
             # add noise
             image += sim_api.noise_for_model(model=image)
 
-            # per-class labels
-            labels[i, :, :, 0] = sim_api.background_noise / (
-                image + sim_api.background_noise
-            )
-            labels[i, :, :, 1] = lens_light_image / (image + sim_api.background_noise)
-            labels[i, :, :, 2] = source_light_image / (image + sim_api.background_noise)
-            labels[i, :, :, 3] = sat_light_image / (image + sim_api.background_noise)
-            labels[i, :, :, 4] = ps_image / (image + sim_api.background_noise)
-
             dataset[i, :, :] = image
             masks[i, :, :] = mask
 
-        return dataset, masks, labels
+        return dataset, masks

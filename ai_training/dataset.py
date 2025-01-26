@@ -109,10 +109,10 @@ class TrainingData(object):
             if self.verbose:
                 print("Number of satellites:", num_satellites)
 
-            theta_E_multiplier = np.linspace(0.1, 0.7, 100)
-            relative_prob_theta_E_sat = 1 / theta_E_multiplier
-            prob_theta_E_sat = relative_prob_theta_E_sat / np.sum(
-                relative_prob_theta_E_sat
+            theta_E_multiplier = np.linspace(0.1, 0.4, 100)
+            probability_theta_E_sat = 1 / theta_E_multiplier
+            probability_theta_E_sat = probability_theta_E_sat / np.sum(
+                probability_theta_E_sat
             )
 
             ## Randomized settings for the lens
@@ -151,6 +151,7 @@ class TrainingData(object):
             r_sersic = trunc_norm.rvs()
 
             mag_lens = np.random.uniform(17, 19.5)  # np.random.uniform(16,20.5)
+
             mag_source = min(
                 24 + np.random.normal(0, 1), mag_lens + np.random.normal(4.5, 0.2)
             )  # np.random.normal(3.8, 1.95)
@@ -188,26 +189,31 @@ class TrainingData(object):
             if num_satellites != 0:
                 r_eff = 1.2 * r_sersic  # 1.2 is a hyperparameter
 
-            x_sats, y_sats = [], []
+            x_sats, y_sats, R_sats = [], [], []
             for j in range(num_satellites):
                 lens_model_list.append("EPL")
 
+                R_sat = np.random.uniform(0.1, 0.5)
                 theta_E_sat = theta_E * np.random.choice(
-                    theta_E_multiplier, p=prob_theta_E_sat
+                    theta_E_multiplier, p=probability_theta_E_sat
                 )
                 e1_sat = np.random.uniform(-0.1, 0.1)
                 e2_sat = np.random.uniform(-0.1, 0.1)
+
                 r = r_eff + np.random.normal(0, 0.2)  # check the 13 lenses
                 phi = np.random.uniform(0, 2 * np.pi)
+
                 x_sat, y_sat = param_util.polar2cart(r, phi, [x_lens, y_lens])
-                R_sat = np.random.uniform(0.1, 1)
                 n_sat = np.random.uniform(3, 9)
+
                 mag_sat = mag_lens + 2.5 * np.log10((theta_E / theta_E_sat) ** 2)
                 # np.random.normal(
                 #     2.5, 0.2
                 # )  # np.random.uniform(20, 22.5)
+
                 x_sats.append(x_sat)
                 y_sats.append(y_sat)
+                R_sats.append(R_sat)
 
                 kwargs_sat_epl = {
                     "theta_E": theta_E_sat,
@@ -470,7 +476,18 @@ class TrainingData(object):
                     x_pixel = int(x_sats[j] / sim_api.pixel_scale) + self.num_pixel // 2
                     y_pixel = int(y_sats[j] / sim_api.pixel_scale) + self.num_pixel // 2
 
-                    mask[(xs - x_pixel) ** 2 + (ys - y_pixel) ** 2 < 3.5**2] = 3
+                    sat_mask = np.zeros_like(mask).astype(bool)
+                    sat_mask[(sat_light_image > 5 * sim_api.background_noise)] = True
+
+                    sat_mask[
+                        (xs - x_pixel) ** 2 + (ys - y_pixel) ** 2
+                        > (0.5 * R_sats[j] / sim_api.pixel_scale) ** 2
+                    ] = False
+
+                    sat_mask[(xs - x_pixel) ** 2 + (ys - y_pixel) ** 2 < 3.5**2] = True
+
+                    mask[sat_mask] = 3
+                    # mask[(xs - x_pixel) ** 2 + (ys - y_pixel) ** 2 < 3.5**2] = 3
 
             # add noise
             image += sim_api.noise_for_model(model=image)

@@ -115,9 +115,10 @@ class TrainingData(object):
                 probability_theta_E_sat
             )
 
-            ## Randomized settings for the lens
+            ## Randomized settings for the lens, these distributions are simple choices
+            # More realistic distributions can be used depending on the necesity
             phi_epl = np.random.uniform(0, np.pi)
-            q_epl = np.random.uniform(0.65, 0.98)
+            q_epl = np.random.uniform(0.7, 0.95)
             theta_E = np.random.uniform(0.8, 1.1)
             gamma_epl = np.random.uniform(1.9, 2.1)
             phi_shear = np.random.uniform(0, np.pi)
@@ -138,9 +139,9 @@ class TrainingData(object):
 
             ## Randomized settings for the lens light
             phi = np.random.uniform(0, np.pi)
-            q = np.random.uniform(0.6, 1)
+            q = np.random.uniform(0.6, 0.95)
             e1, e2 = param_util.phi_q2_ellipticity(phi=phi, q=q)
-            n_sersic = np.random.uniform(0.6, 6)
+            n_sersic = np.random.uniform(0.8, 5)
             # truncated normal distribution for r_sersic
             mu = 1.5  # mean
             sigma = 0.3  # standard deviation
@@ -193,10 +194,11 @@ class TrainingData(object):
             for j in range(num_satellites):
                 lens_model_list.append("EPL")
 
-                R_sat = np.random.uniform(0.1, 0.5)
                 theta_E_sat = theta_E * np.random.choice(
                     theta_E_multiplier, p=probability_theta_E_sat
                 )
+                # R_sat = np.random.uniform(0.1, 0.5)
+                R_sat = r_sersic * theta_E_sat / theta_E
                 e1_sat = np.random.uniform(-0.1, 0.1)
                 e2_sat = np.random.uniform(-0.1, 0.1)
 
@@ -204,7 +206,7 @@ class TrainingData(object):
                 phi = np.random.uniform(0, 2 * np.pi)
 
                 x_sat, y_sat = param_util.polar2cart(r, phi, [x_lens, y_lens])
-                n_sat = np.random.uniform(3, 9)
+                n_sat = np.random.uniform(3, 5)
 
                 mag_sat = mag_lens + 2.5 * np.log10((theta_E / theta_E_sat) ** 2)
                 # np.random.normal(

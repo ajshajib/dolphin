@@ -24,7 +24,6 @@ class TrainingData(object):
         pixel_size,
         num_pixel,
         source_type="galaxy",
-        max_num_satellite=2,
         verbose=False,
     ):
         """
@@ -36,17 +35,19 @@ class TrainingData(object):
         :type pixel_sizes: `list`
         :param num_pixels: number of pixels for each filter
         :type num_pixels: `list`
-        :param max_num_satellite: maximum number of satellites in the lens
-        :type max_satellite_num: `int`
+        :param source_type: type of source to simulate, either "galaxy" or "quasar"
+        :type source_type: `str`
         :param verbose: if `True`, print the satellite numbers
         :type verbose: `bool`
         """
+        if source_type not in ["galaxy", "quasar"]:
+            raise ValueError("source_type must be either 'galaxy' or 'quasar'")
+
         self.filter = filter
         self.pixel_size = pixel_size
         self.num_pixel = num_pixel
         self._with_point_source = source_type == "quasar"
         self.source_type = source_type
-        self.max_num_satellite = max_num_satellite
         self.verbose = verbose
 
         self._shapelet_coeffs = np.load(

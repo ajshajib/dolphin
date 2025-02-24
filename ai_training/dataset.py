@@ -131,7 +131,7 @@ class TrainingData(object):
             e1_source = np.random.uniform(-0.2, 0.2)
             e2_source = np.random.uniform(-0.2, 0.2)
             source_r_sersic = np.random.uniform(0.1, 0.2)
-            n_sersic_source = 1  # np.random.uniform(0.8, 2.5)
+            n_sersic_source = np.random.uniform(1, 10)
             r = np.random.uniform(0.05, 0.35) * theta_E
             phi = np.random.uniform(-np.pi, np.pi)
             x_source = r * np.cos(phi)
@@ -243,7 +243,7 @@ class TrainingData(object):
             kwargs_model = {
                 "lens_model_list": lens_model_list,
                 "lens_light_model_list": lens_light_model_list,
-                "source_light_model_list": ["SHAPELETS"],
+                "source_light_model_list": ["SHAPELETS", "SERSIC_ELLIPSE"],
                 "point_source_model_list": ["SOURCE_POSITION"],
             }
 
@@ -307,7 +307,16 @@ class TrainingData(object):
                     ],
                     "center_x": 0,
                     "center_y": 0,
-                }
+                },
+                {
+                    "amp": 0.0,
+                    "R_sersic": source_r_sersic,
+                    "n_sersic": n_sersic_source,
+                    "e1": e1_source,
+                    "e2": e2_source,
+                    "center_x": 0,
+                    "center_y": 0,
+                },
             ]
 
             kwargs_lens_light, kwargs_source_smooth, kwargs_ps = (
@@ -333,9 +342,19 @@ class TrainingData(object):
             shapelet_flux[shapelet_flux < 0] = 1e-6
             shapelet_flux_total = np.sum(shapelet_flux)
 
-            kwargs_source[0]["amp"] *= smooth_flux_total / shapelet_flux_total
+            shapelet_light_fraction = np.random.uniform(0.2, 0.8)
+
+            kwargs_source[0]["amp"] *= (
+                smooth_flux_total / shapelet_flux_total * shapelet_light_fraction
+            )
             kwargs_source[0]["center_x"] = x_source
             kwargs_source[0]["center_y"] = y_source
+            print(kwargs_source_smooth[0]["amp"])
+            kwargs_source[1]["amp"] = kwargs_source_smooth[0]["amp"] * (
+                1 - shapelet_light_fraction
+            )
+            kwargs_source[1]["center_x"] = x_source
+            kwargs_source[1]["center_y"] = y_source
 
             if num_satellites != 0:
                 kwargs_sat_light = copy.deepcopy(kwargs_lens_light)

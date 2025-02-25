@@ -349,7 +349,7 @@ class TrainingData(object):
             )
             kwargs_source[0]["center_x"] = x_source
             kwargs_source[0]["center_y"] = y_source
-            print(kwargs_source_smooth[0]["amp"])
+
             kwargs_source[1]["amp"] = kwargs_source_smooth[0]["amp"] * (
                 1 - shapelet_light_fraction
             )

@@ -95,8 +95,8 @@ class Vision(AI):
             target_shape[1] / image.shape[1],
         ]
         resampled_image = zoom(
-            image, zoom_factors, order=1
-        )  # order=1 for bilinear interpolation
+            image, zoom_factors, order=3
+        )  # order=3 for bicubic interpolation
         return resampled_image
 
     @staticmethod

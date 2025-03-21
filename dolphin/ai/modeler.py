@@ -86,7 +86,7 @@ class Modeler(AI):
             "stacking_method": "median",
             "num_iter": 20,
             "psf_iter_factor": 0.5,
-            "keep_psf_error_map": True,
+            "keep_psf_variance_map": True,
             "psf_symmetry": 4,
         },
         sampler_name="emcee",

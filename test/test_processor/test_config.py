@@ -380,7 +380,7 @@ class TestModelConfig(object):
 
         assert kwargs_psf_iteration == {
             "stacking_method": "median",
-            "keep_psf_error_map": True,
+            "keep_psf_variance_map": True,
             "psf_symmetry": 4,
             "block_center_neighbour": 0.5,
             "num_iter": 20,

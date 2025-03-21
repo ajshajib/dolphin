@@ -598,7 +598,7 @@ class ModelConfig(Config):
         ):
             kwargs_psf_iteration = {
                 "stacking_method": "median",
-                "keep_psf_error_map": True,
+                "keep_psf_variance_map": True,
                 "psf_symmetry": 4,
                 "block_center_neighbour": 0.0,
                 "num_iter": 50,

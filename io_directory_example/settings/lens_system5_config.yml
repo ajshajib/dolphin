@@ -36,7 +36,7 @@ fitting:
     psf_iter_factor: 0.5
     psf_symmetry: 4
     block_center_neighbour: 0.5
-    keep_psf_error_map: true
+    keep_psf_variance_map: true
 
   pso: true
   pso_settings:

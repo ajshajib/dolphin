@@ -442,11 +442,8 @@ class ModelConfig(Config):
             and "shapelet_scale_logarithmic_prior"
             in self.settings["source_light_option"]
         ):
-            setting_input3 = self.settings["source_light_option"][
-                "shapelet_scale_logarithmic_prior"
-            ]
-            if setting_input3:
-                for i, model in enumerate(self.settings["model"]["source_light"]):
+            if self.settings["source_light_option"]["shapelet_scale_logarithmic_prior"]:
+                for i, model in enumerate(self.get_source_light_model_list()):
                     if model == "SHAPELETS":
                         beta = kwargs_source[i]["beta"]
                         prior += -np.log(beta)

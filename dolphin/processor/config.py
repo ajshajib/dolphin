@@ -707,11 +707,11 @@ class ModelConfig(Config):
         filters)"""
         index_list = []
 
-        if "lens_light" in self.settings["model"]:
+        if light_type in self.settings["model"]:
             index_list = [[] for _ in range(self.number_of_bands)]
             counter = 0
             for num_band in range(self.number_of_bands):
-                for i, model in enumerate(self.settings["model"][light_type]):
+                for i, _ in enumerate(self.settings["model"][light_type]):
                     index_list[num_band].append(counter)
                     counter += 1
 
@@ -949,6 +949,13 @@ class ModelConfig(Config):
                     }
                 )
             elif model == "SHAPELETS":
+                # If n_max is given as a single integer, convert it to a list
+                if isinstance(self.settings["source_light_option"]["n_max"], int):
+                    self.settings["source_light_option"]["n_max"] = [
+                        self.settings["source_light_option"]["n_max"]
+                        for _ in range(self.number_of_bands)
+                    ]
+
                 fixed.append(
                     {
                         "n_max": self.settings["source_light_option"]["n_max"][
@@ -1065,7 +1072,13 @@ class ModelConfig(Config):
             if self.settings[option_str]["fix"] is not None:
                 for index, param_dict in self.settings[option_str]["fix"].items():
                     for key, value in param_dict.items():
-                        fixed_list[int(index)][key] = value
+                        # Propagting the fixed values in light profile to all bands
+                        if component in ["lens", "lens_light"]:
+                            for n in range(self.number_of_bands):
+                                num_profiles = len(self.settings["model"][component])
+                                fixed_list[int(index) + n * num_profiles][key] = value
+                        else:  # for mass model that doesn't need duplication for multiple bands
+                            fixed_list[int(index)][key] = value
         return fixed_list
 
     def get_kwargs_params(self):

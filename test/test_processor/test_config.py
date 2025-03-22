@@ -575,9 +575,9 @@ class TestModelConfig(object):
         assert config.get_index_lens_light_model_list() == []
 
         config2 = deepcopy(self.config_5)
+        assert len(config2.get_index_lens_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
-        with pytest.raises(ValueError):
-            config2.get_index_lens_light_model_list()
+        assert len(config2.get_index_lens_light_model_list()) == 2
 
     def test_get_index_source_light_model_list(self):
         """Test `get_index_source_light_model_list` method.
@@ -593,6 +593,6 @@ class TestModelConfig(object):
         assert config.get_index_source_light_model_list() == []
 
         config2 = deepcopy(self.config_5)
+        assert len(config2.get_index_source_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
-        with pytest.raises(ValueError):
-            config2.get_index_source_light_model_list()
+        assert len(config2.get_index_source_light_model_list()) == 2

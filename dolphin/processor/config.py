@@ -665,10 +665,14 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+        source_light_model_list = []
+
         if "source_light" in self.settings["model"]:
-            return self.settings["model"]["source_light"]
-        else:
-            return []
+            # return self.settings["model"]["source_light"]
+            for i in range(self.number_of_bands):
+                source_light_model_list += self.settings["model"]["source_light"]
+
+        return source_light_model_list
 
     def get_lens_light_model_list(self):
         """Return `lens_light_model_list`.
@@ -676,10 +680,13 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+        lens_light_model_list = []
+
         if "lens_light" in self.settings["model"]:
-            return self.settings["model"]["lens_light"]
-        else:
-            return []
+            for i in range(self.number_of_bands):
+                lens_light_model_list += self.settings["model"]["lens_light"]
+
+        return lens_light_model_list
 
     def get_point_source_model_list(self):
         """Return `ps_model_list`.
@@ -695,57 +702,32 @@ class ModelConfig(Config):
         else:
             return []
 
+    def get_index_list(self, light_type="lens_light"):
+        """Create list with of index for the different light profiles (for multiple
+        filters)"""
+        index_list = []
+
+        if "lens_light" in self.settings["model"]:
+            index_list = [[] for _ in range(self.number_of_bands)]
+            counter = 0
+            for num_band in range(self.number_of_bands):
+                for i, model in enumerate(self.settings["model"][light_type]):
+                    index_list[num_band].append(counter)
+                    counter += 1
+
+        return index_list
+
     def get_index_lens_light_model_list(self):
         """Create list with of index for the different lens light profile (for multiple
         filters)"""
-        if "lens_light" in self.settings["model"]:
-            if self.number_of_bands == 1:
-                index_list = [[]]
-                for k, model in enumerate(self.settings["model"]["lens_light"]):
-                    index_list[0].append(k)
-                return index_list
-            else:
-                if "lens_light_band_indices" in self.settings["model"]:
-                    index_list = [[] for _ in range(self.number_of_bands)]
-                    for i, model in enumerate(
-                        self.settings["model"]["lens_light_band_indices"]
-                    ):
-                        index_list[model].append(i)
-                    for k in index_list:
-                        assert k != [], "One of the bands have no lens light"
-                    return index_list
-                else:
-                    raise ValueError(
-                        'Missing "lens_light_band_indices" in the settings file!'
-                    )
-        else:
-            return []
+        index_list = self.get_index_list("lens_light")
+
+        return index_list
 
     def get_index_source_light_model_list(self):
         """Create list with of index for the different source light profiles (for
         multiple filters)"""
-        if "source_light" in self.settings["model"]:
-            if self.number_of_bands == 1:
-                index_list = [[]]
-                for k, model in enumerate(self.settings["model"]["source_light"]):
-                    index_list[0].append(k)
-                return index_list
-            else:
-                if "source_light_band_indices" in self.settings["model"]:
-                    index_list = [[] for _ in range(self.number_of_bands)]
-                    for i, model in enumerate(
-                        self.settings["model"]["source_light_band_indices"]
-                    ):
-                        index_list[model].append(i)
-                    for k in index_list:
-                        assert k != [], "One of the bands have no source light"
-                    return index_list
-                else:
-                    raise ValueError(
-                        'Missing "source_light_band_indices" ' "in the settings file!"
-                    )
-        else:
-            return []
+        return self.get_index_list("source_light")
 
     def get_lens_model_params(self):
         """Create `lens_params`.

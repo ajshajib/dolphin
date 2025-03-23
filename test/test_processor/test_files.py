@@ -335,4 +335,4 @@ class TestFileSystem(object):
         """
         path = _TEST_IO_DIR / "trained_nn" / "lensed_quasar_segmentation_model.h5"
 
-        assert Path(self.file_system.get_trained_model_file_path("quasar")) == path
+        assert Path(self.file_system.get_trained_nn_model_file_path("quasar")) == path

@@ -210,25 +210,15 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        joint_source_with_source = []
-        num_source_profiles = len(self.get_source_light_model_list())
+        joint_source_with_source, num_source_profiles = (
+            self.get_joint_source_with_source()
+        )
 
-        if num_source_profiles > 1:
-            for n in range(1, num_source_profiles):
-                joint_source_with_source.append([0, n, ["center_x", "center_y"]])
+        joint_lens_light_with_lens_light = self.get_joint_lens_light_with_lens_light()
 
-        joint_lens_light_with_lens_light = []
-        num_lens_light_profiles = len(self.get_lens_light_model_list())
-        if num_lens_light_profiles > 1:
-            for n in range(1, num_lens_light_profiles):
-                joint_lens_light_with_lens_light.append(
-                    [0, n, ["center_x", "center_y"]]
-                )
-
-        joint_source_with_point_source = []
-        if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
-            for n in range(num_source_profiles):
-                joint_source_with_point_source.append([0, n])
+        joint_source_with_point_source = self.get_joint_source_with_point_source(
+            num_source_profiles
+        )
 
         kwargs_constraints = {
             "joint_source_with_source": joint_source_with_source,
@@ -253,6 +243,59 @@ class ModelConfig(Config):
                 kwargs_constraints[key] = value
 
         return kwargs_constraints
+
+    def get_joint_source_with_point_source(self, num_source_profiles):
+        joint_source_with_point_source = []
+        if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
+            for n in range(num_source_profiles):
+                joint_source_with_point_source.append([0, n])
+        return joint_source_with_point_source
+
+    def get_joint_lens_light_with_lens_light(self):
+        joint_lens_light_with_lens_light = []
+        lens_light_model_list = self.get_lens_light_model_list()
+        num_lens_light_profiles = len(lens_light_model_list)
+        if num_lens_light_profiles > 1:
+            for n in range(1, num_lens_light_profiles):
+                joint_lens_light_with_lens_light.append(
+                    [0, n, ["center_x", "center_y"]]
+                )
+
+        # Join Sersic ellipticities in multiband fitting
+
+        num_bands = self.number_of_bands
+        if num_bands > 1:
+            num_light_profile_single_band = int(num_lens_light_profiles / num_bands)
+
+            for i in range(num_light_profile_single_band):
+                model = lens_light_model_list[i]
+                if model == "SERSIC_ELLIPSE":
+                    joint_lens_light_with_lens_light.append(
+                        [
+                            i,
+                            i + num_light_profile_single_band,
+                            ["e1", "e2", "n_sersic"],
+                        ]
+                    )
+                elif model == "SERSIC":
+                    joint_lens_light_with_lens_light.append(
+                        [
+                            i,
+                            i + num_light_profile_single_band,
+                            ["n_sersic"],
+                        ]
+                    )
+
+        return joint_lens_light_with_lens_light
+
+    def get_joint_source_with_source(self):
+        joint_source_with_source = []
+        num_source_profiles = len(self.get_source_light_model_list())
+
+        if num_source_profiles > 1:
+            for n in range(1, num_source_profiles):
+                joint_source_with_source.append([0, n, ["center_x", "center_y"]])
+        return joint_source_with_source, num_source_profiles
 
     def get_kwargs_likelihood(self):
         """Create `kwargs_likelihood`.

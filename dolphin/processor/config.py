@@ -713,7 +713,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        if not "satellites" in self.settings:
+        if "satellites" not in self.settings:
             return 0
         else:
             return len(self.settings["satellites"]["centroid_init"])

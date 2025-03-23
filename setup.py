@@ -17,7 +17,7 @@ test_requirements = []
 setup(
     author="Anowar Shajib",
     author_email="ajshajib@gmail.com",
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Users",
@@ -39,6 +39,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/ajshajib/dolphin",
-    version="0.0.2",
+    version="0.0.3",
     zip_safe=False,
 )

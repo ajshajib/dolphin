@@ -1,4 +1,4 @@
-# <img src="logo.png" alt="logo" width="30"/> dolphin
+# <img src="https://raw.githubusercontent.com/ajshajib/dolphin/efb2673646edd6c2d98963e9f4d08a9104d293c3/logo.png" alt="logo" width="40"/> dolphin
 
 [![GitHub](https://github.com/ajshajib/dolphin/workflows/CI/badge.svg)](https://github.com/ajshajib/dolphin/actions)
 [![docs](https://readthedocs.org/projects/dolphin-docs/badge/?version=latest)](https://dolphin-docs.readthedocs.io/en/latest/?badge=latest)

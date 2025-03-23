@@ -13,6 +13,7 @@ model:
     - SERSIC_ELLIPSE
     - SERSIC_ELLIPSE
   source_light: # source light model list will be duplicated for each band
+    - SERSIC_ELLIPSE
     - SHAPELETS
 
 numeric_option:
@@ -33,6 +34,9 @@ lens_option:
       - 0.13
   constrain_position_angle_from_lens_light: 15
   limit_mass_eccentricity_from_light: true
+  fix:
+    0:
+      gamma: 2.0
 
 lens_light_option:
   fix:

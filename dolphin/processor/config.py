@@ -210,25 +210,15 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        joint_source_with_source = []
-        num_source_profiles = len(self.get_source_light_model_list())
+        joint_source_with_source, num_source_profiles = (
+            self.get_joint_source_with_source()
+        )
 
-        if num_source_profiles > 1:
-            for n in range(1, num_source_profiles):
-                joint_source_with_source.append([0, n, ["center_x", "center_y"]])
+        joint_lens_light_with_lens_light = self.get_joint_lens_light_with_lens_light()
 
-        joint_lens_light_with_lens_light = []
-        num_lens_light_profiles = len(self.get_lens_light_model_list())
-        if num_lens_light_profiles > 1:
-            for n in range(1, num_lens_light_profiles):
-                joint_lens_light_with_lens_light.append(
-                    [0, n, ["center_x", "center_y"]]
-                )
-
-        joint_source_with_point_source = []
-        if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
-            for n in range(num_source_profiles):
-                joint_source_with_point_source.append([0, n])
+        joint_source_with_point_source = self.get_joint_source_with_point_source(
+            num_source_profiles
+        )
 
         kwargs_constraints = {
             "joint_source_with_source": joint_source_with_source,
@@ -253,6 +243,77 @@ class ModelConfig(Config):
                 kwargs_constraints[key] = value
 
         return kwargs_constraints
+
+    def get_joint_source_with_point_source(self, num_source_profiles):
+        """Create `joint_source_with_point_source`."""
+        joint_source_with_point_source = []
+        if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
+            for n in range(num_source_profiles):
+                joint_source_with_point_source.append([0, n])
+        return joint_source_with_point_source
+
+    def get_joint_lens_light_with_lens_light(self):
+        """Create `joint_lens_light_with_lens_light`."""
+        joint_lens_light_with_lens_light = []
+        lens_light_model_list = self.get_lens_light_model_list()
+        num_lens_light_profiles = len(lens_light_model_list)
+        if num_lens_light_profiles > 1:
+            for n in range(1, num_lens_light_profiles):
+                joint_lens_light_with_lens_light.append(
+                    [0, n, ["center_x", "center_y"]]
+                )
+
+        # Join Sersic ellipticities in multiband fitting
+
+        num_bands = self.number_of_bands
+        if num_bands > 1:
+            num_light_profile_single_band = int(num_lens_light_profiles / num_bands)
+
+            for i in range(num_light_profile_single_band):
+                model = lens_light_model_list[i]
+                if "SERSIC" in model:
+                    join_list = ["n_sersic"]
+                    if "ELLIPSE" in model:
+                        join_list += ["e1", "e2"]
+                    joint_lens_light_with_lens_light.append(
+                        [
+                            i,
+                            i + num_light_profile_single_band,
+                            join_list,
+                        ]
+                    )
+
+        return joint_lens_light_with_lens_light
+
+    def get_joint_source_with_source(self):
+        """Create `joint_source_with_source`."""
+        joint_source_with_source = []
+        num_source_profiles = len(self.get_source_light_model_list())
+
+        if num_source_profiles > 1:
+            for n in range(1, num_source_profiles):
+                joint_source_with_source.append([0, n, ["center_x", "center_y"]])
+
+        # Join Sersic ellipticities in multiband fitting
+        num_bands = self.number_of_bands
+        if num_bands > 1:
+            num_source_profile_single_band = int(num_source_profiles / num_bands)
+
+            for i in range(num_source_profile_single_band):
+                model = self.get_source_light_model_list()[i]
+                if "SERSIC" in model:
+                    join_list = ["n_sersic"]
+                    if "ELLIPSE" in model:
+                        join_list += ["e1", "e2"]
+                    joint_source_with_source.append(
+                        [
+                            i,
+                            i + num_source_profile_single_band,
+                            join_list,
+                        ]
+                    )
+
+        return joint_source_with_source, num_source_profiles
 
     def get_kwargs_likelihood(self):
         """Create `kwargs_likelihood`.
@@ -442,11 +503,8 @@ class ModelConfig(Config):
             and "shapelet_scale_logarithmic_prior"
             in self.settings["source_light_option"]
         ):
-            setting_input3 = self.settings["source_light_option"][
-                "shapelet_scale_logarithmic_prior"
-            ]
-            if setting_input3:
-                for i, model in enumerate(self.settings["model"]["source_light"]):
+            if self.settings["source_light_option"]["shapelet_scale_logarithmic_prior"]:
+                for i, model in enumerate(self.get_source_light_model_list()):
                     if model == "SHAPELETS":
                         beta = kwargs_source[i]["beta"]
                         prior += -np.log(beta)
@@ -665,10 +723,14 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+        source_light_model_list = []
+
         if "source_light" in self.settings["model"]:
-            return self.settings["model"]["source_light"]
-        else:
-            return []
+            # return self.settings["model"]["source_light"]
+            for i in range(self.number_of_bands):
+                source_light_model_list += self.settings["model"]["source_light"]
+
+        return source_light_model_list
 
     def get_lens_light_model_list(self):
         """Return `lens_light_model_list`.
@@ -676,10 +738,13 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+        lens_light_model_list = []
+
         if "lens_light" in self.settings["model"]:
-            return self.settings["model"]["lens_light"]
-        else:
-            return []
+            for i in range(self.number_of_bands):
+                lens_light_model_list += self.settings["model"]["lens_light"]
+
+        return lens_light_model_list
 
     def get_point_source_model_list(self):
         """Return `ps_model_list`.
@@ -695,57 +760,32 @@ class ModelConfig(Config):
         else:
             return []
 
+    def get_index_list(self, light_type="lens_light"):
+        """Create list with of index for the different light profiles (for multiple
+        filters)"""
+        index_list = []
+
+        if light_type in self.settings["model"]:
+            index_list = [[] for _ in range(self.number_of_bands)]
+            counter = 0
+            for num_band in range(self.number_of_bands):
+                for i, _ in enumerate(self.settings["model"][light_type]):
+                    index_list[num_band].append(counter)
+                    counter += 1
+
+        return index_list
+
     def get_index_lens_light_model_list(self):
         """Create list with of index for the different lens light profile (for multiple
         filters)"""
-        if "lens_light" in self.settings["model"]:
-            if self.number_of_bands == 1:
-                index_list = [[]]
-                for k, model in enumerate(self.settings["model"]["lens_light"]):
-                    index_list[0].append(k)
-                return index_list
-            else:
-                if "lens_light_band_indices" in self.settings["model"]:
-                    index_list = [[] for _ in range(self.number_of_bands)]
-                    for i, model in enumerate(
-                        self.settings["model"]["lens_light_band_indices"]
-                    ):
-                        index_list[model].append(i)
-                    for k in index_list:
-                        assert k != [], "One of the bands have no lens light"
-                    return index_list
-                else:
-                    raise ValueError(
-                        'Missing "lens_light_band_indices" in the settings file!'
-                    )
-        else:
-            return []
+        index_list = self.get_index_list("lens_light")
+
+        return index_list
 
     def get_index_source_light_model_list(self):
         """Create list with of index for the different source light profiles (for
         multiple filters)"""
-        if "source_light" in self.settings["model"]:
-            if self.number_of_bands == 1:
-                index_list = [[]]
-                for k, model in enumerate(self.settings["model"]["source_light"]):
-                    index_list[0].append(k)
-                return index_list
-            else:
-                if "source_light_band_indices" in self.settings["model"]:
-                    index_list = [[] for _ in range(self.number_of_bands)]
-                    for i, model in enumerate(
-                        self.settings["model"]["source_light_band_indices"]
-                    ):
-                        index_list[model].append(i)
-                    for k in index_list:
-                        assert k != [], "One of the bands have no source light"
-                    return index_list
-                else:
-                    raise ValueError(
-                        'Missing "source_light_band_indices" ' "in the settings file!"
-                    )
-        else:
-            return []
+        return self.get_index_list("source_light")
 
     def get_lens_model_params(self):
         """Create `lens_params`.
@@ -967,6 +1007,13 @@ class ModelConfig(Config):
                     }
                 )
             elif model == "SHAPELETS":
+                # If n_max is given as a single integer, convert it to a list
+                if isinstance(self.settings["source_light_option"]["n_max"], int):
+                    self.settings["source_light_option"]["n_max"] = [
+                        self.settings["source_light_option"]["n_max"]
+                        for _ in range(self.number_of_bands)
+                    ]
+
                 fixed.append(
                     {
                         "n_max": self.settings["source_light_option"]["n_max"][
@@ -1083,7 +1130,16 @@ class ModelConfig(Config):
             if self.settings[option_str]["fix"] is not None:
                 for index, param_dict in self.settings[option_str]["fix"].items():
                     for key, value in param_dict.items():
-                        fixed_list[int(index)][key] = value
+                        # Propagting the fixed values in light profile to all bands
+                        if component in ["lens_light", "source_light"]:
+                            for n in range(self.number_of_bands):
+                                num_profiles = len(self.settings["model"][component])
+                                fixed_list[int(index) + n * num_profiles][key] = value
+                        elif (
+                            component == "lens"
+                        ):  # for mass model that doesn't need duplication for multiple bands
+                            fixed_list[int(index)][key] = value
+
         return fixed_list
 
     def get_kwargs_params(self):

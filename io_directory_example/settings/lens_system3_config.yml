@@ -9,22 +9,12 @@ model:
   lens:
     - EPL
     - SHEAR_GAMMA_PSI
-  lens_light:
+  lens_light: # lens light model list will be duplicated for each band
     - SERSIC_ELLIPSE
     - SERSIC_ELLIPSE
+  source_light: # source light model list will be duplicated for each band
     - SERSIC_ELLIPSE
-    - SERSIC_ELLIPSE
-  lens_light_band_indices:
-    - 0
-    - 0
-    - 1
-    - 1
-  source_light:
     - SHAPELETS
-    - SHAPELETS
-  source_light_band_indices:
-    - 0
-    - 1
 
 numeric_option:
   supersampling_factor:
@@ -44,12 +34,13 @@ lens_option:
       - 0.13
   constrain_position_angle_from_lens_light: 15
   limit_mass_eccentricity_from_light: true
+  fix:
+    0:
+      gamma: 2.0
 
 lens_light_option:
   fix:
     0:
-      n_sersic: 4.0
-    2:
       n_sersic: 4.0
   gaussian_prior:
     0:
@@ -66,9 +57,7 @@ source_light_option:
   shapelet_scale_logarithmic_prior: true
     # If true, provide logarithmic_prior on the source light profile
     # beta parameter
-  n_max:
-    - 2
-    - 4
+  n_max: [2, 4] # list to specify n_max for each band
 
 fitting:
   pso: true

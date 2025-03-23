@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import numpy as np
 import h5py
+import gdown
 
 
 class FileSystem(object):
@@ -541,10 +542,27 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
+        assert source_type in ["galaxy", "quasar"]
         path = self.path2str(
             self._root_path
             / "trained_nn"
             / f"lensed_{source_type}_segmentation_model.h5"
         )
+
+        # Check if the file exists
+        if not Path(path).is_file():
+            # Download the model using gdown
+            index = ["galaxy", "quasar"].index(source_type)
+            file_id = [
+                "1MAR2i5WlLlW_mAub3lbLLIlL6MPGXG8s",
+                "1xO6Mniir3169H-7K5nThXR4lLvOUp6OQ",
+            ][index]
+
+            print("AI model not found in local storage. Downloading from the web...")
+            gdown.download(
+                id=file_id,
+                output=path,
+                quiet=False,
+            )
 
         return path

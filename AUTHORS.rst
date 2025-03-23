@@ -12,7 +12,9 @@ Development Lead
 Co-developers
 -------------
 
+* Nafis Sadik Nihal, |github| `pensive-aristocrat < 
 * Chin Yi Tan, |github| `chinyitan <https://github.com/chinyitan>`_
+* Vedant Sahu
 
 
 Contributors

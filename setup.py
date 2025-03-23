@@ -17,7 +17,7 @@ test_requirements = []
 setup(
     author="Anowar Shajib",
     author_email="ajshajib@gmail.com",
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Users",

@@ -806,8 +806,12 @@ class ModelConfig(Config):
         if light_type in self.settings["model"]:
             index_list = [[] for _ in range(self.number_of_bands)]
             counter = 0
+            n = len(self.settings["model"][light_type])
+            if light_type == "lens_light":
+                n += self.num_satellites
+
             for num_band in range(self.number_of_bands):
-                for i, _ in enumerate(self.settings["model"][light_type]):
+                for _ in range(n):
                     index_list[num_band].append(counter)
                     counter += 1
 

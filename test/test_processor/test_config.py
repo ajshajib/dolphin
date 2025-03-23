@@ -658,6 +658,11 @@ class TestModelConfig(object):
         config2.settings["band"] = ["F390W", "F555W"]
         assert len(config2.get_index_lens_light_model_list()) == 2
 
+        assert self.config_wsat.get_index_lens_light_model_list() == [
+            [0, 1, 2, 3],
+            [4, 5, 6, 7],
+        ]
+
     def test_get_index_source_light_model_list(self):
         """Test `get_index_source_light_model_list` method.
 

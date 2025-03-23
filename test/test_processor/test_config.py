@@ -46,6 +46,7 @@ class TestModelConfig(object):
         self.config_3 = ModelConfig("lens_system3", io_directory=self.io_directory)
         self.config_4 = ModelConfig("lens_system4", io_directory=self.io_directory)
         self.config_5 = ModelConfig("lens_system5", file_system)
+        self.config_wsat = ModelConfig("lens_system_wsat", file_system)
 
     @classmethod
     def teardown_class(cls):
@@ -474,6 +475,23 @@ class TestModelConfig(object):
         config = deepcopy(self.config_5)
         del config.settings["model"]["lens"]
         assert config.get_lens_model_list() == []
+
+        assert self.config_wsat.get_lens_model_list() == [
+            "EPL",
+            "SHEAR_GAMMA_PSI",
+            "SIE",
+            "SIS",
+        ]
+
+        config = deepcopy(self.config_wsat)
+        del config.settings["satellites"]["is_elliptical"]
+        print(config.get_lens_model_list())
+        assert config.get_lens_model_list() == [
+            "EPL",
+            "SHEAR_GAMMA_PSI",
+            "SIS",
+            "SIS",
+        ]
 
     def test_get_source_light_model_list(self):
         """Test `get_source_light_model_list` method.

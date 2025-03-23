@@ -706,16 +706,41 @@ class ModelConfig(Config):
 
         return kwargs_numerics
 
+    @property
+    def num_satellites(self):
+        """Check if the system has satellites.
+
+        :return:
+        :rtype:
+        """
+        if not "satellites" in self.settings:
+            return 0
+        else:
+            return len(self.settings["satellites"]["centroid_init"])
+
     def get_lens_model_list(self):
         """Return `lens_model_list`.
 
         :return:
         :rtype:
         """
+        lens_model_list = []
+
         if "lens" in self.settings["model"]:
-            return self.settings["model"]["lens"]
-        else:
-            return []
+            lens_model_list = [model for model in self.settings["model"]["lens"]]
+
+            if self.num_satellites > 0:
+                if "is_elliptical" not in self.settings["satellites"]:
+                    is_elliptical = [False] * self.num_satellites
+                else:
+                    is_elliptical = self.settings["satellites"]["is_elliptical"]
+                for yes in is_elliptical:
+                    if yes:
+                        lens_model_list.append("SIE")
+                    else:
+                        lens_model_list.append("SIS")
+
+        return lens_model_list
 
     def get_source_light_model_list(self):
         """Return `source_model_list`.

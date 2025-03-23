@@ -533,7 +533,7 @@ class FileSystem(object):
         save_file = self.get_mask_file_path(lens_name, band)
         np.save(save_file, mask)
 
-    def get_trained_model_file_path(self, source_type="galaxy"):
+    def get_trained_nn_model_file_path(self, source_type="galaxy"):
         """Get the file path for the trained model.
 
         :param lens_type: type of lens, 'galaxy' or 'quasar'
@@ -541,8 +541,10 @@ class FileSystem(object):
         :return: file path
         :rtype: `str`
         """
-        return self.path2str(
+        path = self.path2str(
             self._root_path
             / "trained_nn"
             / f"lensed_{source_type}_segmentation_model.h5"
         )
+
+        return path

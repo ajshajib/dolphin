@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dolphin"
+version = "0.0.2"
+description = "Automated pipeline for lens modeling based on lenstronomy"
+readme = "README.md"
+license = { text = "MIT license" }
+authors = [
+    { name = "Anowar Shajib", email = "ajshajib@gmail.com" }
+]
+keywords = ["dolphin"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Users",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.11"
+]
+requires-python = ">=3.6"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/ajshajib/dolphin"
+
+[tool.setuptools.packages.find]
+include = ["dolphin", "dolphin.*"]

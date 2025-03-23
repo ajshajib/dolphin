@@ -532,10 +532,10 @@ class TestModelConfig(object):
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
             "SERSIC",
-            "SERSIC_ELLIPSE",
-            "SERSIC_ELLIPSE",
-            "SERSIC_ELLIPSE",
             "SERSIC",
         ]
 
@@ -544,10 +544,10 @@ class TestModelConfig(object):
         assert config.get_lens_light_model_list() == [
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
-            "SERSIC",
-            "SERSIC",
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC",
             "SERSIC",
             "SERSIC",
         ]
@@ -659,8 +659,8 @@ class TestModelConfig(object):
         assert len(config2.get_index_lens_light_model_list()) == 2
 
         assert self.config_wsat.get_index_lens_light_model_list() == [
-            [0, 1, 2, 3],
-            [4, 5, 6, 7],
+            [0, 1, 4, 6],
+            [2, 3, 5, 7],
         ]
 
     def test_get_index_source_light_model_list(self):

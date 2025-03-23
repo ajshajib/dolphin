@@ -771,12 +771,14 @@ class ModelConfig(Config):
                     model for model in self.settings["model"]["lens_light"]
                 ]
 
-                if self.num_satellites > 0:
-                    if "is_elliptical" not in self.settings["satellites"]:
-                        is_elliptical = [False] * self.num_satellites
-                    else:
-                        is_elliptical = self.settings["satellites"]["is_elliptical"]
-                    for yes in is_elliptical:
+            if self.num_satellites > 0:
+                if "is_elliptical" not in self.settings["satellites"]:
+                    is_elliptical = [False] * self.num_satellites
+                else:
+                    is_elliptical = self.settings["satellites"]["is_elliptical"]
+
+                for yes in is_elliptical:
+                    for i in range(self.number_of_bands):
                         if yes:
                             lens_light_model_list.append("SERSIC_ELLIPSE")
                         else:
@@ -807,13 +809,17 @@ class ModelConfig(Config):
             index_list = [[] for _ in range(self.number_of_bands)]
             counter = 0
             n = len(self.settings["model"][light_type])
-            if light_type == "lens_light":
-                n += self.num_satellites
 
             for num_band in range(self.number_of_bands):
                 for _ in range(n):
                     index_list[num_band].append(counter)
                     counter += 1
+
+            if light_type == "lens_light":
+                for i in range(self.num_satellites):
+                    for num_band in range(self.number_of_bands):
+                        index_list[num_band].append(counter)
+                        counter += 1
 
         return index_list
 

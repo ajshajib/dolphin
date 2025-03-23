@@ -326,3 +326,13 @@ class TestFileSystem(object):
             self.file_system.load_semantic_segmentation("test_system", "test").shape[0]
             == 43
         )
+
+    def test_get_trained_model_file_path(self):
+        """Test `get_trained_model_file_path` method.
+
+        :return:
+        :rtype:
+        """
+        path = _TEST_IO_DIR / "trained_nn" / "lensed_quasar_segmentation_model.h5"
+
+        assert Path(self.file_system.get_trained_model_file_path("quasar")) == path

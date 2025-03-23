@@ -1,17 +1,12 @@
 ---
 lens_name: 'lens_system5'
 
-band:
-  - 'F390W'
+band: ['F390W']
 
 model:
-  lens:
-    - 'EPL' # the first mass profile needs to be for the deflector as required by `lenstronomy`
-    - 'SHEAR_GAMMA_PSI'
-  lens_light:
-    - 'SERSIC_ELLIPSE'
-  source_light:
-    - 'SHAPELETS'
+  lens: ['EPL', 'SHEAR_GAMMA_PSI'] # the first mass profile needs to be for the deflector as required by `lenstronomy`
+  lens_light: ['SERSIC_ELLIPSE']
+  source_light: ['SHAPELETS']
   point_source: ['LENSED_POSITION'] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 # lens_option:

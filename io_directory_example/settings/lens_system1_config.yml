@@ -1,18 +1,12 @@
 ---
 lens_name: 'lens_system1'
 
-band:
-  - 'F390W'
+band: ['F390W']
 
 model:
-  lens:
-    - 'EPL' # the first mass profile needs to be for the deflector
-             # as required by `lenstronomy`
-    - 'SHEAR_GAMMA_PSI'
-  lens_light:
-    - 'SERSIC_ELLIPSE'
-  source_light:
-    - 'SERSIC_ELLIPSE'
+  lens: ['EPL', 'SHEAR_GAMMA_PSI']
+  lens_light: ['SERSIC_ELLIPSE']
+  source_light: ['SERSIC_ELLIPSE']
   point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 lens_option:
@@ -81,7 +75,3 @@ mask:
   provided: False
   # if actual masks is provided in the masks folder, in individual .npy files for each filter 
   # if provided everything the mask specifications will be ignored 
-
-
-
-

@@ -24,5 +24,7 @@ Contributors
 
 
 .. |mail| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mail.svg?sanitize=true
+   :alt: mail
 
 .. |github| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mark-github.svg?sanitize=true
+   :alt: github

@@ -245,6 +245,7 @@ class ModelConfig(Config):
         return kwargs_constraints
 
     def get_joint_source_with_point_source(self, num_source_profiles):
+        """Create `joint_source_with_point_source`."""
         joint_source_with_point_source = []
         if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
             for n in range(num_source_profiles):
@@ -252,6 +253,7 @@ class ModelConfig(Config):
         return joint_source_with_point_source
 
     def get_joint_lens_light_with_lens_light(self):
+        """Create `joint_lens_light_with_lens_light`."""
         joint_lens_light_with_lens_light = []
         lens_light_model_list = self.get_lens_light_model_list()
         num_lens_light_profiles = len(lens_light_model_list)
@@ -289,12 +291,38 @@ class ModelConfig(Config):
         return joint_lens_light_with_lens_light
 
     def get_joint_source_with_source(self):
+        """Create `joint_source_with_source`."""
         joint_source_with_source = []
         num_source_profiles = len(self.get_source_light_model_list())
 
         if num_source_profiles > 1:
             for n in range(1, num_source_profiles):
                 joint_source_with_source.append([0, n, ["center_x", "center_y"]])
+
+        # Join Sersic ellipticities in multiband fitting
+        num_bands = self.number_of_bands
+        if num_bands > 1:
+            num_source_profile_single_band = int(num_source_profiles / num_bands)
+
+            for i in range(num_source_profile_single_band):
+                model = self.get_source_light_model_list()[i]
+                if model == "SERSIC_ELLIPSE":
+                    joint_source_with_source.append(
+                        [
+                            i,
+                            i + num_source_profile_single_band,
+                            ["e1", "e2", "n_sersic"],
+                        ]
+                    )
+                elif model == "SERSIC":
+                    joint_source_with_source.append(
+                        [
+                            i,
+                            i + num_source_profile_single_band,
+                            ["n_sersic"],
+                        ]
+                    )
+
         return joint_source_with_source, num_source_profiles
 
     def get_kwargs_likelihood(self):

@@ -38,7 +38,7 @@ class TestConfig(object):
 class TestModelConfig(object):
     """"""
 
-    def setup_class(self):
+    def setup_method(self):
         self.io_directory = str((_ROOT_DIR / "io_directory_example").resolve())
         file_system = FileSystem(self.io_directory)
 
@@ -46,9 +46,9 @@ class TestModelConfig(object):
         self.config_3 = ModelConfig("lens_system3", io_directory=self.io_directory)
         self.config_4 = ModelConfig("lens_system4", io_directory=self.io_directory)
         self.config_5 = ModelConfig("lens_system5", file_system)
+        self.config_wsat = ModelConfig("lens_system_wsat", file_system)
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown_method(self):
         pass
 
     def test_init(self):
@@ -162,7 +162,7 @@ class TestModelConfig(object):
             "joint_lens_with_lens": [],
         }
 
-        kwargs_constraints_2 = {
+        kwargs_constraints_3 = {
             "joint_source_with_source": [
                 [0, 1, ["center_x", "center_y"]],
                 [0, 2, ["center_x", "center_y"]],
@@ -194,7 +194,30 @@ class TestModelConfig(object):
         assert kwargs_constraints["joint_source_with_point_source"] == [[0, 0], [0, 1]]
         del self.config_5.settings["kwargs_constraints"]
 
-        assert kwargs_constraints_2 == self.config_3.get_kwargs_constraints()
+        assert kwargs_constraints_3 == self.config_3.get_kwargs_constraints()
+
+        kwargs_constraints_wsat = {
+            "joint_source_with_source": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+            ],
+            "joint_lens_light_with_lens_light": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+                [1, 3, ["n_sersic", "e1", "e2"]],
+                [4, 6, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
+                [5, 7, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
+            ],
+            "joint_source_with_point_source": [],
+            "joint_lens_with_light": [],
+            "joint_lens_with_lens": [],
+        }
+
+        assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method.
@@ -475,6 +498,23 @@ class TestModelConfig(object):
         del config.settings["model"]["lens"]
         assert config.get_lens_model_list() == []
 
+        assert self.config_wsat.get_lens_model_list() == [
+            "EPL",
+            "SHEAR_GAMMA_PSI",
+            "SIE",
+            "SIS",
+        ]
+
+        config = deepcopy(self.config_wsat)
+        del config.settings["satellites"]["is_elliptical"]
+        print(config.get_lens_model_list())
+        assert config.get_lens_model_list() == [
+            "EPL",
+            "SHEAR_GAMMA_PSI",
+            "SIS",
+            "SIS",
+        ]
+
     def test_get_source_light_model_list(self):
         """Test `get_source_light_model_list` method.
 
@@ -509,6 +549,30 @@ class TestModelConfig(object):
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
+        ]
+
+        assert self.config_wsat.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+        ]
+
+        config = deepcopy(self.config_wsat)
+        del config.settings["satellites"]["is_elliptical"]
+        assert config.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC",
+            "SERSIC",
+            "SERSIC",
         ]
 
     def test_get_point_source_model_list(self):
@@ -616,6 +680,11 @@ class TestModelConfig(object):
         assert len(config2.get_index_lens_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
         assert len(config2.get_index_lens_light_model_list()) == 2
+
+        assert self.config_wsat.get_index_lens_light_model_list() == [
+            [0, 1, 4, 6],
+            [2, 3, 5, 7],
+        ]
 
     def test_get_index_source_light_model_list(self):
         """Test `get_index_source_light_model_list` method.

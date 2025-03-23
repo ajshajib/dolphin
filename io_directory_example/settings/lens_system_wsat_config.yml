@@ -1,5 +1,5 @@
 ---
-lens_name: lens_system3
+lens_name: lens_system_wsat
 
 band: [F475X, F600LP]
 
@@ -7,6 +7,11 @@ model:
   lens: [EPL, SHEAR_GAMMA_PSI]
   lens_light: [SERSIC_ELLIPSE, SERSIC_ELLIPSE] # lens light model list will be duplicated for each band
   source_light: [SERSIC_ELLIPSE, SHAPELETS] # source light model list will be duplicated for each band
+
+satellites:
+  centroid_init: [[1, 1], [1.5, 1.5]]
+  centroid_bound: 0.5
+  is_elliptical: [true, false]
 
 numeric_option:
   supersampling_factor: [2]

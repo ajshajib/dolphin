@@ -1,18 +1,12 @@
 ---
 lens_name: 'lens_system4'
 
-band:
-  - 'F390W'
+band: ['F390W']
 
 model:
-  lens:
-    - 'SIE' # the first mass profile needs to be for the deflector
-             # as required by `lenstronomy`
-    - 'SHEAR_GAMMA_PSI'
-  lens_light:
-    - 'SERSIC_ELLIPSE'
-  source_light:
-    - 'SERSIC_ELLIPSE'
+  lens: ['SIE', 'SHEAR_GAMMA_PSI']
+  lens_light: ['SERSIC_ELLIPSE']
+  source_light: ['SERSIC_ELLIPSE']
   point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 lens_option:
@@ -84,7 +78,3 @@ mask:
   provided:
   # actual masks, 3d array with dimension (band, x, y), if
   # provided everything above will be ignored
-
-
-
-

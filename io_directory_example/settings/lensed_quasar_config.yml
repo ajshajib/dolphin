@@ -1,17 +1,12 @@
 lens_name: 'lensed_quasar'
 
-band:
-- F814W
+band: ['F814W']
 
 model:
-  lens:
-    - 'EPL' # the first mass profile needs to be for the deflector as required by `lenstronomy`
-    - 'SHEAR_GAMMA_PSI'
-  lens_light:
-    - 'SERSIC_ELLIPSE'
-  source_light:
-    - 'SERSIC_ELLIPSE'
-  point_source: ["LENSED_POSITION"] # "LENSED_POSITION", "SOURCE_POSITION"
+  lens: ['EPL', 'SHEAR_GAMMA_PSI']
+  lens_light: ['SERSIC_ELLIPSE']
+  source_light: ['SERSIC_ELLIPSE']
+  point_source: ['LENSED_POSITION']
 
 lens_option:
   centroid_init: [-0.2, 0.04]

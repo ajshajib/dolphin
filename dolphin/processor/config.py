@@ -256,7 +256,6 @@ class ModelConfig(Config):
         """Create `joint_lens_light_with_lens_light`."""
         joint_lens_light_with_lens_light = []
         lens_light_model_list = self.get_lens_light_model_list()
-        num_lens_light_profiles = len(lens_light_model_list)
 
         num_lens_light_profile_central = len(self.settings["model"]["lens_light"])
 

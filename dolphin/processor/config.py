@@ -271,20 +271,15 @@ class ModelConfig(Config):
 
             for i in range(num_light_profile_single_band):
                 model = lens_light_model_list[i]
-                if model == "SERSIC_ELLIPSE":
+                if "SERSIC" in model:
+                    join_list = ["n_sersic"]
+                    if "ELLIPSE" in model:
+                        join_list += ["e1", "e2"]
                     joint_lens_light_with_lens_light.append(
                         [
                             i,
                             i + num_light_profile_single_band,
-                            ["e1", "e2", "n_sersic"],
-                        ]
-                    )
-                elif model == "SERSIC":
-                    joint_lens_light_with_lens_light.append(
-                        [
-                            i,
-                            i + num_light_profile_single_band,
-                            ["n_sersic"],
+                            join_list,
                         ]
                     )
 
@@ -306,20 +301,15 @@ class ModelConfig(Config):
 
             for i in range(num_source_profile_single_band):
                 model = self.get_source_light_model_list()[i]
-                if model == "SERSIC_ELLIPSE":
+                if "SERSIC" in model:
+                    join_list = ["n_sersic"]
+                    if "ELLIPSE" in model:
+                        join_list += ["e1", "e2"]
                     joint_source_with_source.append(
                         [
                             i,
                             i + num_source_profile_single_band,
-                            ["e1", "e2", "n_sersic"],
-                        ]
-                    )
-                elif model == "SERSIC":
-                    joint_source_with_source.append(
-                        [
-                            i,
-                            i + num_source_profile_single_band,
-                            ["n_sersic"],
+                            join_list,
                         ]
                     )
 
@@ -1141,12 +1131,15 @@ class ModelConfig(Config):
                 for index, param_dict in self.settings[option_str]["fix"].items():
                     for key, value in param_dict.items():
                         # Propagting the fixed values in light profile to all bands
-                        if component in ["lens", "lens_light"]:
+                        if component in ["lens_light", "source_light"]:
                             for n in range(self.number_of_bands):
                                 num_profiles = len(self.settings["model"][component])
                                 fixed_list[int(index) + n * num_profiles][key] = value
-                        else:  # for mass model that doesn't need duplication for multiple bands
+                        elif (
+                            component == "lens"
+                        ):  # for mass model that doesn't need duplication for multiple bands
                             fixed_list[int(index)][key] = value
+
         return fixed_list
 
     def get_kwargs_params(self):

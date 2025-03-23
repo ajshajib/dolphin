@@ -767,7 +767,20 @@ class ModelConfig(Config):
 
         if "lens_light" in self.settings["model"]:
             for i in range(self.number_of_bands):
-                lens_light_model_list += self.settings["model"]["lens_light"]
+                lens_light_model_list += [
+                    model for model in self.settings["model"]["lens_light"]
+                ]
+
+                if self.num_satellites > 0:
+                    if "is_elliptical" not in self.settings["satellites"]:
+                        is_elliptical = [False] * self.num_satellites
+                    else:
+                        is_elliptical = self.settings["satellites"]["is_elliptical"]
+                    for yes in is_elliptical:
+                        if yes:
+                            lens_light_model_list.append("SERSIC_ELLIPSE")
+                        else:
+                            lens_light_model_list.append("SERSIC")
 
         return lens_light_model_list
 

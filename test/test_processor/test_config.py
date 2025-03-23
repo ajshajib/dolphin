@@ -38,7 +38,7 @@ class TestConfig(object):
 class TestModelConfig(object):
     """"""
 
-    def setup_class(self):
+    def setup_method(self):
         self.io_directory = str((_ROOT_DIR / "io_directory_example").resolve())
         file_system = FileSystem(self.io_directory)
 
@@ -48,8 +48,7 @@ class TestModelConfig(object):
         self.config_5 = ModelConfig("lens_system5", file_system)
         self.config_wsat = ModelConfig("lens_system_wsat", file_system)
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown_method(self):
         pass
 
     def test_init(self):
@@ -527,6 +526,30 @@ class TestModelConfig(object):
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
+        ]
+
+        assert self.config_wsat.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+        ]
+
+        config = deepcopy(self.config_wsat)
+        del config.settings["satellites"]["is_elliptical"]
+        assert config.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC",
         ]
 
     def test_get_point_source_model_list(self):

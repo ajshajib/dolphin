@@ -162,7 +162,7 @@ class TestModelConfig(object):
             "joint_lens_with_lens": [],
         }
 
-        kwargs_constraints_2 = {
+        kwargs_constraints_3 = {
             "joint_source_with_source": [
                 [0, 1, ["center_x", "center_y"]],
                 [0, 2, ["center_x", "center_y"]],
@@ -194,7 +194,30 @@ class TestModelConfig(object):
         assert kwargs_constraints["joint_source_with_point_source"] == [[0, 0], [0, 1]]
         del self.config_5.settings["kwargs_constraints"]
 
-        assert kwargs_constraints_2 == self.config_3.get_kwargs_constraints()
+        assert kwargs_constraints_3 == self.config_3.get_kwargs_constraints()
+
+        kwargs_constraints_wsat = {
+            "joint_source_with_source": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+            ],
+            "joint_lens_light_with_lens_light": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+                [1, 3, ["n_sersic", "e1", "e2"]],
+                [4, 6, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
+                [5, 7, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
+            ],
+            "joint_source_with_point_source": [],
+            "joint_lens_with_light": [],
+            "joint_lens_with_lens": [],
+        }
+
+        assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method.
@@ -534,8 +557,8 @@ class TestModelConfig(object):
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
-            "SERSIC_ELLIPSE",
             "SERSIC",
+            "SERSIC_ELLIPSE",
             "SERSIC",
         ]
 

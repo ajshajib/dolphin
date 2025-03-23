@@ -257,19 +257,18 @@ class ModelConfig(Config):
         joint_lens_light_with_lens_light = []
         lens_light_model_list = self.get_lens_light_model_list()
         num_lens_light_profiles = len(lens_light_model_list)
-        if num_lens_light_profiles > 1:
-            for n in range(1, num_lens_light_profiles):
+
+        num_lens_light_profile_central = len(self.settings["model"]["lens_light"])
+
+        if num_lens_light_profile_central > 1:
+            for n in range(1, num_lens_light_profile_central * self.number_of_bands):
                 joint_lens_light_with_lens_light.append(
                     [0, n, ["center_x", "center_y"]]
                 )
 
         # Join Sersic ellipticities in multiband fitting
-
-        num_bands = self.number_of_bands
-        if num_bands > 1:
-            num_light_profile_single_band = int(num_lens_light_profiles / num_bands)
-
-            for i in range(num_light_profile_single_band):
+        if self.number_of_bands > 1:
+            for i in range(num_lens_light_profile_central):
                 model = lens_light_model_list[i]
                 if "SERSIC" in model:
                     join_list = ["n_sersic"]
@@ -278,11 +277,29 @@ class ModelConfig(Config):
                     joint_lens_light_with_lens_light.append(
                         [
                             i,
-                            i + num_light_profile_single_band,
+                            i + num_lens_light_profile_central,
                             join_list,
                         ]
                     )
 
+        if self.num_satellites > 0:
+            for i in range(self.num_satellites):
+                model = lens_light_model_list[i + num_lens_light_profile_central]
+
+                join_list = ["center_x", "center_y", "n_sersic"]
+                if "ELLIPSE" in model:
+                    join_list += ["e1", "e2"]
+                joint_lens_light_with_lens_light.append(
+                    [
+                        i + num_lens_light_profile_central * self.number_of_bands,
+                        i
+                        + num_lens_light_profile_central * self.number_of_bands
+                        + self.num_satellites,
+                        join_list,
+                    ]
+                )
+
+        print(joint_lens_light_with_lens_light)
         return joint_lens_light_with_lens_light
 
     def get_joint_source_with_source(self):
@@ -777,8 +794,8 @@ class ModelConfig(Config):
                 else:
                     is_elliptical = self.settings["satellites"]["is_elliptical"]
 
-                for yes in is_elliptical:
-                    for i in range(self.number_of_bands):
+                for i in range(self.number_of_bands):
+                    for yes in is_elliptical:
                         if yes:
                             lens_light_model_list.append("SERSIC_ELLIPSE")
                         else:

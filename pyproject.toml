@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dolphin"
-version = "0.0.2"
+version = "0.0.3"
 description = "Automated pipeline for lens modeling based on lenstronomy"
 readme = "README.md"
 license = { text = "MIT license" }
@@ -17,9 +17,9 @@ classifiers = [
     "Intended Audience :: Users",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
-    "Programming Language :: Python :: 3.11"
+    "Programming Language :: Python :: 3.12"
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 dependencies = []
 
 [project.urls]

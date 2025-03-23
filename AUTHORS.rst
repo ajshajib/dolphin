@@ -23,8 +23,8 @@ Contributors
 * Simon Birrer, |github| `sibirrer <https://github.com/sibirrer>`_
 
 
-.. |mail| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mail.svg?sanitize=true
+.. |mail| image:: https://raw.githubusercontent.com/primer/octicons/refs/heads/main/icons/mail-16.svg?sanitize=true
    :alt: mail
 
-.. |github| image:: https://raw.githubusercontent.com/primer/octicons/master/icons/mark-github.svg?sanitize=true
+.. |github| image:: https://raw.githubusercontent.com/primer/octicons/refs/heads/main/icons/mark-github-24.svg?sanitize=true
    :alt: github

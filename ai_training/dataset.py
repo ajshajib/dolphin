@@ -121,7 +121,7 @@ class TrainingData(object):
             phi_epl = np.random.uniform(0, np.pi)
             q_epl = np.random.uniform(0.7, 0.95)
             theta_E = np.random.uniform(0.8, 1.1)
-            gamma_epl = np.random.uniform(1.9, 2.1)
+            gamma_epl = np.random.uniform(2.0, 2.1)
             phi_shear = np.random.uniform(0, np.pi)
             gamma_shear = np.random.uniform(0, 0.1)
             x_lens = np.random.uniform(-0.1, 0.1)
@@ -398,7 +398,7 @@ class TrainingData(object):
             else:
                 ps_image = 0
 
-            if num_satellites != 0:
+            if num_satellites != 0 and lens_light_image > 0:
                 sat_light_image = im_sim.image(
                     kwargs_lens,
                     kwargs_source,
@@ -487,7 +487,7 @@ class TrainingData(object):
                 ps_image = 0
 
             ########## satellite masks ##########
-            if num_satellites != 0:
+            if num_satellites != 0 and np.sum(sat_light_image) > 0:
                 # mask[
                 #     (sat_light_image > 5 * sim_api.background_noise)
                 #     & (sat_light_image > lens_light_image)

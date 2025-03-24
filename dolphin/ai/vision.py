@@ -19,9 +19,9 @@ class Vision(AI):
         :type data_file_path: `str`
         """
         assert source_type in ["quasar", "galaxy"]
-
         super(Vision, self).__init__(io_directory_path)
 
+        self._source_type = source_type
         self.nn_model_path = self.file_system.get_trained_nn_model_file_path(
             source_type=source_type
         )
@@ -134,5 +134,9 @@ class Vision(AI):
         prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 5)
 
         segmentation = np.argmax(prediction[0], axis=-1)  # Shape: (128, 128)
+
+        if self._source_type == "galaxy":
+            # Setting the satellite label to 4 to match with the case of quasar
+            segmentation[segmentation == 3] = 4
 
         return segmentation

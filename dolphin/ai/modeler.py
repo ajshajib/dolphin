@@ -80,7 +80,7 @@ class Modeler(AI):
         self,
         lens_name,
         band_name,
-        type="quasar",
+        source_type="quasar",
         pso_settings={"num_particle": 50, "num_iteration": 50},
         psf_iteration_settings={
             "stacking_method": "median",
@@ -96,6 +96,10 @@ class Modeler(AI):
             "walkerRatio": 2,
         },
         supersampling_factor=[2],
+        max_satellite_number=1,
+        minimum_satellite_area=15,
+        satellite_bound=0.2,
+        clear_center=0.2,
     ):
         """Get configuration from the semantic segmentation output. This method
         currently works only for the single-band case.
@@ -104,32 +108,48 @@ class Modeler(AI):
         :type lens_name: `str`
         :param band_name: band name
         :type band_name: `str`
-        :param type: type of configuration
-        :type type: `str`
+        :param source_type: type of configuration
+        :type source_type: `str`
         :param pso_settings: PSO settings
         :type pso_settings: `dict`
         :param psf_iteration_settings: PSF iteration settings
         :type psf_iteration_settings: `dict`
         :param sampler_settings: sampler settings
         :type sampler_settings: `dict`
+        :param sampler_name: sampler name
+        :type sampler_name: `str`
+        :param supersampling_factor: supersampling factor
+        :type supersampling_factor: `List[int]`
+        :param max_satellite_number: maximum number of satellites
+        :type max_satellite_number: `int`
+        :param minimum_satellite_area: minimum satellite area
+        :type minimum_satellite_area: `int`
+        :param satellite_bound: satellite bound
+        :type satellite_bound: `float`
+        :param clear_center: radius (arcsecond) to clear the center from any detected satellite or quasar
+        :type clear_center: `float`
+        :return: configuration
+        :rtype: `dict`
         """
+        # Get image data and coordinate system
         image_data = self.get_image_data(lens_name, band_name)
         coordinate_system = image_data.get_image_coordinate_system()
         semantic_segmentation = self.load_semantic_segmentation(lens_name, band_name)
 
+        # Initialize configuration dictionary
         config = {}
         config["lens_name"] = lens_name
         config["band"] = [band_name]
 
-        # config["pixel_size"] = image_data.get_image_pixel_scale().item()
-
+        # Define model components
         config["model"] = {
             "lens": ["EPL", "SHEAR_GAMMA_PSI"],
             "lens_light": ["SERSIC_ELLIPSE"],
             "source_light": ["SERSIC_ELLIPSE"],
-            "point_source": (["LENSED_POSITION"] if type == "quasar" else [""]),
+            "point_source": (["LENSED_POSITION"] if source_type == "quasar" else [""]),
         }
 
+        # Set lens options
         galaxy_center_x, galaxy_center_y = self.get_lens_galaxy_center_init(
             semantic_segmentation, coordinate_system
         )
@@ -140,8 +160,9 @@ class Modeler(AI):
         config["lens_light_option"] = {"fix": {0: {"n_sersic": 4.0}}}
         config["source_light_option"] = {"n_max": [4]}
 
+        # Set point source options
         point_source_init = self.get_quasar_image_position(
-            semantic_segmentation, coordinate_system
+            semantic_segmentation, coordinate_system, clear_center=clear_center
         )
         config["point_source_option"] = {
             "ra_init": point_source_init[0].tolist(),
@@ -149,18 +170,39 @@ class Modeler(AI):
             "bound": 0.2,
         }
 
+        # Set satellite options
+        satellite_positions = self.get_satellite_positions(
+            semantic_segmentation,
+            coordinate_system,
+            clear_center=clear_center,
+            minimum_pixel_area=minimum_satellite_area,
+        )
+
+        if len(satellite_positions) > 0:
+            config["satellites"] = {
+                "centroid_init": [
+                    a for a in satellite_positions[:max_satellite_number]
+                ],
+                "centroid_bound": satellite_bound,
+            }
+
+        # Set numeric options
         config["numeric_option"] = {"supersampling_factor": supersampling_factor}
 
+        # Set fitting options
         config["fitting"] = {
             "pso": psf_iteration_settings is not None,
             "pso_settings": pso_settings,
         }
 
         config["fitting"]["psf_iteration"] = (
-            True if psf_iteration_settings is not None and type == "quasar" else False
+            True
+            if psf_iteration_settings is not None and source_type == "quasar"
+            else False
         )
         config["fitting"]["psf_iteration_settings"] = psf_iteration_settings
-        # second minimum distance between the four quasar images
+
+        # Calculate distances between quasar images
         distances = []
         for i in range(len(point_source_init[0])):
             for j in range(i + 1, len(point_source_init[0])):
@@ -170,6 +212,9 @@ class Modeler(AI):
                         + (point_source_init[1][i] - point_source_init[1][j]) ** 2
                     )
                 )
+
+        # Set PSF iteration settings
+        # Second minimum distance is used to set the block center neighbour and error map radius
         if "block_center_neighbour" not in config["fitting"]["psf_iteration_settings"]:
             config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = (
                 float(np.sort(distances)[1] / 2.0)
@@ -179,17 +224,19 @@ class Modeler(AI):
                 np.sort(distances)[1] / 2.0
             )
 
+        # Set sampling options
         config["fitting"]["sampling"] = sampler_settings is not None
         config["fitting"]["sampler"] = sampler_name
         config["fitting"]["sampler_settings"] = sampler_settings
 
+        # Set mask options
         config["mask"] = {}
         config["mask"]["provided"] = True
         self.file_system.save_mask(
             lens_name,
             band_name,
             self.get_mask_from_semantic_segmentation(
-                semantic_segmentation, coordinate_system
+                semantic_segmentation, coordinate_system, point_source_init
             ),
         )
 
@@ -197,19 +244,20 @@ class Modeler(AI):
 
     @classmethod
     def get_mask_from_semantic_segmentation(
-        cls, semantic_segmentation, coordinate_system
+        cls, semantic_segmentation, coordinate_system, image_positions
     ):
         """Get mask from the semantic segmentation output.
 
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
+        :param coordinate_system: coordinate system
+        :type coordinate_system: `Coordinates`
+        :param image_positions: image positions
+        :type image_positions: `List[np.ndarray]`
         :return: mask
         :rtype: `numpy.ndarray`
         """
         galaxy_center = cls.get_lens_galaxy_center_init(
-            semantic_segmentation, coordinate_system
-        )
-        image_positions = cls.get_quasar_image_position(
             semantic_segmentation, coordinate_system
         )
 
@@ -272,13 +320,19 @@ class Modeler(AI):
         return [galaxy_center_ra, galaxy_center_dec]
 
     @classmethod
-    def get_quasar_image_position(cls, semantic_segmentation, coordinate_system):
+    def get_quasar_image_position(
+        cls, semantic_segmentation, coordinate_system, clear_center=0.0
+    ):
         """Identify quasar image positions from the semantic segmentation output.
 
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
         :type coordinate_system: `Coordinates`
+        :param galaxy_center: galaxy center
+        :type galaxy_center: `List[float]`
+        :param clear_center: radius (arcsecond) to clear the center from any detected quasar
+        :type clear_center: `float`
         :return: quasar image positions
         :rtype: `[np.ndarray, np.ndarray]`
         """
@@ -286,12 +340,64 @@ class Modeler(AI):
 
         quasar_ra, quasar_dec = [], []
 
+        galaxy_center = cls.get_lens_galaxy_center_init(
+            semantic_segmentation, coordinate_system
+        )
+
         for position in quasar_positions:
             ra, dec = coordinate_system.map_pix2coord(position[1], position[0])
-            quasar_ra.append(ra)
-            quasar_dec.append(dec)
+
+            distance = np.sqrt(
+                (ra - galaxy_center[0]) ** 2 + (dec - galaxy_center[1]) ** 2
+            )
+
+            if distance > clear_center:
+                quasar_ra.append(ra)
+                quasar_dec.append(dec)
 
         return [np.array(quasar_ra), np.array(quasar_dec)]
+
+    @classmethod
+    def get_satellite_positions(
+        cls,
+        semantic_segmentation,
+        coordinate_system,
+        clear_center=0.0,
+        minimum_pixel_area=1,
+    ):
+        """Identify satellite positions from the semantic segmentation output.
+
+        :param semantic_segmentation: semantic segmentation output
+        :type semantic_segmentation: `numpy.ndarray`
+        :param coordinate_system: coordinate system
+        :type coordinate_system: `Coordinates`
+        :param clear_center: radius (arcsecond) to clear the center from any detected satellite
+        :type clear_center: `float`
+        :param minimum_pixel_area: minimum pixel area for a satellite
+        :type minimum_pixel_area: `int`
+        :return: satellite positions
+        :rtype: `List[List[float]]`
+        """
+        satellite_positions = cls.list_region_centers(
+            semantic_segmentation, 4, minimum_pixel_area=minimum_pixel_area
+        )
+        galaxy_center = cls.get_lens_galaxy_center_init(
+            semantic_segmentation, coordinate_system
+        )
+
+        satellite_ra, satellite_dec = [], []
+
+        for position in satellite_positions:
+            ra, dec = coordinate_system.map_pix2coord(position[1], position[0])
+
+            distance = np.sqrt(
+                (ra - galaxy_center[0]) ** 2 + (dec - galaxy_center[1]) ** 2
+            )
+            if distance > clear_center:
+                satellite_ra.append(float(ra))
+                satellite_dec.append(float(dec))
+
+        return [[ra, dec] for ra, dec in zip(satellite_ra, satellite_dec)]
 
     @classmethod
     def collect_connected_pixels(
@@ -329,7 +435,7 @@ class Modeler(AI):
         )
 
     @classmethod
-    def list_region_centers(cls, matrix, target_value):
+    def list_region_centers(cls, matrix, target_value, minimum_pixel_area=1):
         """List the central pixel (x, y) for all regions in a matrix with the target
         value.
 
@@ -337,6 +443,10 @@ class Modeler(AI):
         :type matrix: `List[List[int]]`
         :param target_value: target value
         :type target_value: `int`
+        :return: list of central pixels (x, y) for all regions
+        :rtype: `List[Tuple[int, int]]`
+        :param minimum_size: minimum size of the region
+        :type minimum_size: `int`
         :return: list of central pixels (x, y) for all regions
         :rtype: `List[Tuple[int, int]]`
         """
@@ -351,9 +461,10 @@ class Modeler(AI):
                     cls.collect_connected_pixels(
                         i, j, pixels, visited, target_value, matrix, rows, cols
                     )
-                    if pixels:
+                    if pixels and len(pixels) >= minimum_pixel_area:
                         center_x = sum(p[0] for p in pixels) // len(pixels)
                         center_y = sum(p[1] for p in pixels) // len(pixels)
+
                         region_centers.append((center_x, center_y))
 
         return region_centers

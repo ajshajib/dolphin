@@ -13,9 +13,10 @@ class Modeler(AI):
     """This class creates a configuration file from the output of the visual recognition
     model."""
 
-    def __init__(self, io_directory_path):
+    def __init__(self, io_directory_path, source_type="galaxy"):
         """Initialize the Configure object."""
         super(Modeler, self).__init__(io_directory_path)
+        self._source_type = source_type
 
     def create_configuration_for_all_lenses(self, band_name, **kwargs):
         """Create configuration files for all lenses.
@@ -230,21 +231,21 @@ class Modeler(AI):
         config["fitting"]["sampler_settings"] = sampler_settings
 
         # Set mask options
-        config["mask"] = {}
-        config["mask"]["provided"] = True
-        self.file_system.save_mask(
-            lens_name,
-            band_name,
-            self.get_mask_from_semantic_segmentation(
-                semantic_segmentation, coordinate_system, point_source_init
-            ),
-        )
+        if self._source_type == "quasar":
+            config["mask"] = {}
+            config["mask"]["provided"] = True
+            self.file_system.save_mask(
+                lens_name,
+                band_name,
+                self.get_mask_from_semantic_segmentation(
+                    semantic_segmentation, coordinate_system, point_source_init
+                ),
+            )
 
         return config
 
-    @classmethod
     def get_mask_from_semantic_segmentation(
-        cls, semantic_segmentation, coordinate_system, image_positions
+        self, semantic_segmentation, coordinate_system, image_positions
     ):
         """Get mask from the semantic segmentation output.
 
@@ -257,7 +258,11 @@ class Modeler(AI):
         :return: mask
         :rtype: `numpy.ndarray`
         """
-        galaxy_center = cls.get_lens_galaxy_center_init(
+        if self._source_type != "quasar":
+            raise NotImplementedError(
+                "Mask generation is only implemented for quasar sources."
+            )
+        galaxy_center = self.get_lens_galaxy_center_init(
             semantic_segmentation, coordinate_system
         )
 
@@ -269,7 +274,7 @@ class Modeler(AI):
             image_positions[0], image_positions[1]
         )
 
-        theta_E_init = cls.get_theta_E_init(
+        theta_E_init = self.get_theta_E_init(
             [galaxy_center_x, galaxy_center_y], [image_positions_x, image_positions_y]
         )
 
@@ -284,8 +289,7 @@ class Modeler(AI):
 
         return mask
 
-    @staticmethod
-    def get_theta_E_init(galaxy_center, image_positions):
+    def get_theta_E_init(self, galaxy_center, image_positions):
         """Get the initial guess for the Einstein radius.
 
         :param galaxy_center: galaxy center
@@ -295,6 +299,11 @@ class Modeler(AI):
         :return: initial guess for the Einstein radius
         :rtype: `float`
         """
+        if self._source_type != "quasar":
+            raise NotImplementedError(
+                "Einstein radius calculation is only implemented for quasar sources."
+            )
+
         x_0, y_0 = galaxy_center
         x_i, y_i = image_positions
 
@@ -319,9 +328,8 @@ class Modeler(AI):
 
         return [galaxy_center_ra, galaxy_center_dec]
 
-    @classmethod
     def get_quasar_image_position(
-        cls, semantic_segmentation, coordinate_system, clear_center=0.0
+        self, semantic_segmentation, coordinate_system, clear_center=0.0
     ):
         """Identify quasar image positions from the semantic segmentation output.
 
@@ -336,11 +344,15 @@ class Modeler(AI):
         :return: quasar image positions
         :rtype: `[np.ndarray, np.ndarray]`
         """
-        quasar_positions = cls.list_region_centers(semantic_segmentation, 3)
+        if self._source_type != "quasar":
+            raise NotImplementedError(
+                "Quasar image position calculation is only implemented for quasar sources."
+            )
+        quasar_positions = self.list_region_centers(semantic_segmentation, 3)
 
         quasar_ra, quasar_dec = [], []
 
-        galaxy_center = cls.get_lens_galaxy_center_init(
+        galaxy_center = self.get_lens_galaxy_center_init(
             semantic_segmentation, coordinate_system
         )
 

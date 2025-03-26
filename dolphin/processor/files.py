@@ -549,6 +549,10 @@ class FileSystem(object):
             / f"lensed_{source_type}_segmentation_model.h5"
         )
 
+        # Check if the directory exists, create if not
+        if not Path(path).parent.is_dir():
+            Path(path).parent.mkdir()
+
         # Check if the file exists
         if not Path(path).is_file():
             # Download the model using gdown

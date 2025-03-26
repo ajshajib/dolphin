@@ -53,13 +53,10 @@ class Vision(AI):
         reshaped_image = self.resize_image(image)
 
         segmentation = self.get_semantic_segmentation_from_nn(reshaped_image)
-        reshaped_segmentation = self.resize_segmentation_to_original_size(
-            segmentation, image.shape[0]
-        )
 
-        self.save_segmentation(lens_name, band_name, reshaped_segmentation)
+        self.save_segmentation(lens_name, band_name, segmentation)
 
-        return reshaped_segmentation
+        return segmentation
 
     def save_segmentation(self, lens_name, band_name, segmentation):
         """Save the segmentation to a file.
@@ -135,8 +132,13 @@ class Vision(AI):
 
         segmentation = np.argmax(prediction[0], axis=-1)  # Shape: (128, 128)
 
+        # Resize the segmentation to the original size
+        reshaped_segmentation = self.resize_segmentation_to_original_size(
+            segmentation, image.shape[0]
+        )
+
         if self._source_type == "galaxy":
             # Setting the satellite label to 4 to match with the case of quasar
-            segmentation[segmentation == 3] = 4
+            reshaped_segmentation[reshaped_segmentation == 3] = 4
 
-        return segmentation
+        return reshaped_segmentation

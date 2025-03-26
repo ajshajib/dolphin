@@ -4,7 +4,6 @@
 import numpy as np
 from tensorflow.keras.models import load_model
 from scipy.ndimage import zoom
-import os
 
 from .ai import AI
 

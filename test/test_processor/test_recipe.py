@@ -139,7 +139,7 @@ class TestRecipe(object):
         :rtype:
         """
         self.recipe.reconstruct_psf = True
-        fitting_kwargs_list = self.recipe.get_default_recipe()
+        fitting_kwargs_list = self.recipe.get_galaxy_quasar_recipe()
         assert isinstance(fitting_kwargs_list, list)
 
     def test_get_sampling_sequence(self):

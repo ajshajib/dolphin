@@ -34,7 +34,7 @@ class Processor(object):
         model_id,
         log=True,
         mpi=False,
-        recipe_name="default",
+        recipe_name="qalaxy-quasar",
         thread_count=1,
     ):
         """Run models for a single lens.
@@ -48,7 +48,7 @@ class Processor(object):
         :param mpi: MPI option
         :type mpi: `bool`
         :param recipe_name: recipe for pre-sampling optimization, supported
-            ones now: 'default' and 'galaxy-galaxy'
+            ones now: 'galaxy-quasar' and 'galaxy-galaxy'
         :type recipe_name: `str`
         :param sampler: 'EMCEE' or 'COSMOHAMMER', cosmohammer is kept for
             legacy

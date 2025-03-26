@@ -216,6 +216,8 @@ class Output(Processor):
         magnification_cmap="viridis",
         v_min=None,
         v_max=None,
+        source_v_min=None,
+        source_v_max=None,
         print_results=False,
         show_source_light=False,
     ):
@@ -246,6 +248,12 @@ class Output(Processor):
         :type v_min: `float` or `int`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
+        :param source_v_min: minimum plotting scale for the source plot
+        :type source_v_min: `float` or `int`
+        :param source_v_max: maximum plotting scale for the source plot
+        :type source_v_max: `float` or `int`
+        :param print_results: if true, prints the `kwargs_result` dictionary
+        :type print_results: `bool`
         :param show_source_light: if true, replaces convergence plot with
             source light convolved lens decomposition plot and also replaces
             the magnification plot with the source-light subtracted data
@@ -295,8 +303,9 @@ class Output(Processor):
             deltaPix_source=0.02,
             numPix=100,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            v_max=source_v_max,
+            v_min=source_v_min,
+            scale_size=0.4,
         )
         if not show_source_light:
             model_plot.convergence_plot(

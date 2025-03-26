@@ -220,11 +220,13 @@ class ModelConfig(Config):
             num_source_profiles
         )
 
+        joint_lens_with_light = self.get_joint_lens_with_light()
+
         kwargs_constraints = {
             "joint_source_with_source": joint_source_with_source,
             "joint_lens_light_with_lens_light": joint_lens_light_with_lens_light,
             "joint_source_with_point_source": joint_source_with_point_source,
-            "joint_lens_with_light": [],
+            "joint_lens_with_light": joint_lens_with_light,
             "joint_lens_with_lens": [],
         }
 
@@ -243,6 +245,24 @@ class ModelConfig(Config):
                 kwargs_constraints[key] = value
 
         return kwargs_constraints
+
+    def get_joint_lens_with_light(self):
+        """Create `joint_lens_with_light`."""
+        _, lens_light_satellite_flags = self.get_lens_light_model_list_with_flags()
+        _, lens_satellite_flags = self.get_lens_model_list_with_flags()
+
+        joint_lens_with_light = []
+
+        if np.any(lens_light_satellite_flags) > -1:
+            for i, flag in enumerate(lens_light_satellite_flags):
+                if flag > -1:
+                    lens_sat_index = lens_satellite_flags.index(flag)
+                    joint_lens_with_light.append(
+                        [i, lens_sat_index, ["center_x", "center_y"]]
+                    )
+
+        print(joint_lens_with_light)
+        return joint_lens_with_light
 
     def get_joint_source_with_point_source(self, num_source_profiles):
         """Create `joint_source_with_point_source`."""
@@ -884,6 +904,7 @@ class ModelConfig(Config):
                 bound = self.deflector_centroid_bound
                 center_x = self.deflector_center_ra
                 center_y = self.deflector_center_dec
+                theta_E_init = 1.0
             else:
                 # satellite
                 bound = self.settings["satellites"]["centroid_bound"]
@@ -893,8 +914,9 @@ class ModelConfig(Config):
                 center_y = self.settings["satellites"]["centroid_init"][
                     satellite_flags[i]
                 ][1]
+                theta_E_init = 0.1
 
-            if model in ["SPEP", "PEMD", "EPL", "SIE", "SIS"]:
+            if model in ["SPEP", "PEMD", "EPL", "SIE"]:
                 if model == "SIE":
                     fixed.append({"gamma": 2.0})
                 else:
@@ -906,7 +928,7 @@ class ModelConfig(Config):
                         "e1": 0.0,
                         "e2": 0.0,
                         "gamma": 2.0,
-                        "theta_E": 1.0,
+                        "theta_E": theta_E_init,
                     }
                 )
                 sigma.append(
@@ -953,7 +975,7 @@ class ModelConfig(Config):
                     {
                         "center_x": center_x,
                         "center_y": center_y,
-                        "theta_E": 0.2,
+                        "theta_E": theta_E_init,
                     }
                 )
                 sigma.append(

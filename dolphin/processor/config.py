@@ -253,7 +253,7 @@ class ModelConfig(Config):
 
         joint_lens_with_light = []
 
-        if np.any(lens_light_satellite_flags) > -1:
+        if (np.array(lens_light_satellite_flags) > -1).any():
             for i, flag in enumerate(lens_light_satellite_flags):
                 if flag > -1:
                     lens_sat_index = lens_satellite_flags.index(flag)

@@ -13,7 +13,7 @@ class Modeler(AI):
     """This class creates a configuration file from the output of the visual recognition
     model."""
 
-    def __init__(self, io_directory_path, source_type="galaxy"):
+    def __init__(self, io_directory_path, source_type="quasar"):
         """Initialize the Configure object."""
         super(Modeler, self).__init__(io_directory_path)
         self._source_type = source_type
@@ -238,14 +238,14 @@ class Modeler(AI):
                 lens_name,
                 band_name,
                 self.get_mask_from_semantic_segmentation(
-                    semantic_segmentation, coordinate_system, point_source_init
+                    semantic_segmentation, coordinate_system
                 ),
             )
 
         return config
 
     def get_mask_from_semantic_segmentation(
-        self, semantic_segmentation, coordinate_system, image_positions
+        self, semantic_segmentation, coordinate_system
     ):
         """Get mask from the semantic segmentation output.
 
@@ -262,20 +262,10 @@ class Modeler(AI):
             raise NotImplementedError(
                 "Mask generation is only implemented for quasar sources."
             )
-        galaxy_center = self.get_lens_galaxy_center_init(
+
+        theta_E_init = self.get_theta_E_init(semantic_segmentation, coordinate_system)
+        galaxy_center_x, galaxy_center_y = self.get_lens_galaxy_center_init(
             semantic_segmentation, coordinate_system
-        )
-
-        galaxy_center_x, galaxy_center_y = coordinate_system.map_coord2pix(
-            galaxy_center[0], galaxy_center[1]
-        )
-
-        image_positions_x, image_positions_y = coordinate_system.map_coord2pix(
-            image_positions[0], image_positions[1]
-        )
-
-        theta_E_init = self.get_theta_E_init(
-            [galaxy_center_x, galaxy_center_y], [image_positions_x, image_positions_y]
         )
 
         mask = np.zeros(semantic_segmentation.shape)
@@ -289,7 +279,7 @@ class Modeler(AI):
 
         return mask
 
-    def get_theta_E_init(self, galaxy_center, image_positions):
+    def get_theta_E_init(self, semantic_segmentation, coordinate_system):
         """Get the initial guess for the Einstein radius.
 
         :param galaxy_center: galaxy center
@@ -299,15 +289,29 @@ class Modeler(AI):
         :return: initial guess for the Einstein radius
         :rtype: `float`
         """
-        if self._source_type != "quasar":
-            raise NotImplementedError(
-                "Einstein radius calculation is only implemented for quasar sources."
+        galaxy_center = self.get_lens_galaxy_center_init(
+            semantic_segmentation, coordinate_system
+        )
+
+        if self._source_type == "quasar":
+            image_positions = self.get_quasar_image_position(
+                semantic_segmentation, coordinate_system
+            )
+            x_0, y_0 = galaxy_center
+            x_i, y_i = image_positions
+            theta_E_init = np.mean(np.sqrt((x_i - x_0) ** 2 + (y_i - y_0) ** 2))
+        elif self._source_type == "galaxy":
+            # Get all x and y indices of the pixels where semantic segmentation is 2
+            arc_x, arc_y = np.where(semantic_segmentation == 2)
+
+            arc_ra, arc_dec = coordinate_system.map_pix2coord(arc_y, arc_x)
+            rs = np.sqrt(
+                (arc_ra - galaxy_center[0]) ** 2 + (arc_dec - galaxy_center[1]) ** 2
             )
 
-        x_0, y_0 = galaxy_center
-        x_i, y_i = image_positions
+            theta_E_init = np.mean(rs)
 
-        return np.mean(np.sqrt((x_i - x_0) ** 2 + (y_i - y_0) ** 2))
+        return theta_E_init
 
     @classmethod
     def get_lens_galaxy_center_init(cls, semantic_segmentation, coordinate_system):
@@ -321,7 +325,7 @@ class Modeler(AI):
         :rtype: `[float, float]`
         """
         galaxy_center_pixels = cls.list_region_centers(semantic_segmentation, 1)
-
+        print(galaxy_center_pixels, np.sum(semantic_segmentation))
         galaxy_center_ra, galaxy_center_dec = coordinate_system.map_pix2coord(
             galaxy_center_pixels[0][1], galaxy_center_pixels[0][0]
         )

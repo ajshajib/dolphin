@@ -1,5 +1,6 @@
 from pathlib import Path
 import numpy as np
+import pytest
 
 from dolphin.ai.modeler import Modeler
 
@@ -211,3 +212,6 @@ class TestModeler:
 
         assert np.allclose(sorted(quasar_image_positions[0]), sorted(quasar_coords[0]))
         assert np.allclose(sorted(quasar_image_positions[1]), sorted(quasar_coords[1]))
+
+        with pytest.raises(NotImplementedError):
+            self.galaxy_modeler.get_quasar_image_position(mask, coordinate_system)

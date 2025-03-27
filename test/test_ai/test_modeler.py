@@ -138,20 +138,45 @@ class TestModeler:
         band_name = "F814W"
         image_data = self.qso_modeler.get_image_data(lens_name, band_name)
         coordinate_system = image_data.get_image_coordinate_system()
-        semantic_segmentation = self.qso_modeler.load_semantic_segmentation(
-            lens_name, band_name
-        )
+
+        semantic_segmentation = np.zeros_like(image_data.get_image())
+        xs = np.arange(semantic_segmentation.shape[0])
+        ys = np.arange(semantic_segmentation.shape[1])
+        xx, yy = np.meshgrid(xs, ys)
+        ras, decs = coordinate_system.map_pix2coord(xx.flatten(), yy.flatten())
+
+        ras = ras.reshape(semantic_segmentation.shape)
+        decs = decs.reshape(semantic_segmentation.shape)
+
+        rs = np.sqrt(ras**2 + decs**2)
+
+        semantic_segmentation[rs < 0.2] = 1  # deflector
+
+        # quasar 1
+        rs = np.sqrt((ras - 0.5) ** 2 + (decs - 0) ** 2)
+        semantic_segmentation[rs < 0.1] = 3  # quasar 1
+
+        # quasar 2
+        rs = np.sqrt((ras + 0.5) ** 2 + (decs - 0) ** 2)
+        semantic_segmentation[rs < 0.1] = 3  # quasar 2
+
         theta_E_init = self.qso_modeler.get_theta_E_init(
             semantic_segmentation, coordinate_system
         )
 
-        assert 0.70 < theta_E_init < 0.75
+        assert round(theta_E_init, 2) == 0.5
+
+        semantic_segmentation *= 0
+
+        rs = np.sqrt(ras**2 + decs**2)
+        semantic_segmentation[rs < 0.2] = 1  # deflector
+        semantic_segmentation[(rs > 0.65) & (rs < 0.75)] = 2  # arc
 
         theta_E_init = self.galaxy_modeler.get_theta_E_init(
             semantic_segmentation, coordinate_system
         )
 
-        assert 0.77 < theta_E_init < 0.83
+        assert round(theta_E_init, 2) == 0.7
 
     def test_get_lens_galaxy_center_init(self):
         """Test `get_lens_galaxy_center_init` method.

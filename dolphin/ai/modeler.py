@@ -321,7 +321,6 @@ class Modeler(AI):
         :rtype: `[float, float]`
         """
         galaxy_center_pixels = cls.list_region_centers(semantic_segmentation, 1)
-        print(galaxy_center_pixels, np.sum(semantic_segmentation))
         galaxy_center_ra, galaxy_center_dec = coordinate_system.map_pix2coord(
             galaxy_center_pixels[0][1], galaxy_center_pixels[0][0]
         )

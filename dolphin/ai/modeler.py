@@ -187,6 +187,10 @@ class Modeler(AI):
                 "centroid_bound": satellite_bound,
             }
 
+        # Set guess params
+        theta_E_init = self.get_theta_E_init(semantic_segmentation, coordinate_system)
+        config["guess_params"] = {"lens": {0: {"theta_E": theta_E_init}}}
+
         # Set numeric options
         config["numeric_option"] = {"supersampling_factor": supersampling_factor}
 

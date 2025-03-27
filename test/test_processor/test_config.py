@@ -213,7 +213,12 @@ class TestModelConfig(object):
                 [5, 7, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
             ],
             "joint_source_with_point_source": [],
-            "joint_lens_with_light": [],
+            "joint_lens_with_light": [
+                [4, 2, ["center_x", "center_y"]],
+                [5, 3, ["center_x", "center_y"]],
+                [6, 2, ["center_x", "center_y"]],
+                [7, 3, ["center_x", "center_y"]],
+            ],
             "joint_lens_with_lens": [],
         }
 

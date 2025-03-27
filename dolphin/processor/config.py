@@ -261,7 +261,6 @@ class ModelConfig(Config):
                         [i, lens_sat_index, ["center_x", "center_y"]]
                     )
 
-        print(joint_lens_with_light)
         return joint_lens_with_light
 
     def get_joint_source_with_point_source(self, num_source_profiles):
@@ -817,7 +816,7 @@ class ModelConfig(Config):
                 lens_light_model_list += [
                     model for model in self.settings["model"]["lens_light"]
                 ]
-                satellite_flag += [-1]
+                satellite_flag += [-1 for model in self.settings["model"]["lens_light"]]
 
             if self.num_satellites > 0:
                 if "is_elliptical" not in self.settings["satellites"]:

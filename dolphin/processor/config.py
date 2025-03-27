@@ -903,7 +903,10 @@ class ModelConfig(Config):
                 bound = self.deflector_centroid_bound
                 center_x = self.deflector_center_ra
                 center_y = self.deflector_center_dec
-                theta_E_init = 1.0
+                try:
+                    theta_E_init = self.settings["guess_params"]["lens"][0]["theta_E"]
+                except (NameError, KeyError):
+                    theta_E_init = 1.0
             else:
                 # satellite
                 bound = self.settings["satellites"]["centroid_bound"]

@@ -258,11 +258,6 @@ class Modeler(AI):
         :return: mask
         :rtype: `numpy.ndarray`
         """
-        if self._source_type != "quasar":
-            raise NotImplementedError(
-                "Mask generation is only implemented for quasar sources."
-            )
-
         theta_E_init = self.get_theta_E_init(semantic_segmentation, coordinate_system)
         galaxy_center_x, galaxy_center_y = self.get_lens_galaxy_center_init(
             semantic_segmentation, coordinate_system

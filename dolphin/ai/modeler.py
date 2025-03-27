@@ -179,13 +179,10 @@ class Modeler(AI):
             minimum_pixel_area=minimum_satellite_area,
         )
 
-        if len(satellite_positions) > 0:
-            config["satellites"] = {
-                "centroid_init": [
-                    a for a in satellite_positions[:max_satellite_number]
-                ],
-                "centroid_bound": satellite_bound,
-            }
+        config["satellites"] = {
+            "centroid_init": [a for a in satellite_positions[:max_satellite_number]],
+            "centroid_bound": satellite_bound,
+        }
 
         # Set guess params
         theta_E_init = self.get_theta_E_init(semantic_segmentation, coordinate_system)

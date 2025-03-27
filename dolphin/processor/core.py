@@ -34,7 +34,7 @@ class Processor(object):
         model_id,
         log=True,
         mpi=False,
-        recipe_name="qalaxy-quasar",
+        recipe_name="galaxy-quasar",
         thread_count=1,
     ):
         """Run models for a single lens.

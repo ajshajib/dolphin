@@ -9,7 +9,8 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 class TestModeler:
     def setup_class(self):
-        self.modeler = Modeler(_TEST_IO_DIR)
+        self.qso_modeler = Modeler(_TEST_IO_DIR, source_type="quasar")
+        self.galaxy_modeler = Modeler(_TEST_IO_DIR, source_type="galaxy")
 
     @classmethod
     def teardown_class(cls):
@@ -27,7 +28,7 @@ class TestModeler:
         if config_file_path.exists():
             config_file_path.unlink()
 
-        self.modeler.create_config_for_single_lens(lens_system, "F814W")
+        self.qso_modeler.create_config_for_single_lens(lens_system, "F814W")
 
         assert config_file_path.exists()
 
@@ -47,7 +48,7 @@ class TestModeler:
             if config_file_path.exists():
                 config_file_path.unlink()
 
-        self.modeler.create_configuration_for_all_lenses("F814W")
+        self.qso_modeler.create_configuration_for_all_lenses("F814W")
         for lens_system in lens_systems:
             config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
             assert config_file_path.exists()
@@ -60,7 +61,9 @@ class TestModeler:
         :return:
         :rtype:
         """
-        segmentation = self.modeler.load_semantic_segmentation("lensed_quasar", "F814W")
+        segmentation = self.qso_modeler.load_semantic_segmentation(
+            "lensed_quasar", "F814W"
+        )
 
         assert segmentation is not None
         assert segmentation.shape == (120, 120)
@@ -77,7 +80,7 @@ class TestModeler:
         config = {"lens_system": lens_system, "band": "F814W"}
         if config_file_path.exists():
             config_file_path.unlink()
-        self.modeler.save_configuration(config, lens_system)
+        self.qso_modeler.save_configuration(config, lens_system)
 
         assert config_file_path.exists()
 
@@ -88,7 +91,7 @@ class TestModeler:
         :rtype:
         """
         lens_system = "lensed_quasar"
-        config = self.modeler.get_configuration(lens_system, "F814W")
+        config = self.qso_modeler.get_configuration(lens_system, "F814W")
 
         keywords = [
             "lens_name",
@@ -113,12 +116,12 @@ class TestModeler:
         """
         lens_name = "lensed_quasar"
         band_name = "F814W"
-        image_data = self.modeler.get_image_data(lens_name, band_name)
+        image_data = self.qso_modeler.get_image_data(lens_name, band_name)
         coordinate_system = image_data.get_image_coordinate_system()
-        semantic_segmentation = self.modeler.load_semantic_segmentation(
+        semantic_segmentation = self.qso_modeler.load_semantic_segmentation(
             lens_name, band_name
         )
-        mask = self.modeler.get_mask_from_semantic_segmentation(
+        mask = self.qso_modeler.get_mask_from_semantic_segmentation(
             semantic_segmentation=semantic_segmentation,
             coordinate_system=coordinate_system,
         )
@@ -130,11 +133,24 @@ class TestModeler:
         :return:
         :rtype:
         """
-        center = [0, 0]
-        image_positions = np.array([[1, -1, 0, 0], [0, 0, 1, -1]])
-        theta_E_init = self.modeler.get_theta_E_init(center, image_positions)
+        lens_name = "lensed_quasar"
+        band_name = "F814W"
+        image_data = self.qso_modeler.get_image_data(lens_name, band_name)
+        coordinate_system = image_data.get_image_coordinate_system()
+        semantic_segmentation = self.qso_modeler.load_semantic_segmentation(
+            lens_name, band_name
+        )
+        theta_E_init = self.qso_modeler.get_theta_E_init(
+            semantic_segmentation, coordinate_system
+        )
 
-        assert theta_E_init == 1
+        assert 0.70 < theta_E_init < 0.75
+
+        theta_E_init = self.galaxy_modeler.get_theta_E_init(
+            semantic_segmentation, coordinate_system
+        )
+
+        assert 0.77 < theta_E_init < 0.83
 
     def test_get_lens_galaxy_center_init(self):
         """Test `get_lens_galaxy_center_init` method.
@@ -142,7 +158,7 @@ class TestModeler:
         :return:
         :rtype:
         """
-        image_data = self.modeler.get_image_data("lensed_quasar", "F814W")
+        image_data = self.qso_modeler.get_image_data("lensed_quasar", "F814W")
         coordinate_system = image_data.get_image_coordinate_system()
         image_size = image_data.get_image_size()
 
@@ -156,7 +172,7 @@ class TestModeler:
                 if (i - center_pix[0]) ** 2 + (j - center_pix[1]) ** 2 < 10**2:
                     mask[j, i] = 1
 
-        lens_galaxy_center_init = self.modeler.get_lens_galaxy_center_init(
+        lens_galaxy_center_init = self.qso_modeler.get_lens_galaxy_center_init(
             mask, coordinate_system
         )
 
@@ -168,7 +184,7 @@ class TestModeler:
         :return:
         :rtype:
         """
-        image_data = self.modeler.get_image_data("lensed_quasar", "F814W")
+        image_data = self.qso_modeler.get_image_data("lensed_quasar", "F814W")
         coordinate_system = image_data.get_image_coordinate_system()
         image_size = image_data.get_image_size()
 
@@ -177,6 +193,8 @@ class TestModeler:
         quasar_pixel_x, quasar_pixel_y = [30, 50], [80, 40]
         quasar_coords = coordinate_system.map_pix2coord(quasar_pixel_x, quasar_pixel_y)
 
+        galaxy_pixel_x, galaxy_pixel_y = 80, 80
+
         for i in range(image_size):
             for j in range(image_size):
                 if (i - quasar_pixel_x[0]) ** 2 + (j - quasar_pixel_y[0]) ** 2 < 7**2:
@@ -184,7 +202,10 @@ class TestModeler:
                 if (i - quasar_pixel_x[1]) ** 2 + (j - quasar_pixel_y[1]) ** 2 < 7**2:
                     mask[j, i] = 3
 
-        quasar_image_positions = self.modeler.get_quasar_image_position(
+                if (i - galaxy_pixel_x) ** 2 + (j - galaxy_pixel_y) ** 2 < 7**2:
+                    mask[j, i] = 1
+
+        quasar_image_positions = self.qso_modeler.get_quasar_image_position(
             mask, coordinate_system
         )
 

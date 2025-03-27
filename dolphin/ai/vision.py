@@ -17,7 +17,10 @@ class Vision(AI):
         :param data_file_path: path to a data file
         :type data_file_path: `str`
         """
-        assert source_type in ["quasar", "galaxy"]
+        if source_type not in ["quasar", "galaxy"]:
+            raise ValueError(
+                f"Invalid source type: {source_type}. It should be either 'quasar' or 'galaxy'."
+            )
         super(Vision, self).__init__(io_directory_path)
 
         self._source_type = source_type

@@ -114,7 +114,7 @@ html_theme_options = {
         "image_light": "https://raw.githubusercontent.com/ajshajib/dolphin/efb2673646edd6c2d98963e9f4d08a9104d293c3/logo.png",
         "image_dark": "https://raw.githubusercontent.com/ajshajib/dolphin/efb2673646edd6c2d98963e9f4d08a9104d293c3/logo.png",  # Optional for dark mode
         "alt_text": "Dolphin Logo",
-    }
+    },
     "logo_text": "dolphin",
     "navigation_depth": 4,
     "navbar_end": ["search-field", "navbar-icon-links"],

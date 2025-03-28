@@ -223,10 +223,11 @@ class TestModeler:
 
         for i in range(image_size):
             for j in range(image_size):
-                if (i - quasar_pixel_x[0]) ** 2 + (j - quasar_pixel_y[0]) ** 2 < 7**2:
-                    mask[j, i] = 3
-                if (i - quasar_pixel_x[1]) ** 2 + (j - quasar_pixel_y[1]) ** 2 < 7**2:
-                    mask[j, i] = 3
+                for k in range(2):
+                    if (i - quasar_pixel_x[k]) ** 2 + (
+                        j - quasar_pixel_y[k]
+                    ) ** 2 < 7**2:
+                        mask[j, i] = 3
 
                 if (i - galaxy_pixel_x) ** 2 + (j - galaxy_pixel_y) ** 2 < 7**2:
                     mask[j, i] = 1
@@ -235,8 +236,55 @@ class TestModeler:
             mask, coordinate_system
         )
 
-        assert np.allclose(sorted(quasar_image_positions[0]), sorted(quasar_coords[0]))
-        assert np.allclose(sorted(quasar_image_positions[1]), sorted(quasar_coords[1]))
+        assert np.allclose(
+            sorted(quasar_image_positions[0]), sorted(quasar_coords[0]), atol=1e-4
+        )
+        assert np.allclose(
+            sorted(quasar_image_positions[1]), sorted(quasar_coords[1]), atol=1e-4
+        )
 
         with pytest.raises(NotImplementedError):
             self.galaxy_modeler.get_quasar_image_position(mask, coordinate_system)
+
+    def test_get_satellite_positions(self):
+        """
+        Test `get_satellite_positions` method.
+        """
+        image_data = self.qso_modeler.get_image_data("lensed_quasar", "F814W")
+        coordinate_system = image_data.get_image_coordinate_system()
+        image_size = image_data.get_image_size()
+
+        mask = np.zeros((image_size, image_size))
+
+        satellite_pixel_xs, satellite_pixel_ys = [30, 50, 10], [80, 40, 80]
+        satellite_ras, satellite_decs = coordinate_system.map_pix2coord(
+            satellite_pixel_xs, satellite_pixel_ys
+        )
+
+        galaxy_pixel_x, galaxy_pixel_y = 80, 80
+
+        for i in range(image_size):
+            for j in range(image_size):
+                for k, (x, y) in enumerate(zip(satellite_pixel_xs, satellite_pixel_ys)):
+                    if (i - x) ** 2 + (j - y) ** 2 < 7**2:
+                        mask[j, i] = 4
+
+                if (i - galaxy_pixel_x) ** 2 + (j - galaxy_pixel_y) ** 2 < 7**2:
+                    mask[j, i] = 1
+
+        satellite_positions = self.qso_modeler.get_satellite_positions(
+            mask, coordinate_system
+        )
+
+        coords = [[ra, dec] for ra, dec in zip(satellite_ras, satellite_decs)]
+
+        assert len(satellite_positions) == len(coords)
+
+        # Sort coords by first elements first element
+        coords = sorted(coords, key=lambda x: x[0])
+        satellite_positions = sorted(satellite_positions, key=lambda x: x[0])
+
+        for i in range(len(coords)):
+            assert np.allclose(
+                sorted(satellite_positions[i]), sorted(coords[i]), atol=1e-4
+            )

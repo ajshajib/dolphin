@@ -9,9 +9,9 @@ Setting up the `dolphin` Ecosystem
 1. **Install `dolphin` and dependencies**:  
     Ensure you have installed `dolphin`, `lenstronomy`, and all required dependencies. You can install `dolphin` using pip:
 
-    ```bash
-    pip install space-dolphin
-    ```
+```bash
+pip install space-dolphin
+```
 
 2. **Create an input/output directory**:  
     Create a directory to serve as the input/output directory for `dolphin`. For an example, check the `io_directory_example`. The directory can have any name.

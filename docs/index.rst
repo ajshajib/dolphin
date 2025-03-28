@@ -12,7 +12,6 @@ Contents:
    :maxdepth: 3
 
    quickstart
-   usage
    contributing
    authors
    history

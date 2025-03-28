@@ -7,15 +7,15 @@
 [![docformatter](https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg)](https://github.com/PyCQA/docformatter)
 [![sphinx](https://img.shields.io/badge/%20style-sphinx-0a507a.svg)](https://www.sphinx-doc.org/en/master/usage/index.html)
 
-AI-powered automated pipeline for lens modeling based on
-[`lenstronomy`](https://github.com/sibirrer/lenstronomy).
+AI-powered automated pipeline for lens modeling, with
+[`lenstronomy`](https://github.com/sibirrer/lenstronomy) as the modeling engine.
 
 ## Features
-- **Automated** modeling for large samples of galaxy-scale lenses.
+- **AI-powered automated** modeling for large samples of galaxy-scale lenses.
 - **Flexible**: fully automated or semi-automated with user tweaks.
-- **Multi-band** lens modeling made simple.
+- **Multi-band** lens modeling made simple. 
 - Supports **both** galaxy–galaxy and galaxy–quasar systems.
-- Effortless syncing between local machines and **HPCC**.
+- Effortless syncing between local machines and **HPCC**. 
 - [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin) **tested!**
 
 ## Installation

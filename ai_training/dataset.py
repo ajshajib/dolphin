@@ -14,9 +14,7 @@ from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
 
 
 class TrainingData(object):
-    """
-    Contains all the methods to simulate the training set.
-    """
+    """Contains all the methods to simulate the training set."""
 
     def __init__(
         self,
@@ -26,8 +24,7 @@ class TrainingData(object):
         source_type="galaxy",
         verbose=False,
     ):
-        """
-        Setup the training set simulation settings.
+        """Setup the training set simulation settings.
 
         :param filters: list of filters used for simulation, must be defined in filter_settings.yaml
         :type filters: `list`
@@ -57,9 +54,7 @@ class TrainingData(object):
         self.filter_settings = self.get_filter_settings()
 
     def get_filter_settings(self):
-        """
-        Get the filter settings from the filter_settings.yaml file.
-        """
+        """Get the filter settings from the filter_settings.yaml file."""
         with open("filter_settings.yaml", "r") as file:
             filter_spec = yaml.load(file, Loader=yaml.FullLoader)
 
@@ -74,8 +69,7 @@ class TrainingData(object):
         return filter_settings
 
     def get_psf(self, filename):
-        """
-        Load the PSF from the file.
+        """Load the PSF from the file.
 
         :param filename: name of the file containing the PSF
         :type filename: `str`
@@ -92,7 +86,7 @@ class TrainingData(object):
         no_lens_light_fracion=0.5,
         random_seed=None,
     ):
-        """ """
+        """"""
         if random_seed is not None:
             np.random.seed(random_seed)
 

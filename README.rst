@@ -10,6 +10,9 @@
     :target: https://dolphin-docs.readthedocs.io/en/latest/?badge=latest
 .. image:: https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1
     :target: https://codecov.io/gh/ajshajib/dolphin
+.. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
+    :target: https://github.com/ajshajib/dolphin/blob/main/LICENSE
+    :alt: License BSD 3-Clause Badge
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 .. image:: https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg

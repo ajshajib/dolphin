@@ -39,4 +39,4 @@ See the [Quickstart guide](QUICKSTART.rst) for instructions on setting up and ru
 ## Citation
 
 If you use `dolphin` in your research, please cite the `dolphin` paper [Shajib et al. (2025)](). If you have used the `"galaxy-quasar"` fitting recipe, then additionally cite [Shajib et al. (2019)
-](https://ui.adsabs.harvard.edu/abs/2019MNRAS.483.5649S/abstract), and if you have used the `"galaxy-galaxy"' fitting recipe, then additionally cite [Shajib et al. (2021)](https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract).
+](https://ui.adsabs.harvard.edu/abs/2019MNRAS.483.5649S/abstract), or if you have used the `"galaxy-galaxy"` fitting recipe, then cite [Shajib et al. (2021)](https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract).

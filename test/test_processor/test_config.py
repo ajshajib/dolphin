@@ -29,7 +29,7 @@ class TestConfig(object):
         :rtype:
         """
         test_setting_file = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yaml"
         )
         config = Config()
         config.load_config_from_yaml(str(test_setting_file.resolve()))

@@ -22,7 +22,7 @@ Setting up the ``dolphin`` Ecosystem
     - **data**: Contains subdirectories for each lens system. Each subdirectory should include:
       - Image data files (in HDF5 format).
       - PSF files (in HDF5 format).
-    - **settings**: Contains configuration files (``config_{lens_name}.yml``) for each lens system.
+    - **settings**: Contains configuration files (``config_{lens_name}.yaml``) for each lens system.
     - **masks**: *(Optional)* Contains custom mask files (``mask_{lens_name}_{band}.npy``) for each lens system.
     - **logs**: Stores log files generated during model runs.
     - **outputs**: Saves the model outputs.
@@ -38,7 +38,7 @@ Setting up the ``dolphin`` Ecosystem
         │   │   ├── image_data.h5
         │   │   ├── psf_data.h5
         ├── settings/
-        │   ├── config_ai_test.yml
+        │   ├── config_ai_test.yaml
         ├── masks/
         │   ├── mask_ai_test_band1.npy
         ├── logs/

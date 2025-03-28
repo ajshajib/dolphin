@@ -53,7 +53,7 @@ class TestFileSystem(object):
         :return:
         :rtype:
         """
-        config_file_path = _TEST_IO_DIR / "settings" / "lens_system1_config.yml"
+        config_file_path = _TEST_IO_DIR / "settings" / "lens_system1_config.yaml"
 
         assert (
             Path(self.file_system.get_config_file_path("lens_system1"))

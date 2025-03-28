@@ -19,7 +19,7 @@ class TestRecipe(object):
 
     def setup_class(self):
         # self.test_setting_file = (
-        #     _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+        #     _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yaml"
         # )
         self.config = ModelConfig(
             "lens_system1", io_directory=(_ROOT_DIR / "io_directory_example").resolve()

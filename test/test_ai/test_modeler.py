@@ -24,7 +24,7 @@ class TestModeler:
         :rtype:
         """
         lens_system = "lensed_quasar_2"
-        config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+        config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yaml"
 
         if config_file_path.exists():
             config_file_path.unlink()
@@ -44,14 +44,14 @@ class TestModeler:
 
         lens_systems = ["lensed_quasar_2"]
         for lens_system in lens_systems:
-            config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+            config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yaml"
 
             if config_file_path.exists():
                 config_file_path.unlink()
 
         self.qso_modeler.create_configuration_for_all_lenses("F814W")
         for lens_system in lens_systems:
-            config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+            config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yaml"
             assert config_file_path.exists()
 
             config_file_path.unlink()
@@ -76,7 +76,7 @@ class TestModeler:
         :rtype:
         """
         lens_system = "lensed_quasar_2"
-        config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yml"
+        config_file_path = _TEST_IO_DIR / "settings" / f"{lens_system}_config.yaml"
 
         config = {"lens_system": lens_system, "band": "F814W"}
         if config_file_path.exists():

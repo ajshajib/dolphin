@@ -1,4 +1,4 @@
-# .readthedocs.yml
+# .readthedocs.yaml
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
@@ -21,7 +21,7 @@ sphinx:
 
 # Build documentation with MkDocs
 #mkdocs:
-#  configuration: mkdocs.yml
+#  configuration: mkdocs.yaml
 
 # Optionally build your docs in additional formats such as PDF and ePub
 formats: all

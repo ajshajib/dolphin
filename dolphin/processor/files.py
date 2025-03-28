@@ -63,7 +63,7 @@ class FileSystem(object):
         :return: path to the config file
         :rtype: `str`
         """
-        return self.path2str(self.get_settings_directory() / f"{lens_name}_config.yml")
+        return self.path2str(self.get_settings_directory() / f"{lens_name}_config.yaml")
 
     def get_logs_directory(self):
         """Get directory for logs folder. If the directory doesn't exist, a folder is

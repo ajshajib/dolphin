@@ -114,6 +114,7 @@ html_theme_options = {
     "logo": {
         "text": "dolphin",
     },
+    "navigation_depth": 4,
     "navbar_end": ["search-field", "navbar-icon-links"],
     "external_links": [
         {"name": "GitHub", "url": "https://github.com/ajshajib/dolphin"},

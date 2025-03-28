@@ -15,8 +15,9 @@ AI-powered automated pipeline for lens modeling based on
 -   Automated modeling of a large sample of quasar and
     galaxy-galaxy lenses, with lens models setup by an AI.
 -   Semi-automated modeling with human-provided lens model settings or tweaking of AI-generted ones.
--   Joint multi-band lens modeling.
--   Easy portability between local and HPCC environments.
+-   Simultaneous multi-band lens modeling.
+-   Works for both galaxy–galaxy and galaxy–quasar lenses.
+-   Seamless portability and syncing between local and high-performance computer cluster (HPCC).
 -   [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin) tested!
 
 ## Installation

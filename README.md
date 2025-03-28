@@ -11,14 +11,12 @@ AI-powered automated pipeline for lens modeling based on
 [`lenstronomy`](https://github.com/sibirrer/lenstronomy).
 
 ## Features
-
--   Automated modeling of a large sample of quasar and
-    galaxy-galaxy lenses, with lens models setup by an AI.
--   Semi-automated modeling with human-provided lens model settings or tweaking of AI-generted ones.
--   Simultaneous multi-band lens modeling.
--   Works for both galaxy–galaxy and galaxy–quasar lenses.
--   Seamless portability and syncing between local and high-performance computer cluster (HPCC).
--   [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin) tested!
+- **Automated** modeling for large samples of galaxy-scale lenses.
+- **Flexible**: fully automated or semi-automated with user tweaks.
+- **Multi-band** lens modeling made simple.
+- Supports **both** galaxy–galaxy and galaxy–quasar systems.
+- Effortless syncing between local machines and **HPCC**.
+- [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin) **tested!**
 
 ## Installation
 

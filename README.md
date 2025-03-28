@@ -36,6 +36,8 @@ cd dolphin
 pip install .
 ```
 
+See the [Quickstart guide](QUICKSTART.rst) for instructions on setting up and running `dolphin`.
+
 ## Citation
 
 If you use `dolphin` in your research, please cite the `dolphin` paper [Shajib et al. (2025)](). If you have used the `"galaxy-quasar"` fitting recipe, then additionally cite [Shajib et al. (2019)

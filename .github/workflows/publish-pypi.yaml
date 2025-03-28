@@ -26,4 +26,4 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload --repository-url https://pypi.org/legacy/ dist/* --verbose
+        run: twine upload --repository-url https://pypi.org/ dist/* --verbose

@@ -336,8 +336,6 @@ class Modeler(AI):
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
         :type coordinate_system: `Coordinates`
-        :param galaxy_center: galaxy center
-        :type galaxy_center: `List[float]`
         :param clear_center: radius (arcsecond) to clear the center from any detected quasar
         :type clear_center: `float`
         :return: quasar image positions

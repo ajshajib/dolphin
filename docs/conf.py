@@ -47,7 +47,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "dolphin"
-copyright = "2020, Anowar J. Shajib"
+copyright = "2025, Anowar J. Shajib"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -34,7 +34,6 @@ import dolphin
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
     # other extensions
 ]
 

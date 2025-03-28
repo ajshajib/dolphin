@@ -36,6 +36,9 @@ Features
 Installation
 ------------
 
+.. image:: https://img.shields.io/pypi/v/space-dolphin
+   :alt: PyPI - Version
+
 You can install ``dolphin`` using ``pip``. Run the following command:
 
 .. code-block:: bash

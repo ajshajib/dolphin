@@ -4,7 +4,7 @@
 |logo| dolphin
 =======
 
-.. image:: https://github.com/ajshajib/dolphin/workflows/CI/badge.svg
+.. image:: https://github.com/ajshajib/dolphin/workflows/Tests/badge.svg
     :target: https://github.com/ajshajib/dolphin/actions
 .. image:: https://readthedocs.org/projects/dolphin-docs/badge/?version=latest
     :target: https://dolphin-docs.readthedocs.io/en/latest/?badge=latest

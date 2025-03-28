@@ -609,7 +609,6 @@ class TestModelConfig(object):
         params = self.config_wsat.get_lens_model_params()
         for i in range(5):
             assert len(params[i]) == 4
-        print(params[0][2])
         assert params[0][2] == {
             "center_x": 1,
             "center_y": 1,

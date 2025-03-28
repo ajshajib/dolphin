@@ -30,8 +30,7 @@ formats: all
 python:
   install:
     - requirements: requirements.txt
-  install:
-    - method: pip
-      path: .
     - pip: 
         - pydata-sphinx-theme
+        - sphinx
+        - sphinx-autodoc

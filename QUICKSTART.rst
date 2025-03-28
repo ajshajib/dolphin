@@ -10,7 +10,7 @@ Setting up the `dolphin` Ecosystem
     Ensure you have installed `dolphin`, `lenstronomy`, and all required dependencies. You can install `dolphin` using pip:
 
 ```bash
-pip install space-dolphin
+    pip install space-dolphin
 ```
 
 2. **Create an input/output directory**:  

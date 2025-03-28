@@ -10,12 +10,13 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 class TestVision:
     @classmethod
-    def setup_class(self):
+    def setup_method(self):
         """Set up the Vision instance for testing."""
         self.vision = Vision(_TEST_IO_DIR)
+        self.vision_gal = Vision(_TEST_IO_DIR, source_type="galaxy")
 
     @classmethod
-    def teardown_class(cls):
+    def teardown_method(cls):
         """Clean up resources after tests are completed."""
         pass
 
@@ -79,7 +80,14 @@ class TestVision:
         self.vision.create_segmentation_for_all_lenses("F814W")
         assert segm_path_file.exists()
 
-    def test_save_segmenation(self):
+    def test_get_semantic_segmentation_from_nn(self):
+        segm = self.vision_gal.get_semantic_segmentation_from_nn(np.random.rand(90, 90))
+        assert segm.shape == (90, 90)
+
+        segm = self.vision.get_semantic_segmentation_from_nn(np.random.rand(90, 90))
+        assert segm.shape == (90, 90)
+
+    def test_save_segmentation(self):
         """Test the save_segmentation method."""
         lens_system = "lensed_quasar_2"
         segmentation = np.zeros((120, 120))

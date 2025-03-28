@@ -1,2 +1,2 @@
 lensed_quasar_2
-#lens_system2 ; commented out names will be ignored
+#lens_system ; commented out names will be ignored

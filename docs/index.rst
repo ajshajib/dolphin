@@ -5,14 +5,13 @@
 
 .. include:: ../README.rst
 
-Contents:
-=========
+Contents
+========
 
 .. toctree::
    :maxdepth: 3
 
-   installation
-   usage
+   quickstart
    contributing
    authors
    history
@@ -21,8 +20,8 @@ Contents:
 Feedback
 ========
 
-If you have any suggestions or questions about **dolphin** feel free to email me
+If you have any suggestions or questions about **dolphin**, feel free to email me
 at ajshajib@gmail.com.
 
 If you encounter any errors or problems with **dolphin**, please let me know!
-Open an Issue at the GitHub http://github.com/ajshajib/dolphin main repository.
+Open an issue on the GitHub repository: https://github.com/ajshajib/dolphin.

@@ -19,7 +19,7 @@ class TestRecipe(object):
 
     def setup_class(self):
         # self.test_setting_file = (
-        #     _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+        #     _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yaml"
         # )
         self.config = ModelConfig(
             "lens_system1", io_directory=(_ROOT_DIR / "io_directory_example").resolve()
@@ -139,7 +139,7 @@ class TestRecipe(object):
         :rtype:
         """
         self.recipe.reconstruct_psf = True
-        fitting_kwargs_list = self.recipe.get_default_recipe()
+        fitting_kwargs_list = self.recipe.get_galaxy_quasar_recipe()
         assert isinstance(fitting_kwargs_list, list)
 
     def test_get_sampling_sequence(self):

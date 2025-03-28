@@ -4,7 +4,6 @@
 import numpy as np
 from tensorflow.keras.models import load_model
 from scipy.ndimage import zoom
-import os
 
 from .ai import AI
 
@@ -18,19 +17,17 @@ class Vision(AI):
         :param data_file_path: path to a data file
         :type data_file_path: `str`
         """
+        if source_type not in ["quasar", "galaxy"]:
+            raise ValueError(
+                f"Invalid source type: {source_type}. It should be either 'quasar' or 'galaxy'."
+            )
         super(Vision, self).__init__(io_directory_path)
 
-        # To-DO: Load the trained NN model.
-        current_dir = os.path.dirname(__file__)
-        if source_type == "quasar":
-            model_path = os.path.join(
-                current_dir, "lensed_quasar_segmentation_model.h5"
-            )
-            self.nn_model = load_model(model_path)
-        # elif source_type == "galaxy":
-        #   self.nn_model = None  # This is a placeholder for the trained NN model.
-        else:
-            raise ValueError("Invalid source type.")
+        self._source_type = source_type
+        self.nn_model_path = self.file_system.get_trained_nn_model_file_path(
+            source_type=source_type
+        )
+        self.nn_model = load_model(self.nn_model_path, compile=False)
 
     def create_segmentation_for_all_lenses(self, band_name):
         """Create semantic segmentation for all lenses.
@@ -58,13 +55,10 @@ class Vision(AI):
         reshaped_image = self.resize_image(image)
 
         segmentation = self.get_semantic_segmentation_from_nn(reshaped_image)
-        reshaped_segmentation = self.resize_segmentation_to_original_size(
-            segmentation, image.shape[0]
-        )
 
-        self.save_segmentation(lens_name, band_name, reshaped_segmentation)
+        self.save_segmentation(lens_name, band_name, segmentation)
 
-        return reshaped_segmentation
+        return segmentation
 
     def save_segmentation(self, lens_name, band_name, segmentation):
         """Save the segmentation to a file.
@@ -95,8 +89,8 @@ class Vision(AI):
             target_shape[1] / image.shape[1],
         ]
         resampled_image = zoom(
-            image, zoom_factors, order=1
-        )  # order=1 for bilinear interpolation
+            image, zoom_factors, order=3
+        )  # order=3 for bicubic interpolation
         return resampled_image
 
     @staticmethod
@@ -140,4 +134,13 @@ class Vision(AI):
 
         segmentation = np.argmax(prediction[0], axis=-1)  # Shape: (128, 128)
 
-        return segmentation
+        # Resize the segmentation to the original size
+        reshaped_segmentation = self.resize_segmentation_to_original_size(
+            segmentation, image.shape[0]
+        )
+
+        if self._source_type == "galaxy":
+            # Setting the satellite label to 4 to match with the case of quasar
+            reshaped_segmentation[reshaped_segmentation == 3] = 4
+
+        return reshaped_segmentation

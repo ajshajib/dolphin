@@ -138,6 +138,6 @@ class TestPSFData(object):
             "psf_type",
             "kernel_point_source",
             "kernel_point_source_init",
-            "psf_error_map",
+            "psf_variance_map",
         ]:
             assert key in psf.kwargs_psf

@@ -456,8 +456,8 @@ class Modeler(AI):
         :type target_value: `int`
         :return: list of central pixels (x, y) for all regions
         :rtype: `List[Tuple[int, int]]`
-        :param minimum_size: minimum size of the region
-        :type minimum_size: `int`
+        :param minimum_pixel_area: minimum size of the region
+        :type minimum_pixel_area: `int`
         :return: list of central pixels (x, y) for all regions
         :rtype: `List[Tuple[int, int]]`
         """

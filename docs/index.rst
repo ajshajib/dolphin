@@ -3,10 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. mdinclude:: ../README.md
+.. include:: ../README.md
+   :parser: myst_parser
 
-Contents:
-=========
+Contents
+========
 
 .. toctree::
    :maxdepth: 3
@@ -20,8 +21,8 @@ Contents:
 Feedback
 ========
 
-If you have any suggestions or questions about **dolphin** feel free to email me
+If you have any suggestions or questions about **dolphin**, feel free to email me
 at ajshajib@gmail.com.
 
 If you encounter any errors or problems with **dolphin**, please let me know!
-Open an Issue at the GitHub http://github.com/ajshajib/dolphin main repository.
+Open an issue on the GitHub repository: https://github.com/ajshajib/dolphin.

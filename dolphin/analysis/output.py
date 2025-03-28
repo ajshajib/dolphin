@@ -526,16 +526,13 @@ class Output(Processor):
             parameter_list = np.arange(num_params)
         else:
             parameter_list = []
-            try:
-                for i in parameters_to_plot:
+            for i in parameters_to_plot:
+                if i in self.params_mcmc:
                     parameter_list.append(self.params_mcmc.index(i))
-            except ValueError:
-                raise Exception(
-                    "Parameter not found. Available parameters \
-                                 : {}".format(
-                        self.params_mcmc
+                else:
+                    raise ValueError(
+                        f"Parameter '{i}' not found. Available parameters: {self.params_mcmc}"
                     )
-                )
 
         mean_pos = np.zeros((num_params, num_step))
         median_pos = np.zeros((num_params, num_step))

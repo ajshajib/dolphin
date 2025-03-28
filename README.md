@@ -3,7 +3,7 @@
 [![GitHub](https://github.com/ajshajib/dolphin/workflows/CI/badge.svg)](https://github.com/ajshajib/dolphin/actions)
 [![docs](https://readthedocs.org/projects/dolphin-docs/badge/?version=latest)](https://dolphin-docs.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin)
-[![pypi](https://img.shields.io/pypi/v/space-dolphin)](https://pypi.org/project/space-dolphin)
+[![License BSD 3-Clause Badge](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://github.com/ajshajib/dolphin/blob/main/LICENSE)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![docformatter](https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg)](https://github.com/PyCQA/docformatter)
 [![sphinx](https://img.shields.io/badge/%20style-sphinx-0a507a.svg)](https://www.sphinx-doc.org/en/master/usage/index.html)
@@ -20,6 +20,8 @@ AI-powered automated pipeline for lens modeling, with
 - [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin) **tested!**
 
 ## Installation
+
+[![pypi](https://img.shields.io/pypi/v/space-dolphin)](https://pypi.org/project/space-dolphin)
 
 You can install `dolphin` using `pip`. Run the following command:
 

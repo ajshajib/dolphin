@@ -11,8 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
-   installation
-   usage
+   quickstart
    contributing
    authors
    history

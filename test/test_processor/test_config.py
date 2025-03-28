@@ -29,7 +29,7 @@ class TestConfig(object):
         :rtype:
         """
         test_setting_file = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yaml"
         )
         config = Config()
         config.load_config_from_yaml(str(test_setting_file.resolve()))
@@ -213,7 +213,12 @@ class TestModelConfig(object):
                 [5, 7, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
             ],
             "joint_source_with_point_source": [],
-            "joint_lens_with_light": [],
+            "joint_lens_with_light": [
+                [4, 2, ["center_x", "center_y"]],
+                [5, 3, ["center_x", "center_y"]],
+                [6, 2, ["center_x", "center_y"]],
+                [7, 3, ["center_x", "center_y"]],
+            ],
             "joint_lens_with_lens": [],
         }
 
@@ -601,6 +606,23 @@ class TestModelConfig(object):
         assert self.config_4.settings["model"]["lens"][0] == "SIE"
         assert params[2][0] == {"gamma": 2.0}
 
+        params = self.config_wsat.get_lens_model_params()
+        for i in range(5):
+            assert len(params[i]) == 4
+        assert params[0][2] == {
+            "center_x": 1,
+            "center_y": 1,
+            "e1": 0,
+            "e2": 0,
+            "gamma": 2.0,
+            "theta_E": 0.1,
+        }
+        assert params[0][3] == {
+            "center_x": 1.5,
+            "center_y": 1.5,
+            "theta_E": 0.1,
+        }
+
     def test_get_lens_light_model_params(self):
         """Test `get_lens_light_model_params` method.
 
@@ -611,6 +633,42 @@ class TestModelConfig(object):
         config.settings["model"]["lens_light"] = ["INVALID"]
         with pytest.raises(ValueError):
             config.get_lens_light_model_params()
+
+        params = self.config_wsat.get_lens_light_model_params()
+        for i in range(5):
+            assert len(params[i])
+        assert params[0][4] == {
+            "center_x": 1,
+            "center_y": 1,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "e1": 0.0,
+            "e2": 0.0,
+            "n_sersic": 4.0,
+        }
+        assert params[0][5] == {
+            "center_x": 1.5,
+            "center_y": 1.5,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "n_sersic": 4.0,
+        }
+        assert params[0][6] == {
+            "center_x": 1,
+            "center_y": 1,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "e1": 0.0,
+            "e2": 0.0,
+            "n_sersic": 4.0,
+        }
+        assert params[0][7] == {
+            "center_x": 1.5,
+            "center_y": 1.5,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "n_sersic": 4.0,
+        }
 
     def test_get_source_light_model_params(self):
         """Test `get_source_light_model_params` method.

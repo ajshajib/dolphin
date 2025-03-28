@@ -151,13 +151,23 @@ class TestOutput(object):
 
         plt.close(fig2)
 
+        with pytest.raises(ValueError):
+            self.output.plot_mcmc_trace(
+                "lens_system2",
+                "example",
+                2,
+                verbose=True,
+                burn_in=0,
+                parameters_to_plot=["gamma_lens42"],
+            )
+
     def test_get_reshaped_emcee_chain(self):
         """Test `get_reshaped_emcee_chain` method.
 
         :return:
         :rtype:
         """
-        self.output.get_reshaped_emcee_chain("lens_system2", "example", 2)
+        self.output.get_reshaped_emcee_chain("lens_system2", "example", 2, burn_in=1)
 
     def test_get_param_class(self):
         """Test `get_param_class` method.

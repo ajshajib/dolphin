@@ -220,11 +220,13 @@ class ModelConfig(Config):
             num_source_profiles
         )
 
+        joint_lens_with_light = self.get_joint_lens_with_light()
+
         kwargs_constraints = {
             "joint_source_with_source": joint_source_with_source,
             "joint_lens_light_with_lens_light": joint_lens_light_with_lens_light,
             "joint_source_with_point_source": joint_source_with_point_source,
-            "joint_lens_with_light": [],
+            "joint_lens_with_light": joint_lens_with_light,
             "joint_lens_with_lens": [],
         }
 
@@ -243,6 +245,23 @@ class ModelConfig(Config):
                 kwargs_constraints[key] = value
 
         return kwargs_constraints
+
+    def get_joint_lens_with_light(self):
+        """Create `joint_lens_with_light`."""
+        _, lens_light_satellite_flags = self.get_lens_light_model_list_with_flags()
+        _, lens_satellite_flags = self.get_lens_model_list_with_flags()
+
+        joint_lens_with_light = []
+
+        if (np.array(lens_light_satellite_flags) > -1).any():
+            for i, flag in enumerate(lens_light_satellite_flags):
+                if flag > -1:
+                    lens_sat_index = lens_satellite_flags.index(flag)
+                    joint_lens_with_light.append(
+                        [i, lens_sat_index, ["center_x", "center_y"]]
+                    )
+
+        return joint_lens_with_light
 
     def get_joint_source_with_point_source(self, num_source_profiles):
         """Create `joint_source_with_point_source`."""
@@ -281,7 +300,7 @@ class ModelConfig(Config):
                         ]
                     )
 
-        if self.num_satellites > 0:
+        if self.number_of_bands > 1 and self.num_satellites > 0:
             for i in range(self.num_satellites):
                 model = lens_light_model_list[i + num_lens_light_profile_central]
 
@@ -298,7 +317,6 @@ class ModelConfig(Config):
                     ]
                 )
 
-        print(joint_lens_light_with_lens_light)
         return joint_lens_light_with_lens_light
 
     def get_joint_source_with_source(self):
@@ -735,28 +753,35 @@ class ModelConfig(Config):
             return len(self.settings["satellites"]["centroid_init"])
 
     def get_lens_model_list(self):
-        """Return `lens_model_list`.
+        """Return `lens_model_list`."""
+        return self.get_lens_model_list_with_flags()[0]
 
-        :return:
-        :rtype:
+    def get_lens_model_list_with_flags(self):
+        """Return `lens_model_list` and `satellite_flags`.
+
+        :return: lens_model_list, satellite_flags
+        :rtype: list, list
         """
         lens_model_list = []
+        satellite_flag = []
 
         if "lens" in self.settings["model"]:
             lens_model_list = [model for model in self.settings["model"]["lens"]]
+            satellite_flag = [-1 for _ in range(len(lens_model_list))]
 
             if self.num_satellites > 0:
                 if "is_elliptical" not in self.settings["satellites"]:
                     is_elliptical = [False] * self.num_satellites
                 else:
                     is_elliptical = self.settings["satellites"]["is_elliptical"]
-                for yes in is_elliptical:
+                for i, yes in enumerate(is_elliptical):
                     if yes:
                         lens_model_list.append("SIE")
                     else:
                         lens_model_list.append("SIS")
+                    satellite_flag.append(i)
 
-        return lens_model_list
+        return lens_model_list, satellite_flag
 
     def get_source_light_model_list(self):
         """Return `source_model_list`.
@@ -774,18 +799,24 @@ class ModelConfig(Config):
         return source_light_model_list
 
     def get_lens_light_model_list(self):
-        """Return `lens_light_model_list`.
+        """Return `lens_light_model_list`."""
+        return self.get_lens_light_model_list_with_flags()[0]
 
-        :return:
-        :rtype:
+    def get_lens_light_model_list_with_flags(self):
+        """Return `lens_light_model_list` and `satellite_flags`.
+
+        :return: lens_light_model_list, satellite_flags
+        :rtype: list, list
         """
         lens_light_model_list = []
+        satellite_flag = []
 
         if "lens_light" in self.settings["model"]:
             for i in range(self.number_of_bands):
                 lens_light_model_list += [
                     model for model in self.settings["model"]["lens_light"]
                 ]
+                satellite_flag += [-1 for model in self.settings["model"]["lens_light"]]
 
             if self.num_satellites > 0:
                 if "is_elliptical" not in self.settings["satellites"]:
@@ -794,13 +825,14 @@ class ModelConfig(Config):
                     is_elliptical = self.settings["satellites"]["is_elliptical"]
 
                 for i in range(self.number_of_bands):
-                    for yes in is_elliptical:
+                    for j, yes in enumerate(is_elliptical):
                         if yes:
                             lens_light_model_list.append("SERSIC_ELLIPSE")
                         else:
                             lens_light_model_list.append("SERSIC")
+                        satellite_flag.append(j)
 
-        return lens_light_model_list
+        return lens_light_model_list, satellite_flag
 
     def get_point_source_model_list(self):
         """Return `ps_model_list`.
@@ -857,7 +889,7 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        lens_model_list = self.get_lens_model_list()
+        lens_model_list, satellite_flags = self.get_lens_model_list_with_flags()
 
         fixed = []
         init = []
@@ -865,7 +897,27 @@ class ModelConfig(Config):
         lower = []
         upper = []
 
-        for model in lens_model_list:
+        for i, model in enumerate(lens_model_list):
+            if satellite_flags[i] == -1:
+                # central deflector
+                bound = self.deflector_centroid_bound
+                center_x = self.deflector_center_ra
+                center_y = self.deflector_center_dec
+                try:
+                    theta_E_init = self.settings["guess_params"]["lens"][0]["theta_E"]
+                except (NameError, KeyError):
+                    theta_E_init = 1.0
+            else:
+                # satellite
+                bound = self.settings["satellites"]["centroid_bound"]
+                center_x = self.settings["satellites"]["centroid_init"][
+                    satellite_flags[i]
+                ][0]
+                center_y = self.settings["satellites"]["centroid_init"][
+                    satellite_flags[i]
+                ][1]
+                theta_E_init = 0.1
+
             if model in ["SPEP", "PEMD", "EPL", "SIE"]:
                 if model == "SIE":
                     fixed.append({"gamma": 2.0})
@@ -873,23 +925,22 @@ class ModelConfig(Config):
                     fixed.append({})
                 init.append(
                     {
-                        "center_x": self.deflector_center_ra,
-                        "center_y": self.deflector_center_dec,
+                        "center_x": center_x,
+                        "center_y": center_y,
                         "e1": 0.0,
                         "e2": 0.0,
                         "gamma": 2.0,
-                        "theta_E": 1.0,
+                        "theta_E": theta_E_init,
                     }
                 )
-
                 sigma.append(
                     {
                         "theta_E": 0.1,
                         "e1": 0.01,
                         "e2": 0.01,
                         "gamma": 0.02,
-                        "center_x": self.deflector_centroid_bound / 3,
-                        "center_y": self.deflector_centroid_bound / 3,
+                        "center_x": bound / 3,
+                        "center_y": bound / 3,
                     }
                 )
 
@@ -899,10 +950,8 @@ class ModelConfig(Config):
                         "e1": -0.5,
                         "e2": -0.5,
                         "gamma": 1.3,
-                        "center_x": self.deflector_center_ra
-                        - self.deflector_centroid_bound,
-                        "center_y": self.deflector_center_dec
-                        - self.deflector_centroid_bound,
+                        "center_x": center_x - bound,
+                        "center_y": center_y - bound,
                     }
                 )
 
@@ -912,19 +961,46 @@ class ModelConfig(Config):
                         "e1": 0.5,
                         "e2": 0.5,
                         "gamma": 2.8,
-                        "center_x": self.deflector_center_ra
-                        + self.deflector_centroid_bound,
-                        "center_y": self.deflector_center_dec
-                        + self.deflector_centroid_bound,
+                        "center_x": center_x + bound,
+                        "center_y": center_y + bound,
                     }
                 )
-
             elif model == "SHEAR_GAMMA_PSI":
                 fixed.append({"ra_0": 0, "dec_0": 0})
                 init.append({"gamma_ext": 0.05, "psi_ext": 0.0})
                 sigma.append({"gamma_ext": 0.05, "psi_ext": np.pi / 90.0})
                 lower.append({"gamma_ext": 0.0, "psi_ext": -np.pi})
                 upper.append({"gamma_ext": 0.5, "psi_ext": np.pi})
+            elif model == "SIS":
+                fixed.append({})
+                init.append(
+                    {
+                        "center_x": center_x,
+                        "center_y": center_y,
+                        "theta_E": theta_E_init,
+                    }
+                )
+                sigma.append(
+                    {
+                        "theta_E": 0.1,
+                        "center_x": bound / 3,
+                        "center_y": bound / 3,
+                    }
+                )
+                lower.append(
+                    {
+                        "theta_E": 0.0,
+                        "center_x": center_x - bound,
+                        "center_y": center_y - bound,
+                    }
+                )
+                upper.append(
+                    {
+                        "theta_E": 1.0,
+                        "center_x": center_x + bound,
+                        "center_y": center_y + bound,
+                    }
+                )
             else:
                 raise ValueError("{} not implemented as a lens " "model!".format(model))
 
@@ -939,7 +1015,9 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
-        lens_light_model_list = self.get_lens_light_model_list()
+        lens_light_model_list, satellite_flags = (
+            self.get_lens_light_model_list_with_flags()
+        )
 
         fixed = []
         init = []
@@ -948,55 +1026,59 @@ class ModelConfig(Config):
         upper = []
 
         for i, model in enumerate(lens_light_model_list):
-            if model == "SERSIC_ELLIPSE":
-                fixed.append({})
-                init.append(
-                    {
-                        "amp": 1.0,
-                        "R_sersic": 0.2,
-                        "center_x": self.deflector_center_ra,
-                        "center_y": self.deflector_center_dec,
-                        "e1": 0,
-                        "e2": 0,
-                        "n_sersic": 4.0,
-                    }
-                )
-                sigma.append(
-                    {
-                        "center_x": np.max(self.pixel_size) / 10.0,
-                        "center_y": np.max(self.pixel_size) / 10.0,
-                        "R_sersic": 0.05,
-                        "n_sersic": 0.5,
-                        "e1": 0.01,
-                        "e2": 0.01,
-                    }
-                )
+            if satellite_flags[i] == -1:
+                bound = self.deflector_centroid_bound
+                center_x = self.deflector_center_ra
+                center_y = self.deflector_center_dec
+            else:
+                bound = self.settings["satellites"]["centroid_bound"]
+                center_x = self.settings["satellites"]["centroid_init"][
+                    satellite_flags[i]
+                ][0]
+                center_y = self.settings["satellites"]["centroid_init"][
+                    satellite_flags[i]
+                ][1]
+            if "SERSIC" in model:
+                if satellite_flags[i] == -1:
+                    _fixed = {}
+                else:
+                    _fixed = {"n_sersic": 4.0}
+                _init = {
+                    "amp": 1.0,
+                    "R_sersic": 0.2,
+                    "center_x": center_x,
+                    "center_y": center_y,
+                    "n_sersic": 4.0,
+                }
+                _sigma = {
+                    "center_x": np.max(self.pixel_size) / 10.0,
+                    "center_y": np.max(self.pixel_size) / 10.0,
+                    "R_sersic": 0.05,
+                    "n_sersic": 0.5,
+                }
+                _lower = {
+                    "n_sersic": 0.5,
+                    "R_sersic": 0.1,
+                    "center_x": center_x - bound,
+                    "center_y": center_y - bound,
+                }
+                _upper = {
+                    "n_sersic": 8.0,
+                    "R_sersic": 5.0,
+                    "center_x": center_x + bound,
+                    "center_y": center_y + bound,
+                }
+                if "_ELLIPSE" in model:
+                    _init.update({"e1": 0.0, "e2": 0.0})
+                    _sigma.update({"e1": 0.05, "e2": 0.05})
+                    _lower.update({"e1": -0.5, "e2": -0.5})
+                    _upper.update({"e1": 0.5, "e2": 0.5})
 
-                lower.append(
-                    {
-                        "e1": -0.5,
-                        "e2": -0.5,
-                        "n_sersic": 0.5,
-                        "R_sersic": 0.1,
-                        "center_x": self.deflector_center_ra
-                        - self.deflector_centroid_bound,
-                        "center_y": self.deflector_center_dec
-                        - self.deflector_centroid_bound,
-                    }
-                )
-
-                upper.append(
-                    {
-                        "e1": 0.5,
-                        "e2": 0.5,
-                        "n_sersic": 8.0,
-                        "R_sersic": 5.0,
-                        "center_x": self.deflector_center_ra
-                        + self.deflector_centroid_bound,
-                        "center_y": self.deflector_center_dec
-                        + self.deflector_centroid_bound,
-                    }
-                )
+                fixed.append(_fixed)
+                init.append(_init)
+                sigma.append(_sigma)
+                lower.append(_lower)
+                upper.append(_upper)
             else:
                 raise ValueError(
                     "{} not implemented as a lens light" "model!".format(model)

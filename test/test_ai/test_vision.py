@@ -87,7 +87,7 @@ class TestVision:
         segm = self.vision.get_semantic_segmentation_from_nn(np.random.rand(90, 90))
         assert segm.shape == (90, 90)
 
-    def test_save_segmenation(self):
+    def test_save_segmentation(self):
         """Test the save_segmentation method."""
         lens_system = "lensed_quasar_2"
         segmentation = np.zeros((120, 120))

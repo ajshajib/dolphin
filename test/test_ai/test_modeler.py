@@ -247,9 +247,7 @@ class TestModeler:
             self.galaxy_modeler.get_quasar_image_position(mask, coordinate_system)
 
     def test_get_satellite_positions(self):
-        """
-        Test `get_satellite_positions` method.
-        """
+        """Test `get_satellite_positions` method."""
         image_data = self.qso_modeler.get_image_data("lensed_quasar", "F814W")
         coordinate_system = image_data.get_image_coordinate_system()
         image_size = image_data.get_image_size()

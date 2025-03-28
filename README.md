@@ -7,22 +7,35 @@
 [![docformatter](https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg)](https://github.com/PyCQA/docformatter)
 [![sphinx](https://img.shields.io/badge/%20style-sphinx-0a507a.svg)](https://www.sphinx-doc.org/en/master/usage/index.html)
 
-Semi-automated pipeline for lens modeling based on
+AI-powered automated pipeline for lens modeling based on
 [`lenstronomy`](https://github.com/sibirrer/lenstronomy).
 
 ## Features
 
--   Semi-automated modeling of a large sample of quasar and
-    galaxy-galaxy lenses.
+-   Automated modeling of a large sample of quasar and
+    galaxy-galaxy lenses, with lens models setup by an AI.
+-   Semi-automated modeling with human-provided lens model settings or tweaking of AI-generted ones.
 -   Joint multi-band lens modeling.
 -   Easy portability between local and HPCC environments.
--   Initial fitting recipe for galaxy-galaxy lenses for faster
-    convergence.
+-   [![codecov](https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1)](https://codecov.io/gh/ajshajib/dolphin) tested!
+
+## Installation
+
+You can install `dolphin` using `pip`. Run the following command:
+
+```bash
+pip install space-dolphin
+```
+
+Alternatively, you can install the latest development version from GitHub as:
+
+```bash
+git clone https://github.com/ajshajib/dolphin.git
+cd dolphin
+pip install .
+```
 
 ## Citation
 
-If you use `dolphin` in your research, please cite [Shajib
-et al.
-(2021)](https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract)
-and [Tan et al.
-(2024)](https://ui.adsabs.harvard.edu/abs/2023arXiv231109307T/abstract).
+If you use `dolphin` in your research, please cite the `dolphin` paper [Shajib et al. (2025)](). If you have used the `"galaxy-quasar"` fitting recipe, then additionally cite [Shajib et al. (2019)
+](https://ui.adsabs.harvard.edu/abs/2019MNRAS.483.5649S/abstract), and if you have used the `"galaxy-galaxy"' fitting recipe, then additionally cite [Shajib et al. (2021)](https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract).

@@ -13,6 +13,7 @@ class TestVision:
     def setup_class(self):
         """Set up the Vision instance for testing."""
         self.vision = Vision(_TEST_IO_DIR)
+        self.vision_gal = Vision(_TEST_IO_DIR, source_type="galaxy")
 
     @classmethod
     def teardown_class(cls):
@@ -91,4 +92,9 @@ class TestVision:
             segm_path_file.unlink()
 
         self.vision.save_segmentation(lens_system, "F814W", segmentation)
+        assert segm_path_file.exists()
+
+        if segm_path_file.exists():
+            segm_path_file.unlink()
+        self.vision_gal.save_segmentation(lens_system, "F814W", segmentation)
         assert segm_path_file.exists()

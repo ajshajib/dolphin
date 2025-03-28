@@ -73,33 +73,31 @@ class Recipe(object):
             except (NameError, KeyError):
                 self.guess_params[component] = None
 
-    def get_recipe(self, kwargs_data_joint=None, recipe_name="default"):
-        """Get `fitting_kwargs_list` according to the requested `recipe`. `default` will
-        first search for specified recipe in the settings, if not will provide the most
-        basic set of fitting sequence.
+    def get_recipe(self, kwargs_data_joint=None, recipe_name="galaxy-quasar"):
+        """Get `fitting_kwargs_list` according to the requested `recipe`.
 
         :param config: `ModelConfig` instance
         :type config:
         :param kwargs_data_joint: `kwargs_data_joint` dictionary
         :type kwargs_data_joint:
-        :param recipe_name: recipe name, 'default' or 'galaxy-galaxy'
+        :param recipe_name: recipe name, 'galaxy-quasar' or 'galaxy-galaxy'
         :type recipe_name: `str`
         :return: fitting kwargs list
         :rtype: `list`
         """
         fitting_kwargs_list = []
 
-        if recipe_name == "default":
+        if recipe_name == "galaxy-quasar":
             try:
                 # if this key exists then return it
                 self._config.settings["fitting_kwargs_list"]
             except (KeyError, NameError):
-                fitting_kwargs_list += self.get_default_recipe()
+                fitting_kwargs_list += self.get_galaxy_quasar_recipe()
             else:
                 if self._config.settings["fitting_kwargs_list"] is not None:
                     fitting_kwargs_list += self._config.settings["fitting_kwargs_list"]
                 else:
-                    fitting_kwargs_list += self.get_default_recipe()
+                    fitting_kwargs_list += self.get_galaxy_quasar_recipe()
         elif recipe_name == "galaxy-galaxy":
             if kwargs_data_joint is None:
                 raise ValueError(
@@ -169,7 +167,7 @@ class Recipe(object):
 
         return index
 
-    def get_default_recipe(self):
+    def get_galaxy_quasar_recipe(self):
         """Get the default pre-sampling optimization routine.
 
         :return: fitting kwargs list

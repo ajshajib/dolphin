@@ -29,7 +29,7 @@ class TestConfig(object):
         :rtype:
         """
         test_setting_file = (
-            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yml"
+            _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yaml"
         )
         config = Config()
         config.load_config_from_yaml(str(test_setting_file.resolve()))
@@ -38,7 +38,7 @@ class TestConfig(object):
 class TestModelConfig(object):
     """"""
 
-    def setup_class(self):
+    def setup_method(self):
         self.io_directory = str((_ROOT_DIR / "io_directory_example").resolve())
         file_system = FileSystem(self.io_directory)
 
@@ -46,10 +46,15 @@ class TestModelConfig(object):
         self.config_3 = ModelConfig("lens_system3", io_directory=self.io_directory)
         self.config_4 = ModelConfig("lens_system4", io_directory=self.io_directory)
         self.config_5 = ModelConfig("lens_system5", file_system)
+        self.config_wsat = ModelConfig("lens_system_wsat", file_system)
 
-    @classmethod
-    def teardown_class(cls):
+    def teardown_method(self):
         pass
+
+    def test_init(self):
+        settings = self.config_1.settings
+
+        ModelConfig(self.config_1.lens_name, settings=settings)
 
     def test_pixel_size(self):
         """Test the `pixel_size` property.
@@ -157,12 +162,19 @@ class TestModelConfig(object):
             "joint_lens_with_lens": [],
         }
 
-        kwargs_constraints_2 = {
-            "joint_source_with_source": [[0, 1, ["center_x", "center_y"]]],
+        kwargs_constraints_3 = {
+            "joint_source_with_source": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+            ],
             "joint_lens_light_with_lens_light": [
                 [0, 1, ["center_x", "center_y"]],
                 [0, 2, ["center_x", "center_y"]],
                 [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+                [1, 3, ["n_sersic", "e1", "e2"]],
             ],
             "joint_source_with_point_source": [],
             "joint_lens_with_light": [],
@@ -182,7 +194,35 @@ class TestModelConfig(object):
         assert kwargs_constraints["joint_source_with_point_source"] == [[0, 0], [0, 1]]
         del self.config_5.settings["kwargs_constraints"]
 
-        assert kwargs_constraints_2 == self.config_3.get_kwargs_constraints()
+        assert kwargs_constraints_3 == self.config_3.get_kwargs_constraints()
+
+        kwargs_constraints_wsat = {
+            "joint_source_with_source": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+            ],
+            "joint_lens_light_with_lens_light": [
+                [0, 1, ["center_x", "center_y"]],
+                [0, 2, ["center_x", "center_y"]],
+                [0, 3, ["center_x", "center_y"]],
+                [0, 2, ["n_sersic", "e1", "e2"]],
+                [1, 3, ["n_sersic", "e1", "e2"]],
+                [4, 6, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
+                [5, 7, ["center_x", "center_y", "n_sersic", "e1", "e2"]],
+            ],
+            "joint_source_with_point_source": [],
+            "joint_lens_with_light": [
+                [4, 2, ["center_x", "center_y"]],
+                [5, 3, ["center_x", "center_y"]],
+                [6, 2, ["center_x", "center_y"]],
+                [7, 3, ["center_x", "center_y"]],
+            ],
+            "joint_lens_with_lens": [],
+        }
+
+        assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method.
@@ -259,7 +299,12 @@ class TestModelConfig(object):
         prior = self.config_3.custom_logL_addition(
             kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
             kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
-            kwargs_source=[{"beta": 0.1}, {"beta": 0.1}],
+            kwargs_source=[
+                {"R_sersic": 1.0},
+                {"beta": 0.1},
+                {"R_sersic": 1.0},
+                {"beta": 0.1},
+            ],
         )
         assert round(prior, 2) == round(-2 * np.log(0.1), 2)
 
@@ -380,7 +425,7 @@ class TestModelConfig(object):
 
         assert kwargs_psf_iteration == {
             "stacking_method": "median",
-            "keep_psf_error_map": True,
+            "keep_psf_variance_map": True,
             "psf_symmetry": 4,
             "block_center_neighbour": 0.5,
             "num_iter": 20,
@@ -454,6 +499,27 @@ class TestModelConfig(object):
         """
         assert self.config_5.get_lens_model_list() == ["EPL", "SHEAR_GAMMA_PSI"]
 
+        config = deepcopy(self.config_5)
+        del config.settings["model"]["lens"]
+        assert config.get_lens_model_list() == []
+
+        assert self.config_wsat.get_lens_model_list() == [
+            "EPL",
+            "SHEAR_GAMMA_PSI",
+            "SIE",
+            "SIS",
+        ]
+
+        config = deepcopy(self.config_wsat)
+        del config.settings["satellites"]["is_elliptical"]
+        print(config.get_lens_model_list())
+        assert config.get_lens_model_list() == [
+            "EPL",
+            "SHEAR_GAMMA_PSI",
+            "SIS",
+            "SIS",
+        ]
+
     def test_get_source_light_model_list(self):
         """Test `get_source_light_model_list` method.
 
@@ -465,7 +531,12 @@ class TestModelConfig(object):
         assert config.get_source_light_model_list() == []
 
         config2 = deepcopy(self.config_3)
-        assert config2.get_source_light_model_list() == ["SHAPELETS", "SHAPELETS"]
+        assert config2.get_source_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SHAPELETS",
+            "SERSIC_ELLIPSE",
+            "SHAPELETS",
+        ]
 
     def test_get_lens_light_model_list(self):
         """Test `get_lens_light_model_list` method.
@@ -483,6 +554,30 @@ class TestModelConfig(object):
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
             "SERSIC_ELLIPSE",
+        ]
+
+        assert self.config_wsat.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+        ]
+
+        config = deepcopy(self.config_wsat)
+        del config.settings["satellites"]["is_elliptical"]
+        assert config.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC",
+            "SERSIC",
+            "SERSIC",
+            "SERSIC",
         ]
 
     def test_get_point_source_model_list(self):
@@ -511,6 +606,23 @@ class TestModelConfig(object):
         assert self.config_4.settings["model"]["lens"][0] == "SIE"
         assert params[2][0] == {"gamma": 2.0}
 
+        params = self.config_wsat.get_lens_model_params()
+        for i in range(5):
+            assert len(params[i]) == 4
+        assert params[0][2] == {
+            "center_x": 1,
+            "center_y": 1,
+            "e1": 0,
+            "e2": 0,
+            "gamma": 2.0,
+            "theta_E": 0.1,
+        }
+        assert params[0][3] == {
+            "center_x": 1.5,
+            "center_y": 1.5,
+            "theta_E": 0.1,
+        }
+
     def test_get_lens_light_model_params(self):
         """Test `get_lens_light_model_params` method.
 
@@ -521,6 +633,42 @@ class TestModelConfig(object):
         config.settings["model"]["lens_light"] = ["INVALID"]
         with pytest.raises(ValueError):
             config.get_lens_light_model_params()
+
+        params = self.config_wsat.get_lens_light_model_params()
+        for i in range(5):
+            assert len(params[i])
+        assert params[0][4] == {
+            "center_x": 1,
+            "center_y": 1,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "e1": 0.0,
+            "e2": 0.0,
+            "n_sersic": 4.0,
+        }
+        assert params[0][5] == {
+            "center_x": 1.5,
+            "center_y": 1.5,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "n_sersic": 4.0,
+        }
+        assert params[0][6] == {
+            "center_x": 1,
+            "center_y": 1,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "e1": 0.0,
+            "e2": 0.0,
+            "n_sersic": 4.0,
+        }
+        assert params[0][7] == {
+            "center_x": 1.5,
+            "center_y": 1.5,
+            "R_sersic": 0.2,
+            "amp": 1.0,
+            "n_sersic": 4.0,
+        }
 
     def test_get_source_light_model_params(self):
         """Test `get_source_light_model_params` method.
@@ -537,6 +685,11 @@ class TestModelConfig(object):
         config2.get_source_light_model_params()
         assert config2.settings["source_light_option"]["n_max"] == [2, 4]
 
+        config3 = deepcopy(self.config_3)
+        config3.settings["source_light_option"]["n_max"] = 2
+        config3.get_source_light_model_params()
+        assert config3.settings["source_light_option"]["n_max"] == [2, 2]
+
     def test_fill_in_fixed_from_settings(self):
         """Test `fill_in_fixed_from_settings` method.
 
@@ -547,9 +700,16 @@ class TestModelConfig(object):
         fixed = self.config_1.fill_in_fixed_from_settings("lens_light", fixed)
         assert fixed == [{"n_sersic": 4.0}]
 
-        fixed2 = [{}, {}, {}, {}]
-        fixed2 = self.config_3.fill_in_fixed_from_settings("lens_light", fixed2)
-        assert fixed2 == [{"n_sersic": 4.0}, {}, {"n_sersic": 4.0}, {}]
+        fixed = [{}, {}, {}, {}]
+        fixed = self.config_3.fill_in_fixed_from_settings("lens_light", fixed)
+        assert fixed == [{"n_sersic": 4.0}, {}, {"n_sersic": 4.0}, {}]
+
+        fixed = [{}, {}]
+        fixed = self.config_3.fill_in_fixed_from_settings("lens", fixed)
+        assert fixed == [{"gamma": 2.0}, {}]
+
+        with pytest.raises(AssertionError):
+            self.config_3.fill_in_fixed_from_settings("invalid", fixed)
 
     def test_get_psf_supersampling_factor(self):
         """Test `get_psf_supersampling_factor` method.
@@ -575,9 +735,14 @@ class TestModelConfig(object):
         assert config.get_index_lens_light_model_list() == []
 
         config2 = deepcopy(self.config_5)
+        assert len(config2.get_index_lens_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
-        with pytest.raises(ValueError):
-            config2.get_index_lens_light_model_list()
+        assert len(config2.get_index_lens_light_model_list()) == 2
+
+        assert self.config_wsat.get_index_lens_light_model_list() == [
+            [0, 1, 4, 6],
+            [2, 3, 5, 7],
+        ]
 
     def test_get_index_source_light_model_list(self):
         """Test `get_index_source_light_model_list` method.
@@ -586,13 +751,13 @@ class TestModelConfig(object):
         :rtype:
         """
         assert self.config_1.get_index_source_light_model_list() == [[0]]
-        assert self.config_3.get_index_source_light_model_list() == [[0], [1]]
+        assert self.config_3.get_index_source_light_model_list() == [[0, 1], [2, 3]]
 
         config = deepcopy(self.config_5)
         del config.settings["model"]["source_light"]
         assert config.get_index_source_light_model_list() == []
 
         config2 = deepcopy(self.config_5)
+        assert len(config2.get_index_source_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
-        with pytest.raises(ValueError):
-            config2.get_index_source_light_model_list()
+        assert len(config2.get_index_source_light_model_list()) == 2

@@ -6,6 +6,7 @@ from pathlib import Path
 import json
 import numpy as np
 import h5py
+import gdown
 
 
 class FileSystem(object):
@@ -62,7 +63,7 @@ class FileSystem(object):
         :return: path to the config file
         :rtype: `str`
         """
-        return self.path2str(self.get_settings_directory() / f"{lens_name}_config.yml")
+        return self.path2str(self.get_settings_directory() / f"{lens_name}_config.yaml")
 
     def get_logs_directory(self):
         """Get directory for logs folder. If the directory doesn't exist, a folder is
@@ -532,3 +533,40 @@ class FileSystem(object):
         """
         save_file = self.get_mask_file_path(lens_name, band)
         np.save(save_file, mask)
+
+    def get_trained_nn_model_file_path(self, source_type="galaxy"):
+        """Get the file path for the trained model.
+
+        :param lens_type: type of lens, 'galaxy' or 'quasar'
+        :type lens_type: `str`
+        :return: file path
+        :rtype: `str`
+        """
+        assert source_type in ["galaxy", "quasar"]
+        path = self.path2str(
+            self._root_path
+            / "trained_nn"
+            / f"lensed_{source_type}_segmentation_model.h5"
+        )
+
+        # Check if the directory exists, create if not
+        if not Path(path).parent.is_dir():
+            Path(path).parent.mkdir()
+
+        # Check if the file exists
+        if not Path(path).is_file():
+            # Download the model using gdown
+            index = ["galaxy", "quasar"].index(source_type)
+            file_id = [
+                "1MAR2i5WlLlW_mAub3lbLLIlL6MPGXG8s",
+                "1xO6Mniir3169H-7K5nThXR4lLvOUp6OQ",
+            ][index]
+
+            print("AI model not found in local storage. Downloading from the web...")
+            gdown.download(
+                id=file_id,
+                output=path,
+                quiet=False,
+            )
+
+        return path

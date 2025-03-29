@@ -2,7 +2,7 @@
     :width: 70
 
 |logo| dolphin
-=======
+==============
 
 .. image:: https://github.com/ajshajib/dolphin/workflows/Tests/badge.svg?branch=main
     :target: https://github.com/ajshajib/dolphin/actions

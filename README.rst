@@ -8,7 +8,7 @@
     :target: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml
 .. image:: https://readthedocs.org/projects/dolphin-docs/badge/?version=latest
     :target: https://dolphin-docs.readthedocs.io/en/latest/?badge=latest
-.. image:: https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1
+.. image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
     :target: https://codecov.io/gh/ajshajib/dolphin
 .. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
     :target: https://github.com/ajshajib/dolphin/blob/main/LICENSE

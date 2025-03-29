@@ -33,8 +33,8 @@ Features
 - Effortless syncing between local machines and **HPCC**.
 - |codecov| **tested!**
 
-.. |codecov| image:: https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1
-      :target: https://codecov.io/gh/ajshajib/dolphin
+.. |codecov| image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
+    :target: https://app.codecov.io/gh/ajshajib/dolphin/tree/main
 
 Installation
 ------------

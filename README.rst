@@ -21,7 +21,7 @@
     :target: https://www.sphinx-doc.org/en/master/usage/index.html
 
 AI-powered automated pipeline for lens modeling, with
-`lenstronomy <https://github.com/sibirrer/lenstronomy>`_ as the modeling engine.
+`lenstronomy <https://github.com/lenstronomy/lenstronomy>`_ as the modeling engine.
 
 Features
 --------

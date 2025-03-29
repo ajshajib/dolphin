@@ -4,8 +4,8 @@
 |logo| dolphin
 ==============
 
-.. image:: https://github.com/ajshajib/dolphin/workflows/Tests/badge.svg?branch=main
-    :target: https://github.com/ajshajib/dolphin/actions
+.. image:: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml/badge.svg?branch=main
+    :target: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml
 .. image:: https://readthedocs.org/projects/dolphin-docs/badge/?version=latest
     :target: https://dolphin-docs.readthedocs.io/en/latest/?badge=latest
 .. image:: https://codecov.io/gh/ajshajib/dolphin/graph/badge.svg?token=WZVXZS9GF1

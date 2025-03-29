@@ -1,0 +1,3 @@
+pydata-sphinx-theme
+-r ../requirements.txt
+.

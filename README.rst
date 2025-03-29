@@ -39,8 +39,10 @@ Features
 Installation
 ------------
 
-.. image:: https://img.shields.io/pypi/v/space-dolphin
+.. image:: https://img.shields.io/pypi/v/space-dolphin.svg
    :alt: PyPI - Version
+   :target: https://pypi.org/project/space-dolphin/
+
 
 You can install ``dolphin`` using ``pip``. Run the following command:
 

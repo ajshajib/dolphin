@@ -1,0 +1,53 @@
+# filter specifications
+
+F140W:
+    read_noise: 14
+    ccd_gain: 1.0
+    sky_brightness: 23.170 # https://hst-docs.stsci.edu/wfc3ihb/chapter-9-wfc3-exposure-time-calculation/9-7-sky-background
+    magnitude_zero_point: 26.454 # https://www.stsci.edu/hst/instrumentation/wfc3/data-analysis/photometric-calibration/ir-photometric-calibration
+    exposure_time: 2196.9
+    psf_file: resources/psf_wfc3_f160w.npy
+    point_source_supersampling_factor: 1
+    pixel_scale: 0.08 # arcsec
+
+F200LP:
+    read_noise: 3
+    ccd_gain: 1.5
+    sky_brightness: 21.667 # https://hst-docs.stsci.edu/wfc3ihb/chapter-9-wfc3-exposure-time-calculation/9-7-sky-background
+    magnitude_zero_point: 27.336 # https://www.stsci.edu/hst/instrumentation/wfc3/data-analysis/photometric-calibration/uvis-photometric-calibration
+    exposure_time: 2196.9
+    psf_file: resources/psf_wfc3_f200lp.npy
+    point_source_supersampling_factor: 1
+    pixel_scale: 0.04 # arcsec
+
+F814W:
+    read_noise: 3
+    ccd_gain: 1.5
+    sky_brightness: 22.057 # https://hst-docs.stsci.edu/wfc3ihb/chapter-9-wfc3-exposure-time-calculation/9-7-sky-background
+    magnitude_zero_point: 25.127 # https://www.stsci.edu/hst/instrumentation/wfc3/data-analysis/photometric-calibration/uvis-photometric-calibration
+    exposure_time: 1429.0
+    psf_file: resources/psf_wfc3_f814w.npy
+    point_source_supersampling_factor: 1
+    pixel_scale: 0.04 # arcsec
+
+F475X:
+    read_noise: 3
+    ccd_gain: 1.5
+    sky_brightness: 21.667 # https://hst-docs.stsci.edu/wfc3ihb/chapter-9-wfc3-exposure-time-calculation/9-7-sky-background
+    magnitude_zero_point: 26.156 # https://www.stsci.edu/hst/instrumentation/wfc3/data-analysis/photometric-calibration/ir-photometric-calibration
+    exposure_time: 1119.2
+    psf_file: resources/psf_wfc3_f475x.npy
+    point_source_supersampling_factor: 1
+    pixel_scale: 0.04 # arcsec
+
+F606W:
+    read_noise: 3
+    ccd_gain: 1.5
+    sky_brightness: 21.687 # https://hst-docs.stsci.edu/wfc3ihb/chapter-9-wfc3-exposure-time-calculation/9-7-sky-background
+    magnitude_zero_point: 26.087 # https://www.stsci.edu/hst/instrumentation/wfpc2/data-analysis/photometric-calibration
+    exposure_time: 1429.0
+    psf_file: resources/psf_wfc3_f606w.npy
+    point_source_supersampling_factor: 1
+    pixel_scale: 0.05 # arcsec
+
+

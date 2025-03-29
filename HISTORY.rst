@@ -3,6 +3,16 @@
 History
 -------
 
+1.0.0 (2025-03-28)
+++++++++++++++++++
+
+* Added a fully automated modeling workflow powered by AI
+* Added feature to include satellite(s) in the lens model
+* Notebook for Neural Network Training and Testing by @pensive-aristocrat in https://github.com/ajshajib/dolphin/pull/93
+* Simplified main deflector's light profile specifications in the config.yaml for multiband fitting
+* Updated documentation
+* Updated Readme and added a Quickstart Guide
+
 0.0.2 (2024-09-05)
 ++++++++++++++++++
 * Add SIE lens model support by @ajshajib in https://github.com/ajshajib/dolphin/pull/32
@@ -21,8 +31,5 @@ Supported features:
 - Semi-automated lens modeling for a sample based on user-provided configuration in yaml files
 - Easy setup to perform optimization/MCMC using HPCC for a large sample
 - Initial fitting recipe to achieve faster convergence for galaxy-galaxy lenses
-
-0.0.0 (2020-02-06)
-++++++++++++++++++
 
 

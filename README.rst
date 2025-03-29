@@ -13,6 +13,8 @@
 .. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
     :target: https://github.com/ajshajib/dolphin/blob/main/LICENSE
     :alt: License BSD 3-Clause Badge
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    :target: https://pre-commit.com/
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 .. image:: https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg

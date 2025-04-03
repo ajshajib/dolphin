@@ -1,7 +1,7 @@
 Configuration File Documentation
 ================================
 
-This document provides a detailed explanation of all the possible options in the `config.yaml` file for the `dolphin` pipeline. Check out the `io_directory_example/settings` folder for some example config files.
+This document provides a detailed explanation of all the possible options in the `config.yaml` file for the `dolphin` pipeline. Check out the ``io_directory_example/settings`` `folder <https://github.com/ajshajib/dolphin/tree/main/io_directory_example/settings>`_ for some example config files.
 
 Top-level information
 ---------------------
@@ -24,7 +24,7 @@ Top-level information
 
        band: ["F475X", "F600LP"]
 
-- ``pixel_size``: Pixel size for each band. If not provided, it will be inferred from the image data.
+- ``pixel_size``: *(Optional)* Pixel size for each band. If not provided, it will be inferred from the image data.
 
   - Type: ``list of floats``
   - Example:
@@ -67,7 +67,7 @@ Model Section
 
            source_light: ["SERSIC_ELLIPSE", "SHAPELETS"]
 
-    - ``point_source``: List of point source models. Can be empty list for galaxy-galaxy lenses.
+    - ``point_source``: *(Optional)* List of point source models. Can be an empty list for galaxy-galaxy lenses.
 
       - Type: ``list of strings``
       - Example:
@@ -79,7 +79,7 @@ Model Section
 Satellites Section
 ------------------
 
-- ``satellites``: Options for modeling satellite galaxies.
+- ``satellites``: *(Optional)* Options for modeling satellite galaxies.
 
   - Suboptions:
 
@@ -137,7 +137,7 @@ Lens Options
 
            centroid_bound: 0.5
 
-    - ``gaussian_prior``: Gaussian priors for lens parameters.
+    - ``gaussian_prior``: *(Optional)* Gaussian priors for lens parameters.
 
       - Type: ``dictionary``
       - Example:
@@ -147,7 +147,7 @@ Lens Options
            gaussian_prior:
              0: [[gamma, 2.11, 0.03], [theta_E, 1.11, 0.13]]
 
-    - ``constrain_position_angle_from_lens_light``: Maximum allowed difference between the position angle of the mass and light profiles.
+    - ``constrain_position_angle_from_lens_light``: *(Optional)* Maximum allowed difference between the position angle of the mass and light profiles.
 
       - Type: ``float``
       - Example:
@@ -156,7 +156,7 @@ Lens Options
 
            constrain_position_angle_from_lens_light: 15
 
-    - ``limit_mass_eccentricity_from_light``: Whether to limit the mass eccentricity based on the light profile.
+    - ``limit_mass_eccentricity_from_light``: *(Optional)* Whether to limit the mass eccentricity based on the light profile.
 
       - Type: ``boolean``
       - Example:
@@ -165,7 +165,7 @@ Lens Options
 
            limit_mass_eccentricity_from_light: true
 
-    - ``fix``: Fix specific parameters for the lens model.
+    - ``fix``: *(Optional)* Fix specific parameters for the lens model.
 
       - Type: ``dictionary``
       - Example:
@@ -176,7 +176,7 @@ Lens Options
              0:
                gamma: 2.0
 
-    - ``limit_mass_pa_from_light``: Maximum allowed difference between the position angle of the mass and light profiles.
+    - ``limit_mass_pa_from_light``: *(Optional)* Maximum allowed difference between the position angle of the mass and light profiles.
 
       - Type: ``float``
       - Example:
@@ -185,7 +185,7 @@ Lens Options
 
            limit_mass_pa_from_light: 10.0
 
-    - ``limit_mass_q_from_light``: Maximum allowed difference between the axis ratio of the mass and light profiles.
+    - ``limit_mass_q_from_light``: *(Optional)* Maximum allowed difference between the axis ratio of the mass and light profiles.
 
       - Type: ``float``
       - Example:
@@ -198,7 +198,7 @@ Lens Options
 Lens Light Options
 ------------------
 
-- ``lens_light_option``: Additional options for the lens light model.
+- ``lens_light_option``: *(Optional)* Additional options for the lens light model.
 
   - Suboptions:
 
@@ -225,7 +225,7 @@ Lens Light Options
 Source Light Options
 --------------------
 
-- ``source_light_option``: Additional options for the source light model.
+- ``source_light_option``: *(Optional)* Additional options for the source light model.
 
   - Suboptions:
 
@@ -311,7 +311,7 @@ Fitting Options
 
                num_iteration: 50
 
-    - ``sampling``: Whether to perform sampling after optimization.
+    - ``sampling``: *(Optional)* Whether to perform sampling after optimization.
 
       - Type: ``boolean``
       - Example:
@@ -360,7 +360,7 @@ Fitting Options
 
                walkerRatio: 2
     
-    - ``psf_iteration``: Whether to perform iterative PSF fitting.
+    - ``psf_iteration``: *(Optional)* Whether to perform iterative PSF fitting.
 
       - Type: ``boolean``
       - Example:
@@ -421,7 +421,7 @@ Fitting Options
 Mask Options
 ------------
 
-- ``mask``: Settings for masking regions of the image.
+- ``mask``: *(Optional)* Settings for masking regions of the image.
 
   - Suboptions:
 

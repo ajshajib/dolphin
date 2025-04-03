@@ -43,6 +43,7 @@ Model Section
 
   - Description: Defines the components of the lens model.
   - Suboptions:
+
     - ``lens``:
 
       - Description: List of lens mass profiles.
@@ -90,6 +91,7 @@ Lens Options
 
   - Description: Additional options for the lens model.
   - Suboptions:
+
     - ``centroid_init``:
 
       - Description: Initial guess for the lens centroid.
@@ -138,6 +140,7 @@ Lens Light Options
 
   - Description: Additional options for the lens light model.
   - Suboptions:
+
     - ``fix``:
 
       - Description: Fix specific parameters for the lens light profile.
@@ -166,6 +169,7 @@ Source Light Options
 
   - Description: Additional options for the source light model.
   - Suboptions:
+
     - ``n_max``:
 
       - Description: Maximum number of Sersic profiles for each band.
@@ -193,6 +197,7 @@ Point Source Options
 
   - Description: Additional options for the point source model.
   - Suboptions:
+
     - ``ra_init``:
 
       - Description: Initial RA positions of the point sources.
@@ -230,6 +235,7 @@ Fitting Options
 
   - Description: Settings for the fitting process.
   - Suboptions:
+
     - ``pso``:
 
       - Description: Whether to use Particle Swarm Optimization (PSO) for fitting.
@@ -244,6 +250,7 @@ Fitting Options
 
       - Description: Settings for the PSO algorithm.
       - Suboptions:
+
         - ``num_particle``:
 
           - Description: Number of particles in the swarm.
@@ -278,6 +285,7 @@ Fitting Options
 
       - Description: Settings for iterative PSF fitting.
       - Suboptions:
+
         - ``stacking_method``:
 
           - Description: Method for stacking PSFs.

@@ -12,6 +12,7 @@ Contents
    :maxdepth: 3
 
    quickstart
+   config_options
    contributing
    authors
    history

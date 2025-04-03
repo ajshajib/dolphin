@@ -6,9 +6,8 @@ This document provides a detailed explanation of all the possible options in the
 Top-Level Options
 -----------------
 
-- ``lens_name``:
+- ``lens_name``: The name of the lens system being modeled.
 
-  - Description: The name of the lens system being modeled.
   - Type: ``string``
   - Example:
 
@@ -16,19 +15,17 @@ Top-Level Options
 
        lens_name: "DESJ0408-5354"
 
-- ``band``:
+- ``band``: List of photometric bands used for modeling.
 
-  - Description: List of photometric bands used for modeling.
   - Type: ``list of strings``
   - Example:
 
     .. code-block:: yaml
 
-       band: ['F814W']
+       band: ["F814W"]
 
-- ``pixel_size``:
+- ``pixel_size``: Pixel size for each band. If not provided, it will be inferred from the image data.
 
-  - Description: Pixel size for each band. If not provided, it will be inferred from the image data.
   - Type: ``list of floats``
   - Example:
 
@@ -39,62 +36,55 @@ Top-Level Options
 Model Section
 -------------
 
-- ``model``:
+- ``model``: Defines the components of the lens model.
 
-  - Description: Defines the components of the lens model.
   - Suboptions:
 
-    - ``lens``:
+    - ``lens``: List of lens mass profiles.
 
-      - Description: List of lens mass profiles.
       - Type: ``list of strings``
       - Example:
 
         .. code-block:: yaml
 
-           lens: ['EPL', 'SHEAR_GAMMA_PSI']
+           lens: ["EPL", "SHEAR_GAMMA_PSI"]
 
-    - ``lens_light``:
+    - ``lens_light``: List of lens light profiles.
 
-      - Description: List of lens light profiles.
       - Type: ``list of strings``
       - Example:
 
         .. code-block:: yaml
 
-           lens_light: ['SERSIC_ELLIPSE']
+           lens_light: ["SERSIC_ELLIPSE"]
 
-    - ``source_light``:
+    - ``source_light``: List of source light profiles.
 
-      - Description: List of source light profiles.
       - Type: ``list of strings``
       - Example:
 
         .. code-block:: yaml
 
-           source_light: ['SERSIC_ELLIPSE']
+           source_light: ["SERSIC_ELLIPSE"]
 
-    - ``point_source``:
+    - ``point_source``: List of point source models.
 
-      - Description: List of point source models.
       - Type: ``list of strings``
       - Example:
 
         .. code-block:: yaml
 
-           point_source: ['LENSED_POSITION']
+           point_source: ["LENSED_POSITION"]
 
 Lens Options
 ------------
 
-- ``lens_option``:
+- ``lens_option``: Additional options for the lens model.
 
-  - Description: Additional options for the lens model.
   - Suboptions:
 
-    - ``centroid_init``:
+    - ``centroid_init``: Initial guess for the lens centroid.
 
-      - Description: Initial guess for the lens centroid.
       - Type: ``list of floats``
       - Example:
 
@@ -102,9 +92,8 @@ Lens Options
 
            centroid_init: [-0.2, 0.04]
 
-    - ``centroid_bound``:
+    - ``centroid_bound``: Half of the box width to constrain the deflector's centroid.
 
-      - Description: Half of the box width to constrain the deflector's centroid.
       - Type: ``float``
       - Default: ``0.5``
       - Example:
@@ -113,9 +102,8 @@ Lens Options
 
            centroid_bound: 0.5
 
-    - ``limit_mass_pa_from_light``:
+    - ``limit_mass_pa_from_light``: Maximum allowed difference between the position angle of the mass and light profiles.
 
-      - Description: Maximum allowed difference between the position angle of the mass and light profiles.
       - Type: ``float``
       - Example:
 
@@ -123,9 +111,8 @@ Lens Options
 
            limit_mass_pa_from_light: 10.0
 
-    - ``limit_mass_q_from_light``:
+    - ``limit_mass_q_from_light``: Maximum allowed difference between the axis ratio of the mass and light profiles.
 
-      - Description: Maximum allowed difference between the axis ratio of the mass and light profiles.
       - Type: ``float``
       - Example:
 
@@ -136,43 +123,38 @@ Lens Options
 Lens Light Options
 ------------------
 
-- ``lens_light_option``:
+- ``lens_light_option``: Additional options for the lens light model.
 
-  - Description: Additional options for the lens light model.
   - Suboptions:
 
-    - ``fix``:
+    - ``fix``: Fix specific parameters for the lens light profile.
 
-      - Description: Fix specific parameters for the lens light profile.
       - Type: ``dictionary``
       - Example:
 
         .. code-block:: yaml
 
-           fix: {0: {'n_sersic': 4.}}
+           fix: {0: {"n_sersic": 4.}}
 
-    - ``gaussian_prior``:
+    - ``gaussian_prior``: Gaussian priors for lens light parameters.
 
-      - Description: Gaussian priors for lens light parameters.
       - Type: ``dictionary``
       - Example:
 
         .. code-block:: yaml
 
            gaussian_prior:
-             0: [{'param_name': 'n_sersic', 'mean': 4.0, 'sigma': 0.5}]
+             0: [{"param_name": "n_sersic", "mean": 4.0, "sigma": 0.5}]
 
 Source Light Options
 --------------------
 
-- ``source_light_option``:
+- ``source_light_option``: Additional options for the source light model.
 
-  - Description: Additional options for the source light model.
   - Suboptions:
 
-    - ``n_max``:
+    - ``n_max``: Maximum number of Sersic profiles for each band.
 
-      - Description: Maximum number of Sersic profiles for each band.
       - Type: ``list of integers``
       - Example:
 
@@ -180,9 +162,8 @@ Source Light Options
 
            n_max: [4]
 
-    - ``shapelet_scale_logarithmic_prior``:
+    - ``shapelet_scale_logarithmic_prior``: Whether to apply a logarithmic prior on the shapelet scale parameter.
 
-      - Description: Whether to apply a logarithmic prior on the shapelet scale parameter.
       - Type: ``boolean``
       - Example:
 
@@ -193,14 +174,12 @@ Source Light Options
 Point Source Options
 --------------------
 
-- ``point_source_option``:
+- ``point_source_option``: Additional options for the point source model.
 
-  - Description: Additional options for the point source model.
   - Suboptions:
 
-    - ``ra_init``:
+    - ``ra_init``: Initial RA positions of the point sources.
 
-      - Description: Initial RA positions of the point sources.
       - Type: ``list of floats``
       - Example:
 
@@ -208,9 +187,8 @@ Point Source Options
 
            ra_init: [-0.54, -0.69, 0.19, 0.55]
 
-    - ``dec_init``:
+    - ``dec_init``: Initial Dec positions of the point sources.
 
-      - Description: Initial Dec positions of the point sources.
       - Type: ``list of floats``
       - Example:
 
@@ -218,9 +196,8 @@ Point Source Options
 
            dec_init: [-0.48, 0.54, 0.68, -0.16]
 
-    - ``bound``:
+    - ``bound``: Bound for the point source positions.
 
-      - Description: Bound for the point source positions.
       - Type: ``float``
       - Example:
 
@@ -231,14 +208,12 @@ Point Source Options
 Fitting Options
 ---------------
 
-- ``fitting``:
+- ``fitting``: Settings for the fitting process.
 
-  - Description: Settings for the fitting process.
   - Suboptions:
 
-    - ``pso``:
+    - ``pso``: Whether to use Particle Swarm Optimization (PSO) for fitting.
 
-      - Description: Whether to use Particle Swarm Optimization (PSO) for fitting.
       - Type: ``boolean``
       - Example:
 
@@ -246,14 +221,12 @@ Fitting Options
 
            pso: true
 
-    - ``pso_settings``:
+    - ``pso_settings``: Settings for the PSO algorithm.
 
-      - Description: Settings for the PSO algorithm.
       - Suboptions:
 
-        - ``num_particle``:
+        - ``num_particle``: Number of particles in the swarm.
 
-          - Description: Number of particles in the swarm.
           - Type: ``integer``
           - Example:
 
@@ -261,9 +234,8 @@ Fitting Options
 
                num_particle: 20
 
-        - ``num_iteration``:
+        - ``num_iteration``: Number of iterations for PSO.
 
-          - Description: Number of iterations for PSO.
           - Type: ``integer``
           - Example:
 
@@ -271,9 +243,8 @@ Fitting Options
 
                num_iteration: 50
 
-    - ``psf_iteration``:
+    - ``psf_iteration``: Whether to perform iterative PSF fitting.
 
-      - Description: Whether to perform iterative PSF fitting.
       - Type: ``boolean``
       - Example:
 
@@ -281,14 +252,12 @@ Fitting Options
 
            psf_iteration: true
 
-    - ``psf_iteration_settings``:
+    - ``psf_iteration_settings``: Settings for iterative PSF fitting.
 
-      - Description: Settings for iterative PSF fitting.
       - Suboptions:
 
-        - ``stacking_method``:
+        - ``stacking_method``: Method for stacking PSFs.
 
-          - Description: Method for stacking PSFs.
           - Type: ``string``
           - Example:
 
@@ -296,9 +265,8 @@ Fitting Options
 
                stacking_method: "median"
 
-        - ``num_iter``:
+        - ``num_iter``: Number of PSF iterations.
 
-          - Description: Number of PSF iterations.
           - Type: ``integer``
           - Example:
 
@@ -306,9 +274,8 @@ Fitting Options
 
                num_iter: 20
 
-        - ``psf_iter_factor``:
+        - ``psf_iter_factor``: Factor for PSF iteration.
 
-          - Description: Factor for PSF iteration.
           - Type: ``float``
           - Example:
 
@@ -316,9 +283,8 @@ Fitting Options
 
                psf_iter_factor: 0.5
 
-        - ``keep_psf_variance_map``:
+        - ``keep_psf_variance_map``: Whether to keep the PSF variance map.
 
-          - Description: Whether to keep the PSF variance map.
           - Type: ``boolean``
           - Example:
 
@@ -326,9 +292,8 @@ Fitting Options
 
                keep_psf_variance_map: true
 
-        - ``psf_symmetry``:
+        - ``psf_symmetry``: Symmetry of the PSF.
 
-          - Description: Symmetry of the PSF.
           - Type: ``integer``
           - Example:
 

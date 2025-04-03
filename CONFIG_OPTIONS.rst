@@ -1,5 +1,5 @@
-Configuration File Documentation
-================================
+Configuration Files
+===================
 
 This document provides a detailed explanation of all the possible options in the `config.yaml` file for the `dolphin` pipeline. This page lists all the allowed options/keywords. Check out the ``io_directory_example/settings`` `folder <https://github.com/ajshajib/dolphin/tree/main/io_directory_example/settings>`_ for some example config files.
 

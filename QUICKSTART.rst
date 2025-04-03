@@ -34,13 +34,13 @@ Setting up the ``dolphin`` Ecosystem
 
         io_directory_example/
         ├── data/
-        │   ├── ai_test/
-        │   │   ├── image_data.h5
-        │   │   ├── psf_data.h5
+        │   ├── system_name/
+        │   │   ├── image_system_name_band.h5 (provided by user)
+        │   │   ├── psf_system_name_band.h5 (provided by user)
         ├── settings/
-        │   ├── config_ai_test.yaml
-        ├── masks/
-        │   ├── mask_ai_test_band1.npy
+        │   ├── config_system_name.yaml (can be created by AI)
+        │   ├── masks/
+        │   │   ├── mask_system_name_band.npy (can be created by AI)
         ├── logs/
         ├── outputs/
         ├── hpc/

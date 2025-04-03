@@ -1,7 +1,7 @@
 Configuration File Documentation
 ================================
 
-This document provides a detailed explanation of all the possible options in the `config.yaml` file for the `dolphin` pipeline.
+This document provides a detailed explanation of all the possible options in the `config.yaml` file for the `dolphin` pipeline. Check out the `io_directory_example/settings` folder for some example config files.
 
 Top-Level Options
 -----------------
@@ -20,6 +20,14 @@ Top-Level Options
   - Example:
     ```yaml
     band: ['F814W']
+    ```
+
+- **`pixel_size`**:
+  - Description: Pixel size for each band. If not provided, it will be inferred from the image data.
+  - Type: `list of floats`
+  - Example:
+    ```yaml
+    pixel_size: [0.05]
     ```
 
 Model Section
@@ -70,6 +78,28 @@ Lens Options
         ```yaml
         centroid_init: [-0.2, 0.04]
         ```
+    - **`centroid_bound`**:
+      - Description: Half of the box width to constrain the deflector's centroid.
+      - Type: `float`
+      - Default: `0.5`
+      - Example:
+        ```yaml
+        centroid_bound: 0.5
+        ```
+    - **`limit_mass_pa_from_light`**:
+      - Description: Maximum allowed difference between the position angle of the mass and light profiles.
+      - Type: `float`
+      - Example:
+        ```yaml
+        limit_mass_pa_from_light: 10.0
+        ```
+    - **`limit_mass_q_from_light`**:
+      - Description: Maximum allowed difference between the axis ratio of the mass and light profiles.
+      - Type: `float`
+      - Example:
+        ```yaml
+        limit_mass_q_from_light: 0.1
+        ```
 
 Lens Light Options
 ------------------
@@ -84,6 +114,14 @@ Lens Light Options
         ```yaml
         fix: {0: {'n_sersic': 4.}}
         ```
+    - **`gaussian_prior`**:
+      - Description: Gaussian priors for lens light parameters.
+      - Type: `dictionary`
+      - Example:
+        ```yaml
+        gaussian_prior:
+          0: [{'param_name': 'n_sersic', 'mean': 4.0, 'sigma': 0.5}]
+        ```
 
 Source Light Options
 --------------------
@@ -97,6 +135,13 @@ Source Light Options
       - Example:
         ```yaml
         n_max: [4]
+        ```
+    - **`shapelet_scale_logarithmic_prior`**:
+      - Description: Whether to apply a logarithmic prior on the shapelet scale parameter.
+      - Type: `boolean`
+      - Example:
+        ```yaml
+        shapelet_scale_logarithmic_prior: true
         ```
 
 Point Source Options
@@ -260,4 +305,39 @@ Numeric Options
       - Example:
         ```yaml
         supersampling_factor: [2]
+        ```
+
+Mask Options
+------------
+
+- **`mask`**:
+  - Description: Settings for creating masks.
+  - Suboptions:
+    - **`provided`**:
+      - Description: Whether a mask is provided.
+      - Type: `boolean`
+      - Example:
+        ```yaml
+        provided: true
+        ```
+    - **`radius`**:
+      - Description: Radius for azimuthal masks.
+      - Type: `list of floats`
+      - Example:
+        ```yaml
+        radius: [1.0]
+        ```
+    - **`extra_regions`**:
+      - Description: Additional regions to mask.
+      - Type: `list of lists`
+      - Example:
+        ```yaml
+        extra_regions: [[0.5, 0.5, 0.2]]
+        ```
+    - **`mask_edge_pixels`**:
+      - Description: Number of edge pixels to mask.
+      - Type: `list of integers`
+      - Example:
+        ```yaml
+        mask_edge_pixels: [5]
         ```

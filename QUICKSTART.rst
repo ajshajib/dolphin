@@ -34,13 +34,13 @@ Setting up the ``dolphin`` Ecosystem
 
         io_directory_example/
         ├── data/
-        │   ├── ai_test/
-        │   │   ├── image_data.h5
-        │   │   ├── psf_data.h5
+        │   ├── system_name/
+        │   │   ├── image_system_name_band.h5 (provided by user)
+        │   │   ├── psf_system_name_band.h5 (provided by user)
         ├── settings/
-        │   ├── config_ai_test.yaml
-        ├── masks/
-        │   ├── mask_ai_test_band1.npy
+        │   ├── config_system_name.yaml (can be created by AI)
+        │   ├── masks/
+        │   │   ├── mask_system_name_band.npy (can be created by AI)
         ├── logs/
         ├── outputs/
         ├── hpc/
@@ -64,7 +64,7 @@ The PSF data file needs to have the following datasets:
 - ``kernel_point_source``: a pixelated PSF (not required to have the same dimension of ``image_data``),
 - ``psf_variance_map``: *optional*, uncertainty in the provided PSF, needs to have the same dimension of ``kernel_point_source``.
 
-Running ``dolphin`` for Full Automation
+Running ``dolphin`` with Full Automation
 -------------------------------------
 
 Use the following Python code to run the ``dolphin`` pipeline for a specific lens system. For example, to model a lensed quasar system:
@@ -112,4 +112,7 @@ Generate an overview plot: To visualize the results, use the following Python co
 
 This will create a plot summarizing the lens model. You can save the plot to a file using ``fig.savefig()``.
 
-Congratulations! You have successfully set up and run ``dolphin`` for full automation with AI and generated a model overview plot. For more examples in Jupyter notebooks, check out the ``notebooks`` folder.
+Congratulations! You have successfully set up and run ``dolphin`` for full automation with AI and generated a model overview plot. 
+
+For more examples in Jupyter notebooks, check out the ``notebooks`` `folder <https://github.com/ajshajib/dolphin/tree/main/notebooks>`_. Additionally, check out `"Project Dinos" GitHub repo <https://github.com/Project-Dinos/dinos-i/tree/main/2_dolphin_modelling>`_ for lots of examples of manually produced ``config.yaml`` files that were used in the semi-automated modeling scheme for the Dinos sample in `Tan et al. (2024) <https://ui.adsabs.harvard.edu/abs/2024MNRAS.530.1474T/abstract>`_. As a flexible modeling workflow, AI-generated configs can be tweaked by hand before fitting the model(s) for additional improvements and modifications in the model setup.
+

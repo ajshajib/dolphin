@@ -164,7 +164,7 @@ class Modeler(AI):
             "centroid_bound": 0.2,
         }
         config["lens_light_option"] = {"fix": {0: {"n_sersic": 4.0}}}
-        config["source_light_option"] = {"n_max": [4]}
+        config["source_light_option"] = {"n_max": [6]}
 
         # Set point source options
         if self._source_type == "quasar":
@@ -336,7 +336,6 @@ class Modeler(AI):
         galaxy_center_ra, galaxy_center_dec = coordinate_system.map_pix2coord(
             galaxy_center_pixels[0][1], galaxy_center_pixels[0][0]
         )
-
         return [galaxy_center_ra, galaxy_center_dec]
 
     def get_quasar_image_position(
@@ -488,6 +487,7 @@ class Modeler(AI):
         rows, cols = len(matrix), len(matrix[0])
         visited = [[False for _ in range(cols)] for _ in range(rows)]
         region_centers = []
+        region_areas = []
 
         for i in range(rows):
             for j in range(cols):
@@ -501,5 +501,11 @@ class Modeler(AI):
                         center_y = sum(p[1] for p in pixels) // len(pixels)
 
                         region_centers.append((center_x, center_y))
+                        region_areas.append(len(pixels))
+
+        # sort by region_areas
+        region_centers = [
+            x for _, x in sorted(zip(region_areas, region_centers), reverse=True)
+        ]
 
         return region_centers

@@ -192,7 +192,7 @@ class Modeler(AI):
 
         # Set guess params
         theta_E_init = self.get_theta_E_init(semantic_segmentation, coordinate_system)
-        config["guess_params"] = {"lens": {0: {"theta_E": theta_E_init}}}
+        config["guess_params"] = {"lens": {0: {"theta_E": float(theta_E_init)}}}
 
         # Set numeric options
         config["numeric_option"] = {"supersampling_factor": supersampling_factor}
@@ -282,6 +282,8 @@ class Modeler(AI):
                     2 * theta_E_init
                 ) ** 2:
                     mask[i, j] = 1
+
+        print(mask.shape)
 
         return mask
 

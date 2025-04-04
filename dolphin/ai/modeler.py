@@ -81,7 +81,6 @@ class Modeler(AI):
         self,
         lens_name,
         band_name,
-        source_type="quasar",
         pso_settings={"num_particle": 50, "num_iteration": 50},
         psf_iteration_settings={
             "stacking_method": "median",
@@ -109,8 +108,6 @@ class Modeler(AI):
         :type lens_name: `str`
         :param band_name: band name
         :type band_name: `str`
-        :param source_type: type of configuration
-        :type source_type: `str`
         :param pso_settings: PSO settings
         :type pso_settings: `dict`
         :param psf_iteration_settings: PSF iteration settings
@@ -147,7 +144,9 @@ class Modeler(AI):
             "lens": ["EPL", "SHEAR_GAMMA_PSI"],
             "lens_light": ["SERSIC_ELLIPSE"],
             "source_light": ["SERSIC_ELLIPSE"],
-            "point_source": (["LENSED_POSITION"] if source_type == "quasar" else [""]),
+            "point_source": (
+                ["LENSED_POSITION"] if self._source_type == "quasar" else [""]
+            ),
         }
 
         # Set lens options
@@ -162,14 +161,15 @@ class Modeler(AI):
         config["source_light_option"] = {"n_max": [4]}
 
         # Set point source options
-        point_source_init = self.get_quasar_image_position(
-            semantic_segmentation, coordinate_system, clear_center=clear_center
-        )
-        config["point_source_option"] = {
-            "ra_init": point_source_init[0].tolist(),
-            "dec_init": point_source_init[1].tolist(),
-            "bound": 0.2,
-        }
+        if self._source_type == "quasar":
+            point_source_init = self.get_quasar_image_position(
+                semantic_segmentation, coordinate_system, clear_center=clear_center
+            )
+            config["point_source_option"] = {
+                "ra_init": point_source_init[0].tolist(),
+                "dec_init": point_source_init[1].tolist(),
+                "bound": 0.2,
+            }
 
         # Set satellite options
         satellite_positions = self.get_satellite_positions(
@@ -199,32 +199,36 @@ class Modeler(AI):
 
         config["fitting"]["psf_iteration"] = (
             True
-            if psf_iteration_settings is not None and source_type == "quasar"
+            if psf_iteration_settings is not None and self._source_type == "quasar"
             else False
         )
         config["fitting"]["psf_iteration_settings"] = psf_iteration_settings
 
-        # Calculate distances between quasar images
-        distances = []
-        for i in range(len(point_source_init[0])):
-            for j in range(i + 1, len(point_source_init[0])):
-                distances.append(
-                    np.sqrt(
-                        (point_source_init[0][i] - point_source_init[0][j]) ** 2
-                        + (point_source_init[1][i] - point_source_init[1][j]) ** 2
+        if config["fitting"]["psf_iteration"]:
+            # Calculate distances between quasar images
+            distances = []
+            for i in range(len(point_source_init[0])):
+                for j in range(i + 1, len(point_source_init[0])):
+                    distances.append(
+                        np.sqrt(
+                            (point_source_init[0][i] - point_source_init[0][j]) ** 2
+                            + (point_source_init[1][i] - point_source_init[1][j]) ** 2
+                        )
                     )
-                )
 
-        # Set PSF iteration settings
-        # Second minimum distance is used to set the block center neighbour and error map radius
-        if "block_center_neighbour" not in config["fitting"]["psf_iteration_settings"]:
-            config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = (
-                float(np.sort(distances)[1] / 2.0)
-            )
-        if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
-            config["fitting"]["psf_iteration_settings"]["error_map_radius"] = float(
-                np.sort(distances)[1] / 2.0
-            )
+            # Set PSF iteration settings
+            # Second minimum distance is used to set the block center neighbour and error map radius
+            if (
+                "block_center_neighbour"
+                not in config["fitting"]["psf_iteration_settings"]
+            ):
+                config["fitting"]["psf_iteration_settings"][
+                    "block_center_neighbour"
+                ] = float(np.sort(distances)[1] / 2.0)
+            if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
+                config["fitting"]["psf_iteration_settings"]["error_map_radius"] = float(
+                    np.sort(distances)[1] / 2.0
+                )
 
         # Set sampling options
         config["fitting"]["sampling"] = sampler_settings is not None

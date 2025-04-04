@@ -151,7 +151,7 @@ class Modeler(AI):
             "lens_light": ["SERSIC_ELLIPSE"],
             "source_light": ["SERSIC_ELLIPSE"],
             "point_source": (
-                ["LENSED_POSITION"] if self._source_type == "quasar" else [""]
+                ["LENSED_POSITION"] if self._source_type == "quasar" else []
             ),
         }
 

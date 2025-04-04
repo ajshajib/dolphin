@@ -283,7 +283,6 @@ class Modeler(AI):
                 ) ** 2:
                     mask[i, j] = 1
 
-        print(mask.shape)
 
         return mask
 

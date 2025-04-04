@@ -286,3 +286,49 @@ class TestModeler:
             assert np.allclose(
                 sorted(satellite_positions[i]), sorted(coords[i]), atol=1e-4
             )
+
+    def test_collect_connected_pixels_boundary_check(self):
+        """Test the boundary check in the `collect_connected_pixels` method."""
+        # Define a small matrix
+        matrix = [
+            [1, 1, 0],
+            [1, 0, 0],
+            [0, 0, 0],
+        ]
+        rows, cols = len(matrix), len(matrix[0])
+
+        # Initialize visited matrix
+        visited = [[False for _ in range(cols)] for _ in range(rows)]
+
+        # Define parameters
+        pixels = []
+        target_value = 1
+
+        # Test out-of-bounds indices
+        self.galaxy_modeler.collect_connected_pixels(
+            -1, 0, pixels, visited, target_value, matrix, rows, cols
+        )
+        self.galaxy_modeler.collect_connected_pixels(
+            0, -1, pixels, visited, target_value, matrix, rows, cols
+        )
+        self.galaxy_modeler.collect_connected_pixels(
+            rows, 0, pixels, visited, target_value, matrix, rows, cols
+        )
+        self.galaxy_modeler.collect_connected_pixels(
+            0, cols, pixels, visited, target_value, matrix, rows, cols
+        )
+
+        # Ensure no pixels were added for out-of-bounds indices
+        assert (
+            len(pixels) == 0
+        ), "Boundary check failed: Out-of-bounds indices should not add pixels."
+
+        # Test valid indices
+        self.galaxy_modeler.collect_connected_pixels(
+            0, 0, pixels, visited, target_value, matrix, rows, cols
+        )
+
+        # Ensure valid pixels are added
+        assert (
+            len(pixels) > 0
+        ), "Boundary check failed: Valid indices should add pixels."

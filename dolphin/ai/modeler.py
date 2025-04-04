@@ -420,12 +420,26 @@ class Modeler(AI):
         :type y: `int`
         :param pixels: list of pixels
         :type pixels: `List[Tuple[int, int]]`
+        :param visited: matrix to track visited pixels
+        :type visited: `List[List[bool]]`
+        :param target_value: target value to match
+        :type target_value: `int`
+        :param matrix: input matrix
+        :type matrix: `List[List[int]]`
+        :param rows: number of rows in the matrix
+        :type rows: `int`
+        :param cols: number of columns in the matrix
+        :type cols: `int`
         """
-        # if x < 0 or x >= rows or y < 0 or y >= cols:
-        #     return
+        # Check if the current pixel is out of bounds
+        if x < 0 or x >= rows or y < 0 or y >= cols:
+            return
+
+        # Check if the current pixel is already visited or does not match the target value
         if visited[x][y] or matrix[x][y] != target_value:
             return
 
+        # Mark the current pixel as visited and add it to the list of pixels
         visited[x][y] = True
         pixels.append((x, y))
 

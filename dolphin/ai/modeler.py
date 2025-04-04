@@ -13,8 +13,14 @@ class Modeler(AI):
     """This class creates a configuration file from the output of the visual recognition
     model."""
 
-    def __init__(self, io_directory_path, source_type="quasar"):
-        """Initialize the Configure object."""
+    def __init__(self, io_directory_path, source_type):
+        """Initialize the Configure object.
+
+        :param io_directory_path: path to the input/output directory
+        :type io_directory_path: `str`
+        :param source_type: source type
+        :type source_type: `str`
+        """
         super(Modeler, self).__init__(io_directory_path)
         self._source_type = source_type
 

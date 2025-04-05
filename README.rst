@@ -30,7 +30,7 @@ AI-powered automated pipeline for lens modeling, with
 Features
 --------
 
-- **AI-powered automated** modeling for large samples of galaxy-scale lenses.
+- **AI-automated** modeling for large samples of galaxy-scale lenses.
 - **Flexible**: supports both fully automated and semi-automated (with user tweaks) modes.
 - **Multi-band** lens modeling made simple.
 - Supports **both** galaxy–galaxy and galaxy–quasar systems.

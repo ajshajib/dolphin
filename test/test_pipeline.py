@@ -12,7 +12,7 @@ class TestPipeline(object):
     def setup_method(self):
         """Setup method for the test class."""
 
-        _ROOT_DIR = Path(__file__).resolve().parents[2]
+        _ROOT_DIR = Path(__file__).resolve().parents[1]
         self.io_directory_path = str(_ROOT_DIR / "io_directory_example")
 
     def test_quasar_pipeline(self):

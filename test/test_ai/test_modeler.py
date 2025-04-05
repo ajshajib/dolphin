@@ -4,7 +4,7 @@ import pytest
 
 from dolphin.ai.modeler import Modeler
 
-_ROOT_DIR = Path(__file__).resolve().parents[1]
+_ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 

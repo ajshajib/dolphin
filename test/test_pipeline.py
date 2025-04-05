@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for config module."""
+from pathlib import Path
 from dolphin.processor import Processor
 from dolphin.ai import Vision
 from dolphin.ai import Modeler
@@ -10,7 +11,9 @@ class TestPipeline(object):
 
     def setup_method(self):
         """Setup method for the test class."""
-        self.io_directory_path = "../io_directory_example/"
+
+        _ROOT_DIR = Path(__file__).resolve().parents[2]
+        self.io_directory_path = str(_ROOT_DIR / "io_directory_example")
 
     def test_quasar_pipeline(self):
         """Test the entire pipeline."""

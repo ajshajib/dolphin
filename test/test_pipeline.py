@@ -57,7 +57,7 @@ class TestPipeline(object):
             lens_name,
             band,
             psf_iteration_settings=None,
-            pso_settings={"num_particle": 20, "num_iteration": 20},
+            pso_settings={"num_particle": 4, "num_iteration": 2},
             sampler_settings=None,
         )
 

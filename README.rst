@@ -31,7 +31,7 @@ Features
 --------
 
 - **AI-powered automated** modeling for large samples of galaxy-scale lenses.
-- **Flexible**: fully automated or semi-automated with user tweaks.
+- **Flexible**: supports both fully automated and semi-automated (with user tweaks) modes.
 - **Multi-band** lens modeling made simple.
 - Supports **both** galaxy–galaxy and galaxy–quasar systems.
 - Effortless syncing between local machines and **HPCC**.

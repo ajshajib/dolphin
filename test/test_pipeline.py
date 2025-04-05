@@ -17,7 +17,7 @@ class TestPipeline(object):
 
     def test_quasar_pipeline(self):
         """Test the entire pipeline."""
-        lens_name = "ai_test"
+        lens_name = "lensed_quasar_2"
         band = "F814W"
 
         vision = Vision(io_directory_path=self.io_directory_path, source_type="quasar")

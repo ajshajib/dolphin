@@ -205,7 +205,7 @@ class Modeler(AI):
 
         # Set fitting options
         config["fitting"] = {
-            "pso": psf_iteration_settings is not None,
+            "pso": pso_settings is not None,
             "pso_settings": pso_settings,
         }
 

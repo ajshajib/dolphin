@@ -29,7 +29,17 @@ class TestModeler:
         if config_file_path.exists():
             config_file_path.unlink()
 
-        self.qso_modeler.create_config_for_single_lens(lens_system, "F814W")
+        self.qso_modeler.create_config_for_single_lens(
+            lens_system,
+            "F814W",
+            psf_iteration_settings={
+                "stacking_method": "median",
+                "num_iter": 20,
+                "psf_iter_factor": 0.5,
+                "keep_psf_variance_map": True,
+                "psf_symmetry": 4,
+            },
+        )
 
         assert config_file_path.exists()
 

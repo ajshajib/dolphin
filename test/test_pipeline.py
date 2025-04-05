@@ -29,7 +29,13 @@ class TestPipeline(object):
         modeler.create_config_for_single_lens(
             lens_name,
             band,
-            # psf_iteration_settings=None,
+            psf_iteration_settings={
+                "stacking_method": "median",
+                "num_iter": 2,
+                "psf_iter_factor": 0.5,
+                "keep_psf_variance_map": True,
+                "psf_symmetry": 4,
+            },
             pso_settings={"num_particle": 4, "num_iteration": 2},
             sampler_settings=None,
         )

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for config module."""
-import pytest
 from dolphin.processor import Processor
-from dolphin.analysis import Output
 from dolphin.ai import Vision
 from dolphin.ai import Modeler
 

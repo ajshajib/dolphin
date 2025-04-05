@@ -283,8 +283,6 @@ class Modeler(AI):
                 ) ** 2:
                     mask[i, j] = 1
 
-        print(mask.shape)
-
         return mask
 
     def get_theta_E_init(self, semantic_segmentation, coordinate_system):

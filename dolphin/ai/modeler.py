@@ -88,23 +88,13 @@ class Modeler(AI):
         lens_name,
         band_name,
         pso_settings={"num_particle": 50, "num_iteration": 50},
-        psf_iteration_settings={
-            "stacking_method": "median",
-            "num_iter": 20,
-            "psf_iter_factor": 0.5,
-            "keep_psf_variance_map": True,
-            "psf_symmetry": 4,
-        },
+        psf_iteration_settings=None,
         sampler_name="emcee",
-        sampler_settings={
-            "n_burn": 0,
-            "n_run": 100,
-            "walkerRatio": 2,
-        },
-        supersampling_factor=[2],
-        max_satellite_number=1,
+        sampler_settings=None,
+        supersampling_factor=[3],
+        max_satellite_number=2,
         minimum_satellite_area=15,
-        satellite_bound=0.2,
+        satellite_bound=0.25,
         clear_center=0.2,
     ):
         """Get configuration from the semantic segmentation output. This method
@@ -116,12 +106,28 @@ class Modeler(AI):
         :type band_name: `str`
         :param pso_settings: PSO settings
         :type pso_settings: `dict`
-        :param psf_iteration_settings: PSF iteration settings
+        :param psf_iteration_settings: PSF iteration settings. If `None`, PSF
+            iteration will not be performed. If settings are provided, PSF
+            iteration will be performed. Example settings:
+            {
+                "stacking_method": "median",
+                "num_iter": 20,
+                "psf_iter_factor": 0.5,
+                "keep_psf_variance_map": True,
+                "psf_symmetry": 4,
+            }
         :type psf_iteration_settings: `dict`
-        :param sampler_settings: sampler settings
-        :type sampler_settings: `dict`
-        :param sampler_name: sampler name
+        :param sampler_name: sampler name, default is "emcee"
         :type sampler_name: `str`
+        :param sampler_settings: sampler settings. If `None`, sampling will not be
+            performed. If settings are provided, sampling will be performed.
+            Example settings:
+            {
+                "n_burn": 0,
+                "n_run": 100,
+                "walkerRatio": 2,
+            }
+        :type sampler_settings: `dict`
         :param supersampling_factor: supersampling factor
         :type supersampling_factor: `List[int]`
         :param max_satellite_number: maximum number of satellites

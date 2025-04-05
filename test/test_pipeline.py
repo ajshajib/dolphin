@@ -8,16 +8,21 @@ from dolphin.ai import Modeler
 class TestPipeline(object):
     """Test pipeline for the AI module."""
 
+    def setup_method(self):
+        """Setup method for the test class."""
+        self.io_directory_path = "../io_directory_example/"
+
     def test_quasar_pipeline(self):
         """Test the entire pipeline."""
-        io_directory_path = "io_directory_example/"
         lens_name = "ai_test"
         band = "F814W"
 
-        vision = Vision(io_directory_path=io_directory_path, source_type="quasar")
+        vision = Vision(io_directory_path=self.io_directory_path, source_type="quasar")
         vision.create_segmentation_for_single_lens(lens_name, band)
 
-        modeler = Modeler(io_directory_path=io_directory_path, source_type="quasar")
+        modeler = Modeler(
+            io_directory_path=self.io_directory_path, source_type="quasar"
+        )
         modeler.create_config_for_single_lens(
             lens_name,
             band,
@@ -26,7 +31,7 @@ class TestPipeline(object):
             sampler_settings=None,
         )
 
-        processor = Processor(io_directory_path)
+        processor = Processor(self.io_directory_path)
         processor.swim(
             lens_name=lens_name,
             model_id="example",
@@ -36,14 +41,15 @@ class TestPipeline(object):
 
     def test_galaxy_pipeline(self):
         """Test the entire pipeline."""
-        io_directory_path = "io_directory_example/"
         lens_name = "lens_system2"
         band = "F390W"
 
-        vision = Vision(io_directory_path=io_directory_path, source_type="galaxy")
+        vision = Vision(io_directory_path=self.io_directory_path, source_type="galaxy")
         vision.create_segmentation_for_single_lens(lens_name, band)
 
-        modeler = Modeler(io_directory_path=io_directory_path, source_type="galaxy")
+        modeler = Modeler(
+            io_directory_path=self.io_directory_path, source_type="galaxy"
+        )
         modeler.create_config_for_single_lens(
             lens_name,
             band,
@@ -52,7 +58,7 @@ class TestPipeline(object):
             sampler_settings=None,
         )
 
-        processor = Processor(io_directory_path)
+        processor = Processor(self.io_directory_path)
         processor.swim(
             lens_name=lens_name,
             model_id="example",

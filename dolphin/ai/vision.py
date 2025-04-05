@@ -52,9 +52,8 @@ class Vision(AI):
         """
         image_data = self.get_image_data(lens_name, band_name)
         image = image_data.get_image()
-        reshaped_image = self.resize_image(image)
 
-        segmentation = self.get_semantic_segmentation_from_nn(reshaped_image)
+        segmentation = self.get_semantic_segmentation_from_nn(image)
 
         self.save_segmentation(lens_name, band_name, segmentation)
 
@@ -115,8 +114,6 @@ class Vision(AI):
                 ]
 
         return segmentation_reshaped
-
-        # def get_semantic_segmentation_from_nn(self, image):
 
     def get_semantic_segmentation_from_nn(self, image):
         """Get semantic segmentation for the image from the trained neural network.

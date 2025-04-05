@@ -23,13 +23,10 @@ class Data(object):
         :return:
         :rtype:
         """
-        f = h5py.File(file_path, "r")
-
-        data = {}
-        for key in f:
-            data[key] = f[key][()]
-
-        f.close()
+        with h5py.File(file_path, "r") as f:
+            data = {}
+            for key in f:
+                data[key] = f[key][()]
 
         return data
 

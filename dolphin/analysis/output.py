@@ -850,8 +850,8 @@ class Output(Processor):
         v_max=None,
         v_min=None,
     ):
-        """Get the magnifications for each image for a point source, either isolated
-        or that situated at the center of the extended host.
+        """Get the magnifications for each image for a point source, either isolated or
+        that situated at the center of the extended host.
 
         :param lens_name: name of the lens
         :type lens_name: `str`

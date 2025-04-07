@@ -324,16 +324,16 @@ class Recipe(object):
                             }
                         },
                     ],
-                    [
-                        "update_settings",
-                        {
-                            "kwargs_constraints": {
-                                "joint_lens_with_light": [
-                                    [0, 0, ["center_x", "center_y"]]
-                                ]
-                            }
-                        },
-                    ],
+                    # [
+                    #     "update_settings",
+                    #     {
+                    #         "kwargs_constraints": {
+                    #             "joint_lens_with_light": [
+                    #                 [0, 0, ["center_x", "center_y"]]
+                    #             ]
+                    #         }
+                    #     },
+                    # ],
                     [
                         "PSO",
                         {
@@ -457,7 +457,7 @@ class Recipe(object):
                 # disjoin lens and lens light centroids
                 fitting_kwargs_list += [
                     self.unfix_params("lens"),
-                    ["update_settings", {"kwargs_constraints": temp_constraints}],
+                    # ["update_settings", {"kwargs_constraints": temp_constraints}],
                 ]
 
             # fitting_kwargs_list += self.get_default_recipe()

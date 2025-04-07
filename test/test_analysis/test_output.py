@@ -206,7 +206,7 @@ class TestOutput(object):
         model_id = "example"
 
         # Test with kwargs_result provided
-        magnification = self.output.get_magnification_extended_source(
+        _ = self.output.get_magnification_extended_source(
             lens_name=lens_name,
             model_id=model_id,
             kwargs_result=None,

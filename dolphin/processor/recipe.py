@@ -308,7 +308,7 @@ class Recipe(object):
             external_shear_model_index = self._get_external_shear_model_index()
             shapelets_index = self._get_shapelet_model_index()
 
-            temp_constraints = self._config.get_kwargs_constraints()
+            # temp_constraints = self._config.get_kwargs_constraints()
             for epoch in range(epochs):
                 # first fix everything else except for lens light and use arc
                 # mask to fit the lens light only. Join the centroids of lens

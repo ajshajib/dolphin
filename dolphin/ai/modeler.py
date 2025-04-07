@@ -29,7 +29,7 @@ class Modeler(AI):
 
         :param band_name: band name
         :type band_name: `str`
-        :param kwargs: additional keyword arguments to be passed to `get_configuration`
+        :param kwargs: additional keyword arguments to be passed to `get_configuration`, check the documentation of that function.
         :type kwargs: `dict`
         """
         lens_list = self.file_system.get_lens_list()
@@ -46,7 +46,7 @@ class Modeler(AI):
         :type lens_name: `str`
         :param band_name: band name
         :type band_name: `str`
-        :param kwargs: additional keyword arguments to be passed to `get_configuration`
+        :param kwargs: additional keyword arguments to be passed to `get_configuration`, check the documentation of that function.
         :type kwargs: `dict`
         :return: configuration
         :rtype: `dict`
@@ -96,6 +96,7 @@ class Modeler(AI):
         minimum_satellite_area=15,
         satellite_bound=0.25,
         clear_center=0.2,
+        source_n_max=6,
     ):
         """Get configuration from the semantic segmentation output. This method
         currently works only for the single-band case.
@@ -138,6 +139,8 @@ class Modeler(AI):
         :type satellite_bound: `float`
         :param clear_center: radius (arcsecond) to clear the center from any detected satellite or quasar
         :type clear_center: `float`
+        :param source_n_max: maximum number of shapelet coefficients for the source, choose `None` to turn off shapelets
+        :type source_n_max: `int`
         :return: configuration
         :rtype: `dict`
         """
@@ -160,6 +163,8 @@ class Modeler(AI):
                 ["LENSED_POSITION"] if self._source_type == "quasar" else []
             ),
         }
+        if source_n_max is not None:
+            config["model"]["source_light"].append("SHAPELETS")
 
         # Set lens options
         galaxy_center_x, galaxy_center_y = self.get_lens_galaxy_center_init(
@@ -170,7 +175,8 @@ class Modeler(AI):
             "centroid_bound": 0.2,
         }
         config["lens_light_option"] = {"fix": {0: {"n_sersic": 4.0}}}
-        config["source_light_option"] = {"n_max": [6]}
+        if source_n_max is not None:
+            config["source_light_option"] = {"n_max": [source_n_max]}
 
         # Set point source options
         if self._source_type == "quasar":

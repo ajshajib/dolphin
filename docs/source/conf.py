@@ -119,8 +119,13 @@ html_theme_options = {
     },
     "navigation_depth": 4,
     "navbar_end": ["search-field", "navbar-icon-links"],
-    "external_links": [
-        {"name": "GitHub", "url": "https://github.com/ajshajib/dolphin"},
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/ajshajib/dolphin",
+            "icon": "fab fa-github",  # FontAwesome GitHub icon
+            "type": "fontawesome",
+        },
     ],
 }
 

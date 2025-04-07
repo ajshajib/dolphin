@@ -15,7 +15,6 @@ Contents
    config_options
    contributing
    authors
-   history
    modules
 
 Feedback

@@ -118,7 +118,7 @@ html_theme_options = {
         "text": "dolphin",
     },
     "navigation_depth": 4,
-    "navbar_end": ["search-field", "navbar-icon-links"],
+    "navbar_end": ["navbar-icon-links"],
     "icon_links": [
         {
             "name": "GitHub",

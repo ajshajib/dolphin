@@ -767,7 +767,14 @@ class Output(Processor):
             fig = plt.figure()
             ax = fig.add_subplot(1, 2, 1)
             ax.set_title("Lensed source (convolved)")
-            ax.imshow(np.log10(source_lensed), cmap="cubehelix", vmax=v_max, vmin=v_min)
+            ax.imshow(
+                np.log10(source_lensed),
+                cmap="cubehelix",
+                vmax=v_max,
+                vmin=v_min,
+                interpolation="none",
+                origin="lower",
+            )
             ax.axis("off")
 
             ax = fig.add_subplot(1, 2, 2)
@@ -777,6 +784,8 @@ class Output(Processor):
                 cmap="cubehelix",
                 vmax=v_max,
                 vmin=v_min,
+                interpolation="none",
+                origin="lower",
             )
             ax.axis("off")
 
@@ -936,12 +945,13 @@ class Output(Processor):
 
             temp_image_data = np.copy(image_data)
             temp_image_data[temp_image_data <= 0] = 1e-6
-            ax.matshow(
+            ax.imshow(
                 np.log10(temp_image_data),
                 cmap="cubehelix",
                 vmax=v_max,
                 vmin=v_min,
                 origin="lower",
+                interpolation="none",
             )
 
             ax.scatter(

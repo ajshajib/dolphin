@@ -27,7 +27,7 @@ class Output(Processor):
             end with slash.
         :type io_directory: `str`
         """
-        super(Output, self).__init__(io_directory)
+        super().__init__(io_directory)
 
         self._fit_output = None
         self._kwargs_result = None
@@ -964,8 +964,27 @@ class Output(Processor):
                     edgecolors="black",
                     alpha=0.6,
                     s=(1 + np.log10(np.abs(ma))) * markersize,
-                    label="image",
                 )
+                ax.text(
+                    x_pix[i] + 3,
+                    y_pix[i],
+                    str(round(magnifications[i], 1)),
+                    color="#ffff33",
+                    ha="left",
+                    va="center",
+                )
+
+            # for legend
+            ax.scatter(
+                x_pix[0] * 1000,
+                y_pix[0] * 1000,
+                marker="d",
+                color="#ffff33",
+                edgecolors="black",
+                alpha=0.6,
+                s=markersize,
+                label="image",
+            )
 
             source_x_pix, source_y_pix = coordinate_system.map_coord2pix(
                 x_source, y_source
@@ -974,7 +993,7 @@ class Output(Processor):
                 source_x_pix,
                 source_y_pix,
                 marker="o",
-                color="red",
+                color="#e41a1c",
                 edgecolors="black",
                 alpha=0.6,
                 s=markersize,
@@ -982,8 +1001,10 @@ class Output(Processor):
             )
 
             ax.axis("off")
+            ax.set_xlim(0, image_data.shape[0])
+            ax.set_ylim(0, image_data.shape[1])
 
-            ax.legend(loc="upper right")
+            ax.legend(loc="upper right", framealpha=0.9)
             plt.show()
 
         return magnifications

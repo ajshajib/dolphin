@@ -21,7 +21,7 @@ class Vision(AI):
             raise ValueError(
                 f"Invalid source type: {source_type}. It should be either 'quasar' or 'galaxy'."
             )
-        super(Vision, self).__init__(io_directory_path)
+        super().__init__(io_directory_path)
 
         self._source_type = source_type
         self.nn_model_path = self.file_system.get_trained_nn_model_file_path(

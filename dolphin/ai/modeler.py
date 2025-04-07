@@ -21,7 +21,7 @@ class Modeler(AI):
         :param source_type: source type
         :type source_type: `str`
         """
-        super(Modeler, self).__init__(io_directory_path)
+        super().__init__(io_directory_path)
         self._source_type = source_type
 
     def create_configuration_for_all_lenses(self, band_name, **kwargs):

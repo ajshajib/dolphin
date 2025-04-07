@@ -40,7 +40,7 @@ class ImageData(Data):
         :param data_file_path: path to a data file
         :type data_file_path: `str`
         """
-        super(ImageData, self).__init__()
+        super().__init__()
 
         self._data = self.load_from_file(data_file_path)
 
@@ -106,7 +106,7 @@ class PSFData(Data):
         :param psf_file_path: path to a PSF data file
         :type psf_file_path: `str`
         """
-        super(PSFData, self).__init__()
+        super().__init__()
 
         self._data = self.load_from_file(psf_file_path)
 

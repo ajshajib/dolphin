@@ -227,6 +227,28 @@ class TestOutput(object):
                 plot=False,
             )
 
+    def test_get_critical_curve(self):
+        """Test `get_critical_curve` method."""
+        ra_crit, dec_crit = self.output.get_critical_curve(
+            lens_name="lens_system2",
+            model_id="example",
+            kwargs_result=None,
+            band_index=0,
+        )
+        assert isinstance(ra_crit, np.ndarray)
+        assert isinstance(dec_crit, np.ndarray)
+        assert len(ra_crit) == len(dec_crit)
+
+        # Test ValueError when neither model_id nor kwargs_result is provided
+        with pytest.raises(
+            ValueError,
+            match="Either the `model_id` or the `kwargs_result` needs to be provided!",
+        ):
+            self.output.get_critical_curve(
+                lens_name="lens_system2",
+                band_index=0,
+            )
+
     def test_get_magnification_point_source(self):
         """Test `get_magnification_point_source` method.
 

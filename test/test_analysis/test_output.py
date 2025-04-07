@@ -206,13 +206,15 @@ class TestOutput(object):
         model_id = "example"
 
         # Test with kwargs_result provided
-        _ = self.output.get_magnification_extended_source(
+        magnification = self.output.get_magnification_extended_source(
             lens_name=lens_name,
             model_id=model_id,
             kwargs_result=None,
             band_index=0,
             plot=True,
         )
+
+        assert isinstance(magnification, float)
 
         # Test ValueError when neither model_id nor kwargs_result is provided
         with pytest.raises(
@@ -235,13 +237,15 @@ class TestOutput(object):
         model_id = "example"
 
         # Test with kwargs_result provided
-        _ = self.output.get_magnification_point_source(
+        magnification = self.output.get_magnification_point_source(
             lens_name=lens_name,
             model_id=model_id,
             kwargs_result=None,
             band_index=0,
             plot=True,
         )
+
+        assert isinstance(magnification, list)
 
         # Test ValueError when neither model_id nor kwargs_result is provided
         with pytest.raises(

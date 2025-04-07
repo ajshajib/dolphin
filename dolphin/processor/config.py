@@ -251,8 +251,10 @@ class ModelConfig(Config):
         _, lens_light_satellite_flags = self.get_lens_light_model_list_with_flags()
         _, lens_satellite_flags = self.get_lens_model_list_with_flags()
 
-        joint_lens_with_light = []
+        # join centers of main deflector's mass and light
+        joint_lens_with_light = [[0, 0, ["center_x", "center_y"]]]
 
+        # joint satellite mass and light
         if (np.array(lens_light_satellite_flags) > -1).any():
             for i, flag in enumerate(lens_light_satellite_flags):
                 if flag > -1:
@@ -260,9 +262,6 @@ class ModelConfig(Config):
                     joint_lens_with_light.append(
                         [i, lens_sat_index, ["center_x", "center_y"]]
                     )
-
-        # join centers of lens mass and light
-        joint_lens_with_light.append([0, 0, ["center_x", "center_y"]])
 
         return joint_lens_with_light
 

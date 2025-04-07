@@ -931,9 +931,9 @@ class Output(Processor):
                 ra_crit_list, dec_crit_list
             )
 
-            fig, ax = plt.subplots()
+            fig = plt.figure()
+            ax = fig.add_subplot(1, 1, 1)
 
-            ax.set_title("Image data")
             temp_image_data = np.copy(image_data)
             temp_image_data[temp_image_data <= 0] = 1e-6
             ax.matshow(
@@ -1004,7 +1004,10 @@ class Output(Processor):
             ax.set_xlim(0, image_data.shape[0])
             ax.set_ylim(0, image_data.shape[1])
 
+            ax.set_title(lens_name)
+
             ax.legend(loc="upper right", framealpha=0.9)
+
             plt.show()
 
         return magnifications

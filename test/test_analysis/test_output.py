@@ -197,7 +197,7 @@ class TestOutput(object):
         )
 
     def test_get_magnification_extended_source(self):
-        """Test `get_total_magnification_extended_source` method.
+        """Test `get_magnification_extended_source` method.
 
         :return:
         :rtype:
@@ -220,6 +220,35 @@ class TestOutput(object):
             match="Either the `model_id` or the `kwargs_result` needs to be provided!",
         ):
             self.output.get_magnification_extended_source(
+                lens_name=lens_name,
+                band_index=0,
+                plot=False,
+            )
+
+    def test_get_magnification_point_source(self):
+        """Test `get_magnification_point_source` method.
+
+        :return:
+        :rtype:
+        """
+        lens_name = "lens_system2"
+        model_id = "example"
+
+        # Test with kwargs_result provided
+        _ = self.output.get_magnification_point_source(
+            lens_name=lens_name,
+            model_id=model_id,
+            kwargs_result=None,
+            band_index=0,
+            plot=True,
+        )
+
+        # Test ValueError when neither model_id nor kwargs_result is provided
+        with pytest.raises(
+            ValueError,
+            match="Either the `model_id` or the `kwargs_result` needs to be provided!",
+        ):
+            self.output.get_magnification_point_source(
                 lens_name=lens_name,
                 band_index=0,
                 plot=False,

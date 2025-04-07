@@ -58,7 +58,7 @@ class ModelConfig(Config):
             and `settings` are provided, `file` will be prioritized.
         :type settings: `dict`
         """
-        super(ModelConfig, self).__init__()
+        super().__init__()
 
         if file_system is not None:
             self._file_system = file_system
@@ -260,6 +260,9 @@ class ModelConfig(Config):
                     joint_lens_with_light.append(
                         [i, lens_sat_index, ["center_x", "center_y"]]
                     )
+
+        # join centers of lens mass and light
+        joint_lens_with_light.append([0, 0, ["center_x", "center_y"]])
 
         return joint_lens_with_light
 

@@ -308,7 +308,7 @@ class Recipe(object):
             external_shear_model_index = self._get_external_shear_model_index()
             shapelets_index = self._get_shapelet_model_index()
 
-            temp_constraints = self._config.get_kwargs_constraints()
+            # temp_constraints = self._config.get_kwargs_constraints()
             for epoch in range(epochs):
                 # first fix everything else except for lens light and use arc
                 # mask to fit the lens light only. Join the centroids of lens
@@ -324,16 +324,16 @@ class Recipe(object):
                             }
                         },
                     ],
-                    [
-                        "update_settings",
-                        {
-                            "kwargs_constraints": {
-                                "joint_lens_with_light": [
-                                    [0, 0, ["center_x", "center_y"]]
-                                ]
-                            }
-                        },
-                    ],
+                    # [
+                    #     "update_settings",
+                    #     {
+                    #         "kwargs_constraints": {
+                    #             "joint_lens_with_light": [
+                    #                 [0, 0, ["center_x", "center_y"]]
+                    #             ]
+                    #         }
+                    #     },
+                    # ],
                     [
                         "PSO",
                         {
@@ -457,7 +457,7 @@ class Recipe(object):
                 # disjoin lens and lens light centroids
                 fitting_kwargs_list += [
                     self.unfix_params("lens"),
-                    ["update_settings", {"kwargs_constraints": temp_constraints}],
+                    # ["update_settings", {"kwargs_constraints": temp_constraints}],
                 ]
 
             # fitting_kwargs_list += self.get_default_recipe()

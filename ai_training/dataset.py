@@ -359,7 +359,7 @@ class TrainingData(object):
                     kwargs_sat_light[j]["amp"] = 0
 
             if np.random.uniform() > no_lens_light_fracion:
-                lens_light_image = lens_light_image = im_sim.image(
+                lens_light_image = im_sim.image(
                     kwargs_lens,
                     kwargs_source,
                     kwargs_lens_light,

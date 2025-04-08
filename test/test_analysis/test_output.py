@@ -195,3 +195,87 @@ class TestOutput(object):
             self.output.samples_mcmc[0],
             linear_solve=True,
         )
+
+    def test_get_magnification_extended_source(self):
+        """Test `get_magnification_extended_source` method.
+
+        :return:
+        :rtype:
+        """
+        lens_name = "lens_system2"
+        model_id = "example"
+
+        # Test with kwargs_result provided
+        magnification = self.output.get_magnification_extended_source(
+            lens_name=lens_name,
+            model_id=model_id,
+            kwargs_result=None,
+            band_index=0,
+            plot=True,
+        )
+
+        assert isinstance(magnification, float)
+
+        # Test ValueError when neither model_id nor kwargs_result is provided
+        with pytest.raises(
+            ValueError,
+            match="Either the `model_id` or the `kwargs_result` needs to be provided!",
+        ):
+            self.output.get_magnification_extended_source(
+                lens_name=lens_name,
+                band_index=0,
+                plot=False,
+            )
+
+    def test_get_critical_curve(self):
+        """Test `get_critical_curve` method."""
+        ra_crit, dec_crit = self.output.get_critical_curve(
+            lens_name="lens_system2",
+            model_id="example",
+            kwargs_result=None,
+            band_index=0,
+        )
+        assert isinstance(ra_crit, np.ndarray)
+        assert isinstance(dec_crit, np.ndarray)
+        assert len(ra_crit) == len(dec_crit)
+
+        # Test ValueError when neither model_id nor kwargs_result is provided
+        with pytest.raises(
+            ValueError,
+            match="Either the `model_id` or the `kwargs_result` needs to be provided!",
+        ):
+            self.output.get_critical_curve(
+                lens_name="lens_system2",
+                band_index=0,
+            )
+
+    def test_get_magnification_point_source(self):
+        """Test `get_magnification_point_source` method.
+
+        :return:
+        :rtype:
+        """
+        lens_name = "lens_system2"
+        model_id = "example"
+
+        # Test with kwargs_result provided
+        magnification = self.output.get_magnification_point_source(
+            lens_name=lens_name,
+            model_id=model_id,
+            kwargs_result=None,
+            band_index=0,
+            plot=True,
+        )
+
+        assert isinstance(magnification, list)
+
+        # Test ValueError when neither model_id nor kwargs_result is provided
+        with pytest.raises(
+            ValueError,
+            match="Either the `model_id` or the `kwargs_result` needs to be provided!",
+        ):
+            self.output.get_magnification_point_source(
+                lens_name=lens_name,
+                band_index=0,
+                plot=False,
+            )

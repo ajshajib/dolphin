@@ -8,6 +8,10 @@ import matplotlib.pyplot as plt
 from lenstronomy.Plots.model_plot import ModelPlot
 from lenstronomy.Sampling.parameters import Param
 from lenstronomy.Util.class_creator import create_im_sim
+from lenstronomy.LensModel.lens_model import LensModel
+from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
+from lenstronomy.Data.coord_transforms import Coordinates
+from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
 
 from dolphin.processor import Processor
 from dolphin.processor.config import ModelConfig
@@ -23,7 +27,7 @@ class Output(Processor):
             end with slash.
         :type io_directory: `str`
         """
-        super(Output, self).__init__(io_directory)
+        super().__init__(io_directory)
 
         self._fit_output = None
         self._kwargs_result = None
@@ -145,7 +149,7 @@ class Output(Processor):
 
         return output
 
-    def get_model_plot(
+    def get_model_plot_instance(
         self,
         lens_name,
         model_id=None,
@@ -271,7 +275,7 @@ class Output(Processor):
             print(print_kwargs_result)
 
         if v_max is None:
-            model_plot, v_max = self.get_model_plot(
+            model_plot, v_max = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
@@ -279,7 +283,7 @@ class Output(Processor):
                 data_cmap=data_cmap,
             )
         else:
-            model_plot = self.get_model_plot(
+            model_plot = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
@@ -373,7 +377,7 @@ class Output(Processor):
         """
 
         if v_max is None:
-            model_plot, v_max = self.get_model_plot(
+            model_plot, v_max = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
@@ -381,7 +385,7 @@ class Output(Processor):
                 data_cmap=data_cmap,
             )
         else:
-            model_plot = self.get_model_plot(
+            model_plot = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
@@ -641,24 +645,7 @@ class Output(Processor):
         kwargs = param.args2kwargs(args)
 
         if linear_solve:
-            config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
-
-            # kwargs_numerics = config.get_kwargs_numerics()
-            kwargs_model = config.get_kwargs_model()
-
-            multi_band_list_out = self._multi_band_list_out
-
-            # kwargs_data = multi_band_list_out[band_index][0]
-            # kwargs_psf = multi_band_list_out[band_index][1]
-
-            im_sim = create_im_sim(
-                multi_band_list_out,
-                "multi-linear",
-                kwargs_model,
-                bands_compute=None,
-                image_likelihood_mask_list=(config.get_masks()),
-                band_index=band_index,
-            )
+            im_sim = self.get_im_sim(lens_name, band_index)
 
             im_sim.image_linear_solve(
                 kwargs_lens=kwargs["kwargs_lens"],
@@ -671,3 +658,366 @@ class Output(Processor):
             )
 
         return kwargs
+
+    def get_im_sim(self, lens_name, band_index):
+        """Get lestronomy's `ImSim` instance for the lens.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param band_index: index of band to plot for multi-band case
+        :type band_index: `int`
+        :return: `ImSim` instance
+        :rtype: `obj`
+        """
+        config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
+
+        # kwargs_numerics = config.get_kwargs_numerics()
+        kwargs_model = config.get_kwargs_model()
+
+        multi_band_list_out = self._multi_band_list_out
+
+        # kwargs_data = multi_band_list_out[band_index][0]
+        # kwargs_psf = multi_band_list_out[band_index][1]
+
+        im_sim = create_im_sim(
+            multi_band_list_out,
+            "single-band",
+            kwargs_model,
+            bands_compute=None,
+            image_likelihood_mask_list=(config.get_masks()),
+            band_index=band_index,
+        )
+
+        return im_sim
+
+    def get_magnification_extended_source(
+        self,
+        lens_name,
+        model_id=None,
+        kwargs_result=None,
+        band_index=0,
+        plot=True,
+        v_max=None,
+        v_min=None,
+    ):
+        """Get the total magnification of the lens system for an extended source.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param band_index: index of band to plot for multi-band case
+        :type band_index: `int`
+        :param plot: if `True`, plots the lensed and unlensed source
+        :type plot: `bool`
+        :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
+            provided, it will be used to make the calculation, otherwise the model
+            will be calculated from the saved/loaded outputs for `lens_name` and
+            `model_id`.
+        :type kwargs_result: `dict`
+        :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
+        :return: average magnification
+        :rtype: `float`
+        """
+        if model_id is None and kwargs_result is None:
+            raise ValueError(
+                "Either the `model_id` or the `kwargs_result` " "needs to be provided!"
+            )
+        if kwargs_result is None:
+            self.load_output(lens_name, model_id)
+            kwargs_result = self.kwargs_result
+
+        im_sim = self.get_im_sim(lens_name, band_index)
+
+        model_plot = self.get_model_plot_instance(
+            lens_name,
+            model_id=model_id,
+            kwargs_result=kwargs_result,
+            band_index=band_index,
+        )[0]
+
+        source_lensed = im_sim.image(
+            kwargs_result["kwargs_lens"],
+            kwargs_result["kwargs_source"],
+            kwargs_result["kwargs_lens_light"],
+            kwargs_result["kwargs_ps"],
+            lens_light_add=False,
+            point_source_add=False,
+            unconvolved=False,
+        )
+
+        config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
+        image_pixel_size = config.pixel_size[band_index]
+
+        delta_pix = image_pixel_size / 2
+        num_pix = source_lensed.shape[0]
+        source_unlensed = model_plot.source(
+            deltaPix=delta_pix,
+            numPix=num_pix,
+            band_index=band_index,
+            center=[
+                kwargs_result["kwargs_source"][0]["center_x"],
+                kwargs_result["kwargs_source"][0]["center_y"],
+            ],
+        )[0]
+
+        magnification = np.sum(source_lensed) / np.sum(source_unlensed)
+
+        if plot:
+            fig = plt.figure()
+            ax = fig.add_subplot(1, 2, 1)
+            ax.set_title("Lensed source (convolved)")
+            ax.imshow(
+                np.log10(source_lensed),
+                cmap="cubehelix",
+                vmax=v_max,
+                vmin=v_min,
+                interpolation="none",
+                origin="lower",
+            )
+            ax.axis("off")
+
+            ax = fig.add_subplot(1, 2, 2)
+            ax.set_title("Unlensed source")
+            ax.imshow(
+                np.log10(source_unlensed),
+                cmap="cubehelix",
+                vmax=v_max,
+                vmin=v_min,
+                interpolation="none",
+                origin="lower",
+            )
+            ax.axis("off")
+
+        return magnification
+
+    def get_critical_curve(
+        self,
+        lens_name,
+        model_id=None,
+        kwargs_result=None,
+        band_index=0,
+    ):
+        """Get the critical curve of the lens system.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
+            provided, it will be used to make the calculation, otherwise the model
+            will be calculated from the saved/loaded outputs for `lens_name` and
+            `model_id`.
+        :type kwargs_result: `dict`
+        :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
+        :raises ValueError: if `band_index` is out of bounds
+        :return: critical curve coordinates
+        :rtype: `tuple`
+        """
+        if model_id is None and kwargs_result is None:
+            raise ValueError(
+                "Either the `model_id` or the `kwargs_result` " "needs to be provided!"
+            )
+        if kwargs_result is None:
+            self.load_output(lens_name, model_id)
+            kwargs_result = self.kwargs_result
+
+        # solve lens equation
+        config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
+        kwargs_model = config.get_kwargs_model()
+
+        lens_model_class = LensModel(lens_model_list=kwargs_model["lens_model_list"])
+
+        lens_model_extensions = LensModelExtensions(lens_model_class)
+
+        image_pixel_size = config.pixel_size[band_index]
+        multi_band_list_out = self._multi_band_list_out
+        image_data = multi_band_list_out[band_index][0]["image_data"]
+        image_size = image_data.shape[0] * image_pixel_size
+
+        (
+            ra_crit_list,
+            dec_crit_list,
+        ) = lens_model_extensions.critical_curve_tiling(
+            kwargs_result["kwargs_lens"],
+            compute_window=image_size,
+            start_scale=image_pixel_size / 2.0,
+            max_order=3,
+            center_x=0,
+            center_y=0,
+        )
+
+        return ra_crit_list, dec_crit_list
+
+    def get_magnification_point_source(
+        self,
+        lens_name,
+        model_id=None,
+        kwargs_result=None,
+        band_index=0,
+        plot=True,
+        v_max=None,
+        v_min=None,
+    ):
+        """Get the magnifications for each image for a point source, either isolated or
+        that situated at the center of the extended host.
+
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
+            provided, it will be used to make the calculation, otherwise the model
+            will be calculated from the saved/loaded outputs for `lens_name` and
+            `model_id`.
+        :type kwargs_result: `dict`
+        :param band_index: index of band to plot for multi-band case
+        :type band_index: `int`
+        :param plot: if `True`, plots the lensed and unlensed source
+        :type plot: `bool`
+        :param v_max: maximum plotting scale for the model, data, & source plot
+        :type v_max: `float` or `int`
+        :param v_min: minimum plotting scale for the model, data, & source plot
+        :type v_min: `float` or `int`
+        :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
+        :raises ValueError: if `band_index` is out of bounds
+        :return: individual magnifications of the images
+        :rtype: `list`
+        """
+        if model_id is None and kwargs_result is None:
+            raise ValueError(
+                "Either the `model_id` or the `kwargs_result` " "needs to be provided!"
+            )
+        if kwargs_result is None:
+            self.load_output(lens_name, model_id)
+            kwargs_result = self.kwargs_result
+
+        # solve lens equation
+        config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
+        kwargs_model = config.get_kwargs_model()
+
+        lens_model_class = LensModel(lens_model_list=kwargs_model["lens_model_list"])
+        lensEquationSolver = LensEquationSolver(lens_model_class)
+        x_source = kwargs_result["kwargs_source"][0]["center_x"]
+        y_source = kwargs_result["kwargs_source"][0]["center_y"]
+
+        kwargs_lens = kwargs_result["kwargs_lens"]
+
+        image_pixel_size = config.pixel_size[band_index]
+
+        multi_band_list_out = self._multi_band_list_out
+        image_data = multi_band_list_out[band_index][0]["image_data"]
+        image_size = image_data.shape[0] * image_pixel_size
+
+        x_image, y_image = lensEquationSolver.findBrightImage(
+            x_source,
+            y_source,
+            kwargs_lens,
+            numImages=4,
+            min_distance=image_pixel_size,
+            search_window=image_size,
+        )
+
+        magnifications = []
+        for x, y in zip(x_image, y_image):
+            magnifications.append(lens_model_class.magnification(x, y, kwargs_lens))
+
+        if plot:
+            ra_at_xy_0 = multi_band_list_out[band_index][0]["ra_at_xy_0"]
+            dec_at_xy_0 = multi_band_list_out[band_index][0]["dec_at_xy_0"]
+            transform_pix2angle = multi_band_list_out[band_index][0][
+                "transform_pix2angle"
+            ]
+
+            coordinate_system = Coordinates(
+                transform_pix2angle, ra_at_xy_0, dec_at_xy_0
+            )
+
+            ra_crit_list, dec_crit_list = self.get_critical_curve(
+                lens_name, model_id=model_id, kwargs_result=kwargs_result
+            )
+            x_crit, y_crit = coordinate_system.map_coord2pix(
+                ra_crit_list, dec_crit_list
+            )
+
+            fig = plt.figure()
+            ax = fig.add_subplot(1, 1, 1)
+
+            temp_image_data = np.copy(image_data)
+            temp_image_data[temp_image_data <= 0] = 1e-6
+            ax.imshow(
+                np.log10(temp_image_data),
+                cmap="cubehelix",
+                vmax=v_max,
+                vmin=v_min,
+                origin="lower",
+                interpolation="none",
+            )
+
+            ax.scatter(
+                x_crit,
+                y_crit,
+                marker="o",
+                color="#ff7f00",
+                alpha=0.5,
+                s=0.5,
+            )
+
+            x_pix, y_pix = coordinate_system.map_coord2pix(x_image, y_image)
+            markersize = 50
+            for i, ma in enumerate(magnifications):
+                ax.scatter(
+                    x_pix[i],
+                    y_pix[i],
+                    marker="d",
+                    color="#ffff33",
+                    edgecolors="black",
+                    alpha=0.6,
+                    s=(1 + np.log10(np.abs(ma))) * markersize,
+                )
+                ax.text(
+                    x_pix[i] + 3,
+                    y_pix[i],
+                    str(round(magnifications[i], 1)),
+                    color="#ffff33",
+                    ha="left",
+                    va="center",
+                )
+
+            # for legend
+            ax.scatter(
+                x_pix[0] * 1000,
+                y_pix[0] * 1000,
+                marker="d",
+                color="#ffff33",
+                edgecolors="black",
+                alpha=0.6,
+                s=markersize,
+                label="image",
+            )
+
+            source_x_pix, source_y_pix = coordinate_system.map_coord2pix(
+                x_source, y_source
+            )
+            ax.scatter(
+                source_x_pix,
+                source_y_pix,
+                marker="o",
+                color="#e41a1c",
+                edgecolors="black",
+                alpha=0.6,
+                s=markersize,
+                label="source",
+            )
+
+            ax.axis("off")
+            ax.set_xlim(0, image_data.shape[0])
+            ax.set_ylim(0, image_data.shape[1])
+
+            ax.set_title(lens_name)
+
+            ax.legend(loc="upper right", framealpha=0.9)
+
+            plt.show()
+
+        return magnifications

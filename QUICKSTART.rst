@@ -55,9 +55,9 @@ The image data file needs to have the following datasets:
 - ``image_data``: reduced and background-subtracted image cutout centered at the lens system,
 - ``background_rms``: background level,
 - ``exposure_time``: the map of exposure times for each pixel, so that ``image_data * exposure_time`` is Poisson noise distributed,
-- ``ra_at_xy_0``: RA in arcsec unit of the (0, 0) pixel (i.e., the corner pixel with 0, 0 indices) in the ``image_data`` cutout,
-- ``dec_at_xy_0``: Dec in arcsec unit of the (0, 0) pixel (i.e., the corner pixel with 0, 0 indices) in the ``image_data`` cutout,
-- ``transform_pix2angle``: a transform matrix to map the pixel numbers (x, y) to angles (RA, Dec) in arcsec units.
+- ``ra_at_xy_0``: ΔRA in arcsec unit of the (0, 0) pixel (i.e., the corner pixel with 0, 0 indices) with respect to the central pixel in the ``image_data`` cutout,
+- ``dec_at_xy_0``: ΔDec in arcsec unit of the (0, 0) pixel (i.e., the corner pixel with 0, 0 indices) with respect to the central pixel in the ``image_data`` cutout,
+- ``transform_pix2angle``: a rotational transform matrix that maps (Δx, Δy) in pixel indices into angular difference (ΔRA, ΔDec) in arcsec units (the relevant numbers are usually found in the FITS header, e.g., with keywords "CD1_1", "PC1_1", "CDELT1", etc.: http://tdc-www.harvard.edu/wcstools/cphead.wcs.html).
 
 The PSF data file needs to have the following datasets:
 

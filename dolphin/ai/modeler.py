@@ -97,6 +97,7 @@ class Modeler(AI):
         satellite_bound=0.25,
         clear_center=0.2,
         source_n_max=6,
+        mask_radius_factor=2.5,
     ):
         """Get configuration from the semantic segmentation output. This method
         currently works only for the single-band case.
@@ -141,6 +142,8 @@ class Modeler(AI):
         :type clear_center: `float`
         :param source_n_max: maximum number of shapelet coefficients for the source, choose `None` to turn off shapelets
         :type source_n_max: `int`
+        :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
+        :type mask_radius_factor: `float`
         :return: configuration
         :rtype: `dict`
         """
@@ -261,14 +264,16 @@ class Modeler(AI):
                 lens_name,
                 band_name,
                 self.get_mask_from_semantic_segmentation(
-                    semantic_segmentation, coordinate_system
+                    semantic_segmentation,
+                    coordinate_system,
+                    mask_radius_factor=mask_radius_factor,
                 ),
             )
 
         return config
 
     def get_mask_from_semantic_segmentation(
-        self, semantic_segmentation, coordinate_system
+        self, semantic_segmentation, coordinate_system, mask_radius_factor=2.5
     ):
         """Get mask from the semantic segmentation output.
 
@@ -278,6 +283,8 @@ class Modeler(AI):
         :type coordinate_system: `Coordinates`
         :param image_positions: image positions
         :type image_positions: `List[np.ndarray]`
+        :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
+        :type mask_radius_factor: `float`
         :return: mask
         :rtype: `numpy.ndarray`
         """
@@ -288,11 +295,15 @@ class Modeler(AI):
 
         mask = np.zeros(semantic_segmentation.shape)
 
+        galaxy_center_x_pixel, galaxy_center_y_pixel = coordinate_system.map_coord2pix(
+            galaxy_center_x, galaxy_center_y
+        )
+        pixel_size = coordinate_system.pixel_width
         for i in range(mask.shape[0]):
             for j in range(mask.shape[1]):
-                if (i - galaxy_center_x) ** 2 + (j - galaxy_center_y) ** 2 < (
-                    2 * theta_E_init
-                ) ** 2:
+                if (i - galaxy_center_x_pixel) ** 2 + (
+                    j - galaxy_center_y_pixel
+                ) ** 2 < (mask_radius_factor * theta_E_init / pixel_size) ** 2:
                     mask[i, j] = 1
 
         return mask

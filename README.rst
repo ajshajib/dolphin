@@ -10,6 +10,7 @@
     :target: https://dolphin-docs.readthedocs.io/latest/
 .. image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
     :target: https://app.codecov.io/gh/ajshajib/dolphin/tree/main
+    :alt: Codecov
 .. image:: https://img.shields.io/badge/License-BSD_3--Clause-blue.svg
     :target: https://github.com/ajshajib/dolphin/blob/main/LICENSE
     :alt: License BSD 3-Clause Badge
@@ -35,9 +36,9 @@ Features
 - **Multi-band** lens modeling made simple.
 - Supports both **galaxy–galaxy** and **galaxy–quasar** systems.
 - Effortless syncing between local machines and **HPCC**.
-- |codecov| **tested!**
+- |Codecov| **tested!**
 
-.. |codecov| image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
+.. |Codecov| image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
     :target: https://app.codecov.io/gh/ajshajib/dolphin/tree/main
 
 Installation

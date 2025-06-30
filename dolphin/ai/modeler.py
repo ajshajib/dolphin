@@ -288,11 +288,15 @@ class Modeler(AI):
 
         mask = np.zeros(semantic_segmentation.shape)
 
+        galaxy_center_x_pixel, galaxy_center_y_pixel = coordinate_system.map_coord2pix(
+            galaxy_center_x, galaxy_center_y
+        )
+        pixel_size = coordinate_system.pixel_width
         for i in range(mask.shape[0]):
             for j in range(mask.shape[1]):
-                if (i - galaxy_center_x) ** 2 + (j - galaxy_center_y) ** 2 < (
-                    2 * theta_E_init
-                ) ** 2:
+                if (i - galaxy_center_x_pixel) ** 2 + (
+                    j - galaxy_center_y_pixel
+                ) ** 2 < (2.5 * theta_E_init / pixel_size) ** 2:
                     mask[i, j] = 1
 
         return mask

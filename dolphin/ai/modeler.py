@@ -304,7 +304,7 @@ class Modeler(AI):
                 if (i - galaxy_center_x_pixel) ** 2 + (
                     j - galaxy_center_y_pixel
                 ) ** 2 < (mask_radius_factor * theta_E_init / pixel_size) ** 2:
-                    mask[i, j] = 1
+                    mask[j, i] = 1
 
         return mask
 

@@ -301,10 +301,10 @@ class Modeler(AI):
         pixel_size = coordinate_system.pixel_width
         for i in range(mask.shape[0]):
             for j in range(mask.shape[1]):
-                if (i - galaxy_center_x_pixel) ** 2 + (
-                    j - galaxy_center_y_pixel
+                if (j - galaxy_center_x_pixel) ** 2 + (
+                    i - galaxy_center_y_pixel
                 ) ** 2 < (mask_radius_factor * theta_E_init / pixel_size) ** 2:
-                    mask[j, i] = 1
+                    mask[i, j] = 1
 
         return mask
 

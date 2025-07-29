@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "space-dolphin"
-version = "1.1.2"
+version = "1.1.3"
 description = "Automated pipeline for lens modeling based on lenstronomy"
 readme = "README.rst"
 license = "BSD-3-Clause"

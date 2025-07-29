@@ -4,10 +4,10 @@
 |logo| dolphin
 ==============
 
-.. image:: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml/badge.svg?branch=main
-    :target: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml
 .. image:: https://readthedocs.org/projects/dolphin-docs/badge/?version=latest
     :target: https://dolphin-docs.readthedocs.io/latest/
+.. image:: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml/badge.svg?branch=main
+    :target: https://github.com/ajshajib/dolphin/actions/workflows/ci.yaml
 .. image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
     :target: https://app.codecov.io/gh/ajshajib/dolphin/tree/main
     :alt: Codecov

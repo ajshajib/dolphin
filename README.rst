@@ -16,6 +16,8 @@
     :alt: License BSD 3-Clause Badge
 .. image:: https://img.shields.io/badge/arXiv-2503.22657-b31b1b?logo=arxiv&logoColor=white
     :target: https://arxiv.org/abs/2503.22657
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.16587211.svg
+  :target: https://doi.org/10.5281/zenodo.16587211
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=brightyellow
     :target: https://pre-commit.com/
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg

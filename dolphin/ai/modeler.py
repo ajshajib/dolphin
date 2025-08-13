@@ -98,6 +98,7 @@ class Modeler(AI):
         clear_center=0.2,
         source_n_max=6,
         mask_radius_factor=2.5,
+        additional_settings=None,
     ):
         """Get configuration from the semantic segmentation output. This method
         currently works only for the single-band case.
@@ -144,6 +145,8 @@ class Modeler(AI):
         :type source_n_max: `int`
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
+        :param additional_settings: additional settings to be added to the configuration
+        :type additional_settings: `dict`
         :return: configuration
         :rtype: `dict`
         """
@@ -269,6 +272,10 @@ class Modeler(AI):
                     mask_radius_factor=mask_radius_factor,
                 ),
             )
+
+        if additional_settings is not None:
+            for key, value in additional_settings.items():
+                config[key] = value
 
         return config
 

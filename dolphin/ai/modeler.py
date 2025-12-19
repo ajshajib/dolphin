@@ -451,7 +451,7 @@ class Modeler(AI):
     def collect_connected_pixels(
         cls, x, y, pixels, visited, target_value, matrix, rows, cols
     ):
-        """Collect all connected pixels in the matrix.
+        """Collect all connected pixels in the matrix using an iterative approach.
 
         :param x: x-coordinate
         :type x: `int`
@@ -470,31 +470,28 @@ class Modeler(AI):
         :param cols: number of columns in the matrix
         :type cols: `int`
         """
-        # Check if the current pixel is out of bounds
-        if x < 0 or x >= rows or y < 0 or y >= cols:
-            return
+        stack = [(x, y)]
 
-        # Check if the current pixel is already visited or does not match the target value
-        if visited[x][y] or matrix[x][y] != target_value:
-            return
+        while stack:
+            cx, cy = stack.pop()
 
-        # Mark the current pixel as visited and add it to the list of pixels
-        visited[x][y] = True
-        pixels.append((x, y))
+            # Check if the current pixel is out of bounds
+            if cx < 0 or cx >= rows or cy < 0 or cy >= cols:
+                continue
 
-        # Explore all 4 possible directions (up, down, left, right)
-        cls.collect_connected_pixels(
-            x + 1, y, pixels, visited, target_value, matrix, rows, cols
-        )
-        cls.collect_connected_pixels(
-            x - 1, y, pixels, visited, target_value, matrix, rows, cols
-        )
-        cls.collect_connected_pixels(
-            x, y + 1, pixels, visited, target_value, matrix, rows, cols
-        )
-        cls.collect_connected_pixels(
-            x, y - 1, pixels, visited, target_value, matrix, rows, cols
-        )
+            # Check if the current pixel is already visited or does not match the target value
+            if visited[cx][cy] or matrix[cx][cy] != target_value:
+                continue
+
+            # Mark the current pixel as visited and add it to the list of pixels
+            visited[cx][cy] = True
+            pixels.append((cx, cy))
+
+            # Add all 4 possible directions (up, down, left, right) to the stack
+            stack.append((cx + 1, cy))
+            stack.append((cx - 1, cy))
+            stack.append((cx, cy + 1))
+            stack.append((cx, cy - 1))
 
     @classmethod
     def list_region_centers(cls, matrix, target_value, minimum_pixel_area=1):

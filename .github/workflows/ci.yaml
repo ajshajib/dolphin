@@ -33,7 +33,7 @@ jobs:
       - name: Test with pytest
         run: |
           pytest --cov --junitxml=junit.xml -o junit_family=legacy
-          # codecov
+          codecov
           
       - name: Upload test results to Codecov
           if: ${{ !cancelled() }}

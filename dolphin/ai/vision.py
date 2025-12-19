@@ -14,8 +14,10 @@ class Vision(AI):
     def __init__(self, io_directory_path, source_type="quasar"):
         """
 
-        :param data_file_path: path to a data file
-        :type data_file_path: `str`
+        :param io_directory_path: path to IO directory
+        :type io_directory_path: `str`
+        :param source_type: source type, between "quasar" or "galaxy"
+        :type source_type: `str`
         """
         if source_type not in ["quasar", "galaxy"]:
             raise ValueError(

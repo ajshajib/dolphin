@@ -44,7 +44,7 @@ repos:
         description: Formats docstrings to follow PEP 257.
         entry: python -m docformatter
         additional_dependencies:
-          - docformatter==1.7.5
+          - docformatter==1.7.7
           - tomli
         args: [-r, --black, --in-place]
         language: python

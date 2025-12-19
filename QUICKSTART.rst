@@ -84,7 +84,7 @@ Use the following Python code to run the ``dolphin`` pipeline for a specific len
     )
 
     # Step 2: Create configuration for the lens system
-    modeler = Modeler(io_directory_path)
+    modeler = Modeler(io_directory_path, source_type="quasar")
     modeler.create_config_for_single_lens(
          lens_name="system_name", band_name="filter_name"
     )
@@ -95,7 +95,7 @@ Use the following Python code to run the ``dolphin`` pipeline for a specific len
          lens_name="system_name", model_id="example", recipe_name="galaxy-quasar"
     )
 
-Replace ``system_name`` and ``filter_name`` with the appropriate lens name and band name for your system. The ``source_type`` parameter in the ``Vision`` class can be set to either ``quasar`` or ``galaxy`` depending on the type of lens system being modeled.
+Replace ``system_name`` and ``filter_name`` with the appropriate lens name and band name for your system. The ``source_type`` parameter in the ``Vision`` and ``Modeler`` classes can be set to either ``quasar`` or ``galaxy`` depending on the type of lens system being modeled.
 
 Check the outputs: After running the pipeline, check the ``logs/`` directory for log files and the ``outputs/`` directory for the model outputs.
 

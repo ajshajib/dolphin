@@ -13,7 +13,7 @@ ci:
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.12.12
+    rev: v0.14.9
     hooks:
       - id: ruff
         exclude: docs/.*
@@ -23,8 +23,8 @@ repos:
     hooks:
       - id: nbqa-ruff
         args: ["--line-length=120"]
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.12.0
     hooks:
       - id: black
         # It is recommended to specify the latest version of Python
@@ -32,8 +32,8 @@ repos:
         # pre-commit's default_language_version, see
         # https://pre-commit.com/#top_level-default_language_version
         language_version: python3
-  - repo: https://github.com/psf/black
-    rev: 25.1.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.12.0
     hooks:
       - id: black-jupyter
         language_version: python3
@@ -44,9 +44,10 @@ repos:
         description: Formats docstrings to follow PEP 257.
         entry: python -m docformatter
         additional_dependencies:
-          - docformatter==1.7.5
+          - docformatter==1.7.7
           - tomli
         args: [-r, --black, --in-place]
         language: python
+        language_version: python3.12
         types:
           - python

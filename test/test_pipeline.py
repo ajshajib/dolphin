@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for config module."""
+
 from pathlib import Path
 from dolphin.processor import Processor
 from dolphin.ai import Vision

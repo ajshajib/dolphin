@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module has a class for maintaining the file system."""
+
 __author__ = "ajshajib"
 
 from pathlib import Path

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for data module."""
+
 from pathlib import Path
 import numpy.testing as npt
 from dolphin.processor.data import Data

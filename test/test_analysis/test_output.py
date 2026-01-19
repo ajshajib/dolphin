@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for output module."""
+
 from pathlib import Path
 import pytest
 import numpy as np

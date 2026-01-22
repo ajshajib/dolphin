@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for config module."""
+
 import pytest
 from copy import deepcopy
 import numpy as np

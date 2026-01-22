@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module loads settings from a configuration file."""
+
 __author__ = "ajshajib"
 
 import sys

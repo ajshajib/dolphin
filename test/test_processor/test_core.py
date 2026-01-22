@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Tests for data module."""
+
 from pathlib import Path
 
 from dolphin.processor.core import Processor

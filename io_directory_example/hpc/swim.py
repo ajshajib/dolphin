@@ -6,7 +6,6 @@ from dolphin.processor import Processor
 import time
 import schwimmbad
 
-
 pool = schwimmbad.choose_pool(mpi=True)
 
 start_time = time.perf_counter()

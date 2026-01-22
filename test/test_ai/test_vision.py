@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 from dolphin.ai.vision import Vision
 
-
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 

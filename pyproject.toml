@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "space-dolphin"
+version = "1.2.0"
+description = "Automated pipeline for lens modeling based on lenstronomy"
+readme = "README.rst"
+license = "BSD-3-Clause"
+license-files = ["LICEN[CS]E*", "AUTHORS.rst"]
+authors = [
+    { name = "Anowar J. Shajib", email = "ajshajib@gmail.com" }
+]
+keywords = ["dolphin", "lenstronomy"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/ajshajib/dolphin"
+
+[tool.setuptools.packages.find]
+include = ["dolphin", "dolphin.*"]

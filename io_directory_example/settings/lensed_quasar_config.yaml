@@ -1,0 +1,48 @@
+lens_name: 'lensed_quasar'
+
+band: ['F814W']
+
+model:
+  lens: ['EPL', 'SHEAR_GAMMA_PSI']
+  lens_light: ['SERSIC_ELLIPSE']
+  source_light: ['SERSIC_ELLIPSE']
+  point_source: ['LENSED_POSITION']
+
+lens_option:
+  centroid_init: [-0.2, 0.04]
+
+lens_light_option:
+  fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4. for 0-th light profile
+
+source_light_option:
+  n_max: [4] # array with n_max for each band
+
+point_source_option:
+  ra_init: [-0.54, -0.69,  0.19,  0.55]
+  dec_init: [-0.48,  0.54,  0.68, -0.16]
+  bound: 0.1
+
+fitting:
+  pso: true
+  pso_settings:
+    num_particle: 20
+    num_iteration: 50
+
+  psf_iteration: true
+  psf_iteration_settings: # optional, keywords in **kwargs_psf_update can be specified to send to lenstronomy.Workflow.psf_fitting.PsfFitting.update_iterative()
+    stacking_method: "median"
+    num_iter: 20
+    psf_iter_factor: 0.5
+    keep_psf_variance_map: true
+    psf_symmetry: 4
+    block_center_neighbour: 0.2
+
+  sampling: true
+  sampler: emcee
+  sampler_settings: # keywords to be sent to lenstronomy.Workflow.fitting_sequence.FittingSequence.mcmc()
+    n_burn : 0
+    n_run: 100
+    walkerRatio: 2
+
+numeric_option:
+  supersampling_factor: [2]

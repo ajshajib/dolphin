@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module provides classes to post process a model run output."""
+
 __author__ = "ajshajib"
 
 import numpy as np
@@ -356,15 +357,15 @@ class Output(Processor):
         v_max=None,
         source_v_min=None,
         source_v_max=None,
-        print_results=False
+        print_results=False,
     ):
-        """
-        Plot selected panels from the model overview.
-        """
+        """Plot selected panels from the model overview."""
         if print_results:
             print_kwargs_result = kwargs_result
             if kwargs_result is None:
-                print_kwargs_result = self.load_output(lens_name, model_id)["kwargs_result"]
+                print_kwargs_result = self.load_output(lens_name, model_id)[
+                    "kwargs_result"
+                ]
             print(print_kwargs_result)
 
         if v_max is None:
@@ -388,8 +389,8 @@ class Output(Processor):
         n_panels = len(panels)
         ncols = min(n_panels, 3)
         nrows = (n_panels + ncols - 1) // ncols  # ceil division
-        fig, axes = plt.subplots(nrows, ncols, figsize=(5*ncols, 4*nrows))
-    
+        fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows))
+
         # Flatten axes and handle case of single axis
         if nrows == 1 and ncols == 1:
             axes = [axes]
@@ -398,12 +399,30 @@ class Output(Processor):
 
         # Map panel names to plotting functions
         plot_map = {
-            "data": lambda ax: model_plot.data_plot(ax=ax, band_index=band_index, v_max=v_max, v_min=v_min),
-            "model": lambda ax: model_plot.model_plot(ax=ax, band_index=band_index, v_max=v_max, v_min=v_min),
-            "residual": lambda ax: model_plot.normalized_residual_plot(ax=ax, band_index=band_index, cmap=residual_cmap, v_max=3, v_min=-3),
-            "source": lambda ax: model_plot.source_plot(ax=ax, deltaPix_source=0.02, numPix=100, band_index=band_index, v_max=source_v_max, v_min=source_v_min, scale_size=0.4),
-            "convergence": lambda ax: model_plot.convergence_plot(ax=ax, band_index=band_index, cmap=convergence_cmap),
-            "magnification": lambda ax: model_plot.magnification_plot(ax=ax, band_index=band_index, cmap=magnification_cmap),
+            "data": lambda ax: model_plot.data_plot(
+                ax=ax, band_index=band_index, v_max=v_max, v_min=v_min
+            ),
+            "model": lambda ax: model_plot.model_plot(
+                ax=ax, band_index=band_index, v_max=v_max, v_min=v_min
+            ),
+            "residual": lambda ax: model_plot.normalized_residual_plot(
+                ax=ax, band_index=band_index, cmap=residual_cmap, v_max=3, v_min=-3
+            ),
+            "source": lambda ax: model_plot.source_plot(
+                ax=ax,
+                deltaPix_source=0.02,
+                numPix=100,
+                band_index=band_index,
+                v_max=source_v_max,
+                v_min=source_v_min,
+                scale_size=0.4,
+            ),
+            "convergence": lambda ax: model_plot.convergence_plot(
+                ax=ax, band_index=band_index, cmap=convergence_cmap
+            ),
+            "magnification": lambda ax: model_plot.magnification_plot(
+                ax=ax, band_index=band_index, cmap=magnification_cmap
+            ),
         }
 
         for ax, panel in zip(axes, panels):
@@ -414,18 +433,20 @@ class Output(Processor):
         # Add lens name on top-right corner of the first panel
         ax0 = axes[0]
         ax0.text(
-            0.95, 0.95, lens_name,
-            ha='right', va='top',
-            color='white',
+            0.95,
+            0.95,
+            lens_name,
+            ha="right",
+            va="top",
+            color="white",
             fontsize=12,
-            fontweight='bold',
-            backgroundcolor='blue',
-            transform=ax0.transAxes
+            fontweight="bold",
+            backgroundcolor="blue",
+            transform=ax0.transAxes,
         )
 
         fig.tight_layout()
         return fig
-
 
     def plot_model_decomposition(
         self,

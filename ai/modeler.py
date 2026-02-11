@@ -102,7 +102,7 @@ class Modeler(AI):
         additional_lens_settings=None,
         additional_lens_light_option_settings=None,
         likelihood_settings=None,
-        ):
+    ):
         """Get configuration from the semantic segmentation output. This method
         currently works only for the single-band case.
 
@@ -173,19 +173,22 @@ class Modeler(AI):
         if additional_lens_settings is not None:
             for key, value in additional_lens_settings.items():
                 if key in config["model"]:
-                    config["model"][key] = value  
+                    config["model"][key] = value
                 else:
                     config["model"][key] = value
 
-
-        config["kwargs_likelihood"] = likelihood_settings if likelihood_settings is not None else {
-            'check_bounds': True,
-            # 'image_likelihood_mask_list': [mask_img],
-            # 'image_position_uncertainty': 0.004,
-            # 'check_matched_source_position': True,
-            'source_position_likelihood': True,
-            'source_position_tolerance': 0.001
-        }
+        config["kwargs_likelihood"] = (
+            likelihood_settings
+            if likelihood_settings is not None
+            else {
+                "check_bounds": True,
+                # 'image_likelihood_mask_list': [mask_img],
+                # 'image_position_uncertainty': 0.004,
+                # 'check_matched_source_position': True,
+                "source_position_likelihood": True,
+                "source_position_tolerance": 0.001,
+            }
+        )
 
         if source_n_max is not None:
             config["model"]["source_light"].append("SHAPELETS")
@@ -198,13 +201,11 @@ class Modeler(AI):
             "centroid_init": [galaxy_center_x.item(), galaxy_center_y.item()],
             "centroid_bound": 0.2,
         }
-            # Default lens light option
+        # Default lens light option
         config["lens_light_option"] = {"fix": {0: {"n_sersic": 4.0}}}
         if additional_lens_light_option_settings is not None:
             config["lens_light_option"].update(additional_lens_light_option_settings)
 
-
-        
         if source_n_max is not None:
             config["source_light_option"] = {"n_max": [source_n_max]}
 
@@ -266,12 +267,17 @@ class Modeler(AI):
 
             # Set PSF iteration settings
             # Second minimum distance is used to set the block center neighbour and error map radius
-            if "block_center_neighbour" not in config["fitting"]["psf_iteration_settings"]:
+            if (
+                "block_center_neighbour"
+                not in config["fitting"]["psf_iteration_settings"]
+            ):
                 if len(distances) > 1:
                     value = float(np.sort(distances)[1] / 2.0)
                 else:
                     value = float(distances[0] / 2.0)
-                config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = value
+                config["fitting"]["psf_iteration_settings"][
+                    "block_center_neighbour"
+                ] = value
 
             if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
                 if len(distances) > 1:
@@ -279,7 +285,6 @@ class Modeler(AI):
                 else:
                     value = float(distances[0] / 2.0)
                 config["fitting"]["psf_iteration_settings"]["error_map_radius"] = value
-        
 
         # Set sampling options
         config["fitting"]["sampling"] = sampler_settings is not None
@@ -302,12 +307,8 @@ class Modeler(AI):
             if additional_settings is not None:
                 for key, value in additional_settings.items():
                     config[key] = value
-                    
-        return config
-    
 
-    
-        
+        return config
 
     def get_mask_from_semantic_segmentation(
         self, semantic_segmentation, coordinate_system, mask_radius_factor=2.5

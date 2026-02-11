@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module loads settings from a configuration file."""
+
 __author__ = "ajshajib"
 
 import yaml
@@ -949,7 +950,7 @@ class ModelConfig(Config):
                 lower.append(
                     {
                         "theta_E": 0.3,
-                        "e1": -0.5, #changes from .5
+                        "e1": -0.5,  # changes from .5
                         "e2": -0.25,
                         "gamma": 1.3,
                         "center_x": center_x - bound,
@@ -961,7 +962,7 @@ class ModelConfig(Config):
                     {
                         "theta_E": 3.0,
                         "e1": 0.25,
-                        "e2": 0.5, #changes from .5
+                        "e2": 0.5,  # changes from .5
                         "gamma": 2.8,
                         "center_x": center_x + bound,
                         "center_y": center_y + bound,

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()` with
 pre-defined recipes."""
+
 __author__ = "ajshajib"
 
 from copy import deepcopy

@@ -125,6 +125,14 @@ class TestModeler:
         assert "new_key" in config
         assert config["new_key"] == "new_value"
 
+        config = self.qso_modeler.get_configuration(
+            lens_system,
+            "F814W",
+            additional_settings={"lens_option": {"new_option": "new_value"}},
+        )
+        assert "lens_option" in config
+        assert config["lens_option"]["new_option"] == "new_value"
+
     def test_get_mask_from_semantic_segmentation(self):
         """Test `get_mask_from_semantic_segmentation` method.
 

@@ -275,7 +275,14 @@ class Modeler(AI):
 
         if additional_settings is not None:
             for key, value in additional_settings.items():
-                config[key] = value
+                if (
+                    key in config
+                    and isinstance(config[key], dict)
+                    and isinstance(value, dict)
+                ):
+                    config[key].update(value)
+                else:
+                    config[key] = value
 
         return config
 

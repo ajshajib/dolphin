@@ -275,7 +275,7 @@ class Modeler(AI):
 
         if additional_settings is not None:
             for key, value in additional_settings.items():
-                config[key] = value
+                config.setdefault(key, {}).update(value)
 
         return config
 

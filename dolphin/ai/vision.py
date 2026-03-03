@@ -54,7 +54,7 @@ class Vision(AI):
         image = image_data.get_image()
 
         segmentation = self.get_semantic_segmentation_from_nn(image)
-        
+
         if 1 not in segmentation:
             segmentation = self.relabel_central_label4_blob_to_1(segmentation)
 
@@ -63,8 +63,7 @@ class Vision(AI):
         return segmentation
 
     def relabel_central_label4_blob_to_1(self, segmentation):
-        """
-        Relabel the blob labeled as 4 closest to the center of the image to 1.
+        """Relabel the blob labeled as 4 closest to the center of the image to 1.
 
         :param segmentation: 2D numpy array of segmentation labels
         :return: modified segmentation map
@@ -76,12 +75,14 @@ class Vision(AI):
             return segmentation  # No label 4 regions found
 
         center_y, center_x = np.array(segmentation.shape) / 2
-        min_dist = float('inf')
+        min_dist = float("inf")
         closest_blob = None
 
         for i in range(1, num_features + 1):
             blob_center = center_of_mass(mask_label_4, labeled_blobs, i)
-            dist = np.linalg.norm(np.array([center_y, center_x]) - np.array(blob_center))
+            dist = np.linalg.norm(
+                np.array([center_y, center_x]) - np.array(blob_center)
+            )
             if dist < min_dist:
                 min_dist = dist
                 closest_blob = i

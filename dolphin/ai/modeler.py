@@ -242,12 +242,17 @@ class Modeler(AI):
 
             # Set PSF iteration settings
             # Second minimum distance is used to set the block center neighbour and error map radius
-            if "block_center_neighbour" not in config["fitting"]["psf_iteration_settings"]:
+            if (
+                "block_center_neighbour"
+                not in config["fitting"]["psf_iteration_settings"]
+            ):
                 if len(distances) > 1:
                     value = float(np.sort(distances)[1] / 2.0)
                 else:
                     value = float(distances[0] / 2.0)
-                config["fitting"]["psf_iteration_settings"]["block_center_neighbour"] = value
+                config["fitting"]["psf_iteration_settings"][
+                    "block_center_neighbour"
+                ] = value
 
             if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
                 if len(distances) > 1:
@@ -255,7 +260,6 @@ class Modeler(AI):
                 else:
                     value = float(distances[0] / 2.0)
                 config["fitting"]["psf_iteration_settings"]["error_map_radius"] = value
-        
 
         # Set sampling options
         config["fitting"]["sampling"] = sampler_settings is not None

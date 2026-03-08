@@ -1,5 +1,5 @@
 codecov: 
-  token: {{ secrets.CODECOV_TOKEN }}
+  token: 11740e29-ae37-4e08-ad1c-2019b2b7f652
 comment:                  # this is a top-level key
   layout: " diff, flags, files"
   behavior: default

@@ -61,15 +61,15 @@ class Vision(AI):
         self.save_segmentation(lens_name, band_name, segmentation)
 
         return segmentation
+
     # In some science images the satellite deflector is not located near the center. If the model predicts a label-4 region near the center, it is likely a misidentified central deflector, so we relabel that region to class 1.
     def relabel_central_satellite_to_lens(self, segmentation):
-        """
-        Relabel the blob labeled as 4 (satellite deflector) that is closest to the
+        """Relabel the blob labeled as 4 (satellite deflector) that is closest to the
         image center as label 1 (central deflector).
 
-        This correction is applied because the AI model can sometimes misclassify
-        the central deflector as a satellite deflector when no true satellite
-        deflector is present near the image center.
+        This correction is applied because the AI model can sometimes misclassify the
+        central deflector as a satellite deflector when no true satellite deflector is
+        present near the image center.
 
         :type segmentation: numpy.ndarray
         :param segmentation: 2D segmentation map containing integer class labels.

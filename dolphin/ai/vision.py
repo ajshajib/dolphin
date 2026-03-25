@@ -56,17 +56,25 @@ class Vision(AI):
         segmentation = self.get_semantic_segmentation_from_nn(image)
 
         if 1 not in segmentation:
-            segmentation = self.relabel_central_label4_blob_to_1(segmentation)
+            segmentation = self.relabel_central_satellite_to_lens(segmentation)
 
         self.save_segmentation(lens_name, band_name, segmentation)
 
         return segmentation
+    # In some science images the satellite deflector is not located near the center. If the model predicts a label-4 region near the center, it is likely a misidentified central deflector, so we relabel that region to class 1.
+    def relabel_central_satellite_to_lens(self, segmentation):
+        """
+        Relabel the blob labeled as 4 (satellite deflector) that is closest to the
+        image center as label 1 (central deflector).
 
-    def relabel_central_label4_blob_to_1(self, segmentation):
-        """Relabel the blob labeled as 4 closest to the center of the image to 1.
+        This correction is applied because the AI model can sometimes misclassify
+        the central deflector as a satellite deflector when no true satellite
+        deflector is present near the image center.
 
-        :param segmentation: 2D numpy array of segmentation labels
-        :return: modified segmentation map
+        :type segmentation: numpy.ndarray
+        :param segmentation: 2D segmentation map containing integer class labels.
+        :rtype: numpy.ndarray
+        :return: Modified segmentation map with the closest label-4 blob relabeled to 1.
         """
         mask_label_4 = segmentation == 4
         labeled_blobs, num_features = label(mask_label_4)

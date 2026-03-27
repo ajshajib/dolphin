@@ -914,6 +914,9 @@ class ModelConfig(Config):
                     theta_E_init = self.settings["guess_params"]["lens"][0]["theta_E"]
                 except (NameError, KeyError):
                     theta_E_init = 1.0
+
+                theta_E_upper_limit = theta_E_upper_factor * theta_E_init
+                theta_E_lower_limit = theta_E_lower_factor * theta_E_init
             else:
                 # satellite
                 bound = self.settings["satellites"]["centroid_bound"]
@@ -924,6 +927,8 @@ class ModelConfig(Config):
                     satellite_flags[i]
                 ][1]
                 theta_E_init = 0.1
+                theta_E_upper_limit = 1.0
+                theta_E_lower_limit = 0.01
 
             if model in ["SPEP", "PEMD", "EPL", "SIE"]:
                 if model == "SIE":
@@ -953,7 +958,7 @@ class ModelConfig(Config):
 
                 lower.append(
                     {
-                        "theta_E": theta_E_lower_factor * theta_E_init,
+                        "theta_E": theta_E_lower_limit,
                         "e1": -0.5,
                         "e2": -0.5,
                         "gamma": 1.3,
@@ -964,7 +969,7 @@ class ModelConfig(Config):
 
                 upper.append(
                     {
-                        "theta_E": theta_E_upper_factor * theta_E_init,
+                        "theta_E": theta_E_upper_limit,
                         "e1": 0.5,
                         "e2": 0.5,
                         "gamma": 2.8,
@@ -996,14 +1001,14 @@ class ModelConfig(Config):
                 )
                 lower.append(
                     {
-                        "theta_E": theta_E_lower_factor * theta_E_init,
+                        "theta_E": theta_E_lower_limit,
                         "center_x": center_x - bound,
                         "center_y": center_y - bound,
                     }
                 )
                 upper.append(
                     {
-                        "theta_E": theta_E_upper_factor * theta_E_init,
+                        "theta_E": theta_E_upper_limit,
                         "center_x": center_x + bound,
                         "center_y": center_y + bound,
                     }

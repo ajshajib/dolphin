@@ -886,13 +886,17 @@ class ModelConfig(Config):
         multiple filters)"""
         return self.get_index_list("source_light")
 
-    def get_lens_model_params(self, theta_E_upper_factor=1.5, theta_E_lower_factor=0.3):
+    def get_lens_model_params(
+        self, theta_E_upper_factor=1.5, theta_E_lower_factor=0.3, theta_E_satellite=0.1
+    ):
         """Create `lens_params`.
 
         :param theta_E_upper_factor: Factor to multiply the initial Einstein radius for the upper bound
         :type theta_E_upper_factor: `float`
         :param theta_E_lower_factor: Factor to multiply the initial Einstein radius for the lower bound
         :type theta_E_lower_factor: `float`
+        :param theta_E_satellite: Initial guess for the satellite's Einstein radius, if exists.
+        :type theta_E_satellite: `float`
         :return:
         :rtype:
         """
@@ -926,9 +930,9 @@ class ModelConfig(Config):
                 center_y = self.settings["satellites"]["centroid_init"][
                     satellite_flags[i]
                 ][1]
-                theta_E_init = 0.1
-                theta_E_upper_limit = 1.0
-                theta_E_lower_limit = 0.01
+                theta_E_init = theta_E_satellite
+                theta_E_upper_limit = 5.0 * theta_E_satellite
+                theta_E_lower_limit = 0.2 * theta_E_satellite
 
             if model in ["SPEP", "PEMD", "EPL", "SIE"]:
                 if model == "SIE":

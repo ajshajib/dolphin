@@ -52,7 +52,7 @@ class TestVision:
 
     def create_segmentation_for_single_lens(self):
         """Test the create_segmentation_for_single_lens method."""
-        lens_system = "lensed_quasar_2"
+        lens_system = "PSJ0429+1428"
         segm_path_file = (
             _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_F814W.npy"
         )

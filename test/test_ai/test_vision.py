@@ -84,6 +84,15 @@ class TestVision:
         assert 4 not in segmentation
         assert np.all(np.isin(segmentation, [0, 1, 2, 3, 4]))
 
+        
+        # Case 1: No label-4 regions — early return, segmentation unchanged
+        segmentation = np.zeros((120, 120), dtype=int)
+        segmentation[30:40, 30:40] = 1  # only label 1, no label 4
+        original = segmentation.copy()
+        result = self.vision.relabel_central_satellite_to_lens(segmentation)
+        np.testing.assert_array_equal(result, original)
+        assert 4 not in result  # confirms no label-4 existed, early return was hit
+
     def test_resize_image(self):
         """Test the resize_image method to ensure it resizes images correctly."""
         # Create a sample image (e.g., 256x256)

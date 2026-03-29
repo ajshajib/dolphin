@@ -32,25 +32,35 @@ class TestVision:
         band_name = "F814W"
 
         segm_path_file = (
-            _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_{band_name}.npy"
+            _TEST_IO_DIR
+            / "outputs"
+            / f"semantic_segmentation_{lens_system}_{band_name}.npy"
         )
 
         if segm_path_file.exists():
             segm_path_file.unlink()
 
-        segmentation = self.vision.create_segmentation_for_single_lens(lens_system, band_name)
+        segmentation = self.vision.create_segmentation_for_single_lens(
+            lens_system, band_name
+        )
 
         assert segm_path_file.exists()
-        assert segmentation.shape == self.vision.get_image_data(lens_system, band_name).get_image().shape
+        assert (
+            segmentation.shape
+            == self.vision.get_image_data(lens_system, band_name).get_image().shape
+        )
         assert np.all(np.isin(segmentation, [0, 1, 2, 3, 4]))
 
     def test_create_segmentation_for_single_lens_with_relabeling(self):
-        """Test that relabel_central_satellite_to_lens is called when label 1 is absent."""
+        """Test that relabel_central_satellite_to_lens is called when label 1 is
+        absent."""
         lens_system = "PSJ0429+1428"
         band_name = "F814W"
 
         segm_path_file = (
-            _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_{band_name}.npy"
+            _TEST_IO_DIR
+            / "outputs"
+            / f"semantic_segmentation_{lens_system}_{band_name}.npy"
         )
 
         if segm_path_file.exists():

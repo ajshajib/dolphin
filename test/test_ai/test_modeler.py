@@ -133,6 +133,22 @@ class TestModeler:
         assert "lens_option" in config
         assert config["lens_option"]["new_option"] == "new_value"
 
+        lens_system = "J0544+4350"
+        config = self.qso_modeler.get_configuration(
+            lens_system,
+            "F814W",
+            psf_iteration_settings={
+                "stacking_method": "median",
+                "num_iter": 20,
+                "psf_iter_factor": 0.5,
+                "keep_psf_variance_map": True,
+                "psf_symmetry": 4,
+            },
+        )
+
+        for keyword in keywords:
+            assert keyword in config
+
     def test_get_mask_from_semantic_segmentation(self):
         """Test `get_mask_from_semantic_segmentation` method.
 

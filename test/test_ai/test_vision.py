@@ -2,6 +2,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from dolphin.ai.vision import Vision
+from unittest.mock import patch
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
@@ -24,6 +25,54 @@ class TestVision:
         # Expected output
         with pytest.raises(ValueError):
             Vision(_TEST_IO_DIR, source_type="invalid")
+
+    def test_create_segmentation_for_single_lens(self):
+        """Test the create_segmentation_for_single_lens method."""
+        lens_system = "PSJ0429+1428"
+        band_name = "F814W"
+
+        segm_path_file = (
+            _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_{band_name}.npy"
+        )
+
+        if segm_path_file.exists():
+            segm_path_file.unlink()
+
+        segmentation = self.vision.create_segmentation_for_single_lens(lens_system, band_name)
+
+        assert segm_path_file.exists()
+        assert segmentation.shape == self.vision.get_image_data(lens_system, band_name).get_image().shape
+        assert np.all(np.isin(segmentation, [0, 1, 2, 3, 4]))
+
+    def test_create_segmentation_for_single_lens_with_relabeling(self):
+        """Test that relabel_central_satellite_to_lens is called when label 1 is absent."""
+        lens_system = "PSJ0429+1428"
+        band_name = "F814W"
+
+        segm_path_file = (
+            _TEST_IO_DIR / "outputs" / f"semantic_segmentation_{lens_system}_{band_name}.npy"
+        )
+
+        if segm_path_file.exists():
+            segm_path_file.unlink()
+
+        fake_segmentation = np.zeros((120, 120))
+        fake_segmentation[58:62, 58:62] = 4
+
+        with patch.object(
+            self.vision,
+            "get_semantic_segmentation_from_nn",
+            return_value=fake_segmentation,
+        ):
+            segmentation = self.vision.create_segmentation_for_single_lens(
+                lens_system, band_name
+            )
+
+        assert segm_path_file.exists()
+        assert 1 in segmentation
+        assert np.all(segmentation[58:62, 58:62] == 1)
+        assert 4 not in segmentation
+        assert np.all(np.isin(segmentation, [0, 1, 2, 3, 4]))
 
     def test_resize_image(self):
         """Test the resize_image method to ensure it resizes images correctly."""

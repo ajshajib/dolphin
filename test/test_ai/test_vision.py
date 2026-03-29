@@ -84,7 +84,6 @@ class TestVision:
         assert 4 not in segmentation
         assert np.all(np.isin(segmentation, [0, 1, 2, 3, 4]))
 
-        
         # Case 1: No label-4 regions — early return, segmentation unchanged
         segmentation = np.zeros((120, 120), dtype=int)
         segmentation[30:40, 30:40] = 1  # only label 1, no label 4

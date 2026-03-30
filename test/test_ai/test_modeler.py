@@ -133,6 +133,24 @@ class TestModeler:
         assert "lens_option" in config
         assert config["lens_option"]["new_option"] == "new_value"
 
+    def test_get_half_second_neighbor_distance(self):
+        """Test `_get_half_second_neighbor_distance` method."""
+        # Single distance: should return half of that distance
+        distances = [2.0]
+        assert Modeler._get_half_second_neighbor_distance(distances) == 1.0
+
+        # Multiple distances: should return half of the second smallest
+        distances = [1.0, 3.0, 5.0]  # sorted: [1.0, 3.0, 5.0], second smallest is 3.0
+        assert Modeler._get_half_second_neighbor_distance(distances) == 1.5
+
+        # Two distances: second smallest is the larger one
+        distances = [2.0, 4.0]
+        assert Modeler._get_half_second_neighbor_distance(distances) == 2.0
+
+        # Unsorted input: method should sort internally
+        distances = [5.0, 1.0, 3.0]  # sorted: [1.0, 3.0, 5.0], second smallest is 3.0
+        assert Modeler._get_half_second_neighbor_distance(distances) == 1.5
+
     def test_get_mask_from_semantic_segmentation(self):
         """Test `get_mask_from_semantic_segmentation` method.
 

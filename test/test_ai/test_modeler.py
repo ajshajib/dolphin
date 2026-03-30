@@ -133,7 +133,6 @@ class TestModeler:
         assert "lens_option" in config
         assert config["lens_option"]["new_option"] == "new_value"
 
-
     def test_get_half_second_neighbor_distance(self):
         """Test `_get_half_second_neighbor_distance` method."""
         # Single distance: should return half of that distance

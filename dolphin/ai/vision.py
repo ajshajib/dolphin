@@ -62,7 +62,6 @@ class Vision(AI):
 
         return segmentation
 
-    
     def relabel_central_satellite_to_lens(self, segmentation):
         """Relabel the blob labeled as 4 (satellite deflector) that is closest to the
         image center as label 1 (central deflector).
@@ -71,8 +70,8 @@ class Vision(AI):
         central deflector as a satellite deflector when no true satellite deflector is
         present near the image center.
 
-        :param segmentation: 2D segmentation map containing integer class labels  
-        :type segmentation: `numpy.ndarray` 
+        :param segmentation: 2D segmentation map containing integer class labels
+        :type segmentation: `numpy.ndarray`
         :return: Modified segmentation map with the closest label-4 blob relabeled to 1.
         :rtype: `numpy.ndarray`
         """
@@ -158,7 +157,7 @@ class Vision(AI):
 
     def get_semantic_segmentation_from_nn(self, image):
         """Get semantic segmentation for the image from the trained neural network.
- 
+
         :param image: image data
         :type image: `numpy.ndarray`
         :return: semantic segmentation
@@ -166,26 +165,26 @@ class Vision(AI):
         """
         resized_image = self.resize_image(image)
         image_input = np.expand_dims(resized_image, axis=0)
- 
+
         # Get predictions from the model
         prediction = self.nn_model.predict(image_input)  # Shape: (1, 128, 128, 5)
- 
+
         segmentation = np.argmax(prediction[0], axis=-1)  # Shape: (128, 128)
- 
+
         # Resize the segmentation to the original size
         reshaped_segmentation = self.resize_segmentation_to_original_size(
             segmentation, image.shape[0]
         )
- 
+
         if self._source_type == "galaxy":
             # Setting the satellite label to 4 to match with the case of quasar
             reshaped_segmentation[reshaped_segmentation == 3] = 4
- 
+
         if 1 not in reshaped_segmentation:
             if 4 not in reshaped_segmentation:
                 return reshaped_segmentation
             reshaped_segmentation = self.relabel_central_satellite_to_lens(
                 reshaped_segmentation
             )
- 
+
         return reshaped_segmentation

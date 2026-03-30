@@ -25,8 +25,6 @@ class TestVision:
         with pytest.raises(ValueError):
             Vision(_TEST_IO_DIR, source_type="invalid")
 
-
-
     def test_relabel_central_satellite_to_lens(self):
         segmentation = np.zeros((100, 100))
 
@@ -99,6 +97,7 @@ class TestVision:
 
         self.vision.create_segmentation_for_all_lenses("F814W")
         assert segm_path_file.exists()
+
     def test_get_semantic_segmentation_from_nn(self):
         """Test the get_semantic_segmentation_from_nn method."""
         segm = self.vision_gal.get_semantic_segmentation_from_nn(np.random.rand(90, 90))

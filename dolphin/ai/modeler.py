@@ -248,10 +248,11 @@ class Modeler(AI):
             ):
                 config["fitting"]["psf_iteration_settings"][
                     "block_center_neighbour"
-                ] = float(np.sort(distances)[1] / 2.0)
+                ] = self._get_half_second_neighbor_distance(distances)
+
             if "error_map_radius" not in config["fitting"]["psf_iteration_settings"]:
-                config["fitting"]["psf_iteration_settings"]["error_map_radius"] = float(
-                    np.sort(distances)[1] / 2.0
+                config["fitting"]["psf_iteration_settings"]["error_map_radius"] = (
+                    self._get_half_second_neighbor_distance(distances)
                 )
 
         # Set sampling options
@@ -285,6 +286,23 @@ class Modeler(AI):
                     config[key] = value
 
         return config
+
+    @staticmethod
+    def _get_half_second_neighbor_distance(distances):
+        """Get half of the second minimum distance between quasar images, or half of the
+        only distance if there is just one.
+
+        :param distances: list of pairwise distances between quasar images
+        :type distances: `List[float]`
+        :return: half of the second minimum distance
+        :rtype: `float`
+        """
+        if len(distances) > 1:
+            half_second_neighbor_distance = float(np.sort(distances)[1] / 2.0)
+        else:
+            half_second_neighbor_distance = float(distances[0] / 2.0)
+
+        return half_second_neighbor_distance
 
     def get_mask_from_semantic_segmentation(
         self, semantic_segmentation, coordinate_system, mask_radius_factor=2.5

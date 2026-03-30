@@ -54,10 +54,7 @@ class Vision(AI):
         image = image_data.get_image()
 
         segmentation = self.get_semantic_segmentation_from_nn(image)
-
-        if 1 not in segmentation:
-            segmentation = self.relabel_central_satellite_to_lens(segmentation)
-
+        
         self.save_segmentation(lens_name, band_name, segmentation)
 
         return segmentation

@@ -69,7 +69,7 @@ class TestVision:
             resized_image.shape == expected_shape
         ), f"Resized image shape: {resized_image.shape}, Expected shape: {expected_shape}"
 
-    def create_segmentation_for_single_lens(self):
+    def test_create_segmentation_for_single_lens(self):
         """Test the create_segmentation_for_single_lens method."""
         lens_system = "lensed_quasar_2"
         segm_path_file = (

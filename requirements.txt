@@ -1,4 +1,4 @@
-numpy<2
+numpy<2.1
 astropy
 scipy>=0.19.1
 emcee>=3.0.0

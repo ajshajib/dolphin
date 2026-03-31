@@ -255,7 +255,7 @@ class FileSystem(object):
             group = f.create_group("fit_output")
             for i, single_output in enumerate(output["fit_output"]):
                 subgroup = group.create_group(f"{i}")
-                subgroup.attrs["fitting_type"] = np.string_(single_output[0])
+                subgroup.attrs["fitting_type"] = np.bytes_(single_output[0])
 
                 if single_output[0] == "PSO":
                     subgroup.create_dataset("chi2", data=np.array(single_output[1][0]))

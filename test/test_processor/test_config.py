@@ -134,6 +134,25 @@ class TestModelConfig(object):
 
         assert kwargs_model == self.config_1.get_kwargs_model()
 
+        # No profile_kwargs_list for SERSIC-only configs
+        assert "lens_light_profile_kwargs_list" not in self.config_1.get_kwargs_model()
+
+        # Test MGE_SET includes profile_kwargs_list
+        config_mge = deepcopy(self.config_1)
+        config_mge.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        config_mge.settings["lens_light_option"] = {
+            "mge_config": {0: {"n_comp": 15}}
+        }
+        kwargs = config_mge.get_kwargs_model()
+        assert "lens_light_profile_kwargs_list" in kwargs
+        assert kwargs["lens_light_profile_kwargs_list"] == [{"n_comp": 15}]
+
+        # Test default n_comp when mge_config is not specified
+        config_mge2 = deepcopy(self.config_1)
+        config_mge2.settings["model"]["lens_light"] = ["MGE_SET"]
+        kwargs2 = config_mge2.get_kwargs_model()
+        assert kwargs2["lens_light_profile_kwargs_list"] == [{"n_comp": 20}]
+
         self.config_5.settings["kwargs_model"] = {
             "key1": "value1",
             "key2": "value2",
@@ -636,6 +655,26 @@ class TestModelConfig(object):
         with pytest.raises(ValueError):
             config.get_lens_light_model_params()
 
+        # Test MGE_SET
+        config_mge = deepcopy(self.config_1)
+        config_mge.settings["model"]["lens_light"] = ["MGE_SET"]
+        params = config_mge.get_lens_light_model_params()
+        assert len(params) == 5
+        assert "sigma_min" in params[0][0]
+        assert "sigma_width" in params[0][0]
+        assert "center_x" in params[0][0]
+        assert "center_y" in params[0][0]
+        assert "amp" in params[0][0]
+        assert "e1" not in params[0][0]
+
+        # Test MGE_SET_ELLIPSE
+        config_mge_e = deepcopy(self.config_1)
+        config_mge_e.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        params_e = config_mge_e.get_lens_light_model_params()
+        assert "e1" in params_e[0][0]
+        assert "e2" in params_e[0][0]
+        assert "sigma_min" in params_e[0][0]
+
         params = self.config_wsat.get_lens_light_model_params()
         for i in range(5):
             assert len(params[i])
@@ -763,3 +802,52 @@ class TestModelConfig(object):
         assert len(config2.get_index_source_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
         assert len(config2.get_index_source_light_model_list()) == 2
+
+    def test_mge_set_multiband_joining(self):
+        """Test that MGE_SET parameters are joined across bands."""
+        config = deepcopy(self.config_3)
+        config.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        constraints = config.get_joint_lens_light_with_lens_light()
+        # Should join sigma_min, sigma_width, e1, e2 across 2 bands
+        found_mge_join = False
+        for entry in constraints:
+            if "sigma_min" in entry[2]:
+                found_mge_join = True
+                assert "sigma_width" in entry[2]
+                assert "e1" in entry[2]
+                assert "e2" in entry[2]
+        assert found_mge_join
+
+        # Test MGE_SET (non-ellipse) - should not join e1, e2
+        config2 = deepcopy(self.config_3)
+        config2.settings["model"]["lens_light"] = ["MGE_SET"]
+        constraints2 = config2.get_joint_lens_light_with_lens_light()
+        for entry in constraints2:
+            if "sigma_min" in entry[2]:
+                assert "e1" not in entry[2]
+                assert "e2" not in entry[2]
+
+    def test_custom_logL_addition_mge_set(self):
+        """Test that custom_logL_addition works with MGE_SET (no e1/e2)."""
+        config = deepcopy(self.config_1)
+        config.settings["model"]["lens_light"] = ["MGE_SET"]
+        # This should not crash even though limit_mass_pa_from_light is set
+        prior = config.custom_logL_addition(
+            kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
+            kwargs_lens_light=[{"sigma_min": 0.01, "sigma_width": 1.0}],
+        )
+        assert prior == 0
+
+    def test_get_mge_n_comp(self):
+        """Test _get_mge_n_comp helper method."""
+        config = deepcopy(self.config_1)
+
+        # Default when no mge_config
+        assert config.get_mge_n_comp(0) == 20
+
+        # With mge_config
+        config.settings["lens_light_option"] = {
+            "mge_config": {0: {"n_comp": 15}}
+        }
+        assert config.get_mge_n_comp(0) == 15
+        assert config.get_mge_n_comp(1) == 20  # Not configured, returns default

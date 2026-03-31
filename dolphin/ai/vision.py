@@ -179,7 +179,7 @@ class Vision(AI):
 
         if 1 not in reshaped_segmentation and 4 in reshaped_segmentation:
             reshaped_segmentation = self.relabel_central_satellite_to_lens(
-            reshaped_segmentation
+                reshaped_segmentation
             )
 
         return reshaped_segmentation

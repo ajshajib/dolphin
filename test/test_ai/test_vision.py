@@ -25,6 +25,25 @@ class TestVision:
         with pytest.raises(ValueError):
             Vision(_TEST_IO_DIR, source_type="invalid")
 
+    def test_relabel_central_satellite_to_lens(self):
+        segmentation = np.zeros((100, 100))
+
+        # Central blob (closest to center at 50, 50)
+        segmentation[48:52, 48:52] = 4
+
+        # Off-center blobs
+        segmentation[10:14, 10:14] = 4
+        segmentation[80:84, 80:84] = 4
+
+        result = self.vision.relabel_central_satellite_to_lens(segmentation)
+
+        # The central blob should be relabeled to 1
+        assert np.all(result[48:52, 48:52] == 1)
+
+        # The off-center blobs should remain as 4
+        assert np.all(result[10:14, 10:14] == 4)
+        assert np.all(result[80:84, 80:84] == 4)
+
     def test_resize_image(self):
         """Test the resize_image method to ensure it resizes images correctly."""
         # Create a sample image (e.g., 256x256)
@@ -50,7 +69,7 @@ class TestVision:
             resized_image.shape == expected_shape
         ), f"Resized image shape: {resized_image.shape}, Expected shape: {expected_shape}"
 
-    def create_segmentation_for_single_lens(self):
+    def test_create_segmentation_for_single_lens(self):
         """Test the create_segmentation_for_single_lens method."""
         lens_system = "lensed_quasar_2"
         segm_path_file = (
@@ -80,11 +99,27 @@ class TestVision:
         assert segm_path_file.exists()
 
     def test_get_semantic_segmentation_from_nn(self):
+        """Test the get_semantic_segmentation_from_nn method."""
         segm = self.vision_gal.get_semantic_segmentation_from_nn(np.random.rand(90, 90))
         assert segm.shape == (90, 90)
 
         segm = self.vision.get_semantic_segmentation_from_nn(np.random.rand(90, 90))
         assert segm.shape == (90, 90)
+
+        # Test relabeling: when label 1 is absent but label 4 is present,
+        # the closest label-4 blob to center should be relabeled to 1
+        fake_segmentation = np.zeros((90, 90))
+        fake_segmentation[43:47, 43:47] = 4
+        segm = self.vision.relabel_central_satellite_to_lens(fake_segmentation.copy())
+        assert segm.shape == (90, 90)
+        assert 1 in segm
+        assert 4 not in segm
+
+        # Test no relabeling when label 4 is also absent
+        empty_segmentation = np.zeros((90, 90))
+        segm = self.vision.relabel_central_satellite_to_lens(empty_segmentation.copy())
+        assert segm.shape == (90, 90)
+        assert 1 not in segm
 
     def test_save_segmentation(self):
         """Test the save_segmentation method."""

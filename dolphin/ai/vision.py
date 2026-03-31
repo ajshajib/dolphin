@@ -4,7 +4,7 @@
 import numpy as np
 from tensorflow.keras.models import load_model
 from scipy.ndimage import zoom
-
+from scipy.ndimage import label, center_of_mass
 from .ai import AI
 
 
@@ -56,6 +56,43 @@ class Vision(AI):
         segmentation = self.get_semantic_segmentation_from_nn(image)
 
         self.save_segmentation(lens_name, band_name, segmentation)
+
+        return segmentation
+
+    def relabel_central_satellite_to_lens(self, segmentation):
+        """Relabel the blob labeled as 4 (satellite deflector) that is closest to the
+        image center as label 1 (central deflector).
+
+        This correction is applied because the AI model can sometimes misclassify the
+        central deflector as a satellite deflector when no true satellite deflector is
+        present near the image center.
+
+        :param segmentation: 2D segmentation map containing integer class labels
+        :type segmentation: `numpy.ndarray`
+        :return: Modified segmentation map with the closest label-4 blob relabeled to 1.
+        :rtype: `numpy.ndarray`
+        """
+        mask_label_4 = segmentation == 4
+        labeled_blobs, num_features = label(mask_label_4)
+
+        if num_features == 0:
+            return segmentation  # No label 4 regions found
+
+        center_y, center_x = np.array(segmentation.shape) / 2
+        min_dist = float("inf")
+        closest_blob = None
+
+        for i in range(1, num_features + 1):
+            blob_center = center_of_mass(mask_label_4, labeled_blobs, i)
+            dist = np.linalg.norm(
+                np.array([center_y, center_x]) - np.array(blob_center)
+            )
+            if dist < min_dist:
+                min_dist = dist
+                closest_blob = i
+
+        if closest_blob is not None:
+            segmentation[(labeled_blobs == closest_blob) & (mask_label_4)] = 1
 
         return segmentation
 
@@ -139,5 +176,10 @@ class Vision(AI):
         if self._source_type == "galaxy":
             # Setting the satellite label to 4 to match with the case of quasar
             reshaped_segmentation[reshaped_segmentation == 3] = 4
+
+        if 1 not in reshaped_segmentation and 4 in reshaped_segmentation:
+            reshaped_segmentation = self.relabel_central_satellite_to_lens(
+                reshaped_segmentation
+            )
 
         return reshaped_segmentation

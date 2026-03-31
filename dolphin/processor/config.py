@@ -176,6 +176,27 @@ class ModelConfig(Config):
         """
         return len(self.settings["band"])
 
+    def get_mge_n_comp(self, config_index):
+        """Get the number of Gaussian components for an MGE_SET model.
+
+        :param config_index: index of the lens light profile in the config
+        :type config_index: `int`
+        :return: number of Gaussian components
+        :rtype: `int`
+        """
+        default_n_comp = 20
+
+        try:
+            mge_config = self.settings["lens_light_option"]["mge_config"]
+            if config_index in mge_config:
+                return mge_config[config_index].get("n_comp", default_n_comp)
+            elif str(config_index) in mge_config:
+                return mge_config[str(config_index)].get("n_comp", default_n_comp)
+        except (KeyError, TypeError):
+            pass
+
+        return default_n_comp
+
     def get_kwargs_model(self):
         """Create `kwargs_model`.
 
@@ -195,6 +216,19 @@ class ModelConfig(Config):
             "index_lens_light_model_list": self.get_index_lens_light_model_list(),
             "index_source_light_model_list": self.get_index_source_light_model_list(),
         }
+
+        # Build `lens_light_profile_kwargs_list` for MGE_SET and MGE_SET_ELLIPSE models
+        if any(m in ["MGE_SET", "MGE_SET_ELLIPSE"] for m in self.get_lens_light_model_list()):
+            num_central = len(self.settings["model"]["lens_light"])
+            profile_kwargs_list = []
+            for i, model in enumerate(self.get_lens_light_model_list()):
+                if model in ["MGE_SET", "MGE_SET_ELLIPSE"]:
+                    config_index = i % num_central
+                    n_comp = self.get_mge_n_comp(config_index)
+                    profile_kwargs_list.append({"n_comp": n_comp})
+                else:
+                    profile_kwargs_list.append({})
+            kwargs_model["lens_light_profile_kwargs_list"] = profile_kwargs_list
 
         if (
             "kwargs_model" in self.settings
@@ -287,13 +321,30 @@ class ModelConfig(Config):
                     [0, n, ["center_x", "center_y"]]
                 )
 
-        # Join Sersic ellipticities in multiband fitting
+        # Join profile-specific parameters in multiband fitting
         if self.number_of_bands > 1:
             for i in range(num_lens_light_profile_central):
                 model = lens_light_model_list[i]
+
+                # Sersic ellipticities
                 if "SERSIC" in model:
                     join_list = ["n_sersic"]
                     if "ELLIPSE" in model:
+                        join_list += ["e1", "e2"]
+                    joint_lens_light_with_lens_light.append(
+                        [
+                            i,
+                            i + num_lens_light_profile_central,
+                            join_list,
+                        ]
+                    )
+                # MGE_SET and MGE_SET_ELLIPSE parameters
+                elif "MGE_SET" in model:
+                    # The sigmas set the scale of the Gaussians 
+                    # where sigma_min + sigma_width is maximum sigma
+                    join_list = ["sigma_min", "sigma_width"] 
+                    if "ELLIPSE" in model:
+                        # For MGE_SET_ELLIPSE, join ellipticities as well
                         join_list += ["e1", "e2"]
                     joint_lens_light_with_lens_light.append(
                         [
@@ -358,6 +409,14 @@ class ModelConfig(Config):
         :return:
         :rtype:
         """
+        # MGE models use multiple linear amplitudes per component, and the
+        # unconstrained linear solver can return negative values for some
+        # components.
+        has_mge = any(
+            m in ("MGE_SET", "MGE_SET_ELLIPSE")
+            for m in self.get_lens_light_model_list()
+        )
+
         kwargs_likelihood = {
             "force_no_add_image": False,
             "source_marg": False,
@@ -365,7 +424,7 @@ class ModelConfig(Config):
             # 'position_uncertainty': 0.00004,
             # 'check_solver': False,
             # 'solver_tolerance': 0.001,
-            "check_positive_flux": True,
+            "check_positive_flux": not has_mge,  # non-MGE: True, MGE: False
             "check_bounds": True,
             "bands_compute": [True] * self.number_of_bands,
             "image_likelihood_mask_list": self.get_masks(),
@@ -474,11 +533,18 @@ class ModelConfig(Config):
         """
         prior = 0.0
 
+        # Check if the first lens light model has ellipticity parameters
+        lens_light_model_list = self.get_lens_light_model_list()
+        first_model_has_ellipticity = len(lens_light_model_list) > 0 and (
+            "e1" in (kwargs_lens_light[0] if kwargs_lens_light else {})
+        )
+
         # Limit the difference between pa_light and pa_mass for the deflector, where pa is the
         # position angle of the major axis
         if (
             "lens_option" in self.settings
             and "limit_mass_pa_from_light" in self.settings["lens_option"]
+            and first_model_has_ellipticity
         ):
             max_mass_pa_difference = self.settings["lens_option"][
                 "limit_mass_pa_from_light"
@@ -511,6 +577,7 @@ class ModelConfig(Config):
         if (
             "lens_option" in self.settings
             and "limit_mass_q_from_light" in self.settings["lens_option"]
+            and first_model_has_ellipticity
         ):
             max_mass_q_difference = self.settings["lens_option"][
                 "limit_mass_q_from_light"
@@ -1081,6 +1148,44 @@ class ModelConfig(Config):
                 _upper = {
                     "n_sersic": 8.0,
                     "R_sersic": 5.0,
+                    "center_x": center_x + bound,
+                    "center_y": center_y + bound,
+                }
+                if "_ELLIPSE" in model:
+                    _init.update({"e1": 0.0, "e2": 0.0})
+                    _sigma.update({"e1": 0.05, "e2": 0.05})
+                    _lower.update({"e1": -0.5, "e2": -0.5})
+                    _upper.update({"e1": 0.5, "e2": 0.5})
+
+                fixed.append(_fixed)
+                init.append(_init)
+                sigma.append(_sigma)
+                lower.append(_lower)
+                upper.append(_upper)
+            elif model in ["MGE_SET", "MGE_SET_ELLIPSE"]:
+                _fixed = {}
+                _init = {
+                    "amp": 1.0,
+                    "sigma_min": 0.01,
+                    "sigma_width": 1.0,
+                    "center_x": center_x,
+                    "center_y": center_y,
+                }
+                _sigma = {
+                    "center_x": np.max(self.pixel_size) / 10.0,
+                    "center_y": np.max(self.pixel_size) / 10.0,
+                    "sigma_min": 0.01,
+                    "sigma_width": 0.5,
+                }
+                _lower = {
+                    "sigma_min": 0.001,
+                    "sigma_width": 0.01,
+                    "center_x": center_x - bound,
+                    "center_y": center_y - bound,
+                }
+                _upper = {
+                    "sigma_min": 1.0,
+                    "sigma_width": 10.0,
                     "center_x": center_x + bound,
                     "center_y": center_y + bound,
                 }

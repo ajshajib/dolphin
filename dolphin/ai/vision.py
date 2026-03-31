@@ -177,11 +177,9 @@ class Vision(AI):
             # Setting the satellite label to 4 to match with the case of quasar
             reshaped_segmentation[reshaped_segmentation == 3] = 4
 
-        if 1 not in reshaped_segmentation:
-            if 4 not in reshaped_segmentation:
-                return reshaped_segmentation
+        if 1 not in reshaped_segmentation and 4 in reshaped_segmentation:
             reshaped_segmentation = self.relabel_central_satellite_to_lens(
-                reshaped_segmentation
+            reshaped_segmentation
             )
 
         return reshaped_segmentation

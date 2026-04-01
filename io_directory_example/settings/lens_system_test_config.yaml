@@ -1,4 +1,4 @@
-lens_name: lens_system2
+lens_name: lens_system_test
 band:
 - F390W
 model:
@@ -36,10 +36,13 @@ numeric_option:
 fitting:
   pso: true
   pso_settings:
-    num_particle: 20
-    num_iteration: 50
+    num_particle: 4
+    num_iteration: 2
   psf_iteration: false
   psf_iteration_settings: null
-  sampling: false
+  sampling: true
   sampler: emcee
-  sampler_settings: null
+  sampler_settings:
+    n_burn : 0
+    n_run: 2
+    walkerRatio: 2

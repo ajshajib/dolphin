@@ -117,14 +117,14 @@ class TestOutput(object):
         :rtype:
         """
         with pytest.raises(ValueError):
-            _ = self.output.plot_model_decomposition("lens_system2")
+            _ = self.output.plot_model_decomposition("lens_system_test")
 
-        fig = self.output.plot_model_decomposition("lens_system2", "example")
+        fig = self.output.plot_model_decomposition("lens_system_test", "example")
 
         plt.close(fig)
 
         fig2 = self.output.plot_model_decomposition(
-            "lens_system2", "example", v_min=-3.0, v_max=1.0
+            "lens_system_test", "example", v_min=-3.0, v_max=1.0
         )
 
         plt.close(fig2)
@@ -136,13 +136,13 @@ class TestOutput(object):
         :rtype:
         """
         fig = self.output.plot_mcmc_trace(
-            "lens_system2", "example", 2, verbose=True, burn_in=0
+            "lens_system_test", "example", 2, verbose=True, burn_in=0
         )
 
         plt.close(fig)
 
         fig2 = self.output.plot_mcmc_trace(
-            "lens_system2",
+            "lens_system_test",
             "example",
             2,
             verbose=True,
@@ -154,7 +154,7 @@ class TestOutput(object):
 
         with pytest.raises(ValueError):
             self.output.plot_mcmc_trace(
-                "lens_system2",
+                "lens_system_test",
                 "example",
                 2,
                 verbose=True,
@@ -168,7 +168,9 @@ class TestOutput(object):
         :return:
         :rtype:
         """
-        self.output.get_reshaped_emcee_chain("lens_system2", "example", 2, burn_in=1)
+        self.output.get_reshaped_emcee_chain(
+            "lens_system_test", "example", 2, burn_in=1
+        )
 
     def test_get_param_class(self):
         """Test `get_param_class` method.
@@ -191,7 +193,7 @@ class TestOutput(object):
         n, _ = param_class.num_param()
 
         self.output.get_kwargs_from_args(
-            "lens_system2",
+            "lens_system_test",
             "example",
             self.output.samples_mcmc[0],
             linear_solve=True,

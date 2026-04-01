@@ -168,7 +168,9 @@ class TestOutput(object):
         :return:
         :rtype:
         """
-        self.output.get_reshaped_emcee_chain("lens_system_test", "example", 2, burn_in=1)
+        self.output.get_reshaped_emcee_chain(
+            "lens_system_test", "example", 2, burn_in=1
+        )
 
     def test_get_param_class(self):
         """Test `get_param_class` method.

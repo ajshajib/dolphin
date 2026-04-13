@@ -36,8 +36,8 @@ numeric_option:
 fitting:
   pso: true
   pso_settings:
-    num_particle: 20
-    num_iteration: 50
+    num_particle: 4
+    num_iteration: 2
   psf_iteration: false
   psf_iteration_settings: null
   sampling: false

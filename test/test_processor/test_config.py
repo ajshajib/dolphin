@@ -140,7 +140,9 @@ class TestModelConfig(object):
         # Test MGE_SET includes profile_kwargs_list
         config_mge = deepcopy(self.config_1)
         config_mge.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
-        config_mge.settings["lens_light_option"] = {"mge_config": {0: {"n_comp": 15}}}
+        config_mge.settings["lens_light_option"] = {
+            "mge_config": {0: {"n_comp": 15}}
+        }
         kwargs = config_mge.get_kwargs_model()
         assert "lens_light_profile_kwargs_list" in kwargs
         assert kwargs["lens_light_profile_kwargs_list"] == [{"n_comp": 15}]

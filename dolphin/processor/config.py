@@ -218,10 +218,7 @@ class ModelConfig(Config):
         }
 
         # Build `lens_light_profile_kwargs_list` for MGE_SET and MGE_SET_ELLIPSE models
-        if any(
-            m in ["MGE_SET", "MGE_SET_ELLIPSE"]
-            for m in self.get_lens_light_model_list()
-        ):
+        if any(m in ["MGE_SET", "MGE_SET_ELLIPSE"] for m in self.get_lens_light_model_list()):
             num_central = len(self.settings["model"]["lens_light"])
             profile_kwargs_list = []
             for i, model in enumerate(self.get_lens_light_model_list()):
@@ -343,9 +340,9 @@ class ModelConfig(Config):
                     )
                 # MGE_SET and MGE_SET_ELLIPSE parameters
                 elif "MGE_SET" in model:
-                    # The sigmas set the scale of the Gaussians
+                    # The sigmas set the scale of the Gaussians 
                     # where sigma_min + sigma_width is maximum sigma
-                    join_list = ["sigma_min", "sigma_width"]
+                    join_list = ["sigma_min", "sigma_width"] 
                     if "ELLIPSE" in model:
                         # For MGE_SET_ELLIPSE, join ellipticities as well
                         join_list += ["e1", "e2"]

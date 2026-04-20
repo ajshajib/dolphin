@@ -871,3 +871,18 @@ class TestModelConfig(object):
         config.settings["lens_light_option"] = {"mge_config": {"0": {"n_comp": 12}}}
         assert config.get_mge_n_comp(0) == 12
         assert config.get_mge_n_comp(1) == 20  # Not configured, returns default
+
+    def test_get_kwargs_likelihood_mge(self):
+        """Test `get_kwargs_likelihood` disables `check_positive_flux` for MGE."""
+        # Non-MGE config: check_positive_flux is True
+        assert self.config_1.get_kwargs_likelihood()["check_positive_flux"] is True
+
+        # MGE_SET: check_positive_flux is False
+        config_mge = deepcopy(self.config_1)
+        config_mge.settings["model"]["lens_light"] = ["MGE_SET"]
+        assert config_mge.get_kwargs_likelihood()["check_positive_flux"] is False
+
+        # MGE_SET_ELLIPSE: check_positive_flux is False
+        config_mge_e = deepcopy(self.config_1)
+        config_mge_e.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        assert config_mge_e.get_kwargs_likelihood()["check_positive_flux"] is False

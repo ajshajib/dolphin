@@ -176,7 +176,7 @@ class ModelConfig(Config):
         """
         return len(self.settings["band"])
 
-    def get_mge_n_comp(self, config_index):
+    def _get_mge_n_comp(self, config_index):
         """Get the number of Gaussian components for an MGE_SET model.
 
         :param config_index: index of the lens light profile in the config
@@ -227,7 +227,7 @@ class ModelConfig(Config):
             for i, model in enumerate(self.get_lens_light_model_list()):
                 if model in ["MGE_SET", "MGE_SET_ELLIPSE"]:
                     config_index = i % num_central
-                    n_comp = self.get_mge_n_comp(config_index)
+                    n_comp = self._get_mge_n_comp(config_index)
                     profile_kwargs_list.append({"n_comp": n_comp})
                 else:
                     profile_kwargs_list.append({})

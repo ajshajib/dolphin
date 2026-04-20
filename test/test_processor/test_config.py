@@ -856,21 +856,21 @@ class TestModelConfig(object):
         assert prior == 0
 
     def test_get_mge_n_comp(self):
-        """Test _get_mge_n_comp helper method."""
+        """Test _get_mge_n_comp() helper method."""
         config = deepcopy(self.config_1)
 
         # Default when no mge_config
-        assert config.get_mge_n_comp(0) == 20
+        assert config._get_mge_n_comp(0) == 20
 
         # With mge_config using integer keys (hits `if` branch)
         config.settings["lens_light_option"] = {"mge_config": {0: {"n_comp": 15}}}
-        assert config.get_mge_n_comp(0) == 15
-        assert config.get_mge_n_comp(1) == 20  # Not configured, returns default
+        assert config._get_mge_n_comp(0) == 15
+        assert config._get_mge_n_comp(1) == 20  # Not configured, returns default
 
         # With mge_config using string keys (hits `elif` branch)
         config.settings["lens_light_option"] = {"mge_config": {"0": {"n_comp": 12}}}
-        assert config.get_mge_n_comp(0) == 12
-        assert config.get_mge_n_comp(1) == 20  # Not configured, returns default
+        assert config._get_mge_n_comp(0) == 12
+        assert config._get_mge_n_comp(1) == 20  # Not configured, returns default
 
     def test_get_kwargs_likelihood_mge(self):
         """Test `get_kwargs_likelihood` disables `check_positive_flux` for MGE."""

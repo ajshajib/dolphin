@@ -77,9 +77,11 @@ class Processor(object):
         kwargs_data_joint = self.get_kwargs_data_joint(
             lens_name, psf_supersampled_factor=psf_supersampling_factor
         )
-        
+
         if use_jax:
-            from jaxtronomy.Workflow.fitting_sequence import FittingSequence as FittingSequenceJAX
+            from jaxtronomy.Workflow.fitting_sequence import (
+                FittingSequence as FittingSequenceJAX,
+            )
 
             FittingSequenceClass = FittingSequenceJAX
         else:

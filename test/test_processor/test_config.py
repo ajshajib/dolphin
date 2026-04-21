@@ -134,6 +134,9 @@ class TestModelConfig(object):
 
         assert kwargs_model == self.config_1.get_kwargs_model()
 
+        # No profile_kwargs_list for SERSIC-only configs
+        assert "lens_light_profile_kwargs_list" not in self.config_1.get_kwargs_model()
+
         self.config_5.settings["kwargs_model"] = {
             "key1": "value1",
             "key2": "value2",
@@ -147,6 +150,35 @@ class TestModelConfig(object):
 
         kwargs_model_4 = self.config_4.get_kwargs_model()
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
+
+    def test_get_kwargs_model_mge(self):
+        """Test `get_kwargs_model` MGE_SET / MGE_SET_ELLIPSE handling."""
+        # MGE_SET_ELLIPSE with explicit n_comp in mge_config
+        config_mge = deepcopy(self.config_1)
+        config_mge.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        config_mge.settings["lens_light_option"] = {"mge_config": {0: {"n_comp": 15}}}
+        kwargs = config_mge.get_kwargs_model()
+        assert "lens_light_profile_kwargs_list" in kwargs
+        assert kwargs["lens_light_profile_kwargs_list"] == [{"n_comp": 15}]
+
+        # Test default n_comp when mge_config is not specified
+        config_mge2 = deepcopy(self.config_1)
+        config_mge2.settings["model"]["lens_light"] = ["MGE_SET"]
+        kwargs2 = config_mge2.get_kwargs_model()
+        assert kwargs2["lens_light_profile_kwargs_list"] == [{"n_comp": 20}]
+
+        # Test mixed list: MGE_SET + non-MGE model (hits `else` branch appending {})
+        config_mge3 = deepcopy(self.config_3)
+        config_mge3.settings["model"]["lens_light"] = ["MGE_SET", "SERSIC_ELLIPSE"]
+        kwargs3 = config_mge3.get_kwargs_model()
+
+        # 2 bands × 2 models = [MGE_SET, SERSIC_ELLIPSE, MGE_SET, SERSIC_ELLIPSE]
+        assert kwargs3["lens_light_profile_kwargs_list"] == [
+            {"n_comp": 20},
+            {},
+            {"n_comp": 20},
+            {},
+        ]
 
     def test_get_kwargs_constraints(self):
         """Test `get_kwargs_constraints` method.
@@ -763,3 +795,94 @@ class TestModelConfig(object):
         assert len(config2.get_index_source_light_model_list()) == 1
         config2.settings["band"] = ["F390W", "F555W"]
         assert len(config2.get_index_source_light_model_list()) == 2
+
+    def test_get_lens_light_model_params_mge(self):
+        """Test `get_lens_light_model_params` MGE_SET / MGE_SET_ELLIPSE branch."""
+        # MGE_SET: sigma_min/sigma_width/center/amp present, no ellipticity
+        config_mge = deepcopy(self.config_1)
+        config_mge.settings["model"]["lens_light"] = ["MGE_SET"]
+        params = config_mge.get_lens_light_model_params()
+        assert len(params) == 5  # fixed, init, sigma, lower, upper
+        assert "sigma_min" in params[0][0]
+        assert "sigma_width" in params[0][0]
+        assert "center_x" in params[0][0]
+        assert "center_y" in params[0][0]
+        assert "amp" in params[0][0]
+        assert "e1" not in params[0][0]
+
+        # MGE_SET_ELLIPSE: additionally has e1/e2
+        config_mge_e = deepcopy(self.config_1)
+        config_mge_e.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        params_e = config_mge_e.get_lens_light_model_params()
+        assert "e1" in params_e[0][0]
+        assert "e2" in params_e[0][0]
+        assert "sigma_min" in params_e[0][0]
+
+    def test_get_kwargs_constraints_mge(self):
+        """Test MGE_SET / MGE_SET_ELLIPSE joining in `get_kwargs_constraints`."""
+        config = deepcopy(self.config_3)
+        config.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        constraints = config.get_joint_lens_light_with_lens_light()
+        # Should join sigma_min, sigma_width, e1, e2 across 2 bands
+        found_mge_join = False
+        for entry in constraints:
+            if "sigma_min" in entry[2]:
+                found_mge_join = True
+                assert "sigma_width" in entry[2]
+                assert "e1" in entry[2]
+                assert "e2" in entry[2]
+        assert found_mge_join
+
+        # MGE_SET (non-ellipse) should not join e1, e2
+        config2 = deepcopy(self.config_3)
+        config2.settings["model"]["lens_light"] = ["MGE_SET"]
+        constraints2 = config2.get_joint_lens_light_with_lens_light()
+        for entry in constraints2:
+            if "sigma_min" in entry[2]:
+                assert "e1" not in entry[2]
+                assert "e2" not in entry[2]
+
+    def test_custom_logL_addition_mge_set(self):
+        """Test that custom_logL_addition skips ellipticity priors for MGE_SET."""
+        config = deepcopy(self.config_1)
+        config.settings["model"]["lens_light"] = ["MGE_SET"]
+        # config_1 has both limit_mass_pa_from_light and limit_mass_q_from_light
+        # set. Without the first-model-has-ellipticity guard, these would try
+        # to read e1/e2 from MGE kwargs and crash. Prior must return 0.
+        prior = config.custom_logL_addition(
+            kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
+            kwargs_lens_light=[{"sigma_min": 0.01, "sigma_width": 1.0}],
+        )
+        assert prior == 0
+
+    def test_get_mge_n_comp(self):
+        """Test _get_mge_n_comp() helper method."""
+        config = deepcopy(self.config_1)
+
+        # Default when no mge_config
+        assert config._get_mge_n_comp(0) == 20
+
+        # With mge_config using integer keys (hits `if` branch)
+        config.settings["lens_light_option"] = {"mge_config": {0: {"n_comp": 15}}}
+        assert config._get_mge_n_comp(0) == 15
+        assert config._get_mge_n_comp(1) == 20  # Not configured, returns default
+
+        # With mge_config using string keys (hits `elif` branch)
+        config.settings["lens_light_option"] = {"mge_config": {"0": {"n_comp": 12}}}
+        assert config._get_mge_n_comp(0) == 12
+        assert config._get_mge_n_comp(1) == 20  # Not configured, returns default
+
+    def test_get_kwargs_likelihood_mge(self):
+        """Test `get_kwargs_likelihood` disables `check_positive_flux` for MGE."""
+        # Non-MGE config: check_positive_flux is True
+        assert self.config_1.get_kwargs_likelihood()["check_positive_flux"] is True
+
+        # MGE_SET: check_positive_flux is False
+        config_mge = deepcopy(self.config_1)
+        config_mge.settings["model"]["lens_light"] = ["MGE_SET"]
+        assert config_mge.get_kwargs_likelihood()["check_positive_flux"] is False
+
+        # MGE_SET_ELLIPSE: check_positive_flux is False
+        config_mge_e = deepcopy(self.config_1)
+        config_mge_e.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
+        assert config_mge_e.get_kwargs_likelihood()["check_positive_flux"] is False

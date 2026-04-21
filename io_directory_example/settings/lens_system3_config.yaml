@@ -31,7 +31,7 @@ lens_light_option:
 
 source_light_option:
   gaussian_prior:
-    0: [[beta, 0.15, 0.05]]
+    1: [[beta, 0.15, 0.05]]
   shapelet_scale_logarithmic_prior: true
     # If true, provide logarithmic_prior on the source light profile
     # beta parameter

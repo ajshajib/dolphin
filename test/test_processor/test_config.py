@@ -388,8 +388,8 @@ class TestModelConfig(object):
         npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
 
         # phi_m != phi_L (phi_L = 20 deg, q_L = 0.8)
-        kwargs_lens=[{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light=[{"e1": 0.0851, "e2": 0.0714}]
+        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
+        kwargs_lens_light = [{"e1": 0.0851, "e2": 0.0714}]
         prior_ref = self.config_1.custom_logL_addition(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
@@ -428,8 +428,8 @@ class TestModelConfig(object):
         config2.settings["source_light_option"][
             "shapelet_scale_logarithmic_prior"
         ] = False
-        kwargs_lens=[{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light=[{"e1": 0.0403, "e2": 0.0338}]
+        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
+        kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
         prior_ref = config2.custom_logL_addition(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
@@ -444,8 +444,8 @@ class TestModelConfig(object):
         config3 = deepcopy(self.config_1)
         config3.settings["lens_option"]["limit_mass_q_from_light"] = 0.2
         config3.settings["lens_option"]["limit_mass_pa_from_light"] = 5
-        kwargs_lens=[{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light=[{"e1": 0.0403, "e2": 0.0338}]
+        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
+        kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
         prior_ref = config3.custom_logL_addition(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,

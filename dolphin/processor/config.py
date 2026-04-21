@@ -21,6 +21,7 @@ try:
 except ImportError:
     print("Failed to import JAX or JAXtronomy")
 
+
 class Config(object):
     """This class contains the methods to load an read YAML configuration files.
 
@@ -557,7 +558,7 @@ class ModelConfig(Config):
                         prior += -np.log(beta)
 
         return prior
-    
+
     def custom_logL_addition_JAX(
         self,
         kwargs_lens=None,
@@ -568,8 +569,8 @@ class ModelConfig(Config):
         kwargs_extinction=None,
         kwargs_tracer_source=None,
     ):
-        """Provide additional likelihood terms to be sent to `JAXtronomy`. This is the same function
-        as above but compatible with jax.jit.
+        """Provide additional likelihood terms to be sent to `JAXtronomy`. This is the
+        same function as above but compatible with jax.jit.
 
         :param kwargs_lens: dictionary containing lens model keyword arguments
         :type kwargs_lens: `dict`
@@ -599,7 +600,6 @@ class ModelConfig(Config):
                 "limit_mass_pa_from_light"
             ]
 
-
             if not isinstance(max_mass_pa_difference, (int, float)):
                 raise ValueError(
                     "The value for limit_mass_pa_from_light should be a number!"
@@ -618,12 +618,14 @@ class ModelConfig(Config):
                 / jnp.pi
             )
 
-            diff = jnp.minimum(jnp.abs(pa_light - pa_mass), 180 - jnp.abs(pa_light - pa_mass))
+            diff = jnp.minimum(
+                jnp.abs(pa_light - pa_mass), 180 - jnp.abs(pa_light - pa_mass)
+            )
 
             prior = jnp.where(
                 diff > np.abs(max_mass_pa_difference),
                 prior - ((diff - np.abs(max_mass_pa_difference)) ** 2) / 1e-3,
-                prior
+                prior,
             )
 
         # Limit the difference between q_light and q_mass for the deflector, where q is the axis
@@ -641,12 +643,16 @@ class ModelConfig(Config):
                     "The value for limit_mass_q_from_light should be a number!"
                 )
 
-            q_mass = ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
+            q_mass = ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
+                1
+            ]
             q_light = ellipticity2phi_q_JAX(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]
 
-            q_mass = ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
+            q_mass = ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
+                1
+            ]
             q_light = ellipticity2phi_q_JAX(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]
@@ -654,7 +660,7 @@ class ModelConfig(Config):
             prior = jnp.where(
                 diff > max_mass_q_difference,
                 prior - ((diff - max_mass_q_difference) ** 2) / 1e-4,
-                prior
+                prior,
             )
 
         # Provide logarithmic_prior on the source light profile beta param

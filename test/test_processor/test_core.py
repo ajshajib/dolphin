@@ -25,6 +25,8 @@ class TestProcessor(object):
         """
         self.processor.swim("lens_system1", "test")
 
+        self.processor.swim("lens_system1", "test", use_jax=True)
+
     def test_get_kwargs_data_joint(self):
         """Test `get_kwargs_data_joint` method.
 

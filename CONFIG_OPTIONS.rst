@@ -421,11 +421,22 @@ Fitting Options
 Mask Options
 ------------
 
+``dolphin`` supports two ways of producing per-band likelihood masks: programmatically from parameters specified in the settings, or by loading user-provided mask files. When both are present, the user-provided mask files take precedence.
+
 - ``mask``: *(Optional)* Settings for masking regions of the image.
 
   - Suboptions:
+    
+    - ``provided``: Whether to load the mask from a ``.npy`` file instead of generating it. When ``True``, ``dolphin`` loads ``{io_directory}/settings/masks/mask_{lens_name}_{band}.npy`` for each band listed in ``band`` and ignores all other mask suboptions. See :ref:`Providing a mask file <providing-a-mask-file>` for details. When ``False`` or absent, the mask is generated from the other suboptions below.
 
-    - ``centroid_offset``: Offset for the centroid of the mask.
+      - Type: ``boolean``
+      - Example:
+
+        .. code-block:: yaml
+
+           provided: True
+
+    - ``centroid_offset``: Offset for the centroid of the mask, in arcsec, relative to the deflector center. One ``[ra_offset, dec_offset]`` pair per band.
 
       - Type: ``list of lists of floats``
       - Example:
@@ -434,7 +445,7 @@ Mask Options
 
            centroid_offset: [[0.0, 0], [0.0, 0]]
 
-    - ``mask_edge_pixels``: Number of edge pixels to mask.
+    - ``mask_edge_pixels``: Number of edge pixels to mask on each side of the image. One value per band.
 
       - Type: ``list of integers``
       - Example:
@@ -443,7 +454,7 @@ Mask Options
 
            mask_edge_pixels: [0, 2]
 
-    - ``radius``: Radius of the mask for each band.
+    - ``radius``: Radius of a circular mask for each band, in arcsec. Pixels inside the circle are kept; pixels outside are masked. Mutually exclusive with ``a``/``b``/``angle``.
 
       - Type: ``list of floats``
       - Example:
@@ -451,3 +462,72 @@ Mask Options
         .. code-block:: yaml
 
            radius: [20.0, 20.0]
+
+    - ``a``, ``b``, ``angle``: Elliptical mask parameters (semi-major axis, semi-minor axis, and rotation angle in radians). All three must be provided together, one value per band. Use this instead of ``radius`` when an elliptical mask is needed.
+
+      - Type: ``list of floats`` (each)
+      - Example:
+
+        .. code-block:: yaml
+
+           a: [2.5]
+           b: [1.8]
+           angle: [0.0]
+
+    - ``extra_regions``: Additional circular regions to mask out (e.g., nearby companions or satellites). For each band, provide a list of ``[ra_offset, dec_offset, radius]`` triplets, where offsets are in arcsec relative to the deflector center and ``radius`` is in arcsec.
+
+      - Type: ``list of lists of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           extra_regions: [[[1.2, -0.5, 0.3], [-0.8, 0.9, 0.2]]]
+
+Providing a mask file
+~~~~~~~~~~~~~~~~~~~~~
+
+When ``mask.provided`` is ``True``, ``dolphin`` loads one ``.npy`` file per band from the ``masks/`` subdirectory of the settings directory:
+
+- **File location**: ``{io_directory}/settings/masks/``.
+- **Filename pattern**: ``mask_{lens_name}_{band}.npy``.
+- **Array shape**: must match the ``image_data`` cutout shape.
+- **Convention**: ``1`` = pixel is included in the likelihood, ``0`` = pixel is masked out.
+
+An example mask is included at ``io_directory_example/settings/masks/mask_lensed_quasar_F814W.npy``.
+
+The example below loads `lens_system3`, searches outside the central region where the strong lens is for bright clumps, and places a circular mask over each such contaminant:
+
+.. code-block:: python
+
+  import h5py
+  import numpy as np
+  from scipy.ndimage import binary_dilation, label
+
+  # Load an image and background RMS.
+  with h5py.File(
+      "../io_directory_example/data/lens_system3/image_lens_system3_F475X.h5"
+  ) as f:
+      image = f["image_data"][:]
+      background_rms = float(f["background_rms"][()])
+
+  num_pixel = image.shape[0]  # e.g., 130 in the case of lens_system3_F475X
+  y, x = np.indices(image.shape)
+  r = np.hypot(x - num_pixel / 2, y - num_pixel / 2)
+
+  # Find bright pixels (> 2 sigma) outside the central 40-pixel-radius region.
+  bright_outside = (image > 2 * background_rms) & (r > 40)
+
+  # Keep only connected components of 16 or more pixels
+  labels, _ = label(bright_outside)
+  sizes = np.bincount(labels.ravel())
+  sizes[0] = 0  # ignore the background label
+  contaminants = np.isin(labels, np.flatnonzero(sizes >= 16))
+
+  # Expand each contaminant into a 4-pixel-radius circular exclusion zone.
+  disk = np.hypot(*(np.indices((9, 9)) - 4)) <= 4
+  exclusion = binary_dilation(contaminants, structure=disk)
+
+  # 1 = kept, 0 = masked.
+  mask = np.where(exclusion, 0.0, 1.0)
+
+  np.save("../io_directory_example/settings/masks/mask_lens_system3_F475X.npy", mask)

@@ -4,7 +4,7 @@ Quickstart Guide
 This guide provides step-by-step instructions on how to set up the ``dolphin`` ecosystem for full automation with AI and generate model overview plots.
 
 Setting up the ``dolphin`` Ecosystem
-----------------------------------
+------------------------------------
 
 1. **Install** ``dolphin`` **and dependencies**:
     Ensure you have installed ``dolphin``, ``lenstronomy``, and all required dependencies. You can install ``dolphin`` using pip:
@@ -23,7 +23,7 @@ Setting up the ``dolphin`` Ecosystem
       - Image data files (in HDF5 format).
       - PSF files (in HDF5 format).
     - **settings**: Contains configuration files (``config_{lens_name}.yaml``) for each lens system. See `here <CONFIG_OPTIONS.rst>`_ for allowed keywords/options.
-    - **masks**: *(Optional)* Contains custom mask files (``mask_{lens_name}_{band}.npy``) for each lens system.
+    - **masks**: *(Optional)* Contains custom mask files (``mask_{lens_name}_{band}.npy``) for each lens system. See `here <CONFIG_OPTIONS.rst#mask-options>`_ for details.
     - **logs**: Stores log files generated during model runs.
     - **outputs**: Saves the model outputs.
     - **hpc**: *(Optional)* Contains scripts for submitting batch jobs in MPI environments.
@@ -65,7 +65,7 @@ The PSF data file needs to have the following datasets:
 - ``psf_variance_map``: *optional*, uncertainty in the provided PSF, needs to have the same dimension of ``kernel_point_source``.
 
 Running ``dolphin`` with Full Automation
--------------------------------------
+----------------------------------------
 
 Use the following Python code to run the ``dolphin`` pipeline for a specific lens system. For example, to model a lensed quasar system:
 

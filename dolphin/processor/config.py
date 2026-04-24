@@ -928,7 +928,7 @@ class ModelConfig(Config):
         :rtype:
         """
         special_list = []
-        
+
         if "special" in self.settings["model"]:
             if "ASTROMETRIC_UNCERTAINTY" in self.settings["model"]["special"]:
                 special_list.append("ASTROMETRIC_UNCERTAINTY")
@@ -1395,7 +1395,7 @@ class ModelConfig(Config):
 
         params = [init, sigma, fixed, lower, upper]
         return params
-    
+
     def get_special_params(self):
 
         special_list = self.get_special_list()
@@ -1412,37 +1412,55 @@ class ModelConfig(Config):
         for i, model in enumerate(special_list):
             if model == "ASTROMETRIC_UNCERTAINTY":
                 num_point_sources = len(
-                    np.array(
-                    self.settings["special_option"]["delta_x_image"]
-                    )
+                    np.array(self.settings["special_option"]["delta_x_image"])
                 )
 
-                init.update({
-                    "delta_x_image": np.array(self.settings["special_option"]["delta_x_image"]),
-                    "delta_y_image": np.array(self.settings["special_option"]["delta_y_image"]),
-                })
+                init.update(
+                    {
+                        "delta_x_image": np.array(
+                            self.settings["special_option"]["delta_x_image"]
+                        ),
+                        "delta_y_image": np.array(
+                            self.settings["special_option"]["delta_y_image"]
+                        ),
+                    }
+                )
 
-                sigma.update({
-                    "delta_x_image": 0.004 * np.ones(num_point_sources),
-                    "delta_y_image": 0.004 * np.ones(num_point_sources),
-                })
+                sigma.update(
+                    {
+                        "delta_x_image": 0.004 * np.ones(num_point_sources),
+                        "delta_y_image": 0.004 * np.ones(num_point_sources),
+                    }
+                )
 
-                lower.update({
-                    "delta_x_image": self.settings["special_option"]["delta_image_lower"] 
-                    * np.ones(num_point_sources),
-                    "delta_y_image": self.settings["special_option"]["delta_image_lower"] 
-                    * np.ones(num_point_sources),
-                })
+                lower.update(
+                    {
+                        "delta_x_image": self.settings["special_option"][
+                            "delta_image_lower"
+                        ]
+                        * np.ones(num_point_sources),
+                        "delta_y_image": self.settings["special_option"][
+                            "delta_image_lower"
+                        ]
+                        * np.ones(num_point_sources),
+                    }
+                )
 
-                upper.update({
-                    "delta_x_image": self.settings["special_option"]["delta_image_upper"] 
-                    * np.ones(num_point_sources),
-                    "delta_y_image": self.settings["special_option"]["delta_image_upper"] 
-                    * np.ones(num_point_sources),
-                })
+                upper.update(
+                    {
+                        "delta_x_image": self.settings["special_option"][
+                            "delta_image_upper"
+                        ]
+                        * np.ones(num_point_sources),
+                        "delta_y_image": self.settings["special_option"][
+                            "delta_image_upper"
+                        ]
+                        * np.ones(num_point_sources),
+                    }
+                )
 
                 fixed.update({})
-            
+
             else:
                 raise ValueError(f"{model} not supported!")
 

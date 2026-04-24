@@ -934,7 +934,8 @@ class ModelConfig(Config):
                 special_list.append("ASTROMETRIC_UNCERTAINTY")
                 return special_list
             elif self.settings["model"]["special"] != "ASTROMETRIC_UNCERTAINTY":
-                raise ValueError(f"{self.settings["model"]["special"]} not supported")
+                special = self.settings["model"]["special"]
+                raise ValueError(f"{special} not supported")
         else:
             return []
 

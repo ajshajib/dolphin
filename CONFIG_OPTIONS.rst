@@ -76,6 +76,14 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
+    - ``special``: *(Optional)* List of special parameter types.
+
+      - Type: ``list of strings``
+      - Example:
+
+        .. code-block:: yaml
+          special: ["ASTROMETRIC_UNCERTAINTY"]
+
 Satellites Section
 ------------------
 
@@ -256,6 +264,32 @@ Source Light Options
         .. code-block:: yaml
 
            n_max: [2, 4]
+
+Special Options
+---------------
+
+- ``special_option``: Initialization of special parameters.
+
+  - Suboptions:
+
+    ``delta_x_image``: Initial spread from point source centroid.
+    ``delta_y_image``: Initial spread from point source centroid.
+
+      - Type: ``array of floats corresponding to the number of point sources``
+      - Example:
+
+        .. code-block:: yaml
+          delta_x_image: [0.0, 0.0]
+          delta_y_image: [0.0, 0.0]
+    ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
+    ``delta_image_uppwer``: Upper bound in spread of point source centroid sampler.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+          delta_image_lower: -0.004
+          delta_image_upper: 0.004
 
 Numeric Options
 ---------------

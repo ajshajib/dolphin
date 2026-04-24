@@ -1400,7 +1400,13 @@ class ModelConfig(Config):
         special_list = self.get_special_list()
 
         if len(special_list) == 0:
-            return [[], [], [], [], []]
+            return [{}, {}, {}, {}, {}]
+
+        init = {}
+        sigma = {}
+        lower = {}
+        upper = {}
+        fixed = {}
 
         for i, model in enumerate(special_list):
             if model == "ASTROMETRIC_UNCERTAINTY":
@@ -1410,36 +1416,37 @@ class ModelConfig(Config):
                     )
                 )
 
-                init = {
+                init.update({
                     "delta_x_image": np.array(self.settings["special_option"]["delta_x_image"]),
                     "delta_y_image": np.array(self.settings["special_option"]["delta_y_image"]),
-                }
+                })
 
-                sigma = {
+                sigma.update({
                     "delta_x_image": 0.004 * np.ones(num_point_sources),
                     "delta_y_image": 0.004 * np.ones(num_point_sources),
-                }
+                })
 
-                lower = {
+                lower.update({
                     "delta_x_image": self.settings["special_option"]["delta_image_lower"] 
                     * np.ones(num_point_sources),
                     "delta_y_image": self.settings["special_option"]["delta_image_lower"] 
                     * np.ones(num_point_sources),
-                }
+                })
 
-                upper = {
+                upper.update({
                     "delta_x_image": self.settings["special_option"]["delta_image_upper"] 
                     * np.ones(num_point_sources),
                     "delta_y_image": self.settings["special_option"]["delta_image_upper"] 
                     * np.ones(num_point_sources),
-                }
+                })
 
-                fixed = {}
+                fixed.update({})
             
             else:
                 raise ValueError(f"{model} not supported!")
 
-        return [init, sigma, fixed, lower, upper]
+        params = [init, sigma, fixed, lower, upper]
+        return params
 
     def fill_in_fixed_from_settings(self, component, fixed_list):
         """Fill in fixed values from settings for lens, source light and lens light.

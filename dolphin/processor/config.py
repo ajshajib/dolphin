@@ -924,16 +924,16 @@ class ModelConfig(Config):
     def get_special_list(self):
         """Return `special_list`.
 
-        :return:
-        :rtype:
+        :return: special_list
+        :rtype: list
         """
         special_list = []
 
         if "special" in self.settings["model"]:
-            if "ASTROMETRIC_UNCERTAINTY" in self.settings["model"]["special"]:
-                special_list.append("ASTROMETRIC_UNCERTAINTY")
+            if "astrometric_uncertainty" in self.settings["model"]["special"]:
+                special_list.append("astrometric_uncertainty")
                 return special_list
-            elif self.settings["model"]["special"] != "ASTROMETRIC_UNCERTAINTY":
+            elif self.settings["model"]["special"] != "astrometric_uncertainty":
                 special = self.settings["model"]["special"]
                 raise ValueError(f"{special} not supported")
         else:
@@ -1397,6 +1397,11 @@ class ModelConfig(Config):
         return params
 
     def get_special_params(self):
+        """Create `special_params`.
+
+        :return: params
+        :rtype: list of dict
+        """
 
         special_list = self.get_special_list()
 
@@ -1410,7 +1415,7 @@ class ModelConfig(Config):
         fixed = {}
 
         for i, model in enumerate(special_list):
-            if model == "ASTROMETRIC_UNCERTAINTY":
+            if model == "astrometric_uncertainty":
                 num_point_sources = len(
                     np.array(self.settings["special_option"]["delta_x_image"])
                 )

@@ -82,7 +82,7 @@ Model Section
       - Example:
 
         .. code-block:: yaml
-          special: ["ASTROMETRIC_UNCERTAINTY"]
+          special: ["astrometric_uncertainty"]
 
 Satellites Section
 ------------------

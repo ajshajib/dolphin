@@ -625,14 +625,14 @@ class TestModelConfig(object):
 
     def test_get_special_list(self):
         """Test `get_special_list` method."""
-        
+
         # Test 1: ensure consistency of special models
         # if specified in config file
         config = deepcopy(self.config_5)
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
         assert config.get_special_list() == ["astrometric_uncertainty"]
 
-        # Test 2: ensure special list is empty if not 
+        # Test 2: ensure special list is empty if not
         # specified in the config file
         config = deepcopy(self.config_1)
         assert config.get_special_list() == []

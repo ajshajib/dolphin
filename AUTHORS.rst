@@ -20,6 +20,7 @@ Contributors
 ------------
 
 * Vedant Sahu, |github| `Vedant-Sahu <https://github.com/Vedant-Sahu>`_
+* Bryce Wedig, |github| `bryce-wedig <https://github.com/bryce-wedig>`_
 * Simon Birrer, |github| `sibirrer <https://github.com/sibirrer>`_
 
 

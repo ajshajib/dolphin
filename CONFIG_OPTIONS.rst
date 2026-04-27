@@ -96,8 +96,7 @@ Model Section
 
         .. code-block:: yaml
 
-
-          special: ["astrometric_uncertainty"]
+           special: ["astrometric_uncertainty"]
 
 Satellites Section
 ------------------

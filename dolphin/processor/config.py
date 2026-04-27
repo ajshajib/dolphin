@@ -54,12 +54,12 @@ class ModelConfig(Config):
         :param lens_name: name of the lens system
         :type lens_name: `str`
         :param file_system: a `FileSystem` object
-        :type file_system: `FileSystem`
+        :type file_system: `FileSystem` or `None`
         :param io_directory: path to the input-output directory
-        :type io_directory: `str`
+        :type io_directory: `str` or `None`
         :param settings: a dictionary containing settings. If both `file`
             and `settings` are provided, `file` will be prioritized.
-        :type settings: `dict`
+        :type settings: `dict` or `None`
         """
         super().__init__()
 
@@ -539,19 +539,19 @@ class ModelConfig(Config):
         """Provide additional likelihood terms to be sent to `lenstronomy`.
 
         :param kwargs_lens: list of dictionaries containing lens model keyword arguments
-        :type kwargs_lens: `list` of `dict`
+        :type kwargs_lens: `list` of `dict` or `None`
         :param kwargs_source: list of dictionaries containing source model keyword arguments
-        :type kwargs_source: `list` of `dict`
+        :type kwargs_source: `list` of `dict` or `None`
         :param kwargs_lens_light: list of dictionaries containing lens light model keyword arguments
-        :type kwargs_lens_light: `list` of `dict`
+        :type kwargs_lens_light: `list` of `dict` or `None`
         :param kwargs_ps: list of dictionaries containing point source model keyword arguments
-        :type kwargs_ps: `list` of `dict`
+        :type kwargs_ps: `list` of `dict` or `None`
         :param kwargs_special: dictionary containing special model keyword arguments
-        :type kwargs_special: `dict`
+        :type kwargs_special: `dict` or `None`
         :param kwargs_extinction: dictionary containing extinction model keyword arguments
-        :type kwargs_extinction: `dict`
+        :type kwargs_extinction: `dict` or `None`
         :param kwargs_tracer_source: list of dictionaries containing tracer source model keyword arguments
-        :type kwargs_tracer_source: `list` of `dict`
+        :type kwargs_tracer_source: `list` of `dict` or `None`
         :return: prior
         :rtype: `float`
         """

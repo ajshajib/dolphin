@@ -162,12 +162,12 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to plot the model, otherwise the model
             will be plotted from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
@@ -232,12 +232,12 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to plot the model, otherwise the model
             will be plotted from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
@@ -249,13 +249,13 @@ class Output(Processor):
         :param magnification_cmap: colormap for magnification plot
         :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
         :param v_min: minimum plotting scale for the model, data, & source plot
-        :type v_min: `float` or `int`
+        :type v_min: `float` or `int` or `None`
         :param v_max: maximum plotting scale for the model, data, & source plot
-        :type v_max: `float` or `int`
+        :type v_max: `float` or `int` or `None`
         :param source_v_min: minimum plotting scale for the source plot
-        :type source_v_min: `float` or `int`
+        :type source_v_min: `float` or `int` or `None`
         :param source_v_max: maximum plotting scale for the source plot
-        :type source_v_max: `float` or `int`
+        :type source_v_max: `float` or `int` or `None`
         :param print_results: if `True`, prints the `kwargs_result` dictionary
         :type print_results: `bool`
         :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
@@ -355,20 +355,20 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to plot the model, otherwise the model
             will be plotted from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
         :param v_min: minimum plotting scale for the model, data, & source plot
-        :type v_min: `float` or `int`
+        :type v_min: `float` or `int` or `None`
         :param v_max: maximum plotting scale for the model, data, & source plot
-        :type v_max: `float` or `int`
+        :type v_max: `float` or `int` or `None`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
@@ -706,16 +706,20 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param plot: if `True`, plots the lensed and unlensed source
         :type plot: `bool`
+        :param v_max: maximum plotting scale for the image plot
+        :type v_max: `float` or `int` or `None`
+        :param v_min: minimum plotting scale for the image plot
+        :type v_min: `float` or `int` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
             will be calculated from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :return: average magnification
         :rtype: `float`
@@ -804,12 +808,12 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
             will be calculated from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds
         :return: critical curve coordinates
@@ -866,20 +870,20 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
             will be calculated from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param plot: if `True`, plots the image data with critical curves and source/image positions
         :type plot: `bool`
         :param v_max: maximum plotting scale for the image plot
-        :type v_max: `float` or `int`
+        :type v_max: `float` or `int` or `None`
         :param v_min: minimum plotting scale for the image plot
-        :type v_min: `float` or `int`
+        :type v_min: `float` or `int` or `None`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds
         :return: individual magnifications of the images

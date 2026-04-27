@@ -111,7 +111,7 @@ class Modeler(AI):
         :param band_name: band name
         :type band_name: `str`
         :param pso_settings: PSO settings
-        :type pso_settings: `dict`
+        :type pso_settings: `dict` or `None`
         :param psf_iteration_settings: PSF iteration settings. If `None`, PSF
             iteration will not be performed. If settings are provided, PSF
             iteration will be performed. Example settings:
@@ -149,7 +149,7 @@ class Modeler(AI):
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
         :param additional_settings: additional settings to be added to the configuration
-        :type additional_settings: `dict`
+        :type additional_settings: `dict` or `None`
         :return: configuration
         :rtype: `dict`
         """

@@ -78,7 +78,7 @@ class Recipe(object):
         """Get `fitting_kwargs_list` according to the requested `recipe`.
 
         :param kwargs_data_joint: `kwargs_data_joint` dictionary for multiple bands
-        :type kwargs_data_joint: `dict`
+        :type kwargs_data_joint: `dict` or `None`
         :param recipe_name: recipe name, 'galaxy-quasar', 'galaxy-galaxy', or 'skip'
         :type recipe_name: `str`
         :return: fitting kwargs list
@@ -474,7 +474,7 @@ class Recipe(object):
         :param mask: a mask to multiply with the arc mask. If the central
             region is masked out in `mask`, then a circle with radius
             `clear_center` will be unmasked.
-        :type mask: `numpy.ndarray`
+        :type mask: `numpy.ndarray` or `None`
         :return: mask for the lensed galaxy arcs
         :rtype: `numpy.ndarray`
         """

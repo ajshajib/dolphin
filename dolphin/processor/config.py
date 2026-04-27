@@ -31,8 +31,10 @@ class Config(object):
     def load_config_from_yaml(cls, file):
         """Load configuration from `file`.
 
-        :return:
-        :rtype:
+        :param file: Path to the YAML configuration file.
+        :type file: `str`
+        :return: A dictionary containing the loaded settings.
+        :rtype: `dict`
         """
         with open(file, "r") as f:
             settings = yaml.load(f, yaml.FullLoader)
@@ -82,8 +84,8 @@ class ModelConfig(Config):
     def lens_name(self):
         """The name of the lens system.
 
-        :return:
-        :rtype:
+        :return: The name of the lens system.
+        :rtype: `str`
         """
         return self._lens_name
 
@@ -91,8 +93,8 @@ class ModelConfig(Config):
     def pixel_size(self):
         """The pixel size.
 
-        :return:
-        :rtype:
+        :return: A list of pixel sizes for each band.
+        :rtype: `list` of `float`
         """
         # if isinstance(self.settings["pixel_size"], float):
         #     return [self.settings["pixel_size"]] * self.band_number
@@ -124,8 +126,8 @@ class ModelConfig(Config):
         """The RA offset for the deflector's center from the zero-point in the
         coordinate system of the data. Default is 0.
 
-        :return:
-        :rtype:
+        :return: The RA offset in arcseconds.
+        :rtype: `float`
         """
         if (
             "lens_option" in self.settings
@@ -140,8 +142,8 @@ class ModelConfig(Config):
         """The dec offset for the deflector's center from the zero-point in the
         coordinate system of the data. Default is 0.
 
-        :return:
-        :rtype:
+        :return: The declination offset in arcseconds.
+        :rtype: `float`
         """
         if (
             "lens_option" in self.settings
@@ -156,8 +158,8 @@ class ModelConfig(Config):
         """Half of the box width to constrain the deflector's centroid. Default is 0.5
         arcsec.
 
-        :return:
-        :rtype:
+        :return: The centroid bound in arcseconds.
+        :rtype: `float`
         """
         if "lens_option" in self.settings:
             if "centroid_bound" in self.settings["lens_option"]:
@@ -171,8 +173,8 @@ class ModelConfig(Config):
     def number_of_bands(self):
         """The number of bands.
 
-        :return:
-        :rtype:
+        :return: The number of observing bands.
+        :rtype: `int`
         """
         return len(self.settings["band"])
 
@@ -198,10 +200,10 @@ class ModelConfig(Config):
         return default_n_comp
 
     def get_kwargs_model(self):
-        """Create `kwargs_model`.
+        """Create `kwargs_model` dictionary for lenstronomy.
 
-        :return:
-        :rtype:
+        :return: Dictionary containing the model configuration.
+        :rtype: `dict`
         """
         lens_model_list = deepcopy(self.get_lens_model_list())
         if "SIE" in lens_model_list:
@@ -243,10 +245,10 @@ class ModelConfig(Config):
         return kwargs_model
 
     def get_kwargs_constraints(self):
-        """Create `kwargs_constraints`.
+        """Create `kwargs_constraints` dictionary for lenstronomy.
 
-        :return:
-        :rtype:
+        :return: Dictionary containing the constraint configuration.
+        :rtype: `dict`
         """
         joint_source_with_source, num_source_profiles = (
             self.get_joint_source_with_source()
@@ -285,7 +287,11 @@ class ModelConfig(Config):
         return kwargs_constraints
 
     def get_joint_lens_with_light(self):
-        """Create `joint_lens_with_light`."""
+        """Create `joint_lens_with_light` list for constraints.
+
+        :return: List of linked parameters between lens mass and lens light models.
+        :rtype: `list`
+        """
         _, lens_light_satellite_flags = self.get_lens_light_model_list_with_flags()
         _, lens_satellite_flags = self.get_lens_model_list_with_flags()
 
@@ -304,7 +310,13 @@ class ModelConfig(Config):
         return joint_lens_with_light
 
     def get_joint_source_with_point_source(self, num_source_profiles):
-        """Create `joint_source_with_point_source`."""
+        """Create `joint_source_with_point_source` list for constraints.
+
+        :param num_source_profiles: Number of source light profiles.
+        :type num_source_profiles: `int`
+        :return: List of linked parameters between source light and point source models.
+        :rtype: `list`
+        """
         joint_source_with_point_source = []
         if len(self.get_point_source_model_list()) > 0 and num_source_profiles > 0:
             for n in range(num_source_profiles):
@@ -312,7 +324,11 @@ class ModelConfig(Config):
         return joint_source_with_point_source
 
     def get_joint_lens_light_with_lens_light(self):
-        """Create `joint_lens_light_with_lens_light`."""
+        """Create `joint_lens_light_with_lens_light` list for constraints.
+
+        :return: List of linked parameters among lens light models.
+        :rtype: `list`
+        """
         joint_lens_light_with_lens_light = []
         lens_light_model_list = self.get_lens_light_model_list()
 
@@ -377,7 +393,11 @@ class ModelConfig(Config):
         return joint_lens_light_with_lens_light
 
     def get_joint_source_with_source(self):
-        """Create `joint_source_with_source`."""
+        """Create `joint_source_with_source` list for constraints.
+
+        :return: A tuple containing the list of linked parameters among source models and the number of source profiles.
+        :rtype: `tuple` (`list`, `int`)
+        """
         joint_source_with_source = []
         num_source_profiles = len(self.get_source_light_model_list())
 
@@ -407,10 +427,10 @@ class ModelConfig(Config):
         return joint_source_with_source, num_source_profiles
 
     def get_kwargs_likelihood(self):
-        """Create `kwargs_likelihood`.
+        """Create `kwargs_likelihood` dictionary for lenstronomy.
 
-        :return:
-        :rtype:
+        :return: Dictionary containing the likelihood configuration.
+        :rtype: `dict`
         """
         # MGE models use multiple linear amplitudes per component, and the
         # unconstrained linear solver can return negative values for some
@@ -629,10 +649,10 @@ class ModelConfig(Config):
         """
 
     def get_masks(self):
-        """Create masks.
+        """Create masks based on settings or load them from files.
 
-        :return:
-        :rtype:
+        :return: A list of masks for each band, or `None` if not specified.
+        :rtype: `list` of `numpy.ndarray` or `None`
         """
         if "mask" in self.settings and self.settings["mask"] is not None:
             if (
@@ -752,10 +772,10 @@ class ModelConfig(Config):
             return None
 
     def get_kwargs_psf_iteration(self):
-        """Create `kwargs_psf_iteration`.
+        """Create `kwargs_psf_iteration` dictionary for lenstronomy.
 
-        :return:
-        :rtype:
+        :return: Dictionary containing the PSF iteration configuration.
+        :rtype: `dict`
         """
         if (
             "psf_iteration" in self.settings["fitting"]
@@ -781,10 +801,10 @@ class ModelConfig(Config):
             return {}
 
     def get_kwargs_numerics(self):
-        """Create `kwargs_numerics`.
+        """Create `kwargs_numerics` dictionary for lenstronomy.
 
-        :return:
-        :rtype:
+        :return: Dictionary containing the numerics configuration.
+        :rtype: `list` of `dict`
         """
         try:
             self.settings["kwargs_numerics"]["supersampling_factor"]
@@ -817,8 +837,8 @@ class ModelConfig(Config):
     def num_satellites(self):
         """Check if the system has satellites.
 
-        :return:
-        :rtype:
+        :return: The number of satellite galaxies.
+        :rtype: `int`
         """
         if "satellites" not in self.settings:
             return 0
@@ -826,7 +846,11 @@ class ModelConfig(Config):
             return len(self.settings["satellites"]["centroid_init"])
 
     def get_lens_model_list(self):
-        """Return `lens_model_list`."""
+        """Return `lens_model_list`.
+
+        :return: List of lens mass models.
+        :rtype: `list` of `str`
+        """
         return self.get_lens_model_list_with_flags()[0]
 
     def get_lens_model_list_with_flags(self):
@@ -859,8 +883,8 @@ class ModelConfig(Config):
     def get_source_light_model_list(self):
         """Return `source_model_list`.
 
-        :return:
-        :rtype:
+        :return: List of source light models.
+        :rtype: `list` of `str`
         """
         source_light_model_list = []
 
@@ -872,7 +896,11 @@ class ModelConfig(Config):
         return source_light_model_list
 
     def get_lens_light_model_list(self):
-        """Return `lens_light_model_list`."""
+        """Return `lens_light_model_list`.
+
+        :return: List of lens light models.
+        :rtype: `list` of `str`
+        """
         return self.get_lens_light_model_list_with_flags()[0]
 
     def get_lens_light_model_list_with_flags(self):
@@ -908,10 +936,10 @@ class ModelConfig(Config):
         return lens_light_model_list, satellite_flag
 
     def get_point_source_model_list(self):
-        """Return `ps_model_list`.
+        """Return `point_source_model_list`.
 
-        :return:
-        :rtype:
+        :return: List of point source models.
+        :rtype: `list` of `str`
         """
         if (
             "point_source" in self.settings["model"]
@@ -971,14 +999,22 @@ class ModelConfig(Config):
 
     def get_index_lens_light_model_list(self):
         """Create list with of index for the different lens light profile (for multiple
-        filters)"""
+        filters).
+
+        :return: Nested list of profile indices for each band.
+        :rtype: `list` of `list` of `int`
+        """
         index_list = self.get_index_list("lens_light")
 
         return index_list
 
     def get_index_source_light_model_list(self):
         """Create list with of index for the different source light profiles (for
-        multiple filters)"""
+        multiple filters).
+
+        :return: Nested list of profile indices for each band.
+        :rtype: `list` of `list` of `int`
+        """
         return self.get_index_list("source_light")
 
     def get_lens_model_params(
@@ -992,8 +1028,8 @@ class ModelConfig(Config):
         :type theta_E_lower_factor: `float`
         :param theta_E_satellite: Initial guess for the satellite's Einstein radius, if exists.
         :type theta_E_satellite: `float`
-        :return:
-        :rtype:
+        :return: A list of lists containing the initial, sigma, fixed, lower, and upper values for the lens model parameters.
+        :rtype: `list` of `list` of `dict`
         """
         lens_model_list, satellite_flags = self.get_lens_model_list_with_flags()
 
@@ -1123,8 +1159,8 @@ class ModelConfig(Config):
     def get_lens_light_model_params(self):
         """Create `lens_light_params`.
 
-        :return:
-        :rtype:
+        :return: A list of lists containing the initial, sigma, fixed, lower, and upper values for the lens light model parameters.
+        :rtype: `list` of `list` of `dict`
         """
         lens_light_model_list, satellite_flags = (
             self.get_lens_light_model_list_with_flags()
@@ -1241,8 +1277,8 @@ class ModelConfig(Config):
     def get_source_light_model_params(self):
         """Create `source_params`.
 
-        :return:
-        :rtype:
+        :return: A list of lists containing the initial, sigma, fixed, lower, and upper values for the source light model parameters.
+        :rtype: `list` of `list` of `dict`
         """
         source_light_model_list = self.get_source_light_model_list()
 
@@ -1349,8 +1385,8 @@ class ModelConfig(Config):
     def get_point_source_params(self):
         """Create `ps_params`.
 
-        :return:
-        :rtype:
+        :return: A list of lists containing the initial, sigma, fixed, lower, and upper values for the point source model parameters.
+        :rtype: `list` of `list` of `dict`
         """
         point_source_model_list = self.get_point_source_model_list()
 
@@ -1484,8 +1520,8 @@ class ModelConfig(Config):
         :type component: `str`
         :param fixed_list: list of fixed params
         :type fixed_list: `list`
-        :return:
-        :rtype:
+        :return: Updated list of fixed params
+        :rtype: `list`
         """
         assert component in ["lens", "lens_light", "source_light"]
         option_str = component + "_option"
@@ -1513,8 +1549,8 @@ class ModelConfig(Config):
     def get_kwargs_params(self):
         """Create `kwargs_params`.
 
-        :return:
-        :rtype:
+        :return: Dictionary containing the parameter configurations for all models.
+        :rtype: `dict`
         """
         kwargs_params = {
             "lens_model": self.get_lens_model_params(),

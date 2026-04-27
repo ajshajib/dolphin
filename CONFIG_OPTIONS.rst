@@ -3,6 +3,10 @@ Configuration Files
 
 This document provides a detailed explanation of all the allowed options in the ``config.yaml`` files for ``dolphin``, but some of them are optional, as indicated. Check out the ``io_directory_example/settings`` `folder <https://github.com/ajshajib/dolphin/tree/main/io_directory_example/settings>`_ for some example config files.
 
+.. contents:: Table of Contents
+   :local:
+   :depth: 2
+
 Top-level information
 ---------------------
 
@@ -49,7 +53,7 @@ Model Section
 
   - Suboptions:
 
-    - ``lens``: List of lens mass profiles.
+    - ``lens``: List of lens mass profiles. Supported models include: ``EPL``, ``SIE``, ``SIS``, ``SPEP``, ``PEMD``, ``SHEAR_GAMMA_PSI``.
 
       - Type: ``list of strings``
       - Example:
@@ -58,7 +62,7 @@ Model Section
 
            lens: ["EPL", "SHEAR_GAMMA_PSI"]
 
-    - ``lens_light``: List of lens light profiles. The list will be duplicated for each band.
+    - ``lens_light``: List of lens light profiles. Supported models include: ``SERSIC``, ``SERSIC_ELLIPSE``, ``MGE_SET``, ``MGE_SET_ELLIPSE``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:
@@ -67,7 +71,7 @@ Model Section
 
            lens_light: ["SERSIC_ELLIPSE", "SERSIC_ELLIPSE"]
 
-    - ``source_light``: List of source light profiles. The list will be duplicated for each band.
+    - ``source_light``: List of source light profiles. Supported models include: ``SERSIC_ELLIPSE``, ``SHAPELETS``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:
@@ -76,7 +80,7 @@ Model Section
 
            source_light: ["SERSIC_ELLIPSE", "SHAPELETS"]
 
-    - ``point_source``: *(Optional)* List of point source models. Can be an empty list for galaxy-galaxy lenses.
+    - ``point_source``: *(Optional)* List of point source models. Supported models include: ``LENSED_POSITION``, ``SOURCE_POSITION``. Can be an empty list for galaxy-galaxy lenses.
 
       - Type: ``list of strings``
       - Example:
@@ -165,24 +169,6 @@ Lens Options
 
            gaussian_prior:
              0: [[gamma, 2.11, 0.03], [theta_E, 1.11, 0.13]]
-
-    - ``constrain_position_angle_from_lens_light``: *(Optional)* Maximum allowed difference between the position angle of the mass and light profiles.
-
-      - Type: ``float``
-      - Example:
-
-        .. code-block:: yaml
-
-           constrain_position_angle_from_lens_light: 15
-
-    - ``limit_mass_eccentricity_from_light``: *(Optional)* Whether to limit the mass eccentricity based on the light profile.
-
-      - Type: ``boolean``
-      - Example:
-
-        .. code-block:: yaml
-
-           limit_mass_eccentricity_from_light: true
 
     - ``fix``: *(Optional)* Fix specific parameters for the lens model.
 
@@ -344,8 +330,8 @@ Special Options
       - Example:
 
         .. code-block:: yaml
-
-          delta_x_image: [0.0, 0.0]
+        
+           delta_x_image: [0.0, 0.0]
 
     - ``delta_y_image``: Initial spread from point source centroid in the y-axis.
 
@@ -353,7 +339,8 @@ Special Options
       - Example:
 
         .. code-block:: yaml
-          delta_y_image: [0.0, 0.0]
+        
+           delta_y_image: [0.0, 0.0]
 
     - ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
 
@@ -361,8 +348,8 @@ Special Options
       - Example:
 
         .. code-block:: yaml
-
-          delta_image_lower: -0.004
+        
+           delta_image_lower: -0.004
 
     - ``delta_image_upper``: Upper bound in spread of point source centroid sampler.
 
@@ -370,13 +357,14 @@ Special Options
       - Example:
 
         .. code-block:: yaml
-
-          delta_image_upper: 0.004
+        
+           delta_image_upper: 0.004
 
 Guess Parameters
 ----------------
 
-- ``guess_params``: *(Optional)* Initial guess parameter values for component models.
+- ``guess_params``: *(Optional)* Initial guess parameter values for component models. This is commonly used to 
+  overwrite default initial configurations and center the bounds of the PSO optimization process.
 
   - Suboptions:
 
@@ -460,7 +448,7 @@ Fitting Options
 
            sampling: true
 
-    - ``sampler``: The sampler to use for sampling.
+    - ``sampler``: The sampler to use for sampling. Currently, only ``emcee`` is fully supported.
 
       - Type: ``string``
       - Example:

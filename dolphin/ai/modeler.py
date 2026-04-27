@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+"""This module creates a configuration file from the output of the visual recognition model."""
 
-# This module creates a configuration file from the output of the visual recognition model.
-
+__author__ = "ajshajib"
 
 import numpy as np
 import yaml

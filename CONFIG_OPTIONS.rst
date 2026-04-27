@@ -98,40 +98,6 @@ Model Section
 
            special: ["astrometric_uncertainty"]
 
-Satellites Section
-------------------
-
-- ``satellites``: *(Optional)* Options for modeling satellite galaxies.
-
-  - Suboptions:
-
-    - ``centroid_init``: Initial guesses for the centroids of satellites.
-
-      - Type: ``list of lists of floats``
-      - Example:
-
-        .. code-block:: yaml
-
-           centroid_init: [[1, 1], [1.5, 1.5]]
-
-    - ``centroid_bound``: Half of the box width to constrain the centroids of satellites.
-
-      - Type: ``float``
-      - Example:
-
-        .. code-block:: yaml
-
-           centroid_bound: 0.5
-
-    - ``is_elliptical``: Whether each satellite is elliptical.
-
-      - Type: ``list of booleans``
-      - Example:
-
-        .. code-block:: yaml
-
-           is_elliptical: [true, false]
-
 
 Lens Options
 ------------
@@ -197,6 +163,41 @@ Lens Options
         .. code-block:: yaml
 
            limit_mass_q_from_light: 0.1
+
+
+Satellites Option
+------------------
+
+- ``satellites``: *(Optional)* Options for modeling satellite galaxies.
+
+  - Suboptions:
+
+    - ``centroid_init``: Initial guesses for the centroids of satellites.
+
+      - Type: ``list of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           centroid_init: [[1, 1], [1.5, 1.5]]
+
+    - ``centroid_bound``: Half of the box width to constrain the centroids of satellites.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+           centroid_bound: 0.5
+
+    - ``is_elliptical``: Whether each satellite is elliptical.
+
+      - Type: ``list of booleans``
+      - Example:
+
+        .. code-block:: yaml
+
+           is_elliptical: [true, false]           
       
 
 Lens Light Options

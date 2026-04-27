@@ -642,7 +642,7 @@ class TestModelConfig(object):
         config = deepcopy(self.config_3)
         config.settings["model"]["special"] = ["INVALID"]
         with pytest.raises(ValueError):
-            self.config_3.get_special_list()
+            config.get_special_list()
 
     def test_get_lens_model_params(self):
         """Test `get_lens_model_params` method.

@@ -5,6 +5,7 @@ import pytest
 from copy import deepcopy
 import numpy as np
 import numpy.testing as npt
+import os
 from pathlib import Path
 
 from dolphin.processor.config import Config
@@ -381,6 +382,18 @@ class TestModelConfig(object):
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
                 kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
             )
+
+    def test_load_mask(self):
+        """Test `load_mask` static method."""
+        mask_array = np.zeros((20, 20))
+        mask_file = os.path.join(self.io_directory, "temp_test_mask.npy")
+        np.save(mask_file, mask_array)
+
+        loaded_mask = ModelConfig.load_mask(mask_file)
+        npt.assert_array_equal(loaded_mask, mask_array)
+
+        # Clean up the temporary file
+        os.remove(mask_file)
 
     def test_get_masks(self):
         """Test `get_masks` method.

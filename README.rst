@@ -31,18 +31,24 @@
 .. image:: https://img.shields.io/badge/%20style-sphinx-0a507a.svg
     :target: https://www.sphinx-doc.org/en/master/usage/index.html
 
-AI-powered automated pipeline for lens modeling, with
-`lenstronomy <https://github.com/lenstronomy/lenstronomy>`_ as the modeling engine.
+Welcome to **dolphin**, an AI-powered automated pipeline for strong gravitational lens modeling! 
+
+``dolphin`` leverages `lenstronomy <https://github.com/lenstronomy/lenstronomy>`_ as its core modeling engine, providing an accessible and scalable framework for studying galaxy-scale lenses.
+
+What is Dolphin?
+----------------
+
+Strong gravitational lens modeling traditionally requires significant manual effort. ``dolphin`` changes this by providing an AI-driven approach to forward modeling, enabling researchers to process large samples of strong lenses with ease. Whether you want a fully hands-off automated pipeline or a semi-automated workflow where you can fine-tune the AI-generated configurations, ``dolphin`` gives you the flexibility and power you need.
 
 Features
 --------
 
-- **AI-automated** forward modeling for large samples of galaxy-scale lenses.
-- **Flexible**: supports both fully automated and semi-automated (with user tweaks) modes.
-- **Multi-band** lens modeling made simple.
-- Supports both **galaxy–galaxy** and **galaxy–quasar** systems.
-- Effortless syncing between local machines and **HPCC**.
-- |Codecov| **tested!**
+- 🤖 **AI-Automated Modeling**: Streamline forward modeling for large datasets of galaxy-scale lenses.
+- 🎛️ **Flexible Workflows**: Choose between fully automated runs or semi-automated modes with manual overrides.
+- 🌈 **Multi-Band Support**: Easily configure and model across multiple observing bands simultaneously.
+- 🌌 **Versatile Sources**: Built-in support for both **galaxy–galaxy** and **galaxy–quasar** lens systems.
+- 💻 **HPC Ready**: Seamlessly sync your setup between local machines and High-Performance Computing Clusters (HPCC).
+- ✅ **Tested & Reliable**: Comprehensively tested with |Codecov|.
 
 .. |Codecov| image:: https://codecov.io/gh/ajshajib/dolphin/branch/main/graph/badge.svg?token=WZVXZS9GF1 
     :target: https://app.codecov.io/gh/ajshajib/dolphin/tree/main
@@ -54,14 +60,13 @@ Installation
    :alt: PyPI - Version
    :target: https://pypi.org/project/space-dolphin/
 
-
-You can install ``dolphin`` using ``pip``. Run the following command:
+Installing ``dolphin`` is simple. You can install the latest stable release via ``pip``:
 
 .. code-block:: bash
 
     pip install space-dolphin
 
-Alternatively, you can install the latest development version from GitHub as:
+Alternatively, to install the latest development version directly from GitHub:
 
 .. code-block:: bash
 
@@ -69,9 +74,16 @@ Alternatively, you can install the latest development version from GitHub as:
     cd dolphin
     pip install .
 
-See the `Quickstart guide <QUICKSTART.rst>`_ for instructions on setting up and running ``dolphin``.
+For instructions on setting up your workspace and running your first model, please check out our `Quickstart guide <QUICKSTART.rst>`_.
 
 Citation
 --------
 
-If you use ``dolphin`` in your research, please cite the ``dolphin`` paper `Shajib et al. (2025) <https://arxiv.org/abs/2503.22657>`_. If you have used the ``"galaxy-quasar"`` fitting recipe, then additionally cite `Shajib et al. (2019) <https://ui.adsabs.harvard.edu/abs/2019MNRAS.483.5649S/abstract>`_, or if you have used the ``"galaxy-galaxy"`` fitting recipe, then additionally cite `Shajib et al. (2021) <https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract>`_.
+If you use ``dolphin`` in your research, please cite the main ``dolphin`` paper:
+
+- `Shajib et al. (2025) <https://arxiv.org/abs/2503.22657>`_
+
+Depending on the fitting recipe used, please additionally cite the following papers for the underlying modeling methodology:
+
+- **Galaxy-Quasar Recipe:** `Shajib et al. (2019) <https://ui.adsabs.harvard.edu/abs/2019MNRAS.483.5649S/abstract>`_
+- **Galaxy-Galaxy Recipe:** `Shajib et al. (2021) <https://ui.adsabs.harvard.edu/abs/2021MNRAS.503.2380S/abstract>`_

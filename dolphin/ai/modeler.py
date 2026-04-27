@@ -122,7 +122,7 @@ class Modeler(AI):
                 "keep_psf_variance_map": True,
                 "psf_symmetry": 4,
             }
-        :type psf_iteration_settings: `dict`
+        :type psf_iteration_settings: `dict` or `None`
         :param sampler_name: sampler name, default is "emcee"
         :type sampler_name: `str`
         :param sampler_settings: sampler settings. If `None`, sampling will not be
@@ -133,7 +133,7 @@ class Modeler(AI):
                 "n_run": 100,
                 "walkerRatio": 2,
             }
-        :type sampler_settings: `dict`
+        :type sampler_settings: `dict` or `None`
         :param supersampling_factor: supersampling factor
         :type supersampling_factor: `list` of `int`
         :param max_satellite_number: maximum number of satellites
@@ -145,7 +145,7 @@ class Modeler(AI):
         :param clear_center: radius (arcsecond) to clear the center from any detected satellite or quasar
         :type clear_center: `float`
         :param source_n_max: maximum number of shapelet coefficients for the source, choose `None` to turn off shapelets
-        :type source_n_max: `int`
+        :type source_n_max: `int` or `None`
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
         :param additional_settings: additional settings to be added to the configuration
@@ -315,7 +315,7 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
         :return: mask
@@ -347,7 +347,7 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :return: initial guess for the Einstein radius
         :rtype: `float`
         """
@@ -382,7 +382,7 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :return: initial guess for the lens galaxy center
         :rtype: `list` of `float`
         """
@@ -400,7 +400,7 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :param clear_center: radius (arcsecond) to clear the center from any detected quasar
         :type clear_center: `float`
         :return: quasar image positions
@@ -444,7 +444,7 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :param clear_center: radius (arcsecond) to clear the center from any detected satellite
         :type clear_center: `float`
         :param minimum_pixel_area: minimum pixel area for a satellite

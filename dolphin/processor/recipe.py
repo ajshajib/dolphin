@@ -79,7 +79,7 @@ class Recipe(object):
 
         :param kwargs_data_joint: `kwargs_data_joint` dictionary for multiple bands
         :type kwargs_data_joint: `dict`
-        :param recipe_name: recipe name, 'galaxy-quasar' or 'galaxy-galaxy'
+        :param recipe_name: recipe name, 'galaxy-quasar', 'galaxy-galaxy', or 'skip'
         :type recipe_name: `str`
         :return: fitting kwargs list
         :rtype: `list`
@@ -560,7 +560,7 @@ class Recipe(object):
         :param model_component: name of params type, e.g., 'lens', 'lens_light', or 'source'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be fixed
-        :type index: `list` or `int`
+        :type index: `list` or `int` or `None`
         :return: formatted fit-sequence code to go into `fitting_kwargs_list`
         :rtype: `list`
         """
@@ -608,7 +608,7 @@ class Recipe(object):
         :param model_component: name of params type, e.g., 'lens', 'lens_light', or 'source'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be unfixed
-        :type index: `list` or `int`
+        :type index: `list` or `int` or `None`
         :return: formatted fit-sequence code to go into `fitting_kwargs_list`
         :rtype: `list`
         """

@@ -975,7 +975,7 @@ class ModelConfig(Config):
 
         :param light_type: key specifying which light model to use from
             `self.settings["model"]`
-        :type light_type: str
+        :type light_type: `str`
         :return: list of indices
         :rtype: `list` of `list` of `int`
         """
@@ -1521,9 +1521,9 @@ class ModelConfig(Config):
             'source_light'
         :type component: `str`
         :param fixed_list: list of fixed params
-        :type fixed_list: `list`
+        :type fixed_list: `list` of `dict`
         :return: updated list of fixed params
-        :rtype: `list`
+        :rtype: `list` of `dict`
         """
         assert component in ["lens", "lens_light", "source_light"]
         option_str = component + "_option"

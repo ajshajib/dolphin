@@ -260,8 +260,8 @@ class Output(Processor):
         :type print_results: `bool`
         :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
         :type show_source_light: `bool`
-        :return: `matplotlib.pyplot.figure` instance with the plots
-        :rtype: `matplotlib.pyplot.figure`
+        :return: `matplotlib.figure.Figure` instance with the plots
+        :rtype: `matplotlib.figure.Figure`
         """
         if print_results:
             print_kwargs_result = kwargs_result
@@ -369,8 +369,8 @@ class Output(Processor):
         :type v_min: `float` or `int`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`
-        :return: `matplotlib.pyplot.figure` instance with the plots
-        :rtype: `matplotlib.pyplot.figure`
+        :return: `matplotlib.figure.Figure` instance with the plots
+        :rtype: `matplotlib.figure.Figure`
         """
 
         if v_max is None:
@@ -509,8 +509,8 @@ class Output(Processor):
         :type fig_width: `float`
         :param parameters_to_plot: if not empty, list of parameters to plot
         :type parameters_to_plot: `list` of `str`
-        :return: `matplotlib.pyplot.figure` instance with the plots
-        :rtype: `matplotlib.pyplot.figure`
+        :return: `matplotlib.figure.Figure` instance with the plots
+        :rtype: `matplotlib.figure.Figure`
         """
         chain = self.get_reshaped_emcee_chain(
             lens_name, model_id, walker_ratio, burn_in=burn_in
@@ -874,11 +874,11 @@ class Output(Processor):
         :type kwargs_result: `dict`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
-        :param plot: if `True`, plots the lensed and unlensed source
+        :param plot: if `True`, plots the image data with critical curves and source/image positions
         :type plot: `bool`
-        :param v_max: maximum plotting scale for the model, data, & source plot
+        :param v_max: maximum plotting scale for the image plot
         :type v_max: `float` or `int`
-        :param v_min: minimum plotting scale for the model, data, & source plot
+        :param v_min: minimum plotting scale for the image plot
         :type v_min: `float` or `int`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds

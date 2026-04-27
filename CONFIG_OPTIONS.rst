@@ -285,7 +285,7 @@ Special Options
           delta_y_image: [0.0, 0.0]
 
     - ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
-    - ``delta_image_uppwer``: Upper bound in spread of point source centroid sampler.
+    - ``delta_image_upper``: Upper bound in spread of point source centroid sampler.
 
       - Type: ``float``
       - Example:

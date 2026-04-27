@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This module provides capabilities to create semantic segmentation for image data using trained neural networks."""
+"""This module provides capabilities to create semantic segmentation for image data
+using trained neural networks."""
 
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -9,7 +10,8 @@ from .ai import AI
 
 
 class Vision(AI):
-    """This class takes an image data and creates semantic segmentation for it using an AI model."""
+    """This class takes an image data and creates semantic segmentation for it using an
+    AI model."""
 
     def __init__(self, io_directory_path, source_type="quasar"):
         """Initialize the Vision object.

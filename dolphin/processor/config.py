@@ -971,9 +971,9 @@ class ModelConfig(Config):
         """Create list with of index for the different light profiles (for multiple
         filters)
 
-        :param light_type: key specifying which light model to use from `self.settings["model"]`
+        :param light_type: key specifying which light model to use from
+            `self.settings["model"]`
         :type light_type: str
-
         :return: list of indices
         :rtype: list[list]
         """

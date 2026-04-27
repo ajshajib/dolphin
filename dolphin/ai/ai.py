@@ -6,7 +6,8 @@ from ..processor.files import FileSystem
 
 
 class AI(object):
-    """This parent class holds common methods for AI-related operations and initialization."""
+    """This parent class holds common methods for AI-related operations and
+    initialization."""
 
     def __init__(self, io_directory_path):
         """Initialize the AI class.

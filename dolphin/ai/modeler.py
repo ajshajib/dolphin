@@ -314,8 +314,6 @@ class Modeler(AI):
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
         :type coordinate_system: `Coordinates`
-        :param image_positions: image positions
-        :type image_positions: `List[np.ndarray]`
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
         :return: mask

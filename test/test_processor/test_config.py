@@ -504,6 +504,8 @@ class TestModelConfig(object):
         assert test_numerics == self.config_1.get_kwargs_numerics()
 
         self.config_5.settings["band"] = ["F390W"]
+        if "numeric_option" in self.config_5.settings:
+            del self.config_5.settings["numeric_option"]
         assert test_numerics == self.config_5.get_kwargs_numerics()
 
         config = deepcopy(self.config_1)

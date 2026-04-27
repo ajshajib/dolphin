@@ -807,12 +807,12 @@ class ModelConfig(Config):
         :rtype: `list` of `dict`
         """
         try:
-            self.settings["kwargs_numerics"]["supersampling_factor"]
+            self.settings["numeric_option"]["supersampling_factor"]
         except (KeyError, NameError, TypeError):
             supersampling_factor = [3] * self.number_of_bands
         else:
             supersampling_factor = deepcopy(
-                self.settings["kwargs_numerics"]["supersampling_factor"]
+                self.settings["numeric_option"]["supersampling_factor"]
             )
 
             if supersampling_factor is None:

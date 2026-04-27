@@ -57,7 +57,7 @@ fitting:
 
 kwargs_model:
 
-kwargs_numerics:
+numeric_option:
   supersampling_factor: [3] # list specifying for each band
 
 guess_params:

@@ -1569,7 +1569,7 @@ class ModelConfig(Config):
         """Retrieve PSF supersampling factor if specified in the config file.
 
         :return: PSF supersampling factor
-        :rtype: `float`
+        :rtype: `int`
         """
         try:
             self.settings["psf_supersampled_factor"]

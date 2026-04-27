@@ -118,7 +118,7 @@ class Processor(object):
         :param lens_name: name of the lens system
         :type lens_name: `str`
         :param psf_supersampled_factor: supersampling factor applied to the PSF
-        :type psf_supersampled_factor: `float`
+        :type psf_supersampled_factor: `int`
         :return: joint kwargs data mapping suitable for `lenstronomy`
         :rtype: `dict`
         """

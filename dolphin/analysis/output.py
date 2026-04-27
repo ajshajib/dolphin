@@ -508,7 +508,7 @@ class Output(Processor):
         :param fig_width: width of the figure
         :type fig_width: `float`
         :param parameters_to_plot: if not empty, list of parameters to plot
-        :type parameters_to_plot: `list`
+        :type parameters_to_plot: `list` of `str`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
@@ -813,7 +813,7 @@ class Output(Processor):
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds
         :return: critical curve coordinates
-        :rtype: `tuple`
+        :rtype: `tuple` of `numpy.ndarray`
         """
         if model_id is None and kwargs_result is None:
             raise ValueError(
@@ -883,7 +883,7 @@ class Output(Processor):
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds
         :return: individual magnifications of the images
-        :rtype: `list`
+        :rtype: `list` of `float`
         """
         if model_id is None and kwargs_result is None:
             raise ValueError(

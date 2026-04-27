@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+"""This module creates a configuration file from the output of the visual recognition
+model."""
 
-# This module creates a configuration file from the output of the visual recognition model.
-
+__author__ = "ajshajib"
 
 import numpy as np
 import yaml
@@ -14,7 +15,7 @@ class Modeler(AI):
     model."""
 
     def __init__(self, io_directory_path, source_type):
-        """Initialize the Configure object.
+        """Initialize the Modeler object.
 
         :param io_directory_path: path to the input/output directory
         :type io_directory_path: `str`
@@ -67,6 +68,8 @@ class Modeler(AI):
         :type lens_name: `str`
         :param band_name: band name
         :type band_name: `str`
+        :return: the loaded semantic segmentation array
+        :rtype: `numpy.ndarray`
         """
         return self.file_system.load_semantic_segmentation(lens_name, band_name)
 
@@ -108,7 +111,7 @@ class Modeler(AI):
         :param band_name: band name
         :type band_name: `str`
         :param pso_settings: PSO settings
-        :type pso_settings: `dict`
+        :type pso_settings: `dict` or `None`
         :param psf_iteration_settings: PSF iteration settings. If `None`, PSF
             iteration will not be performed. If settings are provided, PSF
             iteration will be performed. Example settings:
@@ -119,7 +122,7 @@ class Modeler(AI):
                 "keep_psf_variance_map": True,
                 "psf_symmetry": 4,
             }
-        :type psf_iteration_settings: `dict`
+        :type psf_iteration_settings: `dict` or `None`
         :param sampler_name: sampler name, default is "emcee"
         :type sampler_name: `str`
         :param sampler_settings: sampler settings. If `None`, sampling will not be
@@ -130,9 +133,9 @@ class Modeler(AI):
                 "n_run": 100,
                 "walkerRatio": 2,
             }
-        :type sampler_settings: `dict`
+        :type sampler_settings: `dict` or `None`
         :param supersampling_factor: supersampling factor
-        :type supersampling_factor: `List[int]`
+        :type supersampling_factor: `list` of `int`
         :param max_satellite_number: maximum number of satellites
         :type max_satellite_number: `int`
         :param minimum_satellite_area: minimum satellite area
@@ -142,11 +145,11 @@ class Modeler(AI):
         :param clear_center: radius (arcsecond) to clear the center from any detected satellite or quasar
         :type clear_center: `float`
         :param source_n_max: maximum number of shapelet coefficients for the source, choose `None` to turn off shapelets
-        :type source_n_max: `int`
+        :type source_n_max: `int` or `None`
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
         :param additional_settings: additional settings to be added to the configuration
-        :type additional_settings: `dict`
+        :type additional_settings: `dict` or `None`
         :return: configuration
         :rtype: `dict`
         """
@@ -293,7 +296,7 @@ class Modeler(AI):
         only distance if there is just one.
 
         :param distances: list of pairwise distances between quasar images
-        :type distances: `List[float]`
+        :type distances: `list` of `float`
         :return: half of the second minimum distance
         :rtype: `float`
         """
@@ -312,9 +315,7 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
-        :param image_positions: image positions
-        :type image_positions: `List[np.ndarray]`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :param mask_radius_factor: factor of initial Einstein radius estimate to set the circular mask radius
         :type mask_radius_factor: `float`
         :return: mask
@@ -343,10 +344,10 @@ class Modeler(AI):
     def get_theta_E_init(self, semantic_segmentation, coordinate_system):
         """Get the initial guess for the Einstein radius.
 
-        :param galaxy_center: galaxy center
-        :type galaxy_center: `List[float]`
-        :param image_positions: image positions
-        :type image_positions: `List[List[float]]`
+        :param semantic_segmentation: semantic segmentation output
+        :type semantic_segmentation: `numpy.ndarray`
+        :param coordinate_system: coordinate system
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :return: initial guess for the Einstein radius
         :rtype: `float`
         """
@@ -381,9 +382,9 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :return: initial guess for the lens galaxy center
-        :rtype: `[float, float]`
+        :rtype: `list` of `float`
         """
         galaxy_center_pixels = cls.list_region_centers(semantic_segmentation, 1)
         galaxy_center_ra, galaxy_center_dec = coordinate_system.map_pix2coord(
@@ -399,11 +400,11 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :param clear_center: radius (arcsecond) to clear the center from any detected quasar
         :type clear_center: `float`
         :return: quasar image positions
-        :rtype: `[np.ndarray, np.ndarray]`
+        :rtype: `list` of `numpy.ndarray`
         """
         if self._source_type != "quasar":
             raise NotImplementedError(
@@ -443,13 +444,13 @@ class Modeler(AI):
         :param semantic_segmentation: semantic segmentation output
         :type semantic_segmentation: `numpy.ndarray`
         :param coordinate_system: coordinate system
-        :type coordinate_system: `Coordinates`
+        :type coordinate_system: `lenstronomy.Data.coord_transforms.Coordinates`
         :param clear_center: radius (arcsecond) to clear the center from any detected satellite
         :type clear_center: `float`
         :param minimum_pixel_area: minimum pixel area for a satellite
         :type minimum_pixel_area: `int`
         :return: satellite positions
-        :rtype: `List[List[float]]`
+        :rtype: `list` of `list` of `float`
         """
         satellite_positions = cls.list_region_centers(
             semantic_segmentation, 4, minimum_pixel_area=minimum_pixel_area
@@ -483,17 +484,19 @@ class Modeler(AI):
         :param y: y-coordinate
         :type y: `int`
         :param pixels: list of pixels
-        :type pixels: `List[Tuple[int, int]]`
+        :type pixels: `list` of `tuple`
         :param visited: matrix to track visited pixels
-        :type visited: `List[List[bool]]`
+        :type visited: `list` of `list` of `bool`
         :param target_value: target value to match
         :type target_value: `int`
         :param matrix: input matrix
-        :type matrix: `List[List[int]]`
+        :type matrix: `list` of `list` of `int`
         :param rows: number of rows in the matrix
         :type rows: `int`
         :param cols: number of columns in the matrix
         :type cols: `int`
+        :return: None
+        :rtype: `None`
         """
         stack = [(x, y)]
 
@@ -524,15 +527,13 @@ class Modeler(AI):
         value.
 
         :param matrix: input matrix
-        :type matrix: `List[List[int]]`
+        :type matrix: `list` of `list` of `int`
         :param target_value: target value
         :type target_value: `int`
-        :return: list of central pixels (x, y) for all regions
-        :rtype: `List[Tuple[int, int]]`
         :param minimum_pixel_area: minimum size of the region
         :type minimum_pixel_area: `int`
         :return: list of central pixels (x, y) for all regions
-        :rtype: `List[Tuple[int, int]]`
+        :rtype: `list` of `tuple`
         """
         rows, cols = len(matrix), len(matrix[0])
         visited = [[False for _ in range(cols)] for _ in range(rows)]

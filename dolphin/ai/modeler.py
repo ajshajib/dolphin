@@ -15,7 +15,7 @@ class Modeler(AI):
     model."""
 
     def __init__(self, io_directory_path, source_type):
-        """Initialize the Configure object.
+        """Initialize the Modeler object.
 
         :param io_directory_path: path to the input/output directory
         :type io_directory_path: `str`
@@ -526,8 +526,6 @@ class Modeler(AI):
         :type matrix: `List[List[int]]`
         :param target_value: target value
         :type target_value: `int`
-        :return: list of central pixels (x, y) for all regions
-        :rtype: `List[Tuple[int, int]]`
         :param minimum_pixel_area: minimum size of the region
         :type minimum_pixel_area: `int`
         :return: list of central pixels (x, y) for all regions

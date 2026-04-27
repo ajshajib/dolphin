@@ -555,7 +555,7 @@ class Recipe(object):
         return arc_mask
 
     def fix_params(self, model_component, index=None):
-        """Fix all the params in `name` that are not fixed by settings.
+        """Fix all the params in `model_component` that are not fixed by settings.
 
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
@@ -603,7 +603,7 @@ class Recipe(object):
         return ["update_settings", {key: param_list_with_index}]
 
     def unfix_params(self, model_component, index=None):
-        """Unfix all the params in `name` that are not fixed from settings.
+        """Unfix all the params in `model_component` that are not fixed from settings.
 
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`

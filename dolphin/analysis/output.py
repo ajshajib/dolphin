@@ -19,10 +19,10 @@ from dolphin.processor.config import ModelConfig
 
 
 class Output(Processor):
-    """This class lets."""
+    """This class provides methods to post-process a model run output."""
 
     def __init__(self, io_directory):
-        """
+        """Initialize the Output class.
 
         :param io_directory: path to the input/output directory. Should not
             end with slash.
@@ -71,8 +71,7 @@ class Output(Processor):
 
     @property
     def model_settings(self):
-        """The `kwargs_result` after running a model by calling
-        `lenstronomy...Fitting_sequence.fit_sequence()`.
+        """The model settings used for the run.
 
         :return: the model settings dictionary
         :rtype: `dict`

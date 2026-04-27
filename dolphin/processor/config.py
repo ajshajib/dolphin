@@ -801,9 +801,9 @@ class ModelConfig(Config):
             return {}
 
     def get_kwargs_numerics(self):
-        """Create `kwargs_numerics` dictionary for lenstronomy.
+        """Create `kwargs_numerics` list for lenstronomy.
 
-        :return: dictionary containing the numerics configuration
+        :return: list containing the numerics configuration
         :rtype: `list` of `dict`
         """
         try:

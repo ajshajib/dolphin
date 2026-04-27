@@ -921,9 +921,34 @@ class ModelConfig(Config):
         else:
             return []
 
+    def get_special_list(self):
+        """Return `special_list`.
+
+        :return: special_list
+        :rtype: list
+        """
+        special_list = []
+
+        if "special" in self.settings["model"]:
+            if "astrometric_uncertainty" in self.settings["model"]["special"]:
+                special_list.append("astrometric_uncertainty")
+                return special_list
+            elif self.settings["model"]["special"] != "astrometric_uncertainty":
+                special = self.settings["model"]["special"]
+                raise ValueError(f"{special} not supported")
+        else:
+            return []
+
     def get_index_list(self, light_type="lens_light"):
         """Create list with of index for the different light profiles (for multiple
-        filters)"""
+        filters)
+
+        :param light_type: Key specifying which light model to use from ``self.settings["model"]``
+        :type light_type: str
+
+        :return: index_list
+        :rtype: list[list]
+        """
         index_list = []
 
         if light_type in self.settings["model"]:
@@ -1378,6 +1403,79 @@ class ModelConfig(Config):
         params = [init, sigma, fixed, lower, upper]
         return params
 
+    def get_special_params(self):
+        """Create `special_params`.
+
+        :return: params
+        :rtype: list of dict
+        """
+
+        special_list = self.get_special_list()
+
+        if len(special_list) == 0:
+            return [{}, {}, {}, {}, {}]
+
+        init = {}
+        sigma = {}
+        lower = {}
+        upper = {}
+        fixed = {}
+
+        for i, model in enumerate(special_list):
+            if model == "astrometric_uncertainty":
+                num_point_sources = len(
+                    np.array(self.settings["special_option"]["delta_x_image"])
+                )
+
+                init.update(
+                    {
+                        "delta_x_image": np.array(
+                            self.settings["special_option"]["delta_x_image"]
+                        ),
+                        "delta_y_image": np.array(
+                            self.settings["special_option"]["delta_y_image"]
+                        ),
+                    }
+                )
+
+                sigma.update(
+                    {
+                        "delta_x_image": 0.004 * np.ones(num_point_sources),
+                        "delta_y_image": 0.004 * np.ones(num_point_sources),
+                    }
+                )
+
+                lower.update(
+                    {
+                        "delta_x_image": self.settings["special_option"][
+                            "delta_image_lower"
+                        ]
+                        * np.ones(num_point_sources),
+                        "delta_y_image": self.settings["special_option"][
+                            "delta_image_lower"
+                        ]
+                        * np.ones(num_point_sources),
+                    }
+                )
+
+                upper.update(
+                    {
+                        "delta_x_image": self.settings["special_option"][
+                            "delta_image_upper"
+                        ]
+                        * np.ones(num_point_sources),
+                        "delta_y_image": self.settings["special_option"][
+                            "delta_image_upper"
+                        ]
+                        * np.ones(num_point_sources),
+                    }
+                )
+
+                fixed.update({})
+
+        params = [init, sigma, fixed, lower, upper]
+        return params
+
     def fill_in_fixed_from_settings(self, component, fixed_list):
         """Fill in fixed values from settings for lens, source light and lens light.
 
@@ -1423,6 +1521,7 @@ class ModelConfig(Config):
             "source_model": self.get_source_light_model_params(),
             "lens_light_model": self.get_lens_light_model_params(),
             "point_source_model": self.get_point_source_params(),
+            "special": self.get_special_params(),
             # 'cosmography': []
         }
 

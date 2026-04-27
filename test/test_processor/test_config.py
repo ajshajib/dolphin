@@ -623,6 +623,27 @@ class TestModelConfig(object):
         config = deepcopy(self.config_5)
         assert config.get_point_source_model_list() == ["LENSED_POSITION"]
 
+    def test_get_special_list(self):
+        """Test `get_special_list` method."""
+
+        # Test 1: ensure consistency of special models
+        # if specified in config file
+        config = deepcopy(self.config_5)
+        config.settings["model"]["special"] = ["astrometric_uncertainty"]
+        assert config.get_special_list() == ["astrometric_uncertainty"]
+
+        # Test 2: ensure special list is empty if not
+        # specified in the config file
+        config = deepcopy(self.config_1)
+        assert config.get_special_list() == []
+
+        # Test 3: ensure error message prints if special
+        # type is not supported
+        config = deepcopy(self.config_3)
+        config.settings["model"]["special"] = ["INVALID"]
+        with pytest.raises(ValueError):
+            config.get_special_list()
+
     def test_get_lens_model_params(self):
         """Test `get_lens_model_params` method.
 
@@ -723,6 +744,53 @@ class TestModelConfig(object):
         config3.settings["source_light_option"]["n_max"] = 2
         config3.get_source_light_model_params()
         assert config3.settings["source_light_option"]["n_max"] == [2, 2]
+
+    def test_get_special_params(self):
+        """Test `get_special_params` method."""
+
+        # Test 1: ensure consistency of astrometric uncertainty params
+        # if specified in config file
+        config = deepcopy(self.config_5)
+
+        config.settings["model"]["special"] = ["astrometric_uncertainty"]
+        config.settings["special_option"] = {
+            "delta_x_image": [0.004, 0.004, 0.004, 0.004],
+            "delta_y_image": [0.004, 0.004, 0.004, 0.004],
+            "delta_image_lower": -0.004,
+            "delta_image_upper": 0.004,
+        }
+
+        params = config.get_special_params()
+
+        init, sigma, fixed, lower, upper = params
+
+        npt.assert_array_equal(
+            init["delta_x_image"], np.array([0.004, 0.004, 0.004, 0.004])
+        )
+        npt.assert_array_equal(
+            init["delta_y_image"], np.array([0.004, 0.004, 0.004, 0.004])
+        )
+
+        assert np.all(sigma["delta_x_image"] == 0.004)
+        assert np.all(sigma["delta_y_image"] == 0.004)
+        assert len(sigma["delta_x_image"]) == 4
+        assert len(sigma["delta_y_image"]) == 4
+
+        assert np.all(lower["delta_x_image"] == -0.004)
+        assert np.all(upper["delta_x_image"] == 0.004)
+
+        assert np.all(lower["delta_y_image"] == -0.004)
+        assert np.all(upper["delta_y_image"] == 0.004)
+
+        assert fixed == {}
+
+        # Test 2: ensure special params is empty list of dictionaries
+        # if not specified in the config file
+        config = deepcopy(self.config_1)
+
+        params = config.get_special_params()
+
+        assert params == [{}, {}, {}, {}, {}]
 
     def test_fill_in_fixed_from_settings(self):
         """Test `fill_in_fixed_from_settings` method.

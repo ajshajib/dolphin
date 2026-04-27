@@ -112,7 +112,8 @@ class Processor(object):
         return ModelConfig(lens_name, file_system=self.file_system)
 
     def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
-        """Create a joint `kwargs_data` dictionary combining data and PSFs across filters.
+        """Create a joint `kwargs_data` dictionary combining data and PSFs across
+        filters.
 
         :param lens_name: name of the lens system
         :type lens_name: `str`

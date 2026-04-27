@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This module provides a class for maintaining the file system and directory architecture."""
+"""This module provides a class for maintaining the file system and directory
+architecture."""
 
 __author__ = "ajshajib"
 
@@ -11,7 +12,8 @@ import gdown
 
 
 class FileSystem(object):
-    """This class contains methods to handle the file system, directory paths, and standard IO operations."""
+    """This class contains methods to handle the file system, directory paths, and
+    standard IO operations."""
 
     def __init__(self, io_directory):
         """Initiates a FileSystem object with `io_directory` as the root base path.
@@ -373,7 +375,8 @@ class FileSystem(object):
 
     @classmethod
     def encode_numpy_arrays(cls, obj):
-        """Recursively encode a list or dictionary containing numpy arrays to allow JSON serialization.
+        """Recursively encode a list or dictionary containing numpy arrays to allow JSON
+        serialization.
 
         :param obj: the object (list, dictionary, or array) to be encoded
         :type obj: `object`
@@ -397,7 +400,8 @@ class FileSystem(object):
 
     @classmethod
     def decode_numpy_arrays(cls, obj):
-        """Recursively decode a list or dictionary, converting encoded dictionary representations back to numpy arrays.
+        """Recursively decode a list or dictionary, converting encoded dictionary
+        representations back to numpy arrays.
 
         :param obj: the object containing encoded representations of arrays
         :type obj: `object`
@@ -421,7 +425,8 @@ class FileSystem(object):
             return obj
 
     def get_semantic_segmentation_file_path(self, lens_name, band):
-        """Get the file path for the semantic segmentation data for a specific lens and band.
+        """Get the file path for the semantic segmentation data for a specific lens and
+        band.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
@@ -510,8 +515,8 @@ class FileSystem(object):
         np.save(save_file, mask)
 
     def get_trained_nn_model_file_path(self, source_type="galaxy"):
-        """Get the local file path for the trained neural network model.
-        Downloads the model from Google Drive if it doesn't exist locally.
+        """Get the local file path for the trained neural network model. Downloads the
+        model from Google Drive if it doesn't exist locally.
 
         :param source_type: the type of lens source. Expected 'galaxy' or 'quasar'. Default is 'galaxy'.
         :type source_type: `str`

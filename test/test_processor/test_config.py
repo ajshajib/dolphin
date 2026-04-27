@@ -25,11 +25,7 @@ class TestConfig(object):
         pass
 
     def test_load(self):
-        """Test the `load` method in `class ModelConfig`.
-
-        :return:
-        :rtype:
-        """
+        """Test the `load` method in `class ModelConfig`."""
         test_setting_file = (
             _ROOT_DIR / "io_directory_example" / "settings" / "lens_system1_config.yaml"
         )
@@ -59,11 +55,7 @@ class TestModelConfig(object):
         ModelConfig(self.config_1.lens_name, settings=settings)
 
     def test_pixel_size(self):
-        """Test the `pixel_size` property.
-
-        :return:
-        :rtype:
-        """
+        """Test the `pixel_size` property."""
         self.config_3.settings["pixel_size"] = [0.04, 0.08]
         npt.assert_almost_equal(self.config_1.pixel_size, [0.04], decimal=6)
         npt.assert_almost_equal(self.config_3.pixel_size, [0.04, 0.08], decimal=6)
@@ -75,55 +67,31 @@ class TestModelConfig(object):
         npt.assert_almost_equal(config.pixel_size, [0.04, 0.04], decimal=6)
 
     def test_lens_name(self):
-        """Test the `lens_name` property.
-
-        :return:
-        :rtype:
-        """
+        """Test the `lens_name` property."""
         assert self.config_1.lens_name == "lens_system1"
         assert self.config_5.lens_name == "lens_system5"
 
     def test_deflector_center_ra(self):
-        """Test the `deflector_center_ra` property.
-
-        :return:
-        :rtype:
-        """
+        """Test the `deflector_center_ra` property."""
         assert self.config_1.deflector_center_ra == 0.04
         assert self.config_5.deflector_center_ra == 0.0
 
     def test_deflector_center_dec(self):
-        """Test the `deflector_center_ra` property.
-
-        :return:
-        :rtype:
-        """
+        """Test the `deflector_center_ra` property."""
         assert self.config_1.deflector_center_dec == -0.04
         assert self.config_5.deflector_center_dec == 0.0
 
     def test_deflector_centroid_bound(self):
-        """Test the `deflector_centroid_bound` property.
-
-        :return:
-        :rtype:
-        """
+        """Test the `deflector_centroid_bound` property."""
         assert self.config_1.deflector_centroid_bound == 0.2
         assert self.config_5.deflector_centroid_bound == 0.5
 
     def test_number_of_bands(self):
-        """Test the `test_band_number` property.
-
-        :return:
-        :rtype:
-        """
+        """Test the `test_band_number` property."""
         assert self.config_1.number_of_bands == 1
 
     def test_get_kwargs_model(self):
-        """Test `get_kwargs_model` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_kwargs_model` method."""
         kwargs_model = {
             "lens_model_list": ["EPL", "SHEAR_GAMMA_PSI"],
             "source_light_model_list": ["SERSIC_ELLIPSE"],
@@ -182,11 +150,7 @@ class TestModelConfig(object):
         ]
 
     def test_get_kwargs_constraints(self):
-        """Test `get_kwargs_constraints` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_kwargs_constraints` method."""
 
         kwargs_constraints = {
             "joint_source_with_source": [],
@@ -260,11 +224,7 @@ class TestModelConfig(object):
         assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
     def test_get_kwargs_likelihood(self):
-        """Test `get_kwargs_likelihood` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_kwargs_likelihood` method."""
         test_likelihood = {
             "force_no_add_image": False,
             "source_marg": False,
@@ -303,11 +263,7 @@ class TestModelConfig(object):
         assert kwargs_likelihood3["prior_ps"] == [[0, "ra_image", 0.21, 0.15]]
 
     def test_custom_logL_addition(self):
-        """Test `custom_logL_addition` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `custom_logL_addition` method."""
         # Mass paramters : (phi_m = 0 deg, q_m = 0.8)
         # Satisfy both priors (phi_L = 10 deg, q_L = 0.8)
         prior = self.config_1.custom_logL_addition(
@@ -396,11 +352,7 @@ class TestModelConfig(object):
         os.remove(mask_file)
 
     def test_get_masks(self):
-        """Test `get_masks` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_masks` method."""
         masks = self.config_1.get_masks()
 
         assert len(masks) == self.config_1.number_of_bands
@@ -461,11 +413,7 @@ class TestModelConfig(object):
         assert np.sum(mask[0]) == 0
 
     def test_get_kwargs_psf_iteration(self):
-        """Test `get_psf_iteration` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_psf_iteration` method."""
         assert self.config_1.get_kwargs_psf_iteration() == {}
 
         kwargs_psf_iteration = self.config_5.get_kwargs_psf_iteration()
@@ -480,11 +428,7 @@ class TestModelConfig(object):
         }
 
     def test_get_kwargs_params(self):
-        """Test `get_kwargs_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_kwargs_params` method."""
         for key in [
             "lens_model",
             "source_model",
@@ -498,11 +442,7 @@ class TestModelConfig(object):
             assert len(kwargs_params[key]) == 5
 
     def test_get_kwargs_numerics(self):
-        """Test `get_kwargs_numerics` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_kwargs_numerics` method."""
         test_numerics = [
             {
                 "supersampling_factor": 3,
@@ -528,11 +468,7 @@ class TestModelConfig(object):
             assert kwargs_numerics_band["supersampling_factor"] == 3
 
     def test_get_point_source_params(self):
-        """Test `get_point_source_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_point_source_params` method."""
         ps_params = self.config_1.get_point_source_params()
         assert ps_params == [[]] * 5
 
@@ -541,11 +477,7 @@ class TestModelConfig(object):
         assert np.all(ps_params[0][0]["dec_image"] == [0.0, 1.0, 0.0, -1.0])
 
     def test_get_lens_model_list(self):
-        """Test `get_lens_model_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_lens_model_list` method."""
         assert self.config_5.get_lens_model_list() == ["EPL", "SHEAR_GAMMA_PSI"]
 
         config = deepcopy(self.config_5)
@@ -570,11 +502,7 @@ class TestModelConfig(object):
         ]
 
     def test_get_source_light_model_list(self):
-        """Test `get_source_light_model_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_source_light_model_list` method."""
         config = deepcopy(self.config_5)
         del config.settings["model"]["source_light"]
         assert config.get_source_light_model_list() == []
@@ -588,11 +516,7 @@ class TestModelConfig(object):
         ]
 
     def test_get_lens_light_model_list(self):
-        """Test `get_lens_light_model_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_lens_light_model_list` method."""
         config = deepcopy(self.config_5)
         del config.settings["model"]["lens_light"]
         assert config.get_lens_light_model_list() == []
@@ -630,11 +554,7 @@ class TestModelConfig(object):
         ]
 
     def test_get_point_source_model_list(self):
-        """Test `get_point_source_model_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_point_source_model_list` method."""
         config = deepcopy(self.config_5)
         assert config.get_point_source_model_list() == ["LENSED_POSITION"]
 
@@ -660,11 +580,7 @@ class TestModelConfig(object):
             config.get_special_list()
 
     def test_get_lens_model_params(self):
-        """Test `get_lens_model_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_lens_model_params` method."""
         self.config_5.settings["model"]["lens"] = ["INVALID"]
         with pytest.raises(ValueError):
             self.config_5.get_lens_model_params()
@@ -694,11 +610,7 @@ class TestModelConfig(object):
         }
 
     def test_get_lens_light_model_params(self):
-        """Test `get_lens_light_model_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_lens_light_model_params` method."""
         config = deepcopy(self.config_5)
         config.settings["model"]["lens_light"] = ["INVALID"]
         with pytest.raises(ValueError):
@@ -741,11 +653,7 @@ class TestModelConfig(object):
         }
 
     def test_get_source_light_model_params(self):
-        """Test `get_source_light_model_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_source_light_model_params` method."""
         config = deepcopy(self.config_1)
         config.settings["model"]["source_light"] = ["INVALID"]
         with pytest.raises(ValueError):
@@ -808,11 +716,7 @@ class TestModelConfig(object):
         assert params == [{}, {}, {}, {}, {}]
 
     def test_fill_in_fixed_from_settings(self):
-        """Test `fill_in_fixed_from_settings` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `fill_in_fixed_from_settings` method."""
         fixed = [{}]
         fixed = self.config_1.fill_in_fixed_from_settings("lens_light", fixed)
         assert fixed == [{"n_sersic": 4.0}]
@@ -829,22 +733,14 @@ class TestModelConfig(object):
             self.config_3.fill_in_fixed_from_settings("invalid", fixed)
 
     def test_get_psf_supersampling_factor(self):
-        """Test `get_psf_supersampling_factor` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_psf_supersampling_factor` method."""
         assert self.config_1.get_psf_supersampled_factor() == 1
 
         self.config_1.settings["psf_supersampled_factor"] = 3
         assert self.config_1.get_psf_supersampled_factor() == 3
 
     def test_get_index_lens_light_model_list(self):
-        """Test `get_index_lens_light_model_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_index_lens_light_model_list` method."""
         assert self.config_1.get_index_lens_light_model_list() == [[0]]
         assert self.config_3.get_index_lens_light_model_list() == [[0, 1], [2, 3]]
         config = deepcopy(self.config_5)
@@ -862,11 +758,7 @@ class TestModelConfig(object):
         ]
 
     def test_get_index_source_light_model_list(self):
-        """Test `get_index_source_light_model_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_index_source_light_model_list` method."""
         assert self.config_1.get_index_source_light_model_list() == [[0]]
         assert self.config_3.get_index_source_light_model_list() == [[0, 1], [2, 3]]
 

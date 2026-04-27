@@ -20,11 +20,7 @@ class TestData(object):
         pass
 
     def test_load_from_file(self):
-        """Test `load_from_file` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `load_from_file` method."""
         data = Data()
 
         data_file = (
@@ -53,11 +49,7 @@ class TestImageData(object):
         pass
 
     def test_kwargs_data(self):
-        """Test `kwargs_data` property.
-
-        :return:
-        :rtype:
-        """
+        """Test `kwargs_data` property."""
         for key in [
             "image_data",
             "background_rms",
@@ -69,22 +61,14 @@ class TestImageData(object):
             assert key in self.image_data.kwargs_data
 
     def test_get_image(self):
-        """Test `get_image` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image` method."""
         image = self.image_data.get_image()
 
         assert len(image.shape) == 2
         assert image.shape == (120, 120)
 
     def test_get_image_coordinate_system(self):
-        """Test `get_image_coordinate_system` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image_coordinate_system` method."""
         coord_sys = self.image_data.get_image_coordinate_system()
 
         x0, y0 = coord_sys.map_pix2coord(0, 0)
@@ -92,19 +76,11 @@ class TestImageData(object):
         assert y0 == self.image_data.kwargs_data["dec_at_xy_0"]
 
     def test_get_image_pixel_number(self):
-        """Test `get_image_pixel_number` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image_pixel_number` method."""
         assert self.image_data.get_image_size() == 120
 
     def test_get_image_pixel_scale(self):
-        """Test `get_image_pixel_scale` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image_pixel_scale` method."""
         npt.assert_almost_equal(
             self.image_data.get_image_pixel_scale(), 0.04, decimal=6
         )
@@ -120,11 +96,7 @@ class TestPSFData(object):
         pass
 
     def test_kwargs_psf(self):
-        """Test `kwargs_psf` property.
-
-        :return:
-        :rtype:
-        """
+        """Test `kwargs_psf` property."""
         psf_file = (
             _ROOT_DIR
             / "io_directory_example"

@@ -40,8 +40,8 @@ class Output(Processor):
     def fit_output(self):
         """The output from the `lenstronomy...Fitting_sequence.fit_sequence()`.
 
-        :return:
-        :rtype:
+        :return: output from the `lenstronomy...Fitting_sequence.fit_sequence()`
+        :rtype: `list`
         """
         if self._fit_output is None:
             raise ValueError(
@@ -57,8 +57,8 @@ class Output(Processor):
         """The `kwargs_result` after running a model by calling
         `lenstronomy...Fitting_sequence.fit_sequence()`.
 
-        :return:
-        :rtype:
+        :return: the `kwargs_result` dictionary
+        :rtype: `dict`
         """
         if self._kwargs_result is None:
             raise ValueError(
@@ -74,8 +74,8 @@ class Output(Processor):
         """The `kwargs_result` after running a model by calling
         `lenstronomy...Fitting_sequence.fit_sequence()`.
 
-        :return:
-        :rtype:
+        :return: the model settings dictionary
+        :rtype: `dict`
         """
         if self._model_settings is None:
             raise ValueError(
@@ -90,8 +90,8 @@ class Output(Processor):
     def samples_mcmc(self):
         """The array of MCMC samples from the model run.
 
-        :return:
-        :rtype:
+        :return: the array of MCMC samples
+        :rtype: `numpy.ndarray` or `list`
         """
         if self._samples_mcmc is None:
             return []
@@ -102,8 +102,8 @@ class Output(Processor):
     def params_mcmc(self):
         """The non-linear parameters sampled with MCMC.
 
-        :return:
-        :rtype:
+        :return: the list of non-linear parameters sampled with MCMC
+        :rtype: `list`
         """
         if self._params_mcmc is None:
             return []
@@ -114,8 +114,8 @@ class Output(Processor):
     def num_params_mcmc(self):
         """Number of sampled non-linear parameters in MCMC.
 
-        :return:
-        :rtype:
+        :return: number of sampled non-linear parameters
+        :rtype: `int`
         """
         if self._params_mcmc is None:
             return 0
@@ -257,12 +257,11 @@ class Output(Processor):
         :type source_v_min: `float` or `int`
         :param source_v_max: maximum plotting scale for the source plot
         :type source_v_max: `float` or `int`
-        :param print_results: if true, prints the `kwargs_result` dictionary
+        :param print_results: if `True`, prints the `kwargs_result` dictionary.
         :type print_results: `bool`
-        :param show_source_light: if true, replaces convergence plot with
+        :param show_source_light: if `True`, replaces convergence plot with
             source light convolved lens decomposition plot and also replaces
-            the magnification plot with the source-light subtracted data
-            plot
+            the magnification plot with the source-light subtracted data plot.
         :type show_source_light: `bool`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
@@ -459,20 +458,20 @@ class Output(Processor):
     def get_reshaped_emcee_chain(
         self, lens_name, model_id, walker_ratio, burn_in=0, verbose=True
     ):
-        """
+        """Get the reshaped MCMC chain from emcee.
 
-        :param lens_name:
-        :type lens_name:
-        :param model_id:
-        :type model_id:
-        :param walker_ratio:
-        :type walker_ratio:
-        :param burn_in:
-        :type burn_in:
-        :param verbose:
-        :type verbose:
-        :return:
-        :rtype:
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param walker_ratio: number of walkers per parameter in MCMC
+        :type walker_ratio: `int`
+        :param burn_in: number of burn-in steps to discard
+        :type burn_in: `int`
+        :param verbose: if `True`, prints verbose output.
+        :type verbose: `bool`
+        :return: reshaped emcee chain
+        :rtype: `numpy.ndarray`
         """
         self.load_output(lens_name, model_id)
 
@@ -511,7 +510,7 @@ class Output(Processor):
         :param burn_in: number of burn-in steps to compute the medians after
             convergence of the MCMC chain
         :type: `int`
-        :param verbose: if `True`, median values after burn-in will be printed
+        :param verbose: if `True`, median values after burn-in will be printed.
         :type verbose: `bool`
         :param fig_width: width of the figure
         :type fig_width: `float`
@@ -631,14 +630,22 @@ class Output(Processor):
     def get_kwargs_from_args(
         self, lens_name, model_id, args, band_index=0, linear_solve=False, param=None
     ):
-        """
+        """Get `kwargs` from a given set of `args`.
 
-        :param lens_name:
-        :type lens_name:
-        :param model_id:
-        :type model_id:
-        :return:
-        :rtype:
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param args: array of parameter values
+        :type args: `numpy.ndarray` or `list`
+        :param band_index: index of band to use for linear solve
+        :type band_index: `int`
+        :param linear_solve: if `True`, solves for the linear parameters.
+        :type linear_solve: `bool`
+        :param param: `Param` instance. If `None`, it is loaded automatically.
+        :type param: `lenstronomy.Sampling.parameters.Param` or `None`
+        :return: dictionary of kwargs
+        :rtype: `dict`
         """
         if param is None:
             param = self.get_param_class(lens_name, model_id)
@@ -709,7 +716,7 @@ class Output(Processor):
         :type model_id: `str`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
-        :param plot: if `True`, plots the lensed and unlensed source
+        :param plot: if `True`, plots the lensed and unlensed source.
         :type plot: `bool`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
@@ -874,7 +881,7 @@ class Output(Processor):
         :type kwargs_result: `dict`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
-        :param plot: if `True`, plots the lensed and unlensed source
+        :param plot: if `True`, plots the lensed and unlensed source.
         :type plot: `bool`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`

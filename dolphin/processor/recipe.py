@@ -77,7 +77,7 @@ class Recipe(object):
     def get_recipe(self, kwargs_data_joint=None, recipe_name="galaxy-quasar"):
         """Get `fitting_kwargs_list` according to the requested `recipe`.
 
-        :param kwargs_data_joint: `kwargs_data_joint` dictionary for multiple bands.
+        :param kwargs_data_joint: `kwargs_data_joint` dictionary for multiple bands
         :type kwargs_data_joint: `dict`
         :param recipe_name: recipe name, 'galaxy-quasar' or 'galaxy-galaxy'
         :type recipe_name: `str`
@@ -229,7 +229,7 @@ class Recipe(object):
     def get_sampling_sequence(self):
         """Get the sampling sequence. Currently only MCMC with emcee is supported.
 
-        :return: A list containing the sampling sequence arguments.
+        :return: a list containing the sampling sequence arguments
         :rtype: `list`
         """
         fitting_kwargs_list = []
@@ -286,11 +286,11 @@ class Recipe(object):
         """Get the pre-sampling optimization routine for a galaxy-galaxy lens. PSF
         iteration is not added.
 
-        :param kwargs_data_joint: Dictionary containing joint data specifications.
+        :param kwargs_data_joint: dictionary containing joint data specifications
         :type kwargs_data_joint: `dict`
         :param epochs: number of times to repeat the fitting sequence
         :type epochs: `int`
-        :return: A list containing the sequence of fitting operations.
+        :return: a list containing the sequence of fitting operations
         :rtype: `list`
         """
         fitting_kwargs_list = []

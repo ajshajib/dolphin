@@ -294,7 +294,7 @@ class Modeler(AI):
         only distance if there is just one.
 
         :param distances: list of pairwise distances between quasar images
-        :type distances: `List[float]`
+        :type distances: `list` of `float`
         :return: half of the second minimum distance
         :rtype: `float`
         """
@@ -448,7 +448,7 @@ class Modeler(AI):
         :param minimum_pixel_area: minimum pixel area for a satellite
         :type minimum_pixel_area: `int`
         :return: satellite positions
-        :rtype: `List[List[float]]`
+        :rtype: `list` of `list` of `float`
         """
         satellite_positions = cls.list_region_centers(
             semantic_segmentation, 4, minimum_pixel_area=minimum_pixel_area
@@ -482,13 +482,13 @@ class Modeler(AI):
         :param y: y-coordinate
         :type y: `int`
         :param pixels: list of pixels
-        :type pixels: `List[Tuple[int, int]]`
+        :type pixels: `list` of `tuple`
         :param visited: matrix to track visited pixels
-        :type visited: `List[List[bool]]`
+        :type visited: `list` of `list` of `bool`
         :param target_value: target value to match
         :type target_value: `int`
         :param matrix: input matrix
-        :type matrix: `List[List[int]]`
+        :type matrix: `list` of `list` of `int`
         :param rows: number of rows in the matrix
         :type rows: `int`
         :param cols: number of columns in the matrix
@@ -523,13 +523,13 @@ class Modeler(AI):
         value.
 
         :param matrix: input matrix
-        :type matrix: `List[List[int]]`
+        :type matrix: `list` of `list` of `int`
         :param target_value: target value
         :type target_value: `int`
         :param minimum_pixel_area: minimum size of the region
         :type minimum_pixel_area: `int`
         :return: list of central pixels (x, y) for all regions
-        :rtype: `List[Tuple[int, int]]`
+        :rtype: `list` of `tuple`
         """
         rows, cols = len(matrix), len(matrix[0])
         visited = [[False for _ in range(cols)] for _ in range(rows)]

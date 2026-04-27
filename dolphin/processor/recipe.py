@@ -21,7 +21,7 @@ class Recipe(object):
         """Initiate the class from the given settings for a lens system.
 
         :param config: `ModelConfig` instance
-        :type config: `class`
+        :type config: `ModelConfig`
         :param thread_count: number of threads if `multiprocess` is used
         :type thread_count: `int`
         """
@@ -117,7 +117,7 @@ class Recipe(object):
         """Get the index of the power-law model, if included in the lens model list.
 
         :return: index or `None`
-        :rtype: `int`
+        :rtype: `int` or `None`
         """
         lens_model_list = self._config.get_lens_model_list()
 
@@ -139,7 +139,7 @@ class Recipe(object):
         list.
 
         :return: index or `None`
-        :rtype: `int`
+        :rtype: `int` or `None`
         """
         lens_model_list = self._config.get_lens_model_list()
         if "SHEAR_GAMMA_PSI" in lens_model_list or "SHEAR" in lens_model_list:
@@ -156,7 +156,7 @@ class Recipe(object):
         """Get the index of the shapelets model, if included in the source model list.
 
         :return: index or `None`
-        :rtype: `int`
+        :rtype: `int` or `None`
         """
         source_model_list = self._config.get_source_light_model_list()
         if "SHAPELETS" in source_model_list:
@@ -468,15 +468,15 @@ class Recipe(object):
         galaxy is required to be close to the center (within a few pixels) of the image.
 
         :param image: image of the lensing system
-        :type image: `ndarray`
+        :type image: `numpy.ndarray`
         :param clear_center: radius of the central region to **not** mask
         :type clear_center: `float`
         :param mask: a mask to multiply with the arc mask. If the central
             region is masked out in `mask`, then a circle with radius
             `clear_center` will be unmasked.
-        :type mask: `ndarray`
+        :type mask: `numpy.ndarray`
         :return: mask for the lensed galaxy arcs
-        :rtype: `ndarray`
+        :rtype: `numpy.ndarray`
         """
         # take x- and y- gradient of the image
         x_diff = np.diff(image, axis=1)[1:, :]
@@ -557,7 +557,7 @@ class Recipe(object):
     def fix_params(self, model_component, index=None):
         """Fix all the params in `model_component` that are not fixed by settings.
 
-        :param model_component: name of params type, e.g., 'lens_model'
+        :param model_component: name of params type, e.g., 'lens', 'lens_light', or 'source'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be fixed
         :type index: `list` or `int`
@@ -605,7 +605,7 @@ class Recipe(object):
     def unfix_params(self, model_component, index=None):
         """Unfix all the params in `model_component` that are not fixed from settings.
 
-        :param model_component: name of params type, e.g., 'lens_model'
+        :param model_component: name of params type, e.g., 'lens', 'lens_light', or 'source'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be unfixed
         :type index: `list` or `int`

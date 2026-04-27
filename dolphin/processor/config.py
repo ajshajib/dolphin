@@ -955,7 +955,7 @@ class ModelConfig(Config):
         """Return `special_list`.
 
         :return: list of special parameters
-        :rtype: list
+        :rtype: `list` of `str`
         """
         special_list = []
 

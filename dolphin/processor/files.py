@@ -29,7 +29,7 @@ class FileSystem(object):
         """Converts a `pathlib.Path` object into an absolute string path.
 
         :param path: path to a file or directory
-        :type path: `Path`
+        :type path: `pathlib.Path`
         :return: absolute string path
         :rtype: `str`
         """
@@ -82,7 +82,7 @@ class FileSystem(object):
         """Get the path to the settings directory as a `Path` object.
 
         :return: path to the `settings` folder
-        :rtype: `Path`
+        :rtype: `pathlib.Path`
         """
         return self._root_path / "settings"
 

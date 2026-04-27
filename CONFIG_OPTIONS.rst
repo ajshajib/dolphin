@@ -24,6 +24,15 @@ Top-level information
 
        band: ["F475X", "F600LP"]
 
+- ``psf_supersampled_factor``: *(Optional)* Factor by which the Point Spread Function (PSF) is supersampled. Default is 1.
+
+  - Type: ``float``
+  - Example:
+
+    .. code-block:: yaml
+
+       psf_supersampled_factor: 3
+
 - ``pixel_size``: *(Optional)* Pixel size for each band. If not provided, it will be inferred from the image data.
 
   - Type: ``list of floats``
@@ -76,12 +85,13 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-    - ``special``: *(Optional)* List of special parameter types.
+    - ``special``: *(Optional)* String or list of special parameter types.
 
-      - Type: ``list of strings``
+      - Type: ``string`` or ``list of strings``
       - Example:
 
         .. code-block:: yaml
+
           special: ["astrometric_uncertainty"]
 
 Satellites Section
@@ -230,6 +240,17 @@ Lens Light Options
              0: 
                [[R_sersic, 0.21, 0.15]]
 
+    - ``mge_config``: *(Optional)* Configuration for MGE_SET and MGE_SET_ELLIPSE light profiles. Can be used to set the number of Gaussian components.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           mge_config:
+             0:
+               n_comp: 20
+
 Source Light Options
 --------------------
 
@@ -256,40 +277,123 @@ Source Light Options
 
            shapelet_scale_logarithmic_prior: true
 
-    - ``n_max``: Maximum number of Sersic profiles for each band.
+    - ``n_max``: Maximum number of Shapelet profiles for each band.
 
-      - Type: ``list of integers``
+      - Type: ``integer`` or ``list of integers``
       - Example:
 
         .. code-block:: yaml
 
            n_max: [2, 4]
 
-Special Options
----------------
+Point Source Options
+--------------------
 
-- ``special_option``: Initialization of special parameters.
+- ``point_source_option``: *(Optional)* Options for point source models.
 
   - Suboptions:
 
-    ``delta_x_image``: Initial spread from point source centroid.
-    ``delta_y_image``: Initial spread from point source centroid.
+    - ``ra_init``: Initial guess for point source RA positions.
 
-      - Type: ``array of floats corresponding to the number of point sources``
+      - Type: ``list of floats``
       - Example:
 
         .. code-block:: yaml
-          delta_x_image: [0.0, 0.0]
-          delta_y_image: [0.0, 0.0]
-    ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
-    ``delta_image_uppwer``: Upper bound in spread of point source centroid sampler.
+
+           ra_init: [0.1, -0.1]
+
+    - ``dec_init``: Initial guess for point source DEC positions.
+
+      - Type: ``list of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           dec_init: [0.1, -0.1]
+
+    - ``bound``: Bound width for searching the point source centroids.
 
       - Type: ``float``
       - Example:
 
         .. code-block:: yaml
+
+           bound: 0.2
+
+    - ``gaussian_prior``: Gaussian priors for point source parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           gaussian_prior:
+             0: [[ra_image, 0.1, 0.05]]
+
+Special Options
+---------------
+
+- ``special_option``: *(Optional)* Initialization of special parameters.
+
+  - Suboptions:
+
+    - ``delta_x_image``: Initial spread from point source centroid in the x-axis.
+
+      - Type: ``array of floats corresponding to the number of point sources``
+      - Example:
+
+        .. code-block:: yaml
+
+          delta_x_image: [0.0, 0.0]
+
+    - ``delta_y_image``: Initial spread from point source centroid in the y-axis.
+
+      - Type: ``array of floats corresponding to the number of point sources``
+      - Example:
+
+        .. code-block:: yaml
+          delta_y_image: [0.0, 0.0]
+
+    - ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
           delta_image_lower: -0.004
+
+    - ``delta_image_upper``: Upper bound in spread of point source centroid sampler.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
           delta_image_upper: 0.004
+
+Guess Parameters
+----------------
+
+- ``guess_params``: *(Optional)* Initial guess parameter values for component models.
+
+  - Suboptions:
+
+    - ``lens``: Guess parameters for lens models.
+    - ``lens_light``: Guess parameters for lens light models.
+    - ``source``: Guess parameters for source light models.
+    - ``ps``: Guess parameters for point source models.
+
+    - Example:
+
+      .. code-block:: yaml
+
+         guess_params:
+           lens:
+             0:
+               theta_E: 1.2
+               e1: 0.05
+               e2: -0.05
 
 Numeric Options
 ---------------
@@ -305,7 +409,8 @@ Numeric Options
 
         .. code-block:: yaml
 
-           supersampling_factor: [2]
+           numeric_option:
+             supersampling_factor: [2]
 
 Fitting Options
 ---------------
@@ -394,6 +499,10 @@ Fitting Options
 
                walkerRatio: 2
     
+        - ``init_samples``: *(Optional)* Initial samples for walkers.
+          
+          - Type: ``list of lists of floats``
+
     - ``psf_iteration``: *(Optional)* Whether to perform iterative PSF fitting.
 
       - Type: ``boolean``
@@ -452,12 +561,54 @@ Fitting Options
 
                psf_symmetry: 4
 
+        - ``block_center_neighbour``: Block center neighbour factor.
+
+          - Type: ``float``
+          - Example:
+
+            .. code-block:: yaml
+
+               block_center_neighbour: 0.0
+
+- ``fitting_kwargs_list``: *(Optional)* User-provided list of fitting sequences to bypass the automated recipes in dolphin.
+
+  - Type: ``list``
+  - Example:
+
+    .. code-block:: yaml
+
+       fitting_kwargs_list:
+         - ['PSO', {'sigma_scale': 1., 'n_particles': 50, 'n_iterations': 50}]
+
+Lenstronomy Arbitrary Keyword Arguments
+---------------------------------------
+
+- ``kwargs_model``: *(Optional)* Pass any arbitrary arguments strictly allowed in `lenstronomy.LensModel`, `lenstronomy.LightModel` inside this section.
+
+- ``kwargs_constraints``: *(Optional)* Pass any arbitrary constraints strictly allowed in `lenstronomy.Workflow.fitting_sequence` inside this section.
+
+  - Example:
+
+    .. code-block:: yaml
+
+       kwargs_constraints:
+         joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
+
 Mask Options
 ------------
 
 - ``mask``: *(Optional)* Settings for masking regions of the image.
 
   - Suboptions:
+
+    - ``provided``: Set to `true` to use custom `.npy` mask files from the `settings/masks/` directory instead of using analytical masking below.
+
+      - Type: ``boolean``
+      - Example:
+
+        .. code-block:: yaml
+
+           provided: false
 
     - ``centroid_offset``: Offset for the centroid of the mask.
 
@@ -466,7 +617,7 @@ Mask Options
 
         .. code-block:: yaml
 
-           centroid_offset: [[0.0, 0], [0.0, 0]]
+           centroid_offset: [[0.0, 0.0], [0.0, 0.0]]
 
     - ``mask_edge_pixels``: Number of edge pixels to mask.
 
@@ -485,3 +636,24 @@ Mask Options
         .. code-block:: yaml
 
            radius: [20.0, 20.0]
+
+    - ``a``, ``b``, ``angle``: Elliptical mask parameters for each band. Used when ``radius`` is not provided.
+    
+      - Type: ``list of floats``
+      - Example:
+      
+        .. code-block:: yaml
+        
+           a: [10.0, 10.0]
+           b: [5.0, 5.0]
+           angle: [0.0, 0.0]
+
+    - ``extra_regions``: List of circular regions to mask additionally. Format is ``[ra, dec, radius]``.
+
+      - Type: ``list of lists of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           extra_regions:
+             - [[1.0, -1.0, 0.5]]

@@ -298,7 +298,7 @@ class ModelConfig(Config):
         # join centers of main deflector's mass and light
         joint_lens_with_light = [[0, 0, ["center_x", "center_y"]]]
 
-        # joint satellite mass and light
+        # join satellite mass and light
         if (np.array(lens_light_satellite_flags) > -1).any():
             for i, flag in enumerate(lens_light_satellite_flags):
                 if flag > -1:
@@ -1536,7 +1536,7 @@ class ModelConfig(Config):
             if self.settings[option_str]["fix"] is not None:
                 for index, param_dict in self.settings[option_str]["fix"].items():
                     for key, value in param_dict.items():
-                        # Propagting the fixed values in light profile to all bands
+                        # Propagating the fixed values in light profile to all bands
                         if component in ["lens_light", "source_light"]:
                             for n in range(self.number_of_bands):
                                 num_profiles = len(self.settings["model"][component])

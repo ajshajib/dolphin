@@ -38,9 +38,9 @@ class Output(Processor):
 
     @property
     def fit_output(self):
-        """The output from the `lenstronomy...Fitting_sequence.fit_sequence()`.
+        """The output from the `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`.
 
-        :return: output from the `lenstronomy...Fitting_sequence.fit_sequence()`
+        :return: output from the `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`
         :rtype: `list`
         """
         if self._fit_output is None:
@@ -55,7 +55,7 @@ class Output(Processor):
     @property
     def kwargs_result(self):
         """The `kwargs_result` after running a model by calling
-        `lenstronomy...Fitting_sequence.fit_sequence()`.
+        `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`.
 
         :return: the `kwargs_result` dictionary
         :rtype: `dict`

@@ -941,7 +941,14 @@ class ModelConfig(Config):
 
     def get_index_list(self, light_type="lens_light"):
         """Create list with of index for the different light profiles (for multiple
-        filters)"""
+        filters)
+        
+        :param light_type: Key specifying which light model to use from ``self.settings["model"]``
+        :type light_type: str
+
+        :return: index_list
+        :rtype: list[list]
+        """
         index_list = []
 
         if light_type in self.settings["model"]:

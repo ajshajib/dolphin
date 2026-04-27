@@ -21,7 +21,7 @@ class Processor(object):
     def __init__(self, io_directory):
         """Initialize the Processor with the base I/O directory.
 
-        :param io_directory: Path to the input/output directory. Should not end with a slash.
+        :param io_directory: path to the input/output directory. Should not end with a slash.
         :type io_directory: `str`
         """
         self.io_directory = io_directory
@@ -39,17 +39,17 @@ class Processor(object):
     ):
         """Run lens modeling optimizations for a single lens system.
 
-        :param lens_name: Name of the lens system to model.
+        :param lens_name: name of the lens system to model
         :type lens_name: `str`
-        :param model_id: Identifier for this specific model run.
+        :param model_id: identifier for this specific model run
         :type model_id: `str`
-        :param log: If `True`, standard output is logged to a file. Set to `False` in notebooks.
+        :param log: if `True`, standard output is logged to a file. Set to `False` in notebooks.
         :type log: `bool`
-        :param mpi: Enable MPI for parallel processing.
+        :param mpi: enable MPI for parallel processing
         :type mpi: `bool`
-        :param recipe_name: Recipe for pre-sampling optimization. Supported: 'galaxy-quasar', 'galaxy-galaxy'.
+        :param recipe_name: recipe for pre-sampling optimization. Supported: 'galaxy-quasar', 'galaxy-galaxy'.
         :type recipe_name: `str`
-        :param thread_count: Number of threads to use if multiprocess is enabled.
+        :param thread_count: number of threads to use if multiprocess is enabled
         :type thread_count: `int`
         :return: None
         :rtype: `None`
@@ -104,9 +104,9 @@ class Processor(object):
     def get_lens_config(self, lens_name):
         """Get the `ModelConfig` object populated with settings for a specific lens.
 
-        :param lens_name: Name of the lens system.
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :return: Instance of `ModelConfig` containing the lens configurations.
+        :return: instance of `ModelConfig` containing the lens configurations
         :rtype: `ModelConfig`
         """
         return ModelConfig(lens_name, file_system=self.file_system)
@@ -114,11 +114,11 @@ class Processor(object):
     def get_kwargs_data_joint(self, lens_name, psf_supersampled_factor=1):
         """Create a joint `kwargs_data` dictionary combining data and PSFs across filters.
 
-        :param lens_name: Name of the lens system.
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param psf_supersampled_factor: Supersampling factor applied to the PSF.
+        :param psf_supersampled_factor: supersampling factor applied to the PSF
         :type psf_supersampled_factor: `float`
-        :return: Joint kwargs data mapping suitable for `lenstronomy`.
+        :return: joint kwargs data mapping suitable for `lenstronomy`
         :rtype: `dict`
         """
         config = self.get_lens_config(lens_name)
@@ -151,11 +151,11 @@ class Processor(object):
     def get_image_data(self, lens_name, band):
         """Get the `ImageData` instance for a given lens and observing band.
 
-        :param lens_name: Name of the lens system.
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param band: Observing band or filter name.
+        :param band: observing band or filter name
         :type band: `str`
-        :return: Loaded image data object.
+        :return: loaded image data object
         :rtype: `ImageData`
         """
         return ImageData(self.file_system.get_image_file_path(lens_name, band))
@@ -163,11 +163,11 @@ class Processor(object):
     def get_psf_data(self, lens_name, band):
         """Get the `PSFData` instance for a given lens and observing band.
 
-        :param lens_name: Name of the lens system.
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param band: Observing band or filter name.
+        :param band: observing band or filter name
         :type band: `str`
-        :return: Loaded PSF data object.
+        :return: loaded PSF data object
         :rtype: `PSFData`
         """
         return PSFData(self.file_system.get_psf_file_path(lens_name, band))

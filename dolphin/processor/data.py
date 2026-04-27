@@ -20,9 +20,9 @@ class Data(object):
     def load_from_file(file_path):
         """Load data dictionary from an HDF5 file.
 
-        :param file_path: Path to the HDF5 data file.
+        :param file_path: path to the HDF5 data file
         :type file_path: `str`
-        :return: A dictionary containing the data loaded from the file.
+        :return: a dictionary containing the data loaded from the file
         :rtype: `dict`
         """
         with h5py.File(file_path, "r") as f:
@@ -39,7 +39,7 @@ class ImageData(Data):
     def __init__(self, data_file_path):
         """Initialize the ImageData instance by loading from the given file path.
 
-        :param data_file_path: Path to the HDF5 data file containing image data.
+        :param data_file_path: path to the HDF5 data file containing image data
         :type data_file_path: `str`
         """
         super().__init__()
@@ -50,7 +50,7 @@ class ImageData(Data):
     def kwargs_data(self):
         """Get a deep copy of the `kwargs_data` dictionary.
 
-        :return: A dictionary with the image configuration and data.
+        :return: a dictionary with the image configuration and data
         :rtype: `dict`
         """
         kwargs_data = deepcopy(self._data)
@@ -60,7 +60,7 @@ class ImageData(Data):
     def get_image(self):
         """Get the image `ndarray` saved in the class instance.
 
-        :return: A numpy array representing the image data.
+        :return: a numpy array representing the image data
         :rtype: `ndarray`
         """
         return deepcopy(self._data["image_data"])
@@ -68,7 +68,7 @@ class ImageData(Data):
     def get_image_coordinate_system(self):
         """Get the coordinate system of the image data.
 
-        :return: An instance representing the image coordinate system.
+        :return: an instance representing the image coordinate system
         :rtype: `lenstronomy.Data.coord_transforms.Coordinates`
         """
         ra_at_xy_0 = self.kwargs_data["ra_at_xy_0"]
@@ -82,7 +82,7 @@ class ImageData(Data):
     def get_image_size(self):
         """Get the number of pixels along one axis in the image.
 
-        :return: The dimension of the square image data.
+        :return: the dimension of the square image data
         :rtype: `int`
         """
         return self.kwargs_data["image_data"].shape[0]
@@ -90,7 +90,7 @@ class ImageData(Data):
     def get_image_pixel_scale(self):
         """Get the pixel scale of the image in arcseconds.
 
-        :return: Pixel scale width.
+        :return: pixel scale width
         :rtype: `float`
         """
         return self.get_image_coordinate_system().pixel_width
@@ -102,7 +102,7 @@ class PSFData(Data):
     def __init__(self, psf_file_path):
         """Initialize the PSFData instance by loading from the given file path.
 
-        :param psf_file_path: Path to the HDF5 PSF data file.
+        :param psf_file_path: path to the HDF5 PSF data file
         :type psf_file_path: `str`
         """
         super().__init__()
@@ -113,7 +113,7 @@ class PSFData(Data):
     def kwargs_psf(self):
         """Get a deep copy of the `kwargs_psf` dictionary with correct formatting.
 
-        :return: A dictionary containing the PSF settings and kernel.
+        :return: a dictionary containing the PSF settings and kernel
         :rtype: `dict`
         """
         kwargs_psf = deepcopy(self._data)

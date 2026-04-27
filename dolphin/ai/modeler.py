@@ -343,10 +343,10 @@ class Modeler(AI):
     def get_theta_E_init(self, semantic_segmentation, coordinate_system):
         """Get the initial guess for the Einstein radius.
 
-        :param galaxy_center: galaxy center
-        :type galaxy_center: `List[float]`
-        :param image_positions: image positions
-        :type image_positions: `List[List[float]]`
+        :param semantic_segmentation: semantic segmentation output
+        :type semantic_segmentation: `numpy.ndarray`
+        :param coordinate_system: coordinate system
+        :type coordinate_system: `Coordinates`
         :return: initial guess for the Einstein radius
         :rtype: `float`
         """

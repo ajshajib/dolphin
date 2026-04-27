@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """This module provides the base AI class for handling common AI-related operations."""
 
+__author__ = "ajshajib"
+
 from ..processor.data import ImageData
 from ..processor.files import FileSystem
 
@@ -11,7 +13,7 @@ class AI(object):
     def __init__(self, io_directory_path):
         """Initialize the AI class.
 
-        :param io_directory_path: Path to the input-output directory containing data.
+        :param io_directory_path: path to the input-output directory containing data
         :type io_directory_path: `str`
         """
         self.file_system = FileSystem(io_directory_path)
@@ -19,11 +21,11 @@ class AI(object):
     def get_image_data(self, lens_name, band_name):
         """Get the image data for a specific lens and band.
 
-        :param lens_name: Name of the lens system.
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param band_name: Name of the observing band (e.g., 'F814W').
+        :param band_name: name of the observing band (e.g., 'F814W')
         :type band_name: `str`
-        :return: An `ImageData` instance containing the image data.
+        :return: an `ImageData` instance containing the image data
         :rtype: `ImageData`
         """
         image_path = self.file_system.get_image_file_path(lens_name, band_name)

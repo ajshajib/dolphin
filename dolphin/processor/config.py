@@ -837,7 +837,7 @@ class ModelConfig(Config):
 
     @property
     def num_satellites(self):
-        """Check if the system has satellites.
+        """Get the number of satellite galaxies in the system.
 
         :return: the number of satellite galaxies
         :rtype: `int`

@@ -123,7 +123,15 @@ class Output(Processor):
 
     def swim(self, *args, **kwargs):
         """Override the `swim` method of the `Processor` class to make it not
-        callable."""
+        callable.
+
+        :param args: positional arguments
+        :type args: `tuple`
+        :param kwargs: keyword arguments
+        :type kwargs: `dict`
+        :return: None
+        :rtype: `None`
+        """
         raise NotImplementedError
 
     def load_output(self, lens_name, model_id):
@@ -248,9 +256,9 @@ class Output(Processor):
         :type convergence_cmap: `str` or `matplotlib.colors.Colormap`
         :param magnification_cmap: colormap for magnification plot
         :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the model, data, & source plot
+        :param v_min: minimum plotting scale for the model & data plots
         :type v_min: `float` or `int` or `None`
-        :param v_max: maximum plotting scale for the model, data, & source plot
+        :param v_max: maximum plotting scale for the model & data plots
         :type v_max: `float` or `int` or `None`
         :param source_v_min: minimum plotting scale for the source plot
         :type source_v_min: `float` or `int` or `None`
@@ -365,9 +373,9 @@ class Output(Processor):
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the model, data, & source plot
+        :param v_min: minimum plotting scale for the component plots
         :type v_min: `float` or `int` or `None`
-        :param v_max: maximum plotting scale for the model, data, & source plot
+        :param v_max: maximum plotting scale for the component plots
         :type v_max: `float` or `int` or `None`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
@@ -661,7 +669,7 @@ class Output(Processor):
         return kwargs
 
     def get_im_sim(self, lens_name, band_index):
-        """Get lestronomy's `ImSim` instance for the lens.
+        """Get lenstronomy's `ImSim` instance for the lens.
 
         :param lens_name: name of the lens
         :type lens_name: `str`

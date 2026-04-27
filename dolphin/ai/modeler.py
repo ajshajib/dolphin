@@ -495,6 +495,8 @@ class Modeler(AI):
         :type rows: `int`
         :param cols: number of columns in the matrix
         :type cols: `int`
+        :return: None
+        :rtype: `None`
         """
         stack = [(x, y)]
 

@@ -17,7 +17,7 @@ from .files import FileSystem
 
 
 class Config(object):
-    """This class contains the methods to load an read YAML configuration files.
+    """This class contains the methods to load and read YAML configuration files.
 
     This is a parent class for other classes that needs to load a configuration file. If
     the file type of the configuration files changes, then only this class needs to be

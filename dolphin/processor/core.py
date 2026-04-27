@@ -48,6 +48,7 @@ class Processor(object):
         :param mpi: enable MPI for parallel processing
         :type mpi: `bool`
         :param recipe_name: recipe for pre-sampling optimization. Supported: 'galaxy-quasar', 'galaxy-galaxy'.
+        :param recipe_name: recipe for pre-sampling optimization. Supported: 'galaxy-quasar', 'galaxy-galaxy', 'skip'.
         :type recipe_name: `str`
         :param thread_count: number of threads to use if multiprocess is enabled
         :type thread_count: `int`
@@ -117,8 +118,8 @@ class Processor(object):
 
         :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param psf_supersampled_factor: supersampling factor applied to the PSF
-        :type psf_supersampled_factor: `float`
+        :param psf_supersampled_factor: integer supersampling factor applied to the PSF
+        :type psf_supersampled_factor: `int`
         :return: joint kwargs data mapping suitable for `lenstronomy`
         :rtype: `dict`
         """

@@ -538,20 +538,20 @@ class ModelConfig(Config):
     ):
         """Provide additional likelihood terms to be sent to `lenstronomy`.
 
-        :param kwargs_lens: dictionary containing lens model keyword arguments
-        :type kwargs_lens: `dict`
-        :param kwargs_source: dictionary containing source model keyword arguments
-        :type kwargs_source: `dict`
-        :param kwargs_lens_light: dictionary containing lens light model keyword arguments
-        :type kwargs_lens_light: `dict`
-        :param kwargs_ps: dictionary containing point source model keyword arguments
-        :type kwargs_ps: `dict`
+        :param kwargs_lens: list of dictionaries containing lens model keyword arguments
+        :type kwargs_lens: `list` of `dict`
+        :param kwargs_source: list of dictionaries containing source model keyword arguments
+        :type kwargs_source: `list` of `dict`
+        :param kwargs_lens_light: list of dictionaries containing lens light model keyword arguments
+        :type kwargs_lens_light: `list` of `dict`
+        :param kwargs_ps: list of dictionaries containing point source model keyword arguments
+        :type kwargs_ps: `list` of `dict`
         :param kwargs_special: dictionary containing special model keyword arguments
         :type kwargs_special: `dict`
         :param kwargs_extinction: dictionary containing extinction model keyword arguments
         :type kwargs_extinction: `dict`
-        :param kwargs_tracer_source: dictionary containing tracer source model keyword arguments
-        :type kwargs_tracer_source: `dict`
+        :param kwargs_tracer_source: list of dictionaries containing tracer source model keyword arguments
+        :type kwargs_tracer_source: `list` of `dict`
         :return: prior
         :rtype: `float`
         """

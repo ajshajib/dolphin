@@ -172,8 +172,8 @@ class Output(Processor):
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
-        :return: `ModelPlot` instance, maximum pixel value of the image
-        :rtype: `obj`, `float`
+        :return: a tuple containing the `ModelPlot` instance and the maximum pixel value of the image
+        :rtype: `tuple` (`lenstronomy.Plots.model_plot.ModelPlot`, `float`)
         """
         if model_id is None and kwargs_result is None:
             raise ValueError(

@@ -38,7 +38,8 @@ class Output(Processor):
 
     @property
     def fit_output(self):
-        """The output from the `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`.
+        """The output from the
+        `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`.
 
         :return: output from the `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`
         :rtype: `list`

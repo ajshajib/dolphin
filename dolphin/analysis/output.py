@@ -452,9 +452,7 @@ class Output(Processor):
 
         return fig
 
-    def get_reshaped_emcee_chain(
-        self, lens_name, model_id, walker_ratio, burn_in=0, verbose=True
-    ):
+    def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio, burn_in=0):
         """Get the reshaped MCMC chain from emcee.
 
         :param lens_name: name of the lens
@@ -465,8 +463,6 @@ class Output(Processor):
         :type walker_ratio: `int`
         :param burn_in: number of burn-in steps to discard
         :type burn_in: `int`
-        :param verbose: if `True`, prints verbose output
-        :type verbose: `bool`
         :return: reshaped emcee chain
         :rtype: `numpy.ndarray`
         """
@@ -506,18 +502,18 @@ class Output(Processor):
         :type walker_ratio: `int`
         :param burn_in: number of burn-in steps to compute the medians after
             convergence of the MCMC chain
-        :type: `int`
+        :type burn_in: `int`
         :param verbose: if `True`, median values after burn-in will be printed
         :type verbose: `bool`
         :param fig_width: width of the figure
         :type fig_width: `float`
         :param parameters_to_plot: if not empty, list of parameters to plot
-        :type fig_width: `list`
+        :type parameters_to_plot: `list`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
         chain = self.get_reshaped_emcee_chain(
-            lens_name, model_id, walker_ratio, burn_in=burn_in, verbose=verbose
+            lens_name, model_id, walker_ratio, burn_in=burn_in
         )
 
         num_params = self.num_params_mcmc

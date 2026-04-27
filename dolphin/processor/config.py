@@ -551,8 +551,9 @@ class ModelConfig(Config):
         :param kwargs_extinction: dictionary containing extinction model keyword arguments
         :type kwargs_extinction: `dict`
         :param kwargs_tracer_source: dictionary containing tracer source model keyword arguments
+        :type kwargs_tracer_source: `dict`
         :return: prior
-        :rtype: float
+        :rtype: `float`
         """
         prior = 0.0
 
@@ -647,6 +648,7 @@ class ModelConfig(Config):
         :return: mask
         :rtype: `numpy.ndarray`
         """
+        return np.load(mask_file_path)
 
     def get_masks(self):
         """Create masks based on settings or load them from files.
@@ -857,7 +859,7 @@ class ModelConfig(Config):
         """Return `lens_model_list` and `satellite_flags`.
 
         :return: list of lens models and satellite flags
-        :rtype: list, list
+        :rtype: `tuple` (`list`, `list`)
         """
         lens_model_list = []
         satellite_flag = []
@@ -907,7 +909,7 @@ class ModelConfig(Config):
         """Return `lens_light_model_list` and `satellite_flags`.
 
         :return: list of lens light models and satellite flags
-        :rtype: list, list
+        :rtype: `tuple` (`list`, `list`)
         """
         lens_light_model_list = []
         satellite_flag = []
@@ -968,14 +970,14 @@ class ModelConfig(Config):
             return []
 
     def get_index_list(self, light_type="lens_light"):
-        """Create list with of index for the different light profiles (for multiple
-        filters)
+        """Create a list of indices for the different light profiles (for multiple
+        filters).
 
         :param light_type: key specifying which light model to use from
             `self.settings["model"]`
         :type light_type: str
         :return: list of indices
-        :rtype: list[list]
+        :rtype: `list` of `list` of `int`
         """
         index_list = []
 
@@ -998,7 +1000,7 @@ class ModelConfig(Config):
         return index_list
 
     def get_index_lens_light_model_list(self):
-        """Create list with of index for the different lens light profile (for multiple
+        """Create a list of indices for the different lens light profiles (for multiple
         filters).
 
         :return: nested list of profile indices for each band
@@ -1009,7 +1011,7 @@ class ModelConfig(Config):
         return index_list
 
     def get_index_source_light_model_list(self):
-        """Create list with of index for the different source light profiles (for
+        """Create a list of indices for the different source light profiles (for
         multiple filters).
 
         :return: nested list of profile indices for each band
@@ -1443,7 +1445,7 @@ class ModelConfig(Config):
         """Create `special_params`.
 
         :return: list of parameters
-        :rtype: list of dict
+        :rtype: `list` of `dict`
         """
 
         special_list = self.get_special_list()

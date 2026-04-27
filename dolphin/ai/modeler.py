@@ -382,7 +382,7 @@ class Modeler(AI):
         :param coordinate_system: coordinate system
         :type coordinate_system: `Coordinates`
         :return: initial guess for the lens galaxy center
-        :rtype: `[float, float]`
+        :rtype: `list` of `float`
         """
         galaxy_center_pixels = cls.list_region_centers(semantic_segmentation, 1)
         galaxy_center_ra, galaxy_center_dec = coordinate_system.map_pix2coord(
@@ -402,7 +402,7 @@ class Modeler(AI):
         :param clear_center: radius (arcsecond) to clear the center from any detected quasar
         :type clear_center: `float`
         :return: quasar image positions
-        :rtype: `[np.ndarray, np.ndarray]`
+        :rtype: `list` of `numpy.ndarray`
         """
         if self._source_type != "quasar":
             raise NotImplementedError(

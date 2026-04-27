@@ -560,7 +560,7 @@ class Recipe(object):
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be fixed
-        :type index: `list`
+        :type index: `list` or `int`
         :return: formatted fit-sequence code to go into `fitting_kwargs_list`
         :rtype: `list`
         """
@@ -608,7 +608,7 @@ class Recipe(object):
         :param model_component: name of params type, e.g., 'lens_model'
         :type model_component: `str`
         :param index: profile indices, if `None` all will be unfixed
-        :type index: `list`
+        :type index: `list` or `int`
         :return: formatted fit-sequence code to go into `fitting_kwargs_list`
         :rtype: `list`
         """

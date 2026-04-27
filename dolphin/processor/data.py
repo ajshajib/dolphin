@@ -61,7 +61,7 @@ class ImageData(Data):
         """Get the image `ndarray` saved in the class instance.
 
         :return: a numpy array representing the image data
-        :rtype: `ndarray`
+        :rtype: `numpy.ndarray`
         """
         return deepcopy(self._data["image_data"])
 

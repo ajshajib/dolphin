@@ -597,7 +597,7 @@ class Output(Processor):
         :param model_id: model run identifier
         :type model_id: `str`
         :return: `Param` instance
-        :rtype: `obj`
+        :rtype: `lenstronomy.Sampling.parameters.Param`
         """
         self.load_output(lens_name, model_id=model_id)
 
@@ -668,7 +668,7 @@ class Output(Processor):
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :return: `ImSim` instance
-        :rtype: `obj`
+        :rtype: `lenstronomy.ImSim.im_sim.ImSim`
         """
         config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
 

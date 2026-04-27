@@ -68,6 +68,8 @@ class Modeler(AI):
         :type lens_name: `str`
         :param band_name: band name
         :type band_name: `str`
+        :return: the loaded semantic segmentation array
+        :rtype: `numpy.ndarray`
         """
         return self.file_system.load_semantic_segmentation(lens_name, band_name)
 
@@ -133,7 +135,7 @@ class Modeler(AI):
             }
         :type sampler_settings: `dict`
         :param supersampling_factor: supersampling factor
-        :type supersampling_factor: `List[int]`
+        :type supersampling_factor: `list` of `int`
         :param max_satellite_number: maximum number of satellites
         :type max_satellite_number: `int`
         :param minimum_satellite_area: minimum satellite area

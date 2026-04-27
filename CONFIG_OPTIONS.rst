@@ -82,6 +82,7 @@ Model Section
       - Example:
 
         .. code-block:: yaml
+
           special: ["astrometric_uncertainty"]
 
 Satellites Section
@@ -272,22 +273,25 @@ Special Options
 
   - Suboptions:
 
-    ``delta_x_image``: Initial spread from point source centroid.
-    ``delta_y_image``: Initial spread from point source centroid.
+    - ``delta_x_image``: Initial spread from point source centroid.
+    - ``delta_y_image``: Initial spread from point source centroid.
 
       - Type: ``array of floats corresponding to the number of point sources``
       - Example:
 
         .. code-block:: yaml
+
           delta_x_image: [0.0, 0.0]
           delta_y_image: [0.0, 0.0]
-    ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
-    ``delta_image_uppwer``: Upper bound in spread of point source centroid sampler.
+
+    - ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
+    - ``delta_image_upper``: Upper bound in spread of point source centroid sampler.
 
       - Type: ``float``
       - Example:
 
         .. code-block:: yaml
+          
           delta_image_lower: -0.004
           delta_image_upper: 0.004
 

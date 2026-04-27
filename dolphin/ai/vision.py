@@ -12,8 +12,8 @@ from .ai import AI
 
 
 class Vision(AI):
-    """This class takes image data and creates semantic segmentation for it using an
-    AI model."""
+    """This class takes image data and creates semantic segmentation for it using an AI
+    model."""
 
     def __init__(self, io_directory_path, source_type="quasar"):
         """Initialize the Vision object.

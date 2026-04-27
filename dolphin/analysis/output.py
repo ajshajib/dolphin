@@ -122,8 +122,7 @@ class Output(Processor):
             return len(self._params_mcmc)
 
     def swim(self, *args, **kwargs):
-        """Override the `swim` method of the `Processor` class to make it not
-        callable.
+        """Override the `swim` method of the `Processor` class to make it not callable.
 
         :param args: positional arguments
         :type args: `tuple`

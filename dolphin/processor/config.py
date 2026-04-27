@@ -1466,9 +1466,6 @@ class ModelConfig(Config):
 
                 fixed.update({})
 
-            else:
-                raise ValueError(f"{model} not supported!")
-
         params = [init, sigma, fixed, lower, upper]
         return params
 

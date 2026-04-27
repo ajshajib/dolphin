@@ -792,13 +792,6 @@ class TestModelConfig(object):
 
         assert params == [{}, {}, {}, {}, {}]
 
-        # Test 3: ensure error message prints if special
-        # type is not supported
-        config = deepcopy(self.config_3)
-        config.settings["model"]["special"] = ["INVALID"]
-        with pytest.raises(ValueError):
-            config.get_special_params()
-
     def test_fill_in_fixed_from_settings(self):
         """Test `fill_in_fixed_from_settings` method.
 

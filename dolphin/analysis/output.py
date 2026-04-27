@@ -257,11 +257,9 @@ class Output(Processor):
         :type source_v_min: `float` or `int`
         :param source_v_max: maximum plotting scale for the source plot
         :type source_v_max: `float` or `int`
-        :param print_results: if `True`, prints the `kwargs_result` dictionary.
+        :param print_results: if `True`, prints the `kwargs_result` dictionary
         :type print_results: `bool`
-        :param show_source_light: if `True`, replaces convergence plot with
-            source light convolved lens decomposition plot and also replaces
-            the magnification plot with the source-light subtracted data plot.
+        :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
         :type show_source_light: `bool`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
@@ -468,7 +466,7 @@ class Output(Processor):
         :type walker_ratio: `int`
         :param burn_in: number of burn-in steps to discard
         :type burn_in: `int`
-        :param verbose: if `True`, prints verbose output.
+        :param verbose: if `True`, prints verbose output
         :type verbose: `bool`
         :return: reshaped emcee chain
         :rtype: `numpy.ndarray`
@@ -510,7 +508,7 @@ class Output(Processor):
         :param burn_in: number of burn-in steps to compute the medians after
             convergence of the MCMC chain
         :type: `int`
-        :param verbose: if `True`, median values after burn-in will be printed.
+        :param verbose: if `True`, median values after burn-in will be printed
         :type verbose: `bool`
         :param fig_width: width of the figure
         :type fig_width: `float`
@@ -640,7 +638,7 @@ class Output(Processor):
         :type args: `numpy.ndarray` or `list`
         :param band_index: index of band to use for linear solve
         :type band_index: `int`
-        :param linear_solve: if `True`, solves for the linear parameters.
+        :param linear_solve: if `True`, solves for the linear parameters
         :type linear_solve: `bool`
         :param param: `Param` instance. If `None`, it is loaded automatically.
         :type param: `lenstronomy.Sampling.parameters.Param` or `None`
@@ -716,7 +714,7 @@ class Output(Processor):
         :type model_id: `str`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
-        :param plot: if `True`, plots the lensed and unlensed source.
+        :param plot: if `True`, plots the lensed and unlensed source
         :type plot: `bool`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
@@ -881,7 +879,7 @@ class Output(Processor):
         :type kwargs_result: `dict`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
-        :param plot: if `True`, plots the lensed and unlensed source.
+        :param plot: if `True`, plots the lensed and unlensed source
         :type plot: `bool`
         :param v_max: maximum plotting scale for the model, data, & source plot
         :type v_max: `float` or `int`

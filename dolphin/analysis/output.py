@@ -35,6 +35,8 @@ class Output(Processor):
         self._model_settings = None
         self._posterior_samples = None
         self._params_sampled = None
+        self._dolphin_version = None
+        self._lenstronomy_version = None
 
     @property
     def fit_output(self):
@@ -122,6 +124,30 @@ class Output(Processor):
         else:
             return len(self._params_sampled)
 
+    @property
+    def dolphin_version(self):
+        """The dolphin version used for the run.
+
+        :return: the dolphin version
+        :rtype: `str`
+        """
+        if self._dolphin_version is None:
+            return "unknown"
+        else:
+            return self._dolphin_version
+
+    @property
+    def lenstronomy_version(self):
+        """The lenstronomy version used for the run.
+
+        :return: the lenstronomy version
+        :rtype: `str`
+        """
+        if self._lenstronomy_version is None:
+            return "unknown"
+        else:
+            return self._lenstronomy_version
+
     def swim(self, *args, **kwargs):
         """Override the `swim` method of the `Processor` class to make it not callable.
 
@@ -150,6 +176,11 @@ class Output(Processor):
         self._kwargs_result = output["kwargs_result"]
         self._fit_output = output["fit_output"]
         self._multi_band_list_out = output["multi_band_list_out"]
+        self._dolphin_version = output.get("dolphin_version", "unknown")
+        self._lenstronomy_version = output.get("lenstronomy_version", "unknown")
+        
+        print(f"dolphin version: {self._dolphin_version}")
+        print(f"lenstronomy version: {self._lenstronomy_version}")
 
         if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
             self._posterior_samples = self.fit_output[-1][1]

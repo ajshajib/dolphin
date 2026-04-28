@@ -63,6 +63,17 @@ class TestOutput(object):
         assert self.output.params_sampled == ["param1"]
         self.output._params_sampled = None
 
+        assert self.output.dolphin_version == "unknown"
+        assert self.output.lenstronomy_version == "unknown"
+
+        self.output._dolphin_version = "1.3.0"
+        assert self.output.dolphin_version == "1.3.0"
+        self.output._dolphin_version = None
+
+        self.output._lenstronomy_version = "1.1.0"
+        assert self.output.lenstronomy_version == "1.1.0"
+        self.output._lenstronomy_version = None
+
     def test_load_output(self):
         """Test that outputs are saved and corresponding class variables are not None.
 
@@ -87,6 +98,8 @@ class TestOutput(object):
         assert self.output.kwargs_result == save_dict["kwargs_result"]
         assert self.output._multi_band_list_out == save_dict["multi_band_list_out"]
         assert self.output.model_settings == save_dict["settings"]
+        assert self.output.dolphin_version == dolphin.__version__
+        assert self.output.lenstronomy_version == lenstronomy.__version__
 
     def test_load_output_version_warnings(self, capsys):
         """Test that correct warnings are printed when versions mismatch.
@@ -132,6 +145,29 @@ class TestOutput(object):
             f"Warning: the output was saved with a different version of lenstronomy (0.0.1) than the current version ({lenstronomy.__version__})."
             in captured.out
         )
+
+    def test_load_output_byte_versions(self):
+        """Test that byte-encoded version strings are properly decoded.
+
+        :return:
+        :rtype:
+        """
+        save_dict = {
+            "settings": {"some": "settings"},
+            "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "fit_output": [
+                ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
+            ],
+            "multi_band_list_out": ["band1", "band2"],
+            "dolphin_version": b"1.3.0",
+            "lenstronomy_version": b"1.1.0",
+        }
+
+        self.processor.file_system.save_output("test", "version_bytes", save_dict)
+        self.output.load_output("test", "version_bytes")
+
+        assert self.output.dolphin_version == "1.3.0"
+        assert self.output.lenstronomy_version == "1.1.0"
 
     def test_plot_model_overview(self):
         """Test `plot_model_overview` method.

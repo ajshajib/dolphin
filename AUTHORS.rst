@@ -19,8 +19,10 @@ Co-developers
 Contributors
 ------------
 
-* Vedant Sahu, |github| `Vedant-Sahu <https://github.com/Vedant-Sahu>`_
 * Simon Birrer, |github| `sibirrer <https://github.com/sibirrer>`_
+* Ryan Brady, |github| `brady-ryan <https://github.com/brady-ryan>`_
+* Vedant Sahu, |github| `Vedant-Sahu <https://github.com/Vedant-Sahu>`_
+* Bryce Wedig, |github| `bryce-wedig <https://github.com/bryce-wedig>`_
 
 
 .. |mail| image:: https://raw.githubusercontent.com/primer/octicons/refs/heads/main/icons/mail-16.svg?sanitize=true

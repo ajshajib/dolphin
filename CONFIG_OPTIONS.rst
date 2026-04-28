@@ -3,6 +3,10 @@ Configuration Files
 
 This document provides a detailed explanation of all the allowed options in the ``config.yaml`` files for ``dolphin``, but some of them are optional, as indicated. Check out the ``io_directory_example/settings`` `folder <https://github.com/ajshajib/dolphin/tree/main/io_directory_example/settings>`_ for some example config files.
 
+.. contents:: Table of Contents
+   :local:
+   :depth: 2
+
 Top-level information
 ---------------------
 
@@ -24,6 +28,15 @@ Top-level information
 
        band: ["F475X", "F600LP"]
 
+- ``psf_supersampled_factor``: *(Optional)* Factor by which the Point Spread Function (PSF) is supersampled. Default is 1.
+
+  - Type: ``float``
+  - Example:
+
+    .. code-block:: yaml
+
+       psf_supersampled_factor: 3
+
 - ``pixel_size``: *(Optional)* Pixel size for each band. If not provided, it will be inferred from the image data.
 
   - Type: ``list of floats``
@@ -40,7 +53,7 @@ Model Section
 
   - Suboptions:
 
-    - ``lens``: List of lens mass profiles.
+    - ``lens``: List of lens mass profiles. Supported models include: ``EPL``, ``SIE``, ``SIS``, ``SPEP``, ``PEMD``, ``SHEAR_GAMMA_PSI``.
 
       - Type: ``list of strings``
       - Example:
@@ -49,7 +62,7 @@ Model Section
 
            lens: ["EPL", "SHEAR_GAMMA_PSI"]
 
-    - ``lens_light``: List of lens light profiles. The list will be duplicated for each band.
+    - ``lens_light``: List of lens light profiles. Supported models include: ``SERSIC``, ``SERSIC_ELLIPSE``, ``MGE_SET``, ``MGE_SET_ELLIPSE``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:
@@ -58,7 +71,7 @@ Model Section
 
            lens_light: ["SERSIC_ELLIPSE", "SERSIC_ELLIPSE"]
 
-    - ``source_light``: List of source light profiles. The list will be duplicated for each band.
+    - ``source_light``: List of source light profiles. Supported models include: ``SERSIC_ELLIPSE``, ``SHAPELETS``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:
@@ -67,7 +80,7 @@ Model Section
 
            source_light: ["SERSIC_ELLIPSE", "SHAPELETS"]
 
-    - ``point_source``: *(Optional)* List of point source models. Can be an empty list for galaxy-galaxy lenses.
+    - ``point_source``: *(Optional)* List of point source models. Supported models include: ``LENSED_POSITION``, ``SOURCE_POSITION``. Can be an empty list for galaxy-galaxy lenses.
 
       - Type: ``list of strings``
       - Example:
@@ -76,39 +89,14 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-Satellites Section
-------------------
+    - ``special``: *(Optional)* String or list of special parameter types.
 
-- ``satellites``: *(Optional)* Options for modeling satellite galaxies.
-
-  - Suboptions:
-
-    - ``centroid_init``: Initial guesses for the centroids of satellites.
-
-      - Type: ``list of lists of floats``
+      - Type: ``string`` or ``list of strings``
       - Example:
 
         .. code-block:: yaml
 
-           centroid_init: [[1, 1], [1.5, 1.5]]
-
-    - ``centroid_bound``: Half of the box width to constrain the centroids of satellites.
-
-      - Type: ``float``
-      - Example:
-
-        .. code-block:: yaml
-
-           centroid_bound: 0.5
-
-    - ``is_elliptical``: Whether each satellite is elliptical.
-
-      - Type: ``list of booleans``
-      - Example:
-
-        .. code-block:: yaml
-
-           is_elliptical: [true, false]
+           special: ["astrometric_uncertainty"]
 
 
 Lens Options
@@ -147,24 +135,6 @@ Lens Options
            gaussian_prior:
              0: [[gamma, 2.11, 0.03], [theta_E, 1.11, 0.13]]
 
-    - ``constrain_position_angle_from_lens_light``: *(Optional)* Maximum allowed difference between the position angle of the mass and light profiles.
-
-      - Type: ``float``
-      - Example:
-
-        .. code-block:: yaml
-
-           constrain_position_angle_from_lens_light: 15
-
-    - ``limit_mass_eccentricity_from_light``: *(Optional)* Whether to limit the mass eccentricity based on the light profile.
-
-      - Type: ``boolean``
-      - Example:
-
-        .. code-block:: yaml
-
-           limit_mass_eccentricity_from_light: true
-
     - ``fix``: *(Optional)* Fix specific parameters for the lens model.
 
       - Type: ``dictionary``
@@ -193,6 +163,41 @@ Lens Options
         .. code-block:: yaml
 
            limit_mass_q_from_light: 0.1
+
+
+Satellites Option
+------------------
+
+- ``satellites``: *(Optional)* Options for modeling satellite galaxies.
+
+  - Suboptions:
+
+    - ``centroid_init``: Initial guesses for the centroids of satellites.
+
+      - Type: ``list of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           centroid_init: [[1, 1], [1.5, 1.5]]
+
+    - ``centroid_bound``: Half of the box width to constrain the centroids of satellites.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+           centroid_bound: 0.5
+
+    - ``is_elliptical``: Whether each satellite is elliptical.
+
+      - Type: ``list of booleans``
+      - Example:
+
+        .. code-block:: yaml
+
+           is_elliptical: [true, false]           
       
 
 Lens Light Options
@@ -222,6 +227,17 @@ Lens Light Options
              0: 
                [[R_sersic, 0.21, 0.15]]
 
+    - ``mge_config``: *(Optional)* Configuration for MGE_SET and MGE_SET_ELLIPSE light profiles. Can be used to set the number of Gaussian components.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           mge_config:
+             0:
+               n_comp: 20
+
 Source Light Options
 --------------------
 
@@ -248,14 +264,125 @@ Source Light Options
 
            shapelet_scale_logarithmic_prior: true
 
-    - ``n_max``: Maximum number of Sersic profiles for each band.
+    - ``n_max``: Maximum number of Shapelet profiles for each band.
 
-      - Type: ``list of integers``
+      - Type: ``integer`` or ``list of integers``
       - Example:
 
         .. code-block:: yaml
 
            n_max: [2, 4]
+
+Point Source Options
+--------------------
+
+- ``point_source_option``: *(Optional)* Options for point source models.
+
+  - Suboptions:
+
+    - ``ra_init``: Initial guess for point source RA positions.
+
+      - Type: ``list of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           ra_init: [0.1, -0.1]
+
+    - ``dec_init``: Initial guess for point source DEC positions.
+
+      - Type: ``list of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           dec_init: [0.1, -0.1]
+
+    - ``bound``: Bound width for searching the point source centroids.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+           bound: 0.2
+
+    - ``gaussian_prior``: Gaussian priors for point source parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           gaussian_prior:
+             0: [[ra_image, 0.1, 0.05]]
+
+Special Options
+---------------
+
+- ``special_option``: *(Optional)* Initialization of special parameters.
+
+  - Suboptions:
+
+    - ``delta_x_image``: Initial spread from point source centroid in the x-axis.
+
+      - Type: ``array of floats corresponding to the number of point sources``
+      - Example:
+
+        .. code-block:: yaml
+        
+           delta_x_image: [0.0, 0.0]
+
+    - ``delta_y_image``: Initial spread from point source centroid in the y-axis.
+
+      - Type: ``array of floats corresponding to the number of point sources``
+      - Example:
+
+        .. code-block:: yaml
+        
+           delta_y_image: [0.0, 0.0]
+
+    - ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+        
+           delta_image_lower: -0.004
+
+    - ``delta_image_upper``: Upper bound in spread of point source centroid sampler.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+        
+           delta_image_upper: 0.004
+
+Guess Parameters
+----------------
+
+- ``guess_params``: *(Optional)* Initial guess parameter values for component models. This is commonly used to 
+  overwrite default initial configurations and center the bounds of the PSO optimization process.
+
+  - Suboptions:
+
+    - ``lens``: Guess parameters for lens models.
+    - ``lens_light``: Guess parameters for lens light models.
+    - ``source``: Guess parameters for source light models.
+    - ``ps``: Guess parameters for point source models.
+
+    - Example:
+
+      .. code-block:: yaml
+
+         guess_params:
+           lens:
+             0:
+               theta_E: 1.2
+               e1: 0.05
+               e2: -0.05
 
 Numeric Options
 ---------------
@@ -271,7 +398,8 @@ Numeric Options
 
         .. code-block:: yaml
 
-           supersampling_factor: [2]
+           numeric_option:
+             supersampling_factor: [2]
 
 Fitting Options
 ---------------
@@ -320,7 +448,7 @@ Fitting Options
 
            sampling: true
 
-    - ``sampler``: The sampler to use for sampling.
+    - ``sampler``: The sampler to use for sampling. Supported samplers are ``emcee`` and ``Nautilus``.
 
       - Type: ``string``
       - Example:
@@ -329,9 +457,67 @@ Fitting Options
 
            sampler: emcee
 
-    - ``sampler_settings``: Settings for the sampler.
+    - ``sampler_settings``: Settings for the sampler. For full documentation of parameters, refer to the `lenstronomy sampler documentation <https://lenstronomy.readthedocs.io/en/latest/lenstronomy.Sampling.Samplers.html>`_ and the `Nautilus documentation <https://nautilus-sampler.readthedocs.io>`_.
 
       - Suboptions:
+
+        **Recommended Nautilus options:**
+
+        - ``n_live``: Number of live points used by the nested sampler.
+
+          - Type: ``integer``
+          - Example:
+
+            .. code-block:: yaml
+
+               n_live: 2000
+
+        - ``n_eff``: Minimum targeted effective sample size. The algorithm will sample from the shells until this is reached.
+
+          - Type: ``float``
+          - Example:
+
+            .. code-block:: yaml
+
+               n_eff: 10000.0
+
+        - ``verbose``: If True, prints detailed information about the sampler's progress.
+
+          - Type: ``boolean``
+          - Example:
+
+            .. code-block:: yaml
+
+               verbose: true
+
+        - ``pass_dict``: Whether to pass dictionaries to the likelihood. Usually set to ``false`` for better performance.
+
+          - Type: ``boolean``
+          - Example:
+
+            .. code-block:: yaml
+
+               pass_dict: false
+
+        - ``filepath``: Path to a file (``.h5`` or ``.hdf5``) where Nautilus will save its internal state for checkpointing.
+
+          - Type: ``string``
+          - Example:
+
+            .. code-block:: yaml
+
+               filepath: "nautilus_checkpoint.hdf5"
+
+        - ``resume``: Whether to resume a run from the file specified in ``filepath``.
+
+          - Type: ``boolean``
+          - Example:
+
+            .. code-block:: yaml
+
+               resume: true
+
+        **Emcee-specific options:**
 
         - ``n_burn``: Number of burn-in steps.
 
@@ -360,6 +546,58 @@ Fitting Options
 
                walkerRatio: 2
     
+        - ``init_samples``: *(Optional)* Initial samples for walkers.
+          
+          - Type: ``list of lists of floats``
+
+        - ``n_walkers``: *(Optional)* Number of walkers of emcee. If set, this overwrites the ``walkerRatio`` input.
+
+          - Type: ``integer``
+          - Example:
+
+            .. code-block:: yaml
+
+               n_walkers: 100
+
+        - ``sigma_scale``: *(Optional)* Scaling of the initial parameter spread relative to the width in the initial settings. Default is 1.0.
+
+          - Type: ``float``
+          - Example:
+
+            .. code-block:: yaml
+
+               sigma_scale: 1.0
+
+        - ``threadCount``: *(Optional)* Number of CPU threads to use for multiprocessing.
+
+          - Type: ``integer``
+          - Example:
+
+            .. code-block:: yaml
+
+               threadCount: 4
+
+        - ``re_use_samples``: *(Optional)* If True and ``init_samples`` is provided, re-uses the samples described.
+
+          - Type: ``boolean``
+
+        - ``progress``: *(Optional)* If True, shows the progress bar during sampling.
+
+          - Type: ``boolean``
+
+        - ``backend_filename``: *(Optional)* Name of the HDF5 file where the emcee sampling state is saved for checkpointing.
+
+          - Type: ``string``
+          - Example:
+
+            .. code-block:: yaml
+
+               backend_filename: "mcmc_emcee_checkpoint.h5"
+
+        - ``start_from_backend``: *(Optional)* If True, start sampling from the state saved in ``backend_filename``.
+
+          - Type: ``boolean``
+
     - ``psf_iteration``: *(Optional)* Whether to perform iterative PSF fitting.
 
       - Type: ``boolean``
@@ -418,12 +656,54 @@ Fitting Options
 
                psf_symmetry: 4
 
+        - ``block_center_neighbour``: Block center neighbour factor.
+
+          - Type: ``float``
+          - Example:
+
+            .. code-block:: yaml
+
+               block_center_neighbour: 0.0
+
+- ``fitting_kwargs_list``: *(Optional)* User-provided list of fitting sequences to bypass the automated recipes in dolphin.
+
+  - Type: ``list``
+  - Example:
+
+    .. code-block:: yaml
+
+       fitting_kwargs_list:
+         - ['PSO', {'sigma_scale': 1., 'n_particles': 50, 'n_iterations': 50}]
+
+Lenstronomy Arbitrary Keyword Arguments
+---------------------------------------
+
+- ``kwargs_model``: *(Optional)* Pass any arbitrary arguments strictly allowed in `lenstronomy.LensModel`, `lenstronomy.LightModel` inside this section.
+
+- ``kwargs_constraints``: *(Optional)* Pass any arbitrary constraints strictly allowed in `lenstronomy.Workflow.fitting_sequence` inside this section.
+
+  - Example:
+
+    .. code-block:: yaml
+
+       kwargs_constraints:
+         joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
+
 Mask Options
 ------------
 
 - ``mask``: *(Optional)* Settings for masking regions of the image.
 
   - Suboptions:
+
+    - ``provided``: Set to `true` to use custom `.npy` mask files from the `settings/masks/` directory instead of using analytical masking below.
+
+      - Type: ``boolean``
+      - Example:
+
+        .. code-block:: yaml
+
+           provided: false
 
     - ``centroid_offset``: Offset for the centroid of the mask.
 
@@ -432,7 +712,7 @@ Mask Options
 
         .. code-block:: yaml
 
-           centroid_offset: [[0.0, 0], [0.0, 0]]
+           centroid_offset: [[0.0, 0.0], [0.0, 0.0]]
 
     - ``mask_edge_pixels``: Number of edge pixels to mask.
 
@@ -451,3 +731,24 @@ Mask Options
         .. code-block:: yaml
 
            radius: [20.0, 20.0]
+
+    - ``a``, ``b``, ``angle``: Elliptical mask parameters for each band. Used when ``radius`` is not provided.
+    
+      - Type: ``list of floats``
+      - Example:
+      
+        .. code-block:: yaml
+        
+           a: [10.0, 10.0]
+           b: [5.0, 5.0]
+           angle: [0.0, 0.0]
+
+    - ``extra_regions``: List of circular regions to mask additionally. Format is ``[ra, dec, radius]``.
+
+      - Type: ``list of lists of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           extra_regions:
+             - [[1.0, -1.0, 0.5]]

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This module has a class for maintaining the file system."""
+"""This module provides a class for maintaining the file system and directory
+architecture."""
 
 __author__ = "ajshajib"
 
@@ -11,42 +12,44 @@ import gdown
 
 
 class FileSystem(object):
-    """This class contains the method to handle the file system and directory
-    addresses."""
+    """This class contains methods to handle the file system, directory paths, and
+    standard IO operations."""
 
     def __init__(self, io_directory):
-        """Initiates a FileSystem object with `io_directory` as root.
+        """Initiates a FileSystem object with `io_directory` as the root base path.
 
-        :param io_directory: path to input/output directory
-        :type io_directory: str
+        :param io_directory: path to the input/output base directory
+        :type io_directory: `str`
         """
         self._root_path = Path(io_directory)
         self.root = io_directory
 
     @staticmethod
     def path2str(path):
-        """Converts a pathlib Path into string.
+        """Converts a `pathlib.Path` object into an absolute string path.
 
         :param path: path to a file or directory
-        :type path: `Path`
-        :return: path to a file or directory
+        :type path: `pathlib.Path`
+        :return: absolute string path
         :rtype: `str`
         """
         return str(path.resolve())
 
     def get_lens_list_file_path(self):
-        """Get the address for the lens_list.txt file.
+        """Get the file path for the `lens_list.txt` file.
 
-        :return:
-        :rtype:
+        :return: path to the `lens_list.txt` file
+        :rtype: `str`
         """
         return self.path2str(self._root_path / "lens_list.txt")
 
     def get_lens_list(self):
-        """Get the list of lenses from lens_list.txt.
+        """Get the list of lenses from the `lens_list.txt` file.
 
-        :return:
-        :rtype:
+        Lines starting with `#` are ignored as comments.
+
+        :return: list of lens names
+        :rtype: `list` of `str`
         """
         lens_list = []
 
@@ -57,81 +60,58 @@ class FileSystem(object):
         return lens_list
 
     def get_config_file_path(self, lens_name):
-        """Get the file path to the config file for `lens_name`.
+        """Get the file path to the configuration YAML file for a given lens.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :return: path to the config file
+        :return: path to the configuration file
         :rtype: `str`
         """
         return self.path2str(self.get_settings_directory() / f"{lens_name}_config.yaml")
 
     def get_logs_directory(self):
-        """Get directory for logs folder. If the directory doesn't exist, a folder is
-        created.
+        """Get the path to the logs directory.
 
-        :return:
-        :rtype:
+        :return: path to the `logs` folder
+        :rtype: `str`
         """
         logs_dir = self.path2str(self._root_path / "logs")
-
-        # commenting out, as this directory needs to be created by user
-        # if not os.path.isdir(logs_dir):
-        #    os.mkdir(logs_dir)
-
         return logs_dir
 
     def get_settings_directory(self):
-        """Get directory for settings folder. If the directory doesn't exist, a folder
-        is created.
+        """Get the path to the settings directory as a `Path` object.
 
-        :return:
-        :rtype:
+        :return: path to the `settings` folder
+        :rtype: `pathlib.Path`
         """
         return self._root_path / "settings"
 
-        # commenting out, as this directory needs to be created by user
-        # if not os.path.isdir(settings_dir):
-        #     os.mkdir(settings_dir)
-
     def get_outputs_directory(self):
-        """Get directory for settings folder. If the directory doesn't exist, a folder
-        is created.
+        """Get the path to the outputs directory.
 
-        :return:
-        :rtype:
+        :return: path to the `outputs` folder
+        :rtype: `str`
         """
         outputs_dir = self.path2str(self._root_path / "outputs")
-
-        # commenting out, as this directory needs to be created by user
-        # if not os.path.isdir(outputs_dir):
-        #    os.mkdir(outputs_dir)
-
         return outputs_dir
 
     def get_data_directory(self):
-        """Get directory for data folder. If the directory doesn't exist, a folder is
-        created.
+        """Get the path to the data directory.
 
-        :return:
-        :rtype:
+        :return: path to the `data` folder
+        :rtype: `str`
         """
         data_dir = self.path2str(self._root_path / "data")
-
-        # commenting out, as this directory needs to be created by user
-        # if not os.path.isdir(data_dir):
-        #     os.mkdir(data_dir)
-
         return data_dir
 
     def get_image_file_path(self, lens_name, band):
-        """Get the file path for the imaging data for `lens_name`.
+        """Get the file path for the HDF5 image data file for a specific lens and band.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :return: file path
+        :return: file path to the image data
         :rtype: `str`
         """
         return self.path2str(
@@ -141,13 +121,13 @@ class FileSystem(object):
         )
 
     def get_psf_file_path(self, lens_name, band):
-        """Get the file path for the PSF data for `lens_name`.
+        """Get the file path for the HDF5 PSF data file for a specific lens and band.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :return: file path
+        :return: file path to the PSF data
         :rtype: `str`
         """
         return self.path2str(
@@ -157,13 +137,13 @@ class FileSystem(object):
         )
 
     def get_log_file_path(self, lens_name, model_id):
-        """Get the file path for the PSF data for `lens_name`.
+        """Get the file path for the log text file for a specific modeling run.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: identifier for run model
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :return: file path
+        :return: file path to the log file
         :rtype: `str`
         """
         return (
@@ -172,15 +152,15 @@ class FileSystem(object):
         )
 
     def get_output_file_path(self, lens_name, model_id, file_type="json"):
-        """Get the file path for the PSF data for `lens_name`.
+        """Get the file path for the output file of a specific modeling run.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: identifier for run model
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :param file_type: type of file, options: 'json', 'h5'
+        :param file_type: extension type of the file. Options: 'json', 'h5'.
         :type file_type: `str`
-        :return: file path
+        :return: file path to the output file
         :rtype: `str`
         """
         return (
@@ -189,18 +169,18 @@ class FileSystem(object):
         )
 
     def save_output(self, lens_name, model_id, output, file_type="h5"):
-        """Save output from fitting sequence.
+        """Save the results output from the fitting sequence to disk.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: identifier for model run
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :param output: output dictionary
+        :param output: output dictionary containing modeling results
         :type output: `dict`
-        :param file_type: type of file to save, 'h5' or 'json'
+        :param file_type: type of file to save format. 'h5' or 'json'.
         :type file_type: `str`
         :return: None
-        :rtype:
+        :rtype: `None`
         """
         if file_type == "h5":
             self.save_output_h5(lens_name, model_id, output)
@@ -210,32 +190,32 @@ class FileSystem(object):
             raise ValueError(f"File type {file_type} not recognized!")
 
     def save_output_json(self, lens_name, model_id, output):
-        """Save output from fitting sequence.
+        """Save the fitting sequence output as a JSON file.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: identifier for model run
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :param output: output dictionary
+        :param output: output dictionary containing modeling results
         :type output: `dict`
         :return: None
-        :rtype:
+        :rtype: `None`
         """
         save_file = self.get_output_file_path(lens_name, model_id, file_type="json")
         with open(save_file, "w") as f:
             json.dump(self.encode_numpy_arrays(output), f, ensure_ascii=False, indent=4)
 
     def save_output_h5(self, lens_name, model_id, output):
-        """Save output from fitting sequence to h5 format.
+        """Save the fitting sequence output as an HDF5 (.h5) file.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: identifier for model run
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :param output: output dictionary
+        :param output: output dictionary containing modeling results
         :type output: `dict`
         :return: None
-        :rtype:
+        :rtype: `None`
         """
         save_file = self.get_output_file_path(lens_name, model_id, file_type="h5")
 
@@ -268,7 +248,7 @@ class FileSystem(object):
                     subgroup.create_dataset(
                         "param_list", data=np.array(single_output[2], dtype="S25")
                     )
-                elif single_output[0] == "emcee":
+                elif single_output[0] in ["emcee", "Nautilus"]:
                     subgroup.create_dataset(
                         "samples",
                         data=np.array(
@@ -278,12 +258,33 @@ class FileSystem(object):
                     subgroup.create_dataset(
                         "param_list", data=np.array(single_output[2], dtype="S25")
                     )
-                    subgroup.create_dataset(
-                        "log_likelihood",
-                        data=np.array(
-                            single_output[3],
-                        ),
-                    )
+                    if single_output[0] == "emcee":
+                        subgroup.create_dataset(
+                            "log_likelihood",
+                            data=np.array(
+                                single_output[3],
+                            ),
+                        )
+                    elif single_output[0] == "Nautilus":
+                        subgroup.create_dataset(
+                            "log_l", data=np.array(single_output[3])
+                        )
+                        subgroup.create_dataset(
+                            "log_z", data=np.array(single_output[4])
+                        )
+                        subgroup.create_dataset(
+                            "log_z_err", data=np.array(single_output[5])
+                        )
+                        results_group = subgroup.create_group("results_object")
+                        results_group.create_dataset(
+                            "points", data=np.array(single_output[6]["points"])
+                        )
+                        results_group.create_dataset(
+                            "log_w", data=np.array(single_output[6]["log_w"])
+                        )
+                        results_group.create_dataset(
+                            "log_l", data=np.array(single_output[6]["log_l"])
+                        )
                 else:
                     raise ValueError(
                         f"Fitting type {single_output[0]} not recognized for "
@@ -291,14 +292,15 @@ class FileSystem(object):
                     )
 
     def load_output(self, lens_name, model_id, file_type="h5"):
-        """Load from saved output file.
+        """Load output modeling results from a previously saved file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: model identifier provided at run initiation
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :param file_type: type of file, 'h5' or 'json'
-        :return: output dictionary
+        :param file_type: type of file. Options: 'h5' or 'json'. Default is 'h5'.
+        :type file_type: `str`
+        :return: the loaded output dictionary
         :rtype: `dict`
         """
         if file_type == "h5":
@@ -309,13 +311,13 @@ class FileSystem(object):
             raise ValueError(f"File type {file_type} not recognized!")
 
     def load_output_json(self, lens_name, model_id):
-        """Load from saved output file.
+        """Load output modeling results from a JSON file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: model identifier provided at run initiation
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :return: output dictionary
+        :return: the loaded output dictionary
         :rtype: `dict`
         """
         load_file = self.get_output_file_path(lens_name, model_id, file_type="json")
@@ -326,13 +328,13 @@ class FileSystem(object):
         return self.decode_numpy_arrays(output)
 
     def load_output_h5(self, lens_name, model_id):
-        """Load from saved output file.
+        """Load output modeling results from an HDF5 file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param model_id: model identifier provided at run initiation
+        :param model_id: identifier for the model run
         :type model_id: `str`
-        :return: output dictionary
+        :return: the loaded output dictionary
         :rtype: `dict`
         """
         load_file = self.get_output_file_path(lens_name, model_id, file_type="h5")
@@ -371,7 +373,7 @@ class FileSystem(object):
                             for s in group[index]["param_list"][:]
                         ]
                     )
-                elif fitting_step[0] == "emcee":
+                elif fitting_step[0] in ["emcee", "Nautilus"]:
                     fitting_step.append(group[index]["samples"][:])
                     fitting_step.append(
                         [
@@ -379,11 +381,18 @@ class FileSystem(object):
                             for s in group[index]["param_list"][:]
                         ]
                     )
-                    fitting_step.append(group[index]["log_likelihood"][:])
-                # else:
-                #     raise ValueError('Fitting type {} not recognized for '
-                #                      'loading output!'.format(fitting_step[0]
-                #                      ))
+                    if fitting_step[0] == "emcee":
+                        fitting_step.append(group[index]["log_likelihood"][:])
+                    elif fitting_step[0] == "Nautilus":
+                        fitting_step.append(group[index]["log_l"][()])
+                        fitting_step.append(group[index]["log_z"][()])
+                        fitting_step.append(group[index]["log_z_err"][()])
+                        results_object = {
+                            "points": group[index]["results_object"]["points"][()],
+                            "log_w": group[index]["results_object"]["log_w"][()],
+                            "log_l": group[index]["results_object"]["log_l"][()],
+                        }
+                        fitting_step.append(results_object)
 
                 fit_output.append(fitting_step)
 
@@ -398,13 +407,13 @@ class FileSystem(object):
 
     @classmethod
     def encode_numpy_arrays(cls, obj):
-        """Encode a list/dictionary containing numpy arrays through recursion for JSON
+        """Recursively encode a list or dictionary containing numpy arrays to allow JSON
         serialization.
 
-        :param obj: object
-        :type obj:
-        :return: object with `ndarray`s encoded as dictionaries
-        :rtype:
+        :param obj: the object (list, dictionary, or array) to be encoded
+        :type obj: `object`
+        :return: the encoded object with `numpy.ndarray`s replaced by dictionaries
+        :rtype: `object`
         """
         if isinstance(obj, np.ndarray):
             return {"__ndarray__": obj.tolist(), "shape": obj.shape}
@@ -423,12 +432,13 @@ class FileSystem(object):
 
     @classmethod
     def decode_numpy_arrays(cls, obj):
-        """Decode a list/dictionary containing encoded numpy arrays through recursion.
+        """Recursively decode a list or dictionary, converting encoded dictionary
+        representations back to numpy arrays.
 
-        :param obj: object with `ndarray`s encoded as dictionaries
-        :type obj:
-        :return: object with `ndarray`s as `numpy.ndarray`
-        :rtype:
+        :param obj: the object containing encoded representations of arrays
+        :type obj: `object`
+        :return: the decoded object with true `numpy.ndarray` objects
+        :rtype: `object`
         """
         if isinstance(obj, dict):
             if "__ndarray__" in obj:
@@ -447,13 +457,14 @@ class FileSystem(object):
             return obj
 
     def get_semantic_segmentation_file_path(self, lens_name, band):
-        """Get the file path for the semantic segmentation data for `lens_name`.
+        """Get the file path for the semantic segmentation data for a specific lens and
+        band.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :return: file path
+        :return: file path to the semantic segmentation numpy file
         :rtype: `str`
         """
         return self.path2str(
@@ -462,13 +473,13 @@ class FileSystem(object):
         )
 
     def load_semantic_segmentation(self, lens_name, band):
-        """Load semantic segmentation data from file.
+        """Load semantic segmentation data from its `.npy` file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :return: semantic segmentation array
+        :return: the loaded semantic segmentation array
         :rtype: `numpy.ndarray`
         """
         semantic_segmentation = np.load(
@@ -478,28 +489,28 @@ class FileSystem(object):
         return semantic_segmentation
 
     def save_semantic_segmentation(self, lens_name, band, semantic_segmentation):
-        """Save semantic segmentation data to file.
+        """Save a semantic segmentation array to a `.npy` file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :param semantic_segmentation: semantic segmentation array
+        :param semantic_segmentation: the semantic segmentation mask to save
         :type semantic_segmentation: `numpy.ndarray`
         :return: None
-        :rtype:
+        :rtype: `None`
         """
         save_file = self.get_semantic_segmentation_file_path(lens_name, band)
         np.save(save_file, semantic_segmentation)
 
     def get_mask_file_path(self, lens_name, band):
-        """Get the file path for the mask data for `lens_name`.
+        """Get the file path for the mask data for a specific lens and band.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :return: file path
+        :return: file path to the mask numpy file
         :rtype: `str`
         """
         return self.path2str(
@@ -507,13 +518,13 @@ class FileSystem(object):
         )
 
     def load_mask(self, lens_name, band):
-        """Load mask data from file.
+        """Load mask data from its `.npy` file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :return: mask array
+        :return: the loaded mask array
         :rtype: `numpy.ndarray`
         """
         mask = np.load(self.get_mask_file_path(lens_name, band))
@@ -521,26 +532,27 @@ class FileSystem(object):
         return mask
 
     def save_mask(self, lens_name, band, mask):
-        """Save mask data to file.
+        """Save a mask array to a `.npy` file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens
         :type lens_name: `str`
-        :param band: band name
+        :param band: observing band name
         :type band: `str`
-        :param mask: mask array
+        :param mask: the mask array to save
         :type mask: `numpy.ndarray`
         :return: None
-        :rtype:
+        :rtype: `None`
         """
         save_file = self.get_mask_file_path(lens_name, band)
         np.save(save_file, mask)
 
     def get_trained_nn_model_file_path(self, source_type="galaxy"):
-        """Get the file path for the trained model.
+        """Get the local file path for the trained neural network model. Downloads the
+        model from Google Drive if it doesn't exist locally.
 
-        :param lens_type: type of lens, 'galaxy' or 'quasar'
-        :type lens_type: `str`
-        :return: file path
+        :param source_type: the type of lens source. Expected 'galaxy' or 'quasar'. Default is 'galaxy'.
+        :type source_type: `str`
+        :return: absolute file path to the downloaded model `.h5` file
         :rtype: `str`
         """
         assert source_type in ["galaxy", "quasar"]

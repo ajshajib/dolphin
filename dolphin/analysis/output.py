@@ -19,10 +19,10 @@ from dolphin.processor.config import ModelConfig
 
 
 class Output(Processor):
-    """This class lets."""
+    """This class provides methods to post-process a model run output."""
 
     def __init__(self, io_directory):
-        """
+        """Initialize the Output class.
 
         :param io_directory: path to the input/output directory. Should not
             end with slash.
@@ -33,15 +33,16 @@ class Output(Processor):
         self._fit_output = None
         self._kwargs_result = None
         self._model_settings = None
-        self._samples_mcmc = None
-        self._params_mcmc = None
+        self._posterior_samples = None
+        self._params_sampled = None
 
     @property
     def fit_output(self):
-        """The output from the `lenstronomy...Fitting_sequence.fit_sequence()`.
+        """The output from the
+        `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`.
 
-        :return:
-        :rtype:
+        :return: output from the `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`
+        :rtype: `list`
         """
         if self._fit_output is None:
             raise ValueError(
@@ -55,10 +56,10 @@ class Output(Processor):
     @property
     def kwargs_result(self):
         """The `kwargs_result` after running a model by calling
-        `lenstronomy...Fitting_sequence.fit_sequence()`.
+        `lenstronomy.Workflow.fitting_sequence.FittingSequence.fit_sequence()`.
 
-        :return:
-        :rtype:
+        :return: the `kwargs_result` dictionary
+        :rtype: `dict`
         """
         if self._kwargs_result is None:
             raise ValueError(
@@ -71,11 +72,10 @@ class Output(Processor):
 
     @property
     def model_settings(self):
-        """The `kwargs_result` after running a model by calling
-        `lenstronomy...Fitting_sequence.fit_sequence()`.
+        """The model settings used for the run.
 
-        :return:
-        :rtype:
+        :return: the model settings dictionary
+        :rtype: `dict`
         """
         if self._model_settings is None:
             raise ValueError(
@@ -87,44 +87,51 @@ class Output(Processor):
             return self._model_settings
 
     @property
-    def samples_mcmc(self):
-        """The array of MCMC samples from the model run.
+    def posterior_samples(self):
+        """The array of posterior samples from the model run.
 
-        :return:
-        :rtype:
+        :return: the array of posterior samples
+        :rtype: `numpy.ndarray` or `list`
         """
-        if self._samples_mcmc is None:
+        if self._posterior_samples is None:
             return []
         else:
-            return self._samples_mcmc
+            return self._posterior_samples
 
     @property
-    def params_mcmc(self):
-        """The non-linear parameters sampled with MCMC.
+    def params_sampled(self):
+        """The non-linear parameters sampled during the model run.
 
-        :return:
-        :rtype:
+        :return: the list of sampled non-linear parameters
+        :rtype: `list`
         """
-        if self._params_mcmc is None:
+        if self._params_sampled is None:
             return []
         else:
-            return self._params_mcmc
+            return self._params_sampled
 
     @property
-    def num_params_mcmc(self):
-        """Number of sampled non-linear parameters in MCMC.
+    def num_params_sampled(self):
+        """Number of sampled non-linear parameters.
 
-        :return:
-        :rtype:
+        :return: number of sampled non-linear parameters
+        :rtype: `int`
         """
-        if self._params_mcmc is None:
+        if self._params_sampled is None:
             return 0
         else:
-            return len(self._params_mcmc)
+            return len(self._params_sampled)
 
     def swim(self, *args, **kwargs):
-        """Override the `swim` method of the `Processor` class to make it not
-        callable."""
+        """Override the `swim` method of the `Processor` class to make it not callable.
+
+        :param args: positional arguments
+        :type args: `tuple`
+        :param kwargs: keyword arguments
+        :type kwargs: `dict`
+        :return: None
+        :rtype: `None`
+        """
         raise NotImplementedError
 
     def load_output(self, lens_name, model_id):
@@ -144,9 +151,9 @@ class Output(Processor):
         self._fit_output = output["fit_output"]
         self._multi_band_list_out = output["multi_band_list_out"]
 
-        if self.fit_output[-1][0] == "emcee":
-            self._samples_mcmc = self.fit_output[-1][1]
-            self._params_mcmc = self.fit_output[-1][2]
+        if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
+            self._posterior_samples = self.fit_output[-1][1]
+            self._params_sampled = self.fit_output[-1][2]
 
         return output
 
@@ -163,18 +170,18 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to plot the model, otherwise the model
             will be plotted from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
-        :return: `ModelPlot` instance, maximum pixel value of the image
-        :rtype: `obj`, `float`
+        :return: a tuple containing the `ModelPlot` instance and the maximum pixel value of the image
+        :rtype: `tuple` (`lenstronomy.Plots.model_plot.ModelPlot`, `float`)
         """
         if model_id is None and kwargs_result is None:
             raise ValueError(
@@ -233,12 +240,12 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to plot the model, otherwise the model
             will be plotted from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
@@ -249,23 +256,20 @@ class Output(Processor):
         :type convergence_cmap: `str` or `matplotlib.colors.Colormap`
         :param magnification_cmap: colormap for magnification plot
         :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the model, data, & source plot
-        :type v_min: `float` or `int`
-        :param v_max: maximum plotting scale for the model, data, & source plot
-        :type v_max: `float` or `int`
+        :param v_min: minimum plotting scale for the model & data plots
+        :type v_min: `float` or `int` or `None`
+        :param v_max: maximum plotting scale for the model & data plots
+        :type v_max: `float` or `int` or `None`
         :param source_v_min: minimum plotting scale for the source plot
-        :type source_v_min: `float` or `int`
+        :type source_v_min: `float` or `int` or `None`
         :param source_v_max: maximum plotting scale for the source plot
-        :type source_v_max: `float` or `int`
-        :param print_results: if true, prints the `kwargs_result` dictionary
+        :type source_v_max: `float` or `int` or `None`
+        :param print_results: if `True`, prints the `kwargs_result` dictionary
         :type print_results: `bool`
-        :param show_source_light: if true, replaces convergence plot with
-            source light convolved lens decomposition plot and also replaces
-            the magnification plot with the source-light subtracted data
-            plot
+        :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
         :type show_source_light: `bool`
-        :return: `matplotlib.pyplot.figure` instance with the plots
-        :rtype: `matplotlib.pyplot.figure`
+        :return: `matplotlib.figure.Figure` instance with the plots
+        :rtype: `matplotlib.figure.Figure`
         """
         if print_results:
             print_kwargs_result = kwargs_result
@@ -359,22 +363,22 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to plot the model, otherwise the model
             will be plotted from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the model, data, & source plot
-        :type v_min: `float` or `int`
-        :param v_max: maximum plotting scale for the model, data, & source plot
-        :type v_max: `float` or `int`
-        :return: `matplotlib.pyplot.figure` instance with the plots
-        :rtype: `matplotlib.pyplot.figure`
+        :param v_min: minimum plotting scale for the component plots
+        :type v_min: `float` or `int` or `None`
+        :param v_max: maximum plotting scale for the component plots
+        :type v_max: `float` or `int` or `None`
+        :return: `matplotlib.figure.Figure` instance with the plots
+        :rtype: `matplotlib.figure.Figure`
         """
 
         if v_max is None:
@@ -456,34 +460,35 @@ class Output(Processor):
 
         return fig
 
-    def get_reshaped_emcee_chain(
-        self, lens_name, model_id, walker_ratio, burn_in=0, verbose=True
-    ):
-        """
+    def get_reshaped_emcee_chain(self, lens_name, model_id, walker_ratio, burn_in=0):
+        """Get the reshaped MCMC chain from emcee.
 
-        :param lens_name:
-        :type lens_name:
-        :param model_id:
-        :type model_id:
-        :param walker_ratio:
-        :type walker_ratio:
-        :param burn_in:
-        :type burn_in:
-        :param verbose:
-        :type verbose:
-        :return:
-        :rtype:
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param walker_ratio: number of walkers per parameter in MCMC
+        :type walker_ratio: `int`
+        :param burn_in: number of burn-in steps to discard
+        :type burn_in: `int`
+        :return: reshaped emcee chain
+        :rtype: `numpy.ndarray`
         """
         self.load_output(lens_name, model_id)
 
-        num_params = self.num_params_mcmc  # self.samples_mcmc.shape[1]
+        if self.fit_output[-1][0] == "Nautilus":
+            raise ValueError(
+                "Nautilus samples do not have walkers to reshape. Use `.samples_mcmc` directly."
+            )
+
+        num_params = self.num_params_sampled  # self.samples_mcmc.shape[1]
         num_walkers = walker_ratio * num_params
-        num_step = int(len(self.samples_mcmc) / num_walkers)
+        num_step = int(len(self.posterior_samples) / num_walkers)
 
         chain = np.empty((num_walkers, num_step, num_params))
 
         for i in np.arange(num_params):
-            samples = self.samples_mcmc[:, i].T
+            samples = self.posterior_samples[:, i].T
             chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
         if burn_in != 0:
             chain = chain[:, burn_in:, :]
@@ -510,21 +515,29 @@ class Output(Processor):
         :type walker_ratio: `int`
         :param burn_in: number of burn-in steps to compute the medians after
             convergence of the MCMC chain
-        :type: `int`
+        :type burn_in: `int`
         :param verbose: if `True`, median values after burn-in will be printed
         :type verbose: `bool`
         :param fig_width: width of the figure
         :type fig_width: `float`
         :param parameters_to_plot: if not empty, list of parameters to plot
-        :type fig_width: `list`
-        :return: `matplotlib.pyplot.figure` instance with the plots
-        :rtype: `matplotlib.pyplot.figure`
+        :type parameters_to_plot: `list` of `str`
+        :return: `matplotlib.figure.Figure` instance with the plots
+        :rtype: `matplotlib.figure.Figure`
         """
+        self.load_output(lens_name, model_id)
+        sampler_type = self.fit_output[-1][0]
+
+        if sampler_type == "Nautilus":
+            raise ValueError(
+                "Trace plotting is not supported for the Nautilus sampler."
+            )
+
         chain = self.get_reshaped_emcee_chain(
-            lens_name, model_id, walker_ratio, burn_in=burn_in, verbose=verbose
+            lens_name, model_id, walker_ratio, burn_in=burn_in
         )
 
-        num_params = self.num_params_mcmc
+        num_params = self.num_params_sampled
         num_step = chain.shape[1]
 
         if len(parameters_to_plot) == 0:
@@ -532,11 +545,11 @@ class Output(Processor):
         else:
             parameter_list = []
             for i in parameters_to_plot:
-                if i in self.params_mcmc:
-                    parameter_list.append(self.params_mcmc.index(i))
+                if i in self.params_sampled:
+                    parameter_list.append(self.params_sampled.index(i))
                 else:
                     raise ValueError(
-                        f"Parameter '{i}' not found. Available parameters: {self.params_mcmc}"
+                        f"Parameter '{i}' not found. Available parameters: {self.params_sampled}"
                     )
 
         mean_pos = np.zeros((num_params, num_step))
@@ -565,7 +578,7 @@ class Output(Processor):
         for n, i in enumerate(parameter_list):
             if verbose:
                 print(
-                    self.params_mcmc[i],
+                    self.params_sampled[i],
                     "{:.4f} ± {:.4f}".format(
                         median_pos[i][last - 1],
                         (q84_pos[i][last - 1] - q16_pos[i][last - 1]) / 2,
@@ -582,7 +595,7 @@ class Output(Processor):
                 # ax[i].fill_between(np.arange(last), mean_pos[i][:last] \
                 # +std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last],
                 # alpha=0.4)
-                ax[n].set_ylabel(self.params_mcmc[i], fontsize=8)
+                ax[n].set_ylabel(self.params_sampled[i], fontsize=8)
                 ax[n].set_xlim(0, last)
             else:
                 ax.plot(median_pos[i][:last], c="g")
@@ -590,7 +603,7 @@ class Output(Processor):
                 ax.fill_between(
                     np.arange(last), q84_pos[i][:last], q16_pos[i][:last], alpha=0.4
                 )
-                ax.set_ylabel(self.params_mcmc[i], fontsize=8)
+                ax.set_ylabel(self.params_sampled[i], fontsize=8)
                 ax.set_xlim(0, last)
 
             medians.append(np.median(median_pos[i][burn_in:last]))
@@ -605,7 +618,7 @@ class Output(Processor):
         :param model_id: model run identifier
         :type model_id: `str`
         :return: `Param` instance
-        :rtype: `obj`
+        :rtype: `lenstronomy.Sampling.parameters.Param`
         """
         self.load_output(lens_name, model_id=model_id)
 
@@ -631,14 +644,22 @@ class Output(Processor):
     def get_kwargs_from_args(
         self, lens_name, model_id, args, band_index=0, linear_solve=False, param=None
     ):
-        """
+        """Get `kwargs` from a given set of `args`.
 
-        :param lens_name:
-        :type lens_name:
-        :param model_id:
-        :type model_id:
-        :return:
-        :rtype:
+        :param lens_name: name of the lens
+        :type lens_name: `str`
+        :param model_id: model run identifier
+        :type model_id: `str`
+        :param args: array of parameter values
+        :type args: `numpy.ndarray` or `list`
+        :param band_index: index of band to use for linear solve
+        :type band_index: `int`
+        :param linear_solve: if `True`, solves for the linear parameters
+        :type linear_solve: `bool`
+        :param param: `Param` instance. If `None`, it is loaded automatically.
+        :type param: `lenstronomy.Sampling.parameters.Param` or `None`
+        :return: dictionary of kwargs
+        :rtype: `dict`
         """
         if param is None:
             param = self.get_param_class(lens_name, model_id)
@@ -661,14 +682,14 @@ class Output(Processor):
         return kwargs
 
     def get_im_sim(self, lens_name, band_index):
-        """Get lestronomy's `ImSim` instance for the lens.
+        """Get lenstronomy's `ImSim` instance for the lens.
 
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :return: `ImSim` instance
-        :rtype: `obj`
+        :rtype: `lenstronomy.ImSim.im_sim.ImSim`
         """
         config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
 
@@ -706,16 +727,20 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
         :param plot: if `True`, plots the lensed and unlensed source
         :type plot: `bool`
+        :param v_max: maximum plotting scale for the image plot
+        :type v_max: `float` or `int` or `None`
+        :param v_min: minimum plotting scale for the image plot
+        :type v_min: `float` or `int` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
             will be calculated from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :return: average magnification
         :rtype: `float`
@@ -804,16 +829,16 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
             will be calculated from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds
         :return: critical curve coordinates
-        :rtype: `tuple`
+        :rtype: `tuple` of `numpy.ndarray`
         """
         if model_id is None and kwargs_result is None:
             raise ValueError(
@@ -866,24 +891,24 @@ class Output(Processor):
         :param lens_name: name of the lens
         :type lens_name: `str`
         :param model_id: model run identifier
-        :type model_id: `str`
+        :type model_id: `str` or `None`
         :param kwargs_result: lenstronomy `kwargs_result` dictionary. If
             provided, it will be used to make the calculation, otherwise the model
             will be calculated from the saved/loaded outputs for `lens_name` and
             `model_id`.
-        :type kwargs_result: `dict`
+        :type kwargs_result: `dict` or `None`
         :param band_index: index of band to plot for multi-band case
         :type band_index: `int`
-        :param plot: if `True`, plots the lensed and unlensed source
+        :param plot: if `True`, plots the image data with critical curves and source/image positions
         :type plot: `bool`
-        :param v_max: maximum plotting scale for the model, data, & source plot
-        :type v_max: `float` or `int`
-        :param v_min: minimum plotting scale for the model, data, & source plot
-        :type v_min: `float` or `int`
+        :param v_max: maximum plotting scale for the image plot
+        :type v_max: `float` or `int` or `None`
+        :param v_min: minimum plotting scale for the image plot
+        :type v_min: `float` or `int` or `None`
         :raises ValueError: if neither `model_id` nor `kwargs_result` is provided
         :raises ValueError: if `band_index` is out of bounds
         :return: individual magnifications of the images
-        :rtype: `list`
+        :rtype: `list` of `float`
         """
         if model_id is None and kwargs_result is None:
             raise ValueError(

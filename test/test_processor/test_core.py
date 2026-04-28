@@ -18,21 +18,13 @@ class TestProcessor(object):
         pass
 
     def test_swim(self):
-        """Test `swim` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `swim` method."""
         self.processor.swim("lens_system1", "test")
 
         self.processor.swim("lens_system1", "test", use_jax=True)
 
     def test_get_kwargs_data_joint(self):
-        """Test `get_kwargs_data_joint` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_kwargs_data_joint` method."""
         kwargs_data_joint = self.processor.get_kwargs_data_joint("lens_system1")
 
         assert kwargs_data_joint["multi_band_type"] == "multi-linear"
@@ -41,19 +33,11 @@ class TestProcessor(object):
         assert len(kwargs_data_joint["multi_band_list"][0]) == 3
 
     def test_get_image_data(self):
-        """Test `get_image_data` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image_data` method."""
         image_data = self.processor.get_image_data("lens_system1", "F390W")
         assert image_data is not None
 
     def test_get_psf_data(self):
-        """Test `get_image_data` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image_data` method."""
         psf_data = self.processor.get_psf_data("lens_system1", "F390W")
         assert psf_data is not None

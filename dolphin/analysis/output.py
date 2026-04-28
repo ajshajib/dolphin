@@ -14,8 +14,8 @@ from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
 from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
 
-from dolphin.processor import Processor
-from dolphin.processor.config import ModelConfig
+from ..processor import Processor
+from ..processor.config import ModelConfig
 
 
 class Output(Processor):
@@ -178,7 +178,7 @@ class Output(Processor):
         self._multi_band_list_out = output["multi_band_list_out"]
         self._dolphin_version = output.get("dolphin_version", "unknown")
         self._lenstronomy_version = output.get("lenstronomy_version", "unknown")
-        
+
         print(f"dolphin version: {self._dolphin_version}")
         print(f"lenstronomy version: {self._lenstronomy_version}")
 

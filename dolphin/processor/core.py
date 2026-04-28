@@ -5,7 +5,7 @@ __author__ = "ajshajib"
 
 import sys
 import lenstronomy
-from dolphin import __version__
+from .. import __version__
 
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 from schwimmbad import choose_pool

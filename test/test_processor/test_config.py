@@ -341,7 +341,7 @@ class TestModelConfig(object):
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
                 kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
             )
-            
+
     def test_custom_logL_addition_JAX(self):
         """Test `custom_logL_addition_JAX` method.
 
@@ -461,7 +461,7 @@ class TestModelConfig(object):
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
                 kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
             )
-            
+
     def test_load_mask(self):
         """Test `load_mask` static method."""
         mask_array = np.zeros((20, 20))

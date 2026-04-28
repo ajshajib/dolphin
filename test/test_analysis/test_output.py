@@ -282,7 +282,8 @@ class TestOutput(object):
             )
 
     def test_nautilus_exceptions(self):
-        """Test that Nautilus raises appropriate ValueErrors for MCMC-specific methods."""
+        """Test that Nautilus raises appropriate ValueErrors for MCMC-specific
+        methods."""
         save_dict = {
             "settings": {"some": "settings"},
             "kwargs_result": {"0": None},

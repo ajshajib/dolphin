@@ -145,6 +145,14 @@ class TestRecipe(object):
             np.zeros(20),
         )
 
+        # test Nautilus
+        config_nautilus = deepcopy(self.config)
+        config_nautilus.settings["fitting"]["sampling"] = True
+        config_nautilus.settings["fitting"]["sampler"] = "Nautilus"
+        recipe_nautilus = Recipe(config_nautilus)
+        sequence_nautilus = recipe_nautilus.get_sampling_sequence()
+        assert sequence_nautilus[0][0] == "Nautilus"
+
     def test_get_galaxy_galaxy_recipe(self):
         """Test `get_galaxy_galaxy_recipe` method."""
         image = np.random.normal(size=(120, 120))

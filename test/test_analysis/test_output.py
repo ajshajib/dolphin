@@ -46,20 +46,20 @@ class TestOutput(object):
         with pytest.raises(ValueError):
             _ = self.output.model_settings
 
-        assert self.output.samples_mcmc == []
-        assert self.output.params_mcmc == []
-        assert self.output.num_params_mcmc == 0
+        assert self.output.samples == []
+        assert self.output.params_sampled == []
+        assert self.output.num_params_sampled == 0
 
-        self.output._params_mcmc = ["param1", "param2"]
-        assert self.output.num_params_mcmc == 2
+        self.output._params_sampled = ["param1", "param2"]
+        assert self.output.num_params_sampled == 2
 
-        self.output._samples_mcmc = np.ones(10)
-        assert np.all(self.output.samples_mcmc == np.ones(10))
-        self.output._samples_mcmc = None
+        self.output._samples = np.ones(10)
+        assert np.all(self.output.samples == np.ones(10))
+        self.output._samples = None
 
-        self.output._params_mcmc = ["param1"]
-        assert self.output.params_mcmc == ["param1"]
-        self.output._params_mcmc = None
+        self.output._params_sampled = ["param1"]
+        assert self.output.params_sampled == ["param1"]
+        self.output._params_sampled = None
 
     def test_load_output(self):
         """Test that outputs are saved and corresponding class variables are not None.
@@ -193,7 +193,7 @@ class TestOutput(object):
         self.output.get_kwargs_from_args(
             "lens_system2",
             "example",
-            self.output.samples_mcmc[0],
+            self.output.samples[0],
             linear_solve=True,
         )
 
@@ -280,3 +280,39 @@ class TestOutput(object):
                 band_index=0,
                 plot=False,
             )
+
+    def test_nautilus_exceptions(self):
+        """Test that Nautilus raises appropriate ValueErrors for MCMC-specific methods."""
+        save_dict = {
+            "settings": {"some": "settings"},
+            "kwargs_result": {"0": None},
+            "fit_output": [
+                [
+                    "Nautilus",
+                    np.ones((50, 2)),
+                    ["param1", "param2"],
+                    np.ones(50),
+                    np.ones(50),
+                    np.ones(50),
+                    {
+                        "points": np.ones((50, 2)),
+                        "log_w": np.ones(50),
+                        "log_l": np.ones(50),
+                    },
+                ]
+            ],
+            "multi_band_list_out": ["band1"],
+        }
+        self.processor.file_system.save_output("test_nautilus", "example", save_dict)
+
+        with pytest.raises(
+            ValueError,
+            match="Nautilus samples do not have walkers to reshape. Use `.samples_mcmc` directly.",
+        ):
+            self.output.get_reshaped_emcee_chain("test_nautilus", "example", 2)
+
+        with pytest.raises(
+            ValueError,
+            match="Trace plotting is not supported for the Nautilus sampler.",
+        ):
+            self.output.plot_mcmc_trace("test_nautilus", "example", 2)

@@ -16,6 +16,8 @@ from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
 
 from ..processor import Processor
 from ..processor.config import ModelConfig
+from .. import __version__
+from lenstronomy import __version__ as _lenstronomy_version
 
 
 class Output(Processor):
@@ -189,6 +191,25 @@ class Output(Processor):
             print(f"Loaded output for {lens_name} with model ID {model_id}.")
             print(f"dolphin version used: {self.dolphin_version}")
             print(f"lenstronomy version used: {self.lenstronomy_version}")
+
+            if self.dolphin_version != __version__:
+                if self.dolphin_version == "unknown":
+                    print(
+                        f"Warning: the output was saved with an unknown version of dolphin. The current version is {__version__}."
+                    )
+                else:
+                    print(
+                        f"Warning: the output was saved with a different version of dolphin ({self.dolphin_version}) than the current version ({__version__})."
+                    )
+            if self.lenstronomy_version != _lenstronomy_version:
+                if self.lenstronomy_version == "unknown":
+                    print(
+                        f"Warning: the output was saved with an unknown version of lenstronomy. The current version is {lenstronomy.__version__}."
+                    )
+                else:
+                    print(
+                        f"Warning: the output was saved with a different version of lenstronomy ({self.lenstronomy_version}) than the current version ({lenstronomy.__version__})."
+                    )
 
         return output
 

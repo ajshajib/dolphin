@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
+import dolphin
+import lenstronomy
 
 from dolphin.processor import Processor
 from dolphin.analysis.output import Output
@@ -85,6 +87,51 @@ class TestOutput(object):
         assert self.output.kwargs_result == save_dict["kwargs_result"]
         assert self.output._multi_band_list_out == save_dict["multi_band_list_out"]
         assert self.output.model_settings == save_dict["settings"]
+
+    def test_load_output_version_warnings(self, capsys):
+        """Test that correct warnings are printed when versions mismatch.
+
+        :return:
+        :rtype:
+        """
+        save_dict = {
+            "settings": {"some": "settings"},
+            "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "fit_output": [
+                ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
+            ],
+            "multi_band_list_out": ["band1", "band2"],
+        }
+
+        # Test unknown versions
+        self.processor.file_system.save_output("test", "version_unknown", save_dict)
+        self.output.load_output("test", "version_unknown")
+        captured = capsys.readouterr()
+
+        assert (
+            f"Warning: the output was saved with an unknown version of dolphin. The current version is {dolphin.__version__}."
+            in captured.out
+        )
+        assert (
+            f"Warning: the output was saved with an unknown version of lenstronomy. The current version is {lenstronomy.__version__}."
+            in captured.out
+        )
+
+        # Test different versions
+        save_dict["dolphin_version"] = "0.0.1"
+        save_dict["lenstronomy_version"] = "0.0.1"
+        self.processor.file_system.save_output("test", "version_diff", save_dict)
+        self.output.load_output("test", "version_diff")
+        captured = capsys.readouterr()
+
+        assert (
+            f"Warning: the output was saved with a different version of dolphin (0.0.1) than the current version ({dolphin.__version__})."
+            in captured.out
+        )
+        assert (
+            f"Warning: the output was saved with a different version of lenstronomy (0.0.1) than the current version ({lenstronomy.__version__})."
+            in captured.out
+        )
 
     def test_plot_model_overview(self):
         """Test `plot_model_overview` method.

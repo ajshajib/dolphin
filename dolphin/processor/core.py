@@ -4,7 +4,7 @@
 __author__ = "ajshajib"
 
 import sys
-import lenstronomy
+from lenstronomy import __version__ as _lenstronomy_version
 from .. import __version__
 
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
@@ -97,7 +97,7 @@ class Processor(object):
             "fit_output": fit_output,
             "multi_band_list_out": multi_band_list_out,
             "dolphin_version": __version__,
-            "lenstronomy_version": lenstronomy.__version__,
+            "lenstronomy_version": _lenstronomy_version,
         }
 
         if pool.is_master():

@@ -87,6 +87,8 @@ class TestOutput(object):
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
             "multi_band_list_out": ["band1", "band2"],
+            "dolphin_version": dolphin.__version__,
+            "lenstronomy_version": lenstronomy.__version__,
         }
 
         self.processor.file_system.save_output("test", "post_process_load", save_dict)

@@ -123,7 +123,7 @@ class Modeler(AI):
                 "psf_symmetry": 4,
             }
         :type psf_iteration_settings: `dict` or `None`
-        :param sampler_name: sampler name, default is "emcee"
+        :param sampler_name: sampler name, default is "emcee". Supported options: "emcee", "Nautilus".
         :type sampler_name: `str`
         :param sampler_settings: sampler settings. If `None`, sampling will not be
             performed. If settings are provided, sampling will be performed.

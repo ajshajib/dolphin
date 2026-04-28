@@ -145,6 +145,19 @@ class TestFileSystem(object):
                     ["{}".format(i) for i in range(4)],
                     np.ones(50),
                 ],
+                [
+                    "Nautilus",
+                    np.ones((50, 4)),
+                    np.array(["{}".format(i) for i in range(4)]),
+                    np.ones(50),
+                    np.ones(50),
+                    np.ones(50),
+                    {
+                        "points": np.ones((50, 4)),
+                        "log_w": np.ones(50),
+                        "log_l": np.ones(50),
+                    },
+                ],
             ],
             "multi_band_list_out": ["band1", "band2"],
         }
@@ -166,6 +179,17 @@ class TestFileSystem(object):
 
         for i in range(3):
             assert np.all(save_dict["fit_output"][1][i] == out["fit_output"][1][i])
+
+        out_nautilus = out["fit_output"][2]
+        save_nautilus = save_dict["fit_output"][2]
+        assert out_nautilus[0] == "Nautilus"
+        assert np.all(out_nautilus[1] == save_nautilus[1])
+        assert out_nautilus[2] == ["0", "1", "2", "3"]
+        assert np.all(out_nautilus[3] == save_nautilus[3])
+        assert np.all(out_nautilus[4] == save_nautilus[4])
+        assert np.all(out_nautilus[5] == save_nautilus[5])
+        for key in save_nautilus[6]:
+            assert np.all(out_nautilus[6][key] == save_nautilus[6][key])
 
         with pytest.raises(ValueError):
             save_dict["fit_output"].append(

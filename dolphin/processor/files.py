@@ -248,7 +248,7 @@ class FileSystem(object):
                     subgroup.create_dataset(
                         "param_list", data=np.array(single_output[2], dtype="S25")
                     )
-                elif single_output[0] == "emcee":
+                elif single_output[0] in ["emcee", "Nautilus"]:
                     subgroup.create_dataset(
                         "samples",
                         data=np.array(
@@ -258,12 +258,33 @@ class FileSystem(object):
                     subgroup.create_dataset(
                         "param_list", data=np.array(single_output[2], dtype="S25")
                     )
-                    subgroup.create_dataset(
-                        "log_likelihood",
-                        data=np.array(
-                            single_output[3],
-                        ),
-                    )
+                    if single_output[0] == "emcee":
+                        subgroup.create_dataset(
+                            "log_likelihood",
+                            data=np.array(
+                                single_output[3],
+                            ),
+                        )
+                    elif single_output[0] == "Nautilus":
+                        subgroup.create_dataset(
+                            "log_l", data=np.array(single_output[3])
+                        )
+                        subgroup.create_dataset(
+                            "log_z", data=np.array(single_output[4])
+                        )
+                        subgroup.create_dataset(
+                            "log_z_err", data=np.array(single_output[5])
+                        )
+                        results_group = subgroup.create_group("results_object")
+                        results_group.create_dataset(
+                            "points", data=np.array(single_output[6]["points"])
+                        )
+                        results_group.create_dataset(
+                            "log_w", data=np.array(single_output[6]["log_w"])
+                        )
+                        results_group.create_dataset(
+                            "log_l", data=np.array(single_output[6]["log_l"])
+                        )
                 else:
                     raise ValueError(
                         f"Fitting type {single_output[0]} not recognized for "
@@ -352,7 +373,7 @@ class FileSystem(object):
                             for s in group[index]["param_list"][:]
                         ]
                     )
-                elif fitting_step[0] == "emcee":
+                elif fitting_step[0] in ["emcee", "Nautilus"]:
                     fitting_step.append(group[index]["samples"][:])
                     fitting_step.append(
                         [
@@ -360,7 +381,18 @@ class FileSystem(object):
                             for s in group[index]["param_list"][:]
                         ]
                     )
-                    fitting_step.append(group[index]["log_likelihood"][:])
+                    if fitting_step[0] == "emcee":
+                        fitting_step.append(group[index]["log_likelihood"][:])
+                    elif fitting_step[0] == "Nautilus":
+                        fitting_step.append(group[index]["log_l"][()])
+                        fitting_step.append(group[index]["log_z"][()])
+                        fitting_step.append(group[index]["log_z_err"][()])
+                        results_object = {
+                            "points": group[index]["results_object"]["points"][()],
+                            "log_w": group[index]["results_object"]["log_w"][()],
+                            "log_l": group[index]["results_object"]["log_l"][()],
+                        }
+                        fitting_step.append(results_object)
 
                 fit_output.append(fitting_step)
 

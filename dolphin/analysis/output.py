@@ -33,7 +33,7 @@ class Output(Processor):
         self._fit_output = None
         self._kwargs_result = None
         self._model_settings = None
-        self._samples = None
+        self._posterior_samples = None
         self._params_sampled = None
 
     @property
@@ -87,16 +87,16 @@ class Output(Processor):
             return self._model_settings
 
     @property
-    def samples(self):
+    def posterior_samples(self):
         """The array of posterior samples from the model run.
 
         :return: the array of posterior samples
         :rtype: `numpy.ndarray` or `list`
         """
-        if self._samples is None:
+        if self._posterior_samples is None:
             return []
         else:
-            return self._samples
+            return self._posterior_samples
 
     @property
     def params_sampled(self):
@@ -152,7 +152,7 @@ class Output(Processor):
         self._multi_band_list_out = output["multi_band_list_out"]
 
         if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
-            self._samples = self.fit_output[-1][1]
+            self._posterior_samples = self.fit_output[-1][1]
             self._params_sampled = self.fit_output[-1][2]
 
         return output
@@ -483,12 +483,12 @@ class Output(Processor):
 
         num_params = self.num_params_sampled  # self.samples_mcmc.shape[1]
         num_walkers = walker_ratio * num_params
-        num_step = int(len(self.samples) / num_walkers)
+        num_step = int(len(self.posterior_samples) / num_walkers)
 
         chain = np.empty((num_walkers, num_step, num_params))
 
         for i in np.arange(num_params):
-            samples = self.samples[:, i].T
+            samples = self.posterior_samples[:, i].T
             chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
         if burn_in != 0:
             chain = chain[:, burn_in:, :]

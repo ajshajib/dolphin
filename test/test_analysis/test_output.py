@@ -46,16 +46,16 @@ class TestOutput(object):
         with pytest.raises(ValueError):
             _ = self.output.model_settings
 
-        assert self.output.samples == []
+        assert self.output.posterior_samples == []
         assert self.output.params_sampled == []
         assert self.output.num_params_sampled == 0
 
         self.output._params_sampled = ["param1", "param2"]
         assert self.output.num_params_sampled == 2
 
-        self.output._samples = np.ones(10)
-        assert np.all(self.output.samples == np.ones(10))
-        self.output._samples = None
+        self.output._posterior_samples = np.ones(10)
+        assert np.all(self.output.posterior_samples == np.ones(10))
+        self.output._posterior_samples = None
 
         self.output._params_sampled = ["param1"]
         assert self.output.params_sampled == ["param1"]
@@ -193,7 +193,7 @@ class TestOutput(object):
         self.output.get_kwargs_from_args(
             "lens_system2",
             "example",
-            self.output.samples[0],
+            self.output.posterior_samples[0],
             linear_solve=True,
         )
 

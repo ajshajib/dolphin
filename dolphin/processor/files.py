@@ -315,11 +315,7 @@ class FileSystem(object):
         else:
             raise ValueError(f"File type {file_type} not recognized!")
 
-        print(f"Loaded output for {lens_name} with model ID {model_id}.")
-        print(f"dolphin version used: {output.get('dolphin_version', 'unknown')}")
-        print(
-            f"lenstronomy version used: {output.get('lenstronomy_version', 'unknown')}"
-        )
+        return output
 
     def load_output_json(self, lens_name, model_id):
         """Load output modeling results from a JSON file.

@@ -160,13 +160,15 @@ class Output(Processor):
         """
         raise NotImplementedError
 
-    def load_output(self, lens_name, model_id):
+    def load_output(self, lens_name, model_id, verbose=True):
         """Load output from file and save in class variables.
 
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: model identifier provided at run initiation
         :type model_id: `str`
+        :param verbose: if `True`, prints the loaded output information
+        :type verbose: `bool`
         :return: output dictionary
         :rtype: `dict`
         """
@@ -179,12 +181,14 @@ class Output(Processor):
         self._dolphin_version = output.get("dolphin_version", "unknown")
         self._lenstronomy_version = output.get("lenstronomy_version", "unknown")
 
-        print(f"dolphin version: {self._dolphin_version}")
-        print(f"lenstronomy version: {self._lenstronomy_version}")
-
         if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
             self._posterior_samples = self.fit_output[-1][1]
             self._params_sampled = self.fit_output[-1][2]
+
+        if verbose:
+            print(f"Loaded output for {lens_name} with model ID {model_id}.")
+            print(f"dolphin version used: {self.dolphin_version}")
+            print(f"lenstronomy version used: {self.lenstronomy_version}")
 
         return output
 

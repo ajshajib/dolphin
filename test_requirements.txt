@@ -1,2 +1,1 @@
-jax
 jaxtronomy @ https://github.com/lenstronomy/JAXtronomy/archive/refs/heads/main.zip

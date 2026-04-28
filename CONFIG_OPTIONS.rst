@@ -448,7 +448,7 @@ Fitting Options
 
            sampling: true
 
-    - ``sampler``: The sampler to use for sampling. Currently, only ``emcee`` is fully supported.
+    - ``sampler``: The sampler to use for sampling. Supported samplers are ``emcee`` and ``Nautilus``.
 
       - Type: ``string``
       - Example:
@@ -457,9 +457,67 @@ Fitting Options
 
            sampler: emcee
 
-    - ``sampler_settings``: Settings for the sampler.
+    - ``sampler_settings``: Settings for the sampler. For full documentation of parameters, refer to the `lenstronomy sampler documentation <https://lenstronomy.readthedocs.io/en/latest/lenstronomy.Sampling.Samplers.html>`_ and the `Nautilus documentation <https://nautilus-sampler.readthedocs.io>`_.
 
       - Suboptions:
+
+        **Recommended Nautilus options:**
+
+        - ``n_live``: Number of live points used by the nested sampler.
+
+          - Type: ``integer``
+          - Example:
+
+            .. code-block:: yaml
+
+               n_live: 2000
+
+        - ``n_eff``: Minimum targeted effective sample size. The algorithm will sample from the shells until this is reached.
+
+          - Type: ``float``
+          - Example:
+
+            .. code-block:: yaml
+
+               n_eff: 10000.0
+
+        - ``verbose``: If True, prints detailed information about the sampler's progress.
+
+          - Type: ``boolean``
+          - Example:
+
+            .. code-block:: yaml
+
+               verbose: true
+
+        - ``pass_dict``: Whether to pass dictionaries to the likelihood. Usually set to ``false`` for better performance.
+
+          - Type: ``boolean``
+          - Example:
+
+            .. code-block:: yaml
+
+               pass_dict: false
+
+        - ``filepath``: Path to a file (``.h5`` or ``.hdf5``) where Nautilus will save its internal state for checkpointing.
+
+          - Type: ``string``
+          - Example:
+
+            .. code-block:: yaml
+
+               filepath: "nautilus_checkpoint.hdf5"
+
+        - ``resume``: Whether to resume a run from the file specified in ``filepath``.
+
+          - Type: ``boolean``
+          - Example:
+
+            .. code-block:: yaml
+
+               resume: true
+
+        **Emcee-specific options:**
 
         - ``n_burn``: Number of burn-in steps.
 
@@ -491,6 +549,54 @@ Fitting Options
         - ``init_samples``: *(Optional)* Initial samples for walkers.
           
           - Type: ``list of lists of floats``
+
+        - ``n_walkers``: *(Optional)* Number of walkers of emcee. If set, this overwrites the ``walkerRatio`` input.
+
+          - Type: ``integer``
+          - Example:
+
+            .. code-block:: yaml
+
+               n_walkers: 100
+
+        - ``sigma_scale``: *(Optional)* Scaling of the initial parameter spread relative to the width in the initial settings. Default is 1.0.
+
+          - Type: ``float``
+          - Example:
+
+            .. code-block:: yaml
+
+               sigma_scale: 1.0
+
+        - ``threadCount``: *(Optional)* Number of CPU threads to use for multiprocessing.
+
+          - Type: ``integer``
+          - Example:
+
+            .. code-block:: yaml
+
+               threadCount: 4
+
+        - ``re_use_samples``: *(Optional)* If True and ``init_samples`` is provided, re-uses the samples described.
+
+          - Type: ``boolean``
+
+        - ``progress``: *(Optional)* If True, shows the progress bar during sampling.
+
+          - Type: ``boolean``
+
+        - ``backend_filename``: *(Optional)* Name of the HDF5 file where the emcee sampling state is saved for checkpointing.
+
+          - Type: ``string``
+          - Example:
+
+            .. code-block:: yaml
+
+               backend_filename: "mcmc_emcee_checkpoint.h5"
+
+        - ``start_from_backend``: *(Optional)* If True, start sampling from the state saved in ``backend_filename``.
+
+          - Type: ``boolean``
 
     - ``psf_iteration``: *(Optional)* Whether to perform iterative PSF fitting.
 

@@ -88,9 +88,9 @@ class Output(Processor):
 
     @property
     def samples(self):
-        """The array of MCMC samples from the model run.
+        """The array of posterior samples from the model run.
 
-        :return: the array of MCMC samples
+        :return: the array of posterior samples
         :rtype: `numpy.ndarray` or `list`
         """
         if self._samples is None:
@@ -100,9 +100,9 @@ class Output(Processor):
 
     @property
     def params_sampled(self):
-        """The non-linear parameters sampled with MCMC.
+        """The non-linear parameters sampled during the model run.
 
-        :return: the list of non-linear parameters sampled with MCMC
+        :return: the list of sampled non-linear parameters
         :rtype: `list`
         """
         if self._params_sampled is None:
@@ -112,7 +112,7 @@ class Output(Processor):
 
     @property
     def num_params_sampled(self):
-        """Number of sampled non-linear parameters in MCMC.
+        """Number of sampled non-linear parameters.
 
         :return: number of sampled non-linear parameters
         :rtype: `int`

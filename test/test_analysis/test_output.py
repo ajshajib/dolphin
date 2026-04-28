@@ -3,6 +3,7 @@
 
 from pathlib import Path
 import pytest
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import dolphin
@@ -148,7 +149,7 @@ class TestOutput(object):
             in captured.out
         )
 
-    def test_load_output_byte_versions(self):
+    def test_load_output_byte_versions(self, monkeypatch):
         """Test that byte-encoded version strings are properly decoded.
 
         :return:
@@ -161,11 +162,22 @@ class TestOutput(object):
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
             "multi_band_list_out": ["band1", "band2"],
-            "dolphin_version": b"1.3.0",
-            "lenstronomy_version": b"1.1.0",
+            "dolphin_version": "1.3.0",
+            "lenstronomy_version": "1.1.0",
         }
 
         self.processor.file_system.save_output("test", "version_bytes", save_dict)
+
+        original_get = h5py.AttributeManager.get
+
+        def mock_get(self_obj, name, default=None):
+            val = original_get(self_obj, name, default)
+            if name in ["dolphin_version", "lenstronomy_version"]:
+                if isinstance(val, str):
+                    return val.encode("utf-8")
+            return val
+
+        monkeypatch.setattr(h5py.AttributeManager, "get", mock_get)
         self.output.load_output("test", "version_bytes")
 
         assert self.output.dolphin_version == "1.3.0"

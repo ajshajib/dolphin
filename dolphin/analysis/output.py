@@ -204,11 +204,11 @@ class Output(Processor):
             if self.lenstronomy_version != _lenstronomy_version:
                 if self.lenstronomy_version == "unknown":
                     print(
-                        f"Warning: the output was saved with an unknown version of lenstronomy. The current version is {lenstronomy.__version__}."
+                        f"Warning: the output was saved with an unknown version of lenstronomy. The current version is {_lenstronomy_version}."
                     )
                 else:
                     print(
-                        f"Warning: the output was saved with a different version of lenstronomy ({self.lenstronomy_version}) than the current version ({lenstronomy.__version__})."
+                        f"Warning: the output was saved with a different version of lenstronomy ({self.lenstronomy_version}) than the current version ({_lenstronomy_version})."
                     )
 
         return output

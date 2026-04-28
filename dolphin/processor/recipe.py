@@ -242,7 +242,7 @@ class Recipe(object):
                 # "dyPolyChord",
                 # "MultiNest",
                 # "nested_sampling",
-                # "Nautilus",
+                "Nautilus",
             ]
             if self._config.settings["fitting"]["sampler"] not in supported_samplers:
                 raise ValueError(
@@ -253,7 +253,7 @@ class Recipe(object):
                 )
 
             sampling_kwargs = self._config.settings["fitting"]["sampler_settings"]
-            if self._config.settings["fitting"]["sampler"] in ["emcee"]:
+            if self._config.settings["fitting"]["sampler"] in ["emcee", "Nautilus"]:
                 if "threadCount" not in sampling_kwargs:
                     sampling_kwargs["threadCount"] = self._thread_count
 

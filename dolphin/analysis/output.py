@@ -33,8 +33,8 @@ class Output(Processor):
         self._fit_output = None
         self._kwargs_result = None
         self._model_settings = None
-        self._samples_mcmc = None
-        self._params_mcmc = None
+        self._samples = None
+        self._params_sampled = None
 
     @property
     def fit_output(self):
@@ -87,40 +87,40 @@ class Output(Processor):
             return self._model_settings
 
     @property
-    def samples_mcmc(self):
+    def samples(self):
         """The array of MCMC samples from the model run.
 
         :return: the array of MCMC samples
         :rtype: `numpy.ndarray` or `list`
         """
-        if self._samples_mcmc is None:
+        if self._samples is None:
             return []
         else:
-            return self._samples_mcmc
+            return self._samples
 
     @property
-    def params_mcmc(self):
+    def params_sampled(self):
         """The non-linear parameters sampled with MCMC.
 
         :return: the list of non-linear parameters sampled with MCMC
         :rtype: `list`
         """
-        if self._params_mcmc is None:
+        if self._params_sampled is None:
             return []
         else:
-            return self._params_mcmc
+            return self._params_sampled
 
     @property
-    def num_params_mcmc(self):
+    def num_params_sampled(self):
         """Number of sampled non-linear parameters in MCMC.
 
         :return: number of sampled non-linear parameters
         :rtype: `int`
         """
-        if self._params_mcmc is None:
+        if self._params_sampled is None:
             return 0
         else:
-            return len(self._params_mcmc)
+            return len(self._params_sampled)
 
     def swim(self, *args, **kwargs):
         """Override the `swim` method of the `Processor` class to make it not callable.
@@ -151,9 +151,9 @@ class Output(Processor):
         self._fit_output = output["fit_output"]
         self._multi_band_list_out = output["multi_band_list_out"]
 
-        if self.fit_output[-1][0] == "emcee":
-            self._samples_mcmc = self.fit_output[-1][1]
-            self._params_mcmc = self.fit_output[-1][2]
+        if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
+            self._samples = self.fit_output[-1][1]
+            self._params_sampled = self.fit_output[-1][2]
 
         return output
 
@@ -476,14 +476,19 @@ class Output(Processor):
         """
         self.load_output(lens_name, model_id)
 
-        num_params = self.num_params_mcmc  # self.samples_mcmc.shape[1]
+        if self.fit_output[-1][0] == "Nautilus":
+            raise ValueError(
+                "Nautilus samples do not have walkers to reshape. Use `.samples_mcmc` directly."
+            )
+
+        num_params = self.num_params_sampled  # self.samples_mcmc.shape[1]
         num_walkers = walker_ratio * num_params
-        num_step = int(len(self.samples_mcmc) / num_walkers)
+        num_step = int(len(self.samples) / num_walkers)
 
         chain = np.empty((num_walkers, num_step, num_params))
 
         for i in np.arange(num_params):
-            samples = self.samples_mcmc[:, i].T
+            samples = self.samples[:, i].T
             chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
         if burn_in != 0:
             chain = chain[:, burn_in:, :]
@@ -520,11 +525,19 @@ class Output(Processor):
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
+        self.load_output(lens_name, model_id)
+        sampler_type = self.fit_output[-1][0]
+
+        if sampler_type == "Nautilus":
+            raise ValueError(
+                "Trace plotting is not supported for the Nautilus sampler."
+            )
+
         chain = self.get_reshaped_emcee_chain(
             lens_name, model_id, walker_ratio, burn_in=burn_in
         )
 
-        num_params = self.num_params_mcmc
+        num_params = self.num_params_sampled
         num_step = chain.shape[1]
 
         if len(parameters_to_plot) == 0:
@@ -532,11 +545,11 @@ class Output(Processor):
         else:
             parameter_list = []
             for i in parameters_to_plot:
-                if i in self.params_mcmc:
-                    parameter_list.append(self.params_mcmc.index(i))
+                if i in self.params_sampled:
+                    parameter_list.append(self.params_sampled.index(i))
                 else:
                     raise ValueError(
-                        f"Parameter '{i}' not found. Available parameters: {self.params_mcmc}"
+                        f"Parameter '{i}' not found. Available parameters: {self.params_sampled}"
                     )
 
         mean_pos = np.zeros((num_params, num_step))
@@ -565,7 +578,7 @@ class Output(Processor):
         for n, i in enumerate(parameter_list):
             if verbose:
                 print(
-                    self.params_mcmc[i],
+                    self.params_sampled[i],
                     "{:.4f} ± {:.4f}".format(
                         median_pos[i][last - 1],
                         (q84_pos[i][last - 1] - q16_pos[i][last - 1]) / 2,
@@ -582,7 +595,7 @@ class Output(Processor):
                 # ax[i].fill_between(np.arange(last), mean_pos[i][:last] \
                 # +std_pos[i][:last], mean_pos[i][:last]-std_pos[i][:last],
                 # alpha=0.4)
-                ax[n].set_ylabel(self.params_mcmc[i], fontsize=8)
+                ax[n].set_ylabel(self.params_sampled[i], fontsize=8)
                 ax[n].set_xlim(0, last)
             else:
                 ax.plot(median_pos[i][:last], c="g")
@@ -590,7 +603,7 @@ class Output(Processor):
                 ax.fill_between(
                     np.arange(last), q84_pos[i][:last], q16_pos[i][:last], alpha=0.4
                 )
-                ax.set_ylabel(self.params_mcmc[i], fontsize=8)
+                ax.set_ylabel(self.params_sampled[i], fontsize=8)
                 ax.set_xlim(0, last)
 
             medians.append(np.median(median_pos[i][burn_in:last]))

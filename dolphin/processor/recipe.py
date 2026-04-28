@@ -227,7 +227,8 @@ class Recipe(object):
         return fitting_kwargs_list
 
     def get_sampling_sequence(self):
-        """Get the sampling sequence. Currently MCMC with emcee and nested sampling with Nautilus are supported.
+        """Get the sampling sequence. Currently MCMC with emcee and nested sampling with
+        Nautilus are supported.
 
         :return: a list containing the sampling sequence arguments
         :rtype: `list`

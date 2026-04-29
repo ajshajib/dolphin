@@ -18,7 +18,7 @@ from .files import FileSystem
 try:
     import jax.numpy as jnp
     from jaxtronomy.Util.param_util import ellipticity2phi_q as ellipticity2phi_q_jax
-    
+
     _is_jax_installed = True
 except ImportError:
     _is_jax_installed = False
@@ -534,7 +534,9 @@ class ModelConfig(Config):
         if use_custom_logL_addition:
             if use_jax:
                 if not _is_jax_installed:
-                    raise ImportError("JAX and/or JAXtronomy are not installed, use_jax option unavailable")
+                    raise ImportError(
+                        "JAX and/or JAXtronomy are not installed, use_jax option unavailable"
+                    )
                 custom_logL_addition = self.custom_logL_addition_jax
             else:
                 custom_logL_addition = self.custom_logL_addition

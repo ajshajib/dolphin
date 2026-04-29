@@ -17,9 +17,11 @@ from .files import FileSystem
 
 try:
     import jax.numpy as jnp
-    from jaxtronomy.Util.param_util import ellipticity2phi_q as ellipticity2phi_q_JAX
+    from jaxtronomy.Util.param_util import ellipticity2phi_q as ellipticity2phi_q_jax
+    
+    _is_jax_installed = True
 except ImportError:
-    print("Failed to import JAX or JAXtronomy")
+    _is_jax_installed = False
 
 
 class Config(object):
@@ -435,6 +437,8 @@ class ModelConfig(Config):
     def get_kwargs_likelihood(self, use_jax=False):
         """Create `kwargs_likelihood` dictionary for lenstronomy.
 
+        :param use_jax: If set to True, uses JAXtronomy for modeling instead of lenstronomy
+        :type use_jax: `bool`
         :return: dictionary containing the likelihood configuration
         :rtype: `dict`
         """
@@ -529,7 +533,9 @@ class ModelConfig(Config):
 
         if use_custom_logL_addition:
             if use_jax:
-                custom_logL_addition = self.custom_logL_addition_JAX
+                if not _is_jax_installed:
+                    raise ImportError("JAX and/or JAXtronomy are not installed, use_jax option unavailable")
+                custom_logL_addition = self.custom_logL_addition_jax
             else:
                 custom_logL_addition = self.custom_logL_addition
 
@@ -650,7 +656,7 @@ class ModelConfig(Config):
 
         return prior
 
-    def custom_logL_addition_JAX(
+    def custom_logL_addition_jax(
         self,
         kwargs_lens=None,
         kwargs_source=None,
@@ -697,12 +703,12 @@ class ModelConfig(Config):
                 )
 
             pa_mass = (
-                ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[0]
+                ellipticity2phi_q_jax(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[0]
                 * 180
                 / jnp.pi
             )
             pa_light = (
-                ellipticity2phi_q_JAX(
+                ellipticity2phi_q_jax(
                     kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
                 )[0]
                 * 180
@@ -734,17 +740,17 @@ class ModelConfig(Config):
                     "The value for limit_mass_q_from_light should be a number!"
                 )
 
-            q_mass = ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
+            q_mass = ellipticity2phi_q_jax(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
                 1
             ]
-            q_light = ellipticity2phi_q_JAX(
+            q_light = ellipticity2phi_q_jax(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]
 
-            q_mass = ellipticity2phi_q_JAX(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
+            q_mass = ellipticity2phi_q_jax(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
                 1
             ]
-            q_light = ellipticity2phi_q_JAX(
+            q_light = ellipticity2phi_q_jax(
                 kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
             )[1]
             diff = q_light - q_mass

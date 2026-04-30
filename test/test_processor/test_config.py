@@ -342,8 +342,8 @@ class TestModelConfig(object):
                 kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
             )
 
-    def test_custom_logL_addition_JAX(self):
-        """Test `custom_logL_addition_JAX` method.
+    def test_custom_logL_addition_jax(self):
+        """Test `custom_logL_addition_jax` method.
 
         :return:
         :rtype:
@@ -357,7 +357,7 @@ class TestModelConfig(object):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
-        prior = self.config_1.custom_logL_addition_JAX(
+        prior = self.config_1.custom_logL_addition_jax(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
@@ -370,7 +370,7 @@ class TestModelConfig(object):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
-        prior = self.config_1.custom_logL_addition_JAX(
+        prior = self.config_1.custom_logL_addition_jax(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
@@ -383,7 +383,7 @@ class TestModelConfig(object):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
-        prior = self.config_1.custom_logL_addition_JAX(
+        prior = self.config_1.custom_logL_addition_jax(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
@@ -403,7 +403,7 @@ class TestModelConfig(object):
             kwargs_lens_light=kwargs_lens_light,
             kwargs_source=kwargs_source,
         )
-        prior = self.config_3.custom_logL_addition_JAX(
+        prior = self.config_3.custom_logL_addition_jax(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
             kwargs_source=kwargs_source,
@@ -423,7 +423,7 @@ class TestModelConfig(object):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
-        prior = config2.custom_logL_addition_JAX(
+        prior = config2.custom_logL_addition_jax(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
@@ -439,7 +439,7 @@ class TestModelConfig(object):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )
-        prior = config3.custom_logL_addition_JAX(
+        prior = config3.custom_logL_addition_jax(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
         )

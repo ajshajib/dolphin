@@ -14,8 +14,10 @@ from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
 from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
 
-from dolphin.processor import Processor
-from dolphin.processor.config import ModelConfig
+from ..processor import Processor
+from ..processor.config import ModelConfig
+from .. import __version__
+from lenstronomy import __version__ as _lenstronomy_version
 
 
 class Output(Processor):
@@ -35,6 +37,8 @@ class Output(Processor):
         self._model_settings = None
         self._posterior_samples = None
         self._params_sampled = None
+        self._dolphin_version = None
+        self._lenstronomy_version = None
 
     @property
     def fit_output(self):
@@ -122,6 +126,30 @@ class Output(Processor):
         else:
             return len(self._params_sampled)
 
+    @property
+    def dolphin_version(self):
+        """The dolphin version used for the run.
+
+        :return: the dolphin version
+        :rtype: `str`
+        """
+        if self._dolphin_version is None:
+            return "unknown"
+        else:
+            return self._dolphin_version
+
+    @property
+    def lenstronomy_version(self):
+        """The lenstronomy version used for the run.
+
+        :return: the lenstronomy version
+        :rtype: `str`
+        """
+        if self._lenstronomy_version is None:
+            return "unknown"
+        else:
+            return self._lenstronomy_version
+
     def swim(self, *args, **kwargs):
         """Override the `swim` method of the `Processor` class to make it not callable.
 
@@ -134,13 +162,15 @@ class Output(Processor):
         """
         raise NotImplementedError
 
-    def load_output(self, lens_name, model_id):
+    def load_output(self, lens_name, model_id, verbose=True):
         """Load output from file and save in class variables.
 
         :param lens_name: lens name
         :type lens_name: `str`
         :param model_id: model identifier provided at run initiation
         :type model_id: `str`
+        :param verbose: if `True`, prints the loaded output information
+        :type verbose: `bool`
         :return: output dictionary
         :rtype: `dict`
         """
@@ -150,10 +180,36 @@ class Output(Processor):
         self._kwargs_result = output["kwargs_result"]
         self._fit_output = output["fit_output"]
         self._multi_band_list_out = output["multi_band_list_out"]
+        self._dolphin_version = output.get("dolphin_version", "unknown")
+        self._lenstronomy_version = output.get("lenstronomy_version", "unknown")
 
         if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
             self._posterior_samples = self.fit_output[-1][1]
             self._params_sampled = self.fit_output[-1][2]
+
+        if verbose:
+            print(f"Loaded output for {lens_name} with model ID {model_id}.")
+            print(f"dolphin version used: {self.dolphin_version}")
+            print(f"lenstronomy version used: {self.lenstronomy_version}")
+
+            if self.dolphin_version != __version__:
+                if self.dolphin_version == "unknown":
+                    print(
+                        f"Warning: the output was saved with an unknown version of dolphin. The current version is {__version__}."
+                    )
+                else:
+                    print(
+                        f"Warning: the output was saved with a different version of dolphin ({self.dolphin_version}) than the current version ({__version__})."
+                    )
+            if self.lenstronomy_version != _lenstronomy_version:
+                if self.lenstronomy_version == "unknown":
+                    print(
+                        f"Warning: the output was saved with an unknown version of lenstronomy. The current version is {_lenstronomy_version}."
+                    )
+                else:
+                    print(
+                        f"Warning: the output was saved with a different version of lenstronomy ({self.lenstronomy_version}) than the current version ({_lenstronomy_version})."
+                    )
 
         return output
 

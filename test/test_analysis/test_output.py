@@ -3,8 +3,11 @@
 
 from pathlib import Path
 import pytest
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+import dolphin
+import lenstronomy
 
 from dolphin.processor import Processor
 from dolphin.analysis.output import Output
@@ -61,6 +64,17 @@ class TestOutput(object):
         assert self.output.params_sampled == ["param1"]
         self.output._params_sampled = None
 
+        assert self.output.dolphin_version == "unknown"
+        assert self.output.lenstronomy_version == "unknown"
+
+        self.output._dolphin_version = "1.3.0"
+        assert self.output.dolphin_version == "1.3.0"
+        self.output._dolphin_version = None
+
+        self.output._lenstronomy_version = "1.1.0"
+        assert self.output.lenstronomy_version == "1.1.0"
+        self.output._lenstronomy_version = None
+
     def test_load_output(self):
         """Test that outputs are saved and corresponding class variables are not None.
 
@@ -74,6 +88,8 @@ class TestOutput(object):
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
             "multi_band_list_out": ["band1", "band2"],
+            "dolphin_version": dolphin.__version__,
+            "lenstronomy_version": lenstronomy.__version__,
         }
 
         self.processor.file_system.save_output("test", "post_process_load", save_dict)
@@ -85,6 +101,87 @@ class TestOutput(object):
         assert self.output.kwargs_result == save_dict["kwargs_result"]
         assert self.output._multi_band_list_out == save_dict["multi_band_list_out"]
         assert self.output.model_settings == save_dict["settings"]
+        assert self.output.dolphin_version == dolphin.__version__
+        assert self.output.lenstronomy_version == lenstronomy.__version__
+
+    def test_load_output_version_warnings(self, capsys):
+        """Test that correct warnings are printed when versions mismatch.
+
+        :return:
+        :rtype:
+        """
+        save_dict = {
+            "settings": {"some": "settings"},
+            "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "fit_output": [
+                ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
+            ],
+            "multi_band_list_out": ["band1", "band2"],
+        }
+
+        # Test unknown versions
+        self.processor.file_system.save_output("test", "version_unknown", save_dict)
+        self.output.load_output("test", "version_unknown")
+        captured = capsys.readouterr()
+
+        assert (
+            f"Warning: the output was saved with an unknown version of dolphin. The current version is {dolphin.__version__}."
+            in captured.out
+        )
+        assert (
+            f"Warning: the output was saved with an unknown version of lenstronomy. The current version is {lenstronomy.__version__}."
+            in captured.out
+        )
+
+        # Test different versions
+        save_dict["dolphin_version"] = "0.0.1"
+        save_dict["lenstronomy_version"] = "0.0.1"
+        self.processor.file_system.save_output("test", "version_diff", save_dict)
+        self.output.load_output("test", "version_diff")
+        captured = capsys.readouterr()
+
+        assert (
+            f"Warning: the output was saved with a different version of dolphin (0.0.1) than the current version ({dolphin.__version__})."
+            in captured.out
+        )
+        assert (
+            f"Warning: the output was saved with a different version of lenstronomy (0.0.1) than the current version ({lenstronomy.__version__})."
+            in captured.out
+        )
+
+    def test_load_output_byte_versions(self, monkeypatch):
+        """Test that byte-encoded version strings are properly decoded.
+
+        :return:
+        :rtype:
+        """
+        save_dict = {
+            "settings": {"some": "settings"},
+            "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "fit_output": [
+                ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
+            ],
+            "multi_band_list_out": ["band1", "band2"],
+            "dolphin_version": "1.3.0",
+            "lenstronomy_version": "1.1.0",
+        }
+
+        self.processor.file_system.save_output("test", "version_bytes", save_dict)
+
+        original_get = h5py.AttributeManager.get
+
+        def mock_get(self_obj, name, default=None):
+            val = original_get(self_obj, name, default)
+            if name in ["dolphin_version", "lenstronomy_version"]:
+                if isinstance(val, str):
+                    return val.encode("utf-8")
+            return val
+
+        monkeypatch.setattr(h5py.AttributeManager, "get", mock_get)
+        self.output.load_output("test", "version_bytes")
+
+        assert self.output.dolphin_version == "1.3.0"
+        assert self.output.lenstronomy_version == "1.1.0"
 
     def test_plot_model_overview(self):
         """Test `plot_model_overview` method.

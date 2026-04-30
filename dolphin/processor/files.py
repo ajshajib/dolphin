@@ -232,6 +232,11 @@ class FileSystem(object):
                 ensure_ascii=False,
             )
 
+            f.attrs["dolphin_version"] = output.get("dolphin_version", "unknown")
+            f.attrs["lenstronomy_version"] = output.get(
+                "lenstronomy_version", "unknown"
+            )
+
             group = f.create_group("fit_output")
             for i, single_output in enumerate(output["fit_output"]):
                 subgroup = group.create_group(f"{i}")
@@ -304,11 +309,13 @@ class FileSystem(object):
         :rtype: `dict`
         """
         if file_type == "h5":
-            return self.load_output_h5(lens_name, model_id)
+            output = self.load_output_h5(lens_name, model_id)
         elif file_type == "json":
-            return self.load_output_json(lens_name, model_id)
+            output = self.load_output_json(lens_name, model_id)
         else:
             raise ValueError(f"File type {file_type} not recognized!")
+
+        return output
 
     def load_output_json(self, lens_name, model_id):
         """Load output modeling results from a JSON file.
@@ -349,6 +356,14 @@ class FileSystem(object):
             multi_band_list_out = self.decode_numpy_arrays(
                 json.loads(str(f.attrs["multi_band_list_out"]))
             )
+
+            dolphin_version = f.attrs.get("dolphin_version", "unknown")
+            if isinstance(dolphin_version, bytes):
+                dolphin_version = dolphin_version.decode("utf-8")
+
+            lenstronomy_version = f.attrs.get("lenstronomy_version", "unknown")
+            if isinstance(lenstronomy_version, bytes):
+                lenstronomy_version = lenstronomy_version.decode("utf-8")
 
             fit_output = []
             group = f["fit_output"]
@@ -401,6 +416,8 @@ class FileSystem(object):
                 "kwargs_result": kwargs_result,
                 "fit_output": fit_output,
                 "multi_band_list_out": multi_band_list_out,
+                "dolphin_version": dolphin_version,
+                "lenstronomy_version": lenstronomy_version,
             }
 
             return output

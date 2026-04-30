@@ -21,8 +21,12 @@ class TestProcessor(object):
         """Test `swim` method."""
         self.processor.swim("lens_system1", "test")
 
-        self.processor.swim("lens_system1", "test", use_jax=True, recipe_name="galaxy-galaxy")
-        self.processor.swim("lensed_quasar", "test", use_jax=True, recipe_name="galaxy-quasar")
+        self.processor.swim(
+            "lens_system1", "test", use_jax=True, recipe_name="galaxy-galaxy"
+        )
+        self.processor.swim(
+            "lensed_quasar", "test", use_jax=True, recipe_name="galaxy-quasar"
+        )
 
     def test_get_kwargs_data_joint(self):
         """Test `get_kwargs_data_joint` method."""

@@ -252,9 +252,11 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self):
+    def get_kwargs_constraints(self, use_jax=False):
         """Create `kwargs_constraints` dictionary for lenstronomy.
 
+        :param use_jax: if `True`, performs modeling through JAXtronomy instead of lenstronomy
+        :type use_jax: `bool`
         :return: dictionary containing the constraint configuration
         :rtype: `dict`
         """
@@ -281,9 +283,14 @@ class ModelConfig(Config):
         if len(self.get_point_source_model_list()) > 0:
             num_image = len(self.settings["point_source_option"]["ra_init"])
             kwargs_constraints["num_point_source_list"] = [num_image]
-            kwargs_constraints["solver_type"] = (
-                "PROFILE_SHEAR" if num_image > 2 else "CENTER"
-            )
+
+            # solver type is not supported in JAXtronomy
+            if use_jax:
+                kwargs_constraints["solver_type"] = None
+            else:
+                kwargs_constraints["solver_type"] = (
+                    "PROFILE_SHEAR" if num_image > 2 else "CENTER"
+                )
 
         if (
             "kwargs_constraints" in self.settings

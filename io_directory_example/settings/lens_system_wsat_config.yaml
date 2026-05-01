@@ -40,7 +40,7 @@ source_light_option:
   gaussian_prior:
     0: [[beta, 0.15, 0.05]]
   shapelet_scale_logarithmic_prior: true
-    # If true, provide logarithmic_prior on the source light profile
+    # if true, provide logarithmic_prior on the source light profile
     # beta parameter
   n_max: [2, 4] # list to specify n_max for each band
 

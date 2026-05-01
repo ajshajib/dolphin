@@ -21,38 +21,23 @@ class TestFileSystem(object):
         pass
 
     def test_path2str(self):
-        """Test `path2str` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `path2str` method."""
         assert Path(self.file_system.path2str(_TEST_IO_DIR)) == _TEST_IO_DIR
 
     def test_get_lens_list_file_path(self):
-        """Test `get_lens_list_file_path` :return:
-
-        :rtype:
-        """
+        """Test `get_lens_list_file_path` method."""
         lens_list_file_path = _TEST_IO_DIR / "lens_list.txt"
 
         assert Path(self.file_system.get_lens_list_file_path()) == lens_list_file_path
 
     def test_get_lens_list(self):
-        """Test `get_lens_list` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_lens_list` method."""
         lens_list = ["lensed_quasar_2"]
 
         assert self.file_system.get_lens_list() == lens_list
 
     def test_get_config_file_path(self):
-        """Test `get_config_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_config_file_path` method."""
         config_file_path = _TEST_IO_DIR / "settings" / "lens_system1_config.yaml"
 
         assert (
@@ -61,51 +46,31 @@ class TestFileSystem(object):
         )
 
     def test_get_logs_directory(self):
-        """Test `get_logs_directory` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_logs_directory` method."""
         logs_directory = _TEST_IO_DIR / "logs"
 
         assert Path(self.file_system.get_logs_directory()) == logs_directory
 
     def test_get_settings_directory(self):
-        """Test `get_settings_directory` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_settings_directory` method."""
         settings_dir = _TEST_IO_DIR / "settings"
 
         assert Path(self.file_system.get_settings_directory()) == settings_dir
 
     def test_get_outputs_directory(self):
-        """Test `get_outputs_directory` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_outputs_directory` method."""
         outputs_dir = _TEST_IO_DIR / "outputs"
 
         assert Path(self.file_system.get_outputs_directory()) == outputs_dir
 
     def test_get_data_directory(self):
-        """Test `get_data_directory` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_data_directory` method."""
         data_dir = _TEST_IO_DIR / "data"
 
         assert Path(self.file_system.get_data_directory()) == data_dir
 
     def test_get_image_file_path(self):
-        """Test `get_image_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_image_file_path` method."""
         path = _TEST_IO_DIR / "data" / "lens_system1" / "image_lens_system1_F390W.h5"
 
         assert (
@@ -113,21 +78,13 @@ class TestFileSystem(object):
         )
 
     def test_get_psf_file_path(self):
-        """Test `get_psf_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_psf_file_path` method."""
         path = _TEST_IO_DIR / "data" / "lens_system1" / "psf_lens_system1_F390W.h5"
 
         assert Path(self.file_system.get_psf_file_path("lens_system1", "F390W")) == path
 
     def test_get_log_file_path(self):
-        """Test `get_log_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_log_file_path` method."""
         with open(str(_TEST_IO_DIR.resolve()) + "/logs/log_name_test.txt", "w"):
             pass
 
@@ -138,11 +95,7 @@ class TestFileSystem(object):
         os.remove(str(path.resolve()))
 
     def test_get_output_file_path(self):
-        """Test `get_output_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_output_file_path` method."""
         with open(str(_TEST_IO_DIR.resolve()) + "/outputs/output_name_test.json", "w"):
             pass
 
@@ -154,11 +107,7 @@ class TestFileSystem(object):
 
     def test_save_load_output(self):
         """Test for the `save_output()` and `load_output()` will be covered by
-        `test_save_load_output_json()` and `test_save_load_output_h5()` methods.
-
-        :return:
-        :rtype:
-        """
+        `test_save_load_output_json()` and `test_save_load_output_h5()` methods."""
         with pytest.raises(ValueError):
             self.file_system.save_output("test", "save_test", {}, file_type="invalid")
 
@@ -166,11 +115,7 @@ class TestFileSystem(object):
             self.file_system.load_output("test", "save_test", file_type="invalid")
 
     def test_save_load_output_json(self):
-        """Test `save_output_json` and `load_output_json` methods.
-
-        :return:
-        :rtype:
-        """
+        """Test `save_output_json` and `load_output_json` methods."""
         save_dict = {
             "kwargs_test": {"0": None, "1": "str", "2": [3, 4]},
             "array_test": np.array([1.0]),
@@ -184,11 +129,7 @@ class TestFileSystem(object):
         )
 
     def test_save_load_output_h5(self):
-        """Test `save_output` and `load_output` methods.
-
-        :return:
-        :rtype:
-        """
+        """Test `save_output` and `load_output` methods."""
         save_dict = {
             "settings": {"some": ["settings"]},
             "kwargs_result": {"0": 1, "1": "str", "2": [3, 4]},
@@ -203,6 +144,19 @@ class TestFileSystem(object):
                     np.ones((50, 4)),
                     ["{}".format(i) for i in range(4)],
                     np.ones(50),
+                ],
+                [
+                    "Nautilus",
+                    np.ones((50, 4)),
+                    np.array(["{}".format(i) for i in range(4)]),
+                    np.ones(50),
+                    np.ones(50),
+                    np.ones(50),
+                    {
+                        "points": np.ones((50, 4)),
+                        "log_w": np.ones(50),
+                        "log_l": np.ones(50),
+                    },
                 ],
             ],
             "multi_band_list_out": ["band1", "band2"],
@@ -226,6 +180,17 @@ class TestFileSystem(object):
         for i in range(3):
             assert np.all(save_dict["fit_output"][1][i] == out["fit_output"][1][i])
 
+        out_nautilus = out["fit_output"][2]
+        save_nautilus = save_dict["fit_output"][2]
+        assert out_nautilus[0] == "Nautilus"
+        assert np.all(out_nautilus[1] == save_nautilus[1])
+        assert out_nautilus[2] == ["0", "1", "2", "3"]
+        assert np.all(out_nautilus[3] == save_nautilus[3])
+        assert np.all(out_nautilus[4] == save_nautilus[4])
+        assert np.all(out_nautilus[5] == save_nautilus[5])
+        for key in save_nautilus[6]:
+            assert np.all(out_nautilus[6][key] == save_nautilus[6][key])
+
         with pytest.raises(ValueError):
             save_dict["fit_output"].append(
                 [
@@ -237,11 +202,7 @@ class TestFileSystem(object):
             self.file_system.save_output("test", "save_test", save_dict, file_type="h5")
 
     def test_numpy_to_json_encoding(self):
-        """Test `class NumpyEncoder` and `hook_json_to_numpy` function.
-
-        :return:
-        :rtype:
-        """
+        """Test `class NumpyEncoder` and `hook_json_to_numpy` function."""
         a = np.array([[0, 2], [3, 4]])
         b = {"1": a}
         c = {"0": {"1": a}, "2": [1, 2]}
@@ -294,11 +255,7 @@ class TestFileSystem(object):
         )
 
     def test_get_semantic_segmentation_file_path(self):
-        """Test `get_semantic_segmentation_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_semantic_segmentation_file_path` method."""
         path = (
             _TEST_IO_DIR / "outputs" / "semantic_segmentation_lensed_quasar_F814W.npy"
         )
@@ -313,11 +270,7 @@ class TestFileSystem(object):
         )
 
     def test_load_save_semantic_segmentation(self):
-        """Test `load_semantic_segmentation` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `load_semantic_segmentation` method."""
         segmentation = np.zeros((43, 43))
 
         self.file_system.save_semantic_segmentation("test_system", "test", segmentation)
@@ -328,11 +281,7 @@ class TestFileSystem(object):
         )
 
     def test_get_trained_model_file_path(self):
-        """Test `get_trained_model_file_path` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_trained_model_file_path` method."""
         path = _TEST_IO_DIR / "trained_nn" / "lensed_quasar_segmentation_model.h5"
 
         assert Path(self.file_system.get_trained_nn_model_file_path("quasar")) == path

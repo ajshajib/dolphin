@@ -31,11 +31,7 @@ class TestRecipe(object):
         pass
 
     def test_init(self):
-        """Test `__init__` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `__init__` method."""
         config = deepcopy(self.config)
 
         config.settings["fitting"]["pso"] = None
@@ -55,11 +51,7 @@ class TestRecipe(object):
         assert recipe.reconstruct_psf is False
 
     def test_get_recipe(self):
-        """Test `get_recipe` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_recipe` method."""
         fitting_kwargs_list = self.recipe.get_recipe()
         assert isinstance(fitting_kwargs_list, list)
 
@@ -85,11 +77,7 @@ class TestRecipe(object):
         assert recipe.get_recipe(recipe_name="skip")[0][0] == "emcee"
 
     def test_get_power_law_model_index(self):
-        """Test `get_power_law_model_index` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_power_law_model_index` method."""
         config = deepcopy(self.config)
         config.settings["model"]["lens"] = ["SERSIC", "SPEMD"]
         assert Recipe(config)._get_power_law_model_index() == 1
@@ -104,11 +92,7 @@ class TestRecipe(object):
         assert Recipe(config)._get_power_law_model_index() is None
 
     def test_get_external_shear_model_index(self):
-        """Test `_get_external_shear_model_index` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `_get_external_shear_model_index` method."""
         config = deepcopy(self.config)
         config.settings["model"]["lens"] = ["SHEAR_GAMMA_PSI", "SPEMD"]
         assert Recipe(config)._get_external_shear_model_index() == 0
@@ -120,11 +104,7 @@ class TestRecipe(object):
         assert Recipe(config)._get_external_shear_model_index() is None
 
     def test_get_shapelet_model_index(self):
-        """Test `get_power_law_model_index` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_power_law_model_index` method."""
         config = deepcopy(self.config)
         config.settings["model"]["source_light"] = ["SERSIC", "SHAPELETS"]
         assert Recipe(config)._get_shapelet_model_index() == 1
@@ -133,21 +113,13 @@ class TestRecipe(object):
         assert Recipe(config)._get_shapelet_model_index() is None
 
     def test_get_default_recipe(self):
-        """Test `get_default_recipe` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_default_recipe` method."""
         self.recipe.reconstruct_psf = True
         fitting_kwargs_list = self.recipe.get_galaxy_quasar_recipe()
         assert isinstance(fitting_kwargs_list, list)
 
     def test_get_sampling_sequence(self):
-        """Test `get_sampling_sequence` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_sampling_sequence` method."""
         self.recipe.do_sampling = True
         fitting_kwargs_list = self.recipe.get_sampling_sequence()
         assert isinstance(fitting_kwargs_list, list)
@@ -173,12 +145,16 @@ class TestRecipe(object):
             np.zeros(20),
         )
 
-    def test_get_galaxy_galaxy_recipe(self):
-        """Test `get_galaxy_galaxy_recipe` method.
+        # test Nautilus
+        config_nautilus = deepcopy(self.config)
+        config_nautilus.settings["fitting"]["sampling"] = True
+        config_nautilus.settings["fitting"]["sampler"] = "Nautilus"
+        recipe_nautilus = Recipe(config_nautilus)
+        sequence_nautilus = recipe_nautilus.get_sampling_sequence()
+        assert sequence_nautilus[0][0] == "Nautilus"
 
-        :return:
-        :rtype:
-        """
+    def test_get_galaxy_galaxy_recipe(self):
+        """Test `get_galaxy_galaxy_recipe` method."""
         image = np.random.normal(size=(120, 120))
         kwargs_data_joint = {
             "multi_band_list": [
@@ -221,22 +197,14 @@ class TestRecipe(object):
         fitting_sequence.fit_sequence(fitting_kwargs_list)
 
     def test_get_arc_mask(self):
-        """Test `get_arc_mask` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `get_arc_mask` method."""
         image = np.random.normal(size=(100, 100))
 
         mask = self.recipe.get_arc_mask(image, mask=np.ones_like(image))
         assert mask.shape == (100, 100)
 
     def test_fix_params(self):
-        """Test `fix_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `fix_params` method."""
         test = self.recipe.fix_params("lens", [0])
         assert set(test[1]["lens_add_fixed"][0][1]) == {
             "theta_E",
@@ -273,11 +241,7 @@ class TestRecipe(object):
             self.recipe.fix_params("observer")
 
     def test_unfix_params(self):
-        """Test `unfix_params` method.
-
-        :return:
-        :rtype:
-        """
+        """Test `unfix_params` method."""
         test = self.recipe.unfix_params("lens", [0])
         assert set(test[1]["lens_remove_fixed"][0][1]) == {
             "theta_E",

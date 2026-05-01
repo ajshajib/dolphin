@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""This module takes an image data and create semantic segmentation for it."""
+"""This module provides capabilities to create semantic segmentation for image data
+using trained neural networks."""
+
+__author__ = "ajshajib"
 
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -9,13 +12,16 @@ from .ai import AI
 
 
 class Vision(AI):
-    """This class takes an image data and create semantic segmentation for it."""
+    """This class takes image data and creates semantic segmentation for it using an AI
+    model."""
 
     def __init__(self, io_directory_path, source_type="quasar"):
-        """
+        """Initialize the Vision object.
 
-        :param data_file_path: path to a data file
-        :type data_file_path: `str`
+        :param io_directory_path: path to the input-output directory
+        :type io_directory_path: `str`
+        :param source_type: the type of astronomical source being modeled. Must be either 'quasar' or 'galaxy'.
+        :type source_type: `str`
         """
         if source_type not in ["quasar", "galaxy"]:
             raise ValueError(
@@ -30,10 +36,12 @@ class Vision(AI):
         self.nn_model = load_model(self.nn_model_path, compile=False)
 
     def create_segmentation_for_all_lenses(self, band_name):
-        """Create semantic segmentation for all lenses.
+        """Create semantic segmentation maps for all lenses in the lens list.
 
-        :param band_name: band name
+        :param band_name: the observing band to process
         :type band_name: `str`
+        :return: None
+        :rtype: `None`
         """
         lens_list = self.file_system.get_lens_list()
 
@@ -43,12 +51,14 @@ class Vision(AI):
         print(f"Semantic segmentation for {len(lens_list)} lenses has been created.")
 
     def create_segmentation_for_single_lens(self, lens_name, band_name):
-        """Create semantic segmentation for a single lens.
+        """Create and save semantic segmentation for a single lens system.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param band_name: band name
+        :param band_name: the observing band
         :type band_name: `str`
+        :return: the generated semantic segmentation mask
+        :rtype: `numpy.ndarray`
         """
         image_data = self.get_image_data(lens_name, band_name)
         image = image_data.get_image()
@@ -69,7 +79,7 @@ class Vision(AI):
 
         :param segmentation: 2D segmentation map containing integer class labels
         :type segmentation: `numpy.ndarray`
-        :return: Modified segmentation map with the closest label-4 blob relabeled to 1.
+        :return: modified segmentation map with the closest label-4 blob relabeled to 1
         :rtype: `numpy.ndarray`
         """
         mask_label_4 = segmentation == 4
@@ -97,24 +107,26 @@ class Vision(AI):
         return segmentation
 
     def save_segmentation(self, lens_name, band_name, segmentation):
-        """Save the segmentation to a file.
+        """Save the generated segmentation mask to a file.
 
-        :param lens_name: lens name
+        :param lens_name: name of the lens system
         :type lens_name: `str`
-        :param band_name: band name
+        :param band_name: the observing band
         :type band_name: `str`
-        :param segmentation: semantic segmentation
+        :param segmentation: semantic segmentation mask array
         :type segmentation: `numpy.ndarray`
+        :return: None
+        :rtype: `None`
         """
         self.file_system.save_semantic_segmentation(lens_name, band_name, segmentation)
 
     @staticmethod
     def resize_image(image):
-        """Resize the image to (128, 128, 1).
+        """Resize the input image to (128, 128) using bicubic interpolation.
 
-        :param image: image data
+        :param image: input image array
         :type image: `numpy.ndarray`
-        :return: resized image
+        :return: resampled image with shape (128, 128)
         :rtype: `numpy.ndarray`
         """
         # Target shape for spatial dimensions
@@ -131,13 +143,13 @@ class Vision(AI):
 
     @staticmethod
     def resize_segmentation_to_original_size(segmentation, original_size):
-        """Resize the prediction to the original size.
+        """Resize the predicted segmentation mask back to the original image dimensions.
 
-        :param segmentation: predicted segmentation from the NN
+        :param segmentation: predicted segmentation from the NN (usually 128x128)
         :type segmentation: `numpy.ndarray`
-        :param original_size: original size of the image
-        :type original_size: int
-        :return: resized prediction
+        :param original_size: the desired original size (assumes a square image)
+        :type original_size: `int`
+        :return: resized segmentation mask
         :rtype: `numpy.ndarray`
         """
         segmentation_shape = segmentation.shape
@@ -155,9 +167,9 @@ class Vision(AI):
     def get_semantic_segmentation_from_nn(self, image):
         """Get semantic segmentation for the image from the trained neural network.
 
-        :param image: image data
+        :param image: input image data
         :type image: `numpy.ndarray`
-        :return: semantic segmentation
+        :return: semantic segmentation mask resized to the original image shape
         :rtype: `numpy.ndarray`
         """
         resized_image = self.resize_image(image)

@@ -1231,19 +1231,19 @@ class ModelConfig(Config):
                 upper.append(_upper)
             elif model == "UNIFORM":
                 _fixed = {}
-    
+
                 _init = {
                     "amp": 0.0,
                 }
-    
+
                 _sigma = {
                     "amp": 1.0,
                 }
-    
+
                 _lower = {
                     "amp": -100.0,
                 }
-    
+
                 _upper = {
                     "amp": 100.0,
                 }

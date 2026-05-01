@@ -320,9 +320,10 @@ class ModelConfig(Config):
 
         if num_lens_light_profile_central > 1:
             for n in range(1, num_lens_light_profile_central * self.number_of_bands):
-                joint_lens_light_with_lens_light.append(
-                    [0, n, ["center_x", "center_y"]]
-                )
+                if lens_light_model_list[n] != "UNIFORM":
+                    joint_lens_light_with_lens_light.append(
+                        [0, n, ["center_x", "center_y"]]
+                    )
 
         # Join profile-specific parameters in multiband fitting
         if self.number_of_bands > 1:
@@ -1223,6 +1224,29 @@ class ModelConfig(Config):
                     _lower.update({"e1": -0.5, "e2": -0.5})
                     _upper.update({"e1": 0.5, "e2": 0.5})
 
+                fixed.append(_fixed)
+                init.append(_init)
+                sigma.append(_sigma)
+                lower.append(_lower)
+                upper.append(_upper)
+            elif model == "UNIFORM":
+                _fixed = {}
+    
+                _init = {
+                    "amp": 0.0,
+                }
+    
+                _sigma = {
+                    "amp": 1.0,
+                }
+    
+                _lower = {
+                    "amp": -100.0,
+                }
+    
+                _upper = {
+                    "amp": 100.0,
+                }
                 fixed.append(_fixed)
                 init.append(_init)
                 sigma.append(_sigma)

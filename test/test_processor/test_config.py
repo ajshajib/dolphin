@@ -725,6 +725,25 @@ class TestModelConfig(object):
             "n_sersic": 4.0,
         }
 
+        config2 = deepcopy(self.config_1)
+        config2.settings["model"]["lens_light"] = ["UNIFORM"]
+        config2.settings["lens_light_option"]["fix"] = {}
+        params = config2.get_lens_light_model_params()
+
+        assert params[0] == [{
+            "amp": 0.0
+        }]
+        assert params[1] == [{
+            "amp": 1.0
+        }]
+        assert params[2] == [{}]
+        assert params[3] == [{
+            "amp": -100.0
+        }]
+        assert params[4] == [{
+            "amp": 100.0
+        }]
+
     def test_get_source_light_model_params(self):
         """Test `get_source_light_model_params` method.
 

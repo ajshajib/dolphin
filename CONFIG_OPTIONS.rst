@@ -62,7 +62,7 @@ Model Section
 
            lens: ["EPL", "SHEAR_GAMMA_PSI"]
 
-    - ``lens_light``: List of lens light profiles. Supported models include: ``SERSIC``, ``SERSIC_ELLIPSE``, ``MGE_SET``, ``MGE_SET_ELLIPSE``. The list will be duplicated for each band.
+    - ``lens_light``: List of lens light profiles. Supported models include: ``SERSIC``, ``SERSIC_ELLIPSE``, ``MGE_SET``, ``MGE_SET_ELLIPSE``, ``UNIFORM``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:

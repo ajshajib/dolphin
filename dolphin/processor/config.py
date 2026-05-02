@@ -542,7 +542,7 @@ class ModelConfig(Config):
             if use_jax:
                 if not _is_jax_installed:
                     raise ImportError(
-                        "JAX and/or JAXtronomy are not installed, use_jax option unavailable"
+                        "JAX and/or JAXtronomy are not installed, use_jax option is unavailable."
                     )
                 custom_logL_addition = self.custom_logL_addition_jax
             else:

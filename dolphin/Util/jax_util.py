@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-"""This module handles JAX related imports and functions separately from the main dolphin modules."""
+"""This module handles JAX related imports and functions separately from the main
+dolphin modules."""
 
 from jax import config, numpy as jnp
+
 config.update("jax_enable_x64", True)
 from jaxtronomy.Util.param_util import ellipticity2phi_q
+
 
 def custom_logL_addition_jax(
     ModelConfig,
@@ -15,8 +18,8 @@ def custom_logL_addition_jax(
     kwargs_extinction=None,
     kwargs_tracer_source=None,
 ):
-    """Provide additional likelihood terms to be sent to `JAXtronomy`. This is the
-    same function as above but compatible with jax.jit.
+    """Provide additional likelihood terms to be sent to `JAXtronomy`. This is the same
+    function as above but compatible with jax.jit.
 
     :param ModelConfig: instance of ModelConfig class
     :type ModelConfig: `ModelConfig` class instance
@@ -59,9 +62,7 @@ def custom_logL_addition_jax(
             / jnp.pi
         )
         pa_light = (
-            ellipticity2phi_q(
-                kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
-            )[0]
+            ellipticity2phi_q(kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"])[0]
             * 180
             / jnp.pi
         )
@@ -91,16 +92,12 @@ def custom_logL_addition_jax(
                 "The value for limit_mass_q_from_light should be a number!"
             )
 
-        q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
-            1
-        ]
+        q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
         q_light = ellipticity2phi_q(
             kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
         )[1]
 
-        q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[
-            1
-        ]
+        q_mass = ellipticity2phi_q(kwargs_lens[0]["e1"], kwargs_lens[0]["e2"])[1]
         q_light = ellipticity2phi_q(
             kwargs_lens_light[0]["e1"], kwargs_lens_light[0]["e2"]
         )[1]
@@ -117,7 +114,9 @@ def custom_logL_addition_jax(
         and "shapelet_scale_logarithmic_prior"
         in ModelConfig.settings["source_light_option"]
     ):
-        if ModelConfig.settings["source_light_option"]["shapelet_scale_logarithmic_prior"]:
+        if ModelConfig.settings["source_light_option"][
+            "shapelet_scale_logarithmic_prior"
+        ]:
             for i, model in enumerate(ModelConfig.get_source_light_model_list()):
                 if model == "SHAPELETS":
                     beta = kwargs_source[i]["beta"]

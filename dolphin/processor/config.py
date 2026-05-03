@@ -15,6 +15,7 @@ import os
 from .data import ImageData
 from .files import FileSystem
 
+
 class Config(object):
     """This class contains the methods to load and read YAML configuration files.
 

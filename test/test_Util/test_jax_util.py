@@ -10,12 +10,12 @@ from dolphin.processor.config import ModelConfig
 from dolphin.Util.jax_util import custom_logL_addition_jax
 from dolphin.processor.files import FileSystem
 
-
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 IO_DIRECTORY = str((_ROOT_DIR / "io_directory_example").resolve())
 FILE_SYSTEM = FileSystem(IO_DIRECTORY)
 CONFIG_1 = ModelConfig("lens_system1", FILE_SYSTEM)
 CONFIG_3 = ModelConfig("lens_system3", io_directory=IO_DIRECTORY)
+
 
 def test_custom_logL_addition_jax():
     """Test `custom_logL_addition_jax` method.
@@ -93,9 +93,7 @@ def test_custom_logL_addition_jax():
     config2 = deepcopy(CONFIG_1)
     config2.settings["lens_option"]["limit_mass_pa_from_light"] = np.inf
     config2.settings["lens_option"]["limit_mass_q_from_light"] = np.inf
-    config2.settings["source_light_option"][
-        "shapelet_scale_logarithmic_prior"
-    ] = False
+    config2.settings["source_light_option"]["shapelet_scale_logarithmic_prior"] = False
     kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
     kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
     prior_ref = config2.custom_logL_addition(

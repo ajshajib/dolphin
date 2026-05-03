@@ -247,7 +247,10 @@ class TestModelConfig(object):
         assert kwargs_likelihood == test_likelihood
 
         kwargs_likelihood_jax = self.config_1.get_kwargs_likelihood(use_jax=True)
-        assert kwargs_likelihood_jax['custom_logL_addition'] != test_likelihood['custom_logL_addition']
+        assert (
+            kwargs_likelihood_jax["custom_logL_addition"]
+            != test_likelihood["custom_logL_addition"]
+        )
 
         kwargs_likelihood_jax.pop("image_likelihood_mask_list")
         kwargs_likelihood_jax.pop("custom_logL_addition")

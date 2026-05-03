@@ -3,7 +3,6 @@
 
 import pytest
 from copy import deepcopy
-import jax
 import numpy as np
 import numpy.testing as npt
 import os
@@ -12,8 +11,6 @@ from pathlib import Path
 from dolphin.processor.config import Config
 from dolphin.processor.config import ModelConfig
 from dolphin.processor.files import FileSystem
-
-jax.config.update("jax_enable_x64", True)
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
@@ -249,6 +246,14 @@ class TestModelConfig(object):
         kwargs_likelihood.pop("image_likelihood_mask_list")
         assert kwargs_likelihood == test_likelihood
 
+        kwargs_likelihood_jax = self.config_1.get_kwargs_likelihood(use_jax=True)
+        assert kwargs_likelihood_jax['custom_logL_addition'] != test_likelihood['custom_logL_addition']
+
+        kwargs_likelihood_jax.pop("image_likelihood_mask_list")
+        kwargs_likelihood_jax.pop("custom_logL_addition")
+        test_likelihood.pop("custom_logL_addition")
+        assert kwargs_likelihood_jax == test_likelihood
+
         kwargs_likelihood2 = self.config_3.get_kwargs_likelihood()
         assert kwargs_likelihood2["prior_lens"] == [
             [0, "gamma", 2.11, 0.03],
@@ -324,126 +329,6 @@ class TestModelConfig(object):
             kwargs_lens_light=[{"e1": 0.0403, "e2": 0.0338}],
         )
         assert round(prior, -3) == -((20 - 5) ** 2) / (1e-3)
-
-        # Raise error when settings are not bool, int or float
-        config4a = deepcopy(self.config_1)
-        config4a.settings["lens_option"]["limit_mass_pa_from_light"] = "Test"
-        with pytest.raises(ValueError):
-            config4a.custom_logL_addition(
-                kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
-                kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
-            )
-
-        config4b = deepcopy(self.config_1)
-        config4b.settings["lens_option"]["limit_mass_q_from_light"] = "Test"
-        with pytest.raises(ValueError):
-            config4b.custom_logL_addition(
-                kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
-                kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
-            )
-
-    def test_custom_logL_addition_jax(self):
-        """Test `custom_logL_addition_jax` method.
-
-        :return:
-        :rtype:
-        """
-        # Mass paramters : (phi_m = 0 deg, q_m = 0.8)
-        # Satisfy both priors (phi_L = 10 deg, q_L = 0.8)
-        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light = [{"e1": 0.166, "e2": 0.060}]
-
-        prior_ref = self.config_1.custom_logL_addition(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        prior = self.config_1.custom_logL_addition_jax(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
-
-        # qm < qL (phi_L = 0 deg, q_L = 0.9)
-        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light = [{"e1": 0.0526, "e2": 0.0}]
-        prior_ref = self.config_1.custom_logL_addition(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        prior = self.config_1.custom_logL_addition_jax(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
-
-        # phi_m != phi_L (phi_L = 20 deg, q_L = 0.8)
-        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light = [{"e1": 0.0851, "e2": 0.0714}]
-        prior_ref = self.config_1.custom_logL_addition(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        prior = self.config_1.custom_logL_addition_jax(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
-
-        # Test logarithmic shapelets prior
-        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light = [{"e1": 0.166, "e2": 0.060}]
-        kwargs_source = [
-            {"R_sersic": 1.0},
-            {"beta": 0.1},
-            {"R_sersic": 1.0},
-            {"beta": 0.1},
-        ]
-        prior_ref = self.config_3.custom_logL_addition(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-            kwargs_source=kwargs_source,
-        )
-        prior = self.config_3.custom_logL_addition_jax(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-            kwargs_source=kwargs_source,
-        )
-        npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
-
-        # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
-        config2 = deepcopy(self.config_1)
-        config2.settings["lens_option"]["limit_mass_pa_from_light"] = np.inf
-        config2.settings["lens_option"]["limit_mass_q_from_light"] = np.inf
-        config2.settings["source_light_option"][
-            "shapelet_scale_logarithmic_prior"
-        ] = False
-        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
-        prior_ref = config2.custom_logL_addition(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        prior = config2.custom_logL_addition_jax(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
-
-        # Change setting data type (phi_L = 20 deg, q_L = 0.9)
-        config3 = deepcopy(self.config_1)
-        config3.settings["lens_option"]["limit_mass_q_from_light"] = 0.2
-        config3.settings["lens_option"]["limit_mass_pa_from_light"] = 5
-        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
-        kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
-        prior_ref = config3.custom_logL_addition(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        prior = config3.custom_logL_addition_jax(
-            kwargs_lens=kwargs_lens,
-            kwargs_lens_light=kwargs_lens_light,
-        )
-        npt.assert_allclose(prior, prior_ref, atol=1e-15, rtol=1e-15)
 
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config_1)

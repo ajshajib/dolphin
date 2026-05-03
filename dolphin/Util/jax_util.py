@@ -4,6 +4,7 @@ dolphin modules."""
 
 from jax import config, numpy as jnp
 from jaxtronomy.Util.param_util import ellipticity2phi_q
+
 config.update("jax_enable_x64", True)
 
 

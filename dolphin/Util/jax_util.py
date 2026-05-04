@@ -11,7 +11,7 @@ config.update("jax_enable_x64", True)
 
 
 def custom_logL_addition_jax(
-    ModelConfig,
+    model_config,
     kwargs_lens=None,
     kwargs_source=None,
     kwargs_lens_light=None,
@@ -23,8 +23,8 @@ def custom_logL_addition_jax(
     """Provide additional likelihood terms to be sent to `JAXtronomy`. This is the same
     function as above but compatible with jax.jit.
 
-    :param ModelConfig: instance of ModelConfig class
-    :type ModelConfig: `ModelConfig` class instance
+    :param model_config: instance of ModelConfig class
+    :type model_config: `ModelConfig` class instance
     :param kwargs_lens: dictionary containing lens model keyword arguments
     :type kwargs_lens: `dict`
     :param kwargs_source: dictionary containing source model keyword arguments
@@ -37,7 +37,8 @@ def custom_logL_addition_jax(
     :type kwargs_special: `dict`
     :param kwargs_extinction: dictionary containing extinction model keyword arguments
     :type kwargs_extinction: `dict`
-    :param kwargs_tracer_source: dictionary containing tracer source model keyword
+    :param kwargs_tracer_source: dictionary containing tracer source model keyword arguments
+    :type kwargs_tracer_source: `dict`
     :return: prior
     :rtype: float
     """
@@ -46,10 +47,10 @@ def custom_logL_addition_jax(
     # Limit the difference between pa_light and pa_mass for the deflector, where pa is the
     # position angle of the major axis
     if (
-        "lens_option" in ModelConfig.settings
-        and "limit_mass_pa_from_light" in ModelConfig.settings["lens_option"]
+        "lens_option" in model_config.settings
+        and "limit_mass_pa_from_light" in model_config.settings["lens_option"]
     ):
-        max_mass_pa_difference = ModelConfig.settings["lens_option"][
+        max_mass_pa_difference = model_config.settings["lens_option"][
             "limit_mass_pa_from_light"
         ]
 
@@ -82,10 +83,10 @@ def custom_logL_addition_jax(
     # Limit the difference between q_light and q_mass for the deflector, where q is the axis
     # ratio of the elliptical profile
     if (
-        "lens_option" in ModelConfig.settings
-        and "limit_mass_q_from_light" in ModelConfig.settings["lens_option"]
+        "lens_option" in model_config.settings
+        and "limit_mass_q_from_light" in model_config.settings["lens_option"]
     ):
-        max_mass_q_difference = ModelConfig.settings["lens_option"][
+        max_mass_q_difference = model_config.settings["lens_option"][
             "limit_mass_q_from_light"
         ]
 
@@ -112,14 +113,14 @@ def custom_logL_addition_jax(
 
     # Provide logarithmic_prior on the source light profile beta param
     if (
-        "source_light_option" in ModelConfig.settings
+        "source_light_option" in model_config.settings
         and "shapelet_scale_logarithmic_prior"
-        in ModelConfig.settings["source_light_option"]
+        in model_config.settings["source_light_option"]
     ):
-        if ModelConfig.settings["source_light_option"][
+        if model_config.settings["source_light_option"][
             "shapelet_scale_logarithmic_prior"
         ]:
-            for i, model in enumerate(ModelConfig.get_source_light_model_list()):
+            for i, model in enumerate(model_config.get_source_light_model_list()):
                 if model == "SHAPELETS":
                     beta = kwargs_source[i]["beta"]
                     prior += -jnp.log(beta)

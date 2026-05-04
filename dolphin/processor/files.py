@@ -435,7 +435,8 @@ class FileSystem(object):
     @classmethod
     def encode_numpy_arrays(cls, obj):
         """Recursively encode a list or dictionary containing numpy arrays to allow JSON
-        serialization.
+        serialization. This function can also handle objects with a callable tolist()
+        function and a 'shape' property, such as JAX arrays.
 
         :param obj: the object (list, dictionary, or array) to be encoded
         :type obj: `object`
@@ -443,6 +444,8 @@ class FileSystem(object):
         :rtype: `object`
         """
         if isinstance(obj, np.ndarray):
+            return {"__ndarray__": obj.tolist(), "shape": obj.shape}
+        elif hasattr(obj, "tolist") and callable(obj.tolist) and hasattr(obj, "shape"):
             return {"__ndarray__": obj.tolist(), "shape": obj.shape}
         elif isinstance(obj, list):
             encoded = []

@@ -236,6 +236,8 @@ class FileSystem(object):
             f.attrs["lenstronomy_version"] = output.get(
                 "lenstronomy_version", "unknown"
             )
+            if "jaxtronomy_version" in output:
+                f.attrs["jaxtronomy_version"] = output["jaxtronomy_version"]
 
             group = f.create_group("fit_output")
             for i, single_output in enumerate(output["fit_output"]):
@@ -365,6 +367,11 @@ class FileSystem(object):
             if isinstance(lenstronomy_version, bytes):
                 lenstronomy_version = lenstronomy_version.decode("utf-8")
 
+            jaxtronomy_version = f.attrs.get("jaxtronomy_version", None)
+            if jaxtronomy_version is not None:
+                if isinstance(jaxtronomy_version, bytes):
+                    jaxtronomy_version = jaxtronomy_version.decode("utf-8")
+
             fit_output = []
             group = f["fit_output"]
 
@@ -419,6 +426,9 @@ class FileSystem(object):
                 "dolphin_version": dolphin_version,
                 "lenstronomy_version": lenstronomy_version,
             }
+
+            if jaxtronomy_version is not None:
+                output["jaxtronomy_version"] = jaxtronomy_version
 
             return output
 

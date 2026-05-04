@@ -534,11 +534,11 @@ class ModelConfig(Config):
         if use_custom_logL_addition:
             if use_jax:
                 from functools import partial
-                from dolphin.Util.jax_util import custom_logL_addition_jax
+                from ..util.jax_util import custom_logL_addition_jax
 
                 custom_logL_addition = partial(
                     custom_logL_addition_jax,
-                    ModelConfig=self,
+                    model_config=self,
                 )
             else:
                 custom_logL_addition = self.custom_logL_addition

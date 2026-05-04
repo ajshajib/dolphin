@@ -7,7 +7,7 @@ from copy import deepcopy
 import numpy as np
 import numpy.testing as npt
 from dolphin.processor.config import ModelConfig
-from dolphin.Util.jax_util import custom_logL_addition_jax
+from dolphin.util.jax_util import custom_logL_addition_jax
 from dolphin.processor.files import FileSystem
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -33,7 +33,7 @@ def test_custom_logL_addition_jax():
         kwargs_lens_light=kwargs_lens_light,
     )
     prior = custom_logL_addition_jax(
-        ModelConfig=CONFIG_1,
+        model_config=CONFIG_1,
         kwargs_lens=kwargs_lens,
         kwargs_lens_light=kwargs_lens_light,
     )
@@ -47,7 +47,7 @@ def test_custom_logL_addition_jax():
         kwargs_lens_light=kwargs_lens_light,
     )
     prior = custom_logL_addition_jax(
-        ModelConfig=CONFIG_1,
+        model_config=CONFIG_1,
         kwargs_lens=kwargs_lens,
         kwargs_lens_light=kwargs_lens_light,
     )
@@ -61,7 +61,7 @@ def test_custom_logL_addition_jax():
         kwargs_lens_light=kwargs_lens_light,
     )
     prior = custom_logL_addition_jax(
-        ModelConfig=CONFIG_1,
+        model_config=CONFIG_1,
         kwargs_lens=kwargs_lens,
         kwargs_lens_light=kwargs_lens_light,
     )
@@ -82,7 +82,7 @@ def test_custom_logL_addition_jax():
         kwargs_source=kwargs_source,
     )
     prior = custom_logL_addition_jax(
-        ModelConfig=CONFIG_3,
+        model_config=CONFIG_3,
         kwargs_lens=kwargs_lens,
         kwargs_lens_light=kwargs_lens_light,
         kwargs_source=kwargs_source,
@@ -101,7 +101,7 @@ def test_custom_logL_addition_jax():
         kwargs_lens_light=kwargs_lens_light,
     )
     prior = custom_logL_addition_jax(
-        ModelConfig=config2,
+        model_config=config2,
         kwargs_lens=kwargs_lens,
         kwargs_lens_light=kwargs_lens_light,
     )
@@ -118,7 +118,7 @@ def test_custom_logL_addition_jax():
         kwargs_lens_light=kwargs_lens_light,
     )
     prior = custom_logL_addition_jax(
-        ModelConfig=config3,
+        model_config=config3,
         kwargs_lens=kwargs_lens,
         kwargs_lens_light=kwargs_lens_light,
     )
@@ -129,7 +129,7 @@ def test_custom_logL_addition_jax():
     config4a.settings["lens_option"]["limit_mass_pa_from_light"] = "Test"
     with pytest.raises(ValueError):
         custom_logL_addition_jax(
-            ModelConfig=config4a,
+            model_config=config4a,
             kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
             kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
         )
@@ -138,7 +138,7 @@ def test_custom_logL_addition_jax():
     config4b.settings["lens_option"]["limit_mass_q_from_light"] = "Test"
     with pytest.raises(ValueError):
         custom_logL_addition_jax(
-            ModelConfig=config4b,
+            model_config=config4b,
             kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
             kwargs_lens_light=[{"e1": 0.166, "e2": 0.060}],
         )

@@ -112,6 +112,11 @@ class Processor(object):
             "lenstronomy_version": _lenstronomy_version,
         }
 
+        if use_jax:
+            import jaxtronomy
+
+            output["jaxtronomy_version"] = jaxtronomy.__version__
+
         if pool.is_master():
             self.file_system.save_output(lens_name, model_id, output)
 

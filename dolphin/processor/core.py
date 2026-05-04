@@ -39,6 +39,7 @@ class Processor(object):
         mpi=False,
         recipe_name="galaxy-quasar",
         thread_count=1,
+        use_jax=False,
     ):
         """Run lens modeling optimizations for a single lens system.
 
@@ -54,6 +55,8 @@ class Processor(object):
         :type recipe_name: `str`
         :param thread_count: number of threads to use if multiprocess is enabled
         :type thread_count: `int`
+        :param use_jax: if `True`, performs modeling through JAXtronomy instead of lenstronomy
+        :type use_jax: `bool`
         :return: None
         :rtype: `None`
         """
@@ -73,11 +76,20 @@ class Processor(object):
             lens_name, psf_supersampled_factor=psf_supersampling_factor
         )
 
-        fitting_sequence = FittingSequence(
+        if use_jax:
+            from jaxtronomy.Workflow.fitting_sequence import (
+                FittingSequence as FittingSequenceJAX,
+            )
+
+            FittingSequenceClass = FittingSequenceJAX
+        else:
+            FittingSequenceClass = FittingSequence
+
+        fitting_sequence = FittingSequenceClass(
             kwargs_data_joint,
             config.get_kwargs_model(),
-            config.get_kwargs_constraints(),
-            config.get_kwargs_likelihood(),
+            config.get_kwargs_constraints(use_jax=use_jax),
+            config.get_kwargs_likelihood(use_jax=use_jax),
             config.get_kwargs_params(),
             mpi=mpi,
         )

@@ -244,9 +244,11 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self):
+    def get_kwargs_constraints(self, use_jax=False):
         """Create `kwargs_constraints` dictionary for lenstronomy.
 
+        :param use_jax: if `True`, performs modeling through JAXtronomy instead of lenstronomy
+        :type use_jax: `bool`
         :return: dictionary containing the constraint configuration
         :rtype: `dict`
         """
@@ -273,9 +275,14 @@ class ModelConfig(Config):
         if len(self.get_point_source_model_list()) > 0:
             num_image = len(self.settings["point_source_option"]["ra_init"])
             kwargs_constraints["num_point_source_list"] = [num_image]
-            kwargs_constraints["solver_type"] = (
-                "PROFILE_SHEAR" if num_image > 2 else "CENTER"
-            )
+
+            # solver type is not supported in JAXtronomy
+            if use_jax:
+                kwargs_constraints["solver_type"] = None
+            else:
+                kwargs_constraints["solver_type"] = (
+                    "PROFILE_SHEAR" if num_image > 2 else "CENTER"
+                )
 
         if (
             "kwargs_constraints" in self.settings
@@ -427,9 +434,11 @@ class ModelConfig(Config):
 
         return joint_source_with_source, num_source_profiles
 
-    def get_kwargs_likelihood(self):
+    def get_kwargs_likelihood(self, use_jax=False):
         """Create `kwargs_likelihood` dictionary for lenstronomy.
 
+        :param use_jax: If set to True, uses JAXtronomy for modeling instead of lenstronomy
+        :type use_jax: `bool`
         :return: dictionary containing the likelihood configuration
         :rtype: `dict`
         """
@@ -523,7 +532,18 @@ class ModelConfig(Config):
                 use_custom_logL_addition = True
 
         if use_custom_logL_addition:
-            kwargs_likelihood["custom_logL_addition"] = self.custom_logL_addition
+            if use_jax:
+                from functools import partial
+                from dolphin.Util.jax_util import custom_logL_addition_jax
+
+                custom_logL_addition = partial(
+                    custom_logL_addition_jax,
+                    ModelConfig=self,
+                )
+            else:
+                custom_logL_addition = self.custom_logL_addition
+
+            kwargs_likelihood["custom_logL_addition"] = custom_logL_addition
 
         return kwargs_likelihood
 

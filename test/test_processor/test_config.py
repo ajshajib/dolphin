@@ -246,6 +246,17 @@ class TestModelConfig(object):
         kwargs_likelihood.pop("image_likelihood_mask_list")
         assert kwargs_likelihood == test_likelihood
 
+        kwargs_likelihood_jax = self.config_1.get_kwargs_likelihood(use_jax=True)
+        assert (
+            kwargs_likelihood_jax["custom_logL_addition"]
+            != test_likelihood["custom_logL_addition"]
+        )
+
+        kwargs_likelihood_jax.pop("image_likelihood_mask_list")
+        kwargs_likelihood_jax.pop("custom_logL_addition")
+        test_likelihood.pop("custom_logL_addition")
+        assert kwargs_likelihood_jax == test_likelihood
+
         kwargs_likelihood2 = self.config_3.get_kwargs_likelihood()
         assert kwargs_likelihood2["prior_lens"] == [
             [0, "gamma", 2.11, 0.03],

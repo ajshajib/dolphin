@@ -236,6 +236,8 @@ class FileSystem(object):
             f.attrs["lenstronomy_version"] = output.get(
                 "lenstronomy_version", "unknown"
             )
+            if "jaxtronomy_version" in output:
+                f.attrs["jaxtronomy_version"] = output["jaxtronomy_version"]
 
             group = f.create_group("fit_output")
             for i, single_output in enumerate(output["fit_output"]):
@@ -365,6 +367,11 @@ class FileSystem(object):
             if isinstance(lenstronomy_version, bytes):
                 lenstronomy_version = lenstronomy_version.decode("utf-8")
 
+            jaxtronomy_version = f.attrs.get("jaxtronomy_version", None)
+            if jaxtronomy_version is not None:
+                if isinstance(jaxtronomy_version, bytes):
+                    jaxtronomy_version = jaxtronomy_version.decode("utf-8")
+
             fit_output = []
             group = f["fit_output"]
 
@@ -420,13 +427,15 @@ class FileSystem(object):
                 "lenstronomy_version": lenstronomy_version,
             }
 
+            if jaxtronomy_version is not None:
+                output["jaxtronomy_version"] = jaxtronomy_version
+
             return output
 
     @classmethod
     def encode_numpy_arrays(cls, obj):
         """Recursively encode a list or dictionary containing numpy arrays to allow JSON
-        serialization. This function can also handle objects with a callable tolist()
-        function and a 'shape' property, such as JAX arrays.
+        serialization.
 
         :param obj: the object (list, dictionary, or array) to be encoded
         :type obj: `object`
@@ -434,8 +443,6 @@ class FileSystem(object):
         :rtype: `object`
         """
         if isinstance(obj, np.ndarray):
-            return {"__ndarray__": obj.tolist(), "shape": obj.shape}
-        elif hasattr(obj, "tolist") and callable(obj.tolist) and hasattr(obj, "shape"):
             return {"__ndarray__": obj.tolist(), "shape": obj.shape}
         elif isinstance(obj, list):
             encoded = []

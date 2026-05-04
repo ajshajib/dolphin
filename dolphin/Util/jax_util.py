@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """This module handles JAX related imports and functions separately from the main
 dolphin modules."""
-
+__author__ = "ahuang"
 from jax import config, numpy as jnp
 from jaxtronomy.Util.param_util import ellipticity2phi_q
 

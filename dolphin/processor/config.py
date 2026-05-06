@@ -551,10 +551,9 @@ class ModelConfig(Config):
             if custom_logL_addition is not None:
 
                 def _combined_logL_addition(*args, **kwargs):
-                    return (
-                        custom_logL_addition(*args, **kwargs) + 
-                        default_logL_addition(*args, **kwargs)
-                    )
+                    return custom_logL_addition(
+                        *args, **kwargs
+                    ) + default_logL_addition(*args, **kwargs)
 
                 kwargs_likelihood["custom_logL_addition"] = _combined_logL_addition
 

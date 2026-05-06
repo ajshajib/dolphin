@@ -94,7 +94,9 @@ class Processor(object):
             kwargs_data_joint,
             config.get_kwargs_model(),
             config.get_kwargs_constraints(use_jax=use_jax),
-            config.get_kwargs_likelihood(custom_logL_addition=custom_logL_addition, use_jax=use_jax),
+            config.get_kwargs_likelihood(
+                custom_logL_addition=custom_logL_addition, use_jax=use_jax
+            ),
             config.get_kwargs_params(),
             mpi=mpi,
         )

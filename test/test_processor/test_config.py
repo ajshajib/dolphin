@@ -285,8 +285,10 @@ class TestModelConfig(object):
             kwargs_tracer_source=None,
         ):
             return 10
-        
-        kwargs_likelihood4 = self.config_1.get_kwargs_likelihood(custom_logL_addition=_custom_logL_func)
+
+        kwargs_likelihood4 = self.config_1.get_kwargs_likelihood(
+            custom_logL_addition=_custom_logL_func
+        )
 
         kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
         kwargs_lens_light = [{"e1": 0.0526, "e2": 0.0}]
@@ -300,7 +302,9 @@ class TestModelConfig(object):
         )
         assert default_logL + 10 == logL
 
-        kwargs_likelihood5 = self.config_2.get_kwargs_likelihood(custom_logL_addition=_custom_logL_func)
+        kwargs_likelihood5 = self.config_2.get_kwargs_likelihood(
+            custom_logL_addition=_custom_logL_func
+        )
         assert kwargs_likelihood5["custom_logL_addition"] == _custom_logL_func
 
     def test_custom_logL_addition(self):

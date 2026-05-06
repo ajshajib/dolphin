@@ -1,4 +1,3 @@
----
 lens_name: lens_system_wsat
 
 band: [F475X, F600LP]
@@ -33,8 +32,7 @@ lens_light_option:
     0:
       n_sersic: 4.0
   gaussian_prior:
-    0: 
-      [[R_sersic, 0.21, 0.15]]
+    0: [[R_sersic, 0.21, 0.15]]
 
 source_light_option:
   gaussian_prior:
@@ -49,7 +47,7 @@ fitting:
   pso_settings:
     num_iteration: 10
     num_particle: 10
-  
+
   sampling: true
   sampler: emcee
   sampler_settings: # keywords to be sent to FittingSequence.mcmc() or FittingSequence.nested_sampling()

@@ -6,7 +6,7 @@ matplotlib
 lenstronomy
 schwimmbad>=0.3.2
 corner>=2.2.1
-pyyaml
+ruamel.yaml
 h5py
 tqdm
 tensorflow

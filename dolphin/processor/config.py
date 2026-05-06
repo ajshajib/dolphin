@@ -3,7 +3,7 @@
 
 __author__ = "ajshajib"
 
-import yaml
+from ruamel.yaml import YAML
 import numpy as np
 from copy import deepcopy
 
@@ -36,8 +36,9 @@ class Config(object):
         :return: a dictionary containing the loaded settings
         :rtype: `dict`
         """
+        yaml = YAML(typ="safe")
         with open(file, "r") as f:
-            settings = yaml.load(f, yaml.FullLoader)
+            settings = yaml.load(f)
 
         return settings
 

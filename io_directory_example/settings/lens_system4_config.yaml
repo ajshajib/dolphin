@@ -1,12 +1,11 @@
----
-lens_name: 'lens_system4'
+lens_name: lens_system4
 
-band: ['F390W']
+band: [F390W]
 
 model:
-  lens: ['SIE', 'SHEAR_GAMMA_PSI']
-  lens_light: ['SERSIC_ELLIPSE']
-  source_light: ['SERSIC_ELLIPSE']
+  lens: [SIE, SHEAR_GAMMA_PSI]
+  lens_light: [SERSIC_ELLIPSE]
+  source_light: [SERSIC_ELLIPSE]
   point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
 lens_option:
@@ -19,7 +18,7 @@ lens_option:
   # than that of the mass, i.e., imposes q_M > q_L - limit_mass_q_from_light.
 
 lens_light_option:
-  fix: {0: {'n_sersic': 4.}} # fix n_sersic to 4, for 0-th light profile
+  fix: {0: {n_sersic: 4.}}   # fix n_sersic to 4, for 0-th light profile
 
 source_light_option:
   n_max: [2] # array with n_max for each band
@@ -30,7 +29,7 @@ point_source_option:
   bound: 0.
 
 kwargs_constraints:
-  joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
+  joint_lens_with_light: [[0, 0, [center_x, center_y]]]
 
 fitting:
   psf_iteration: false
@@ -48,7 +47,7 @@ fitting:
   sampling: true
   sampler: emcee
   sampler_settings: # keywords to be sent to lenstronomy.Workflow.fitting_sequence.FittingSequence.mcmc()
-    n_burn : 2
+    n_burn: 2
     n_run: 2
     walkerRatio: 2
 
@@ -66,6 +65,6 @@ mask:
   centroid_offset: [[0., 0]]
   # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid
   radius: [2.] # 1d array, radius in arcsec for each band
-  provided: False
+  provided: false
   # actual masks, 3d array with dimension (band, x, y), if
   # provided everything above will be ignored

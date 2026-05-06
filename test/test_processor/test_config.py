@@ -41,6 +41,7 @@ class TestModelConfig(object):
         file_system = FileSystem(self.io_directory)
 
         self.config_1 = ModelConfig("lens_system1", file_system)
+        self.config_2 = ModelConfig("lens_system2", io_directory=self.io_directory)
         self.config_3 = ModelConfig("lens_system3", io_directory=self.io_directory)
         self.config_4 = ModelConfig("lens_system4", io_directory=self.io_directory)
         self.config_5 = ModelConfig("lens_system5", file_system)
@@ -272,6 +273,35 @@ class TestModelConfig(object):
 
         kwargs_likelihood3 = config.get_kwargs_likelihood()
         assert kwargs_likelihood3["prior_ps"] == [[0, "ra_image", 0.21, 0.15]]
+
+        # tests user-supplied custom logL functions
+        def _custom_logL_func(
+            kwargs_lens=None,
+            kwargs_source=None,
+            kwargs_lens_light=None,
+            kwargs_ps=None,
+            kwargs_special=None,
+            kwargs_extinction=None,
+            kwargs_tracer_source=None,
+        ):
+            return 10
+        
+        kwargs_likelihood4 = self.config_1.get_kwargs_likelihood(custom_logL_addition=_custom_logL_func)
+
+        kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
+        kwargs_lens_light = [{"e1": 0.0526, "e2": 0.0}]
+        logL = kwargs_likelihood4["custom_logL_addition"](
+            kwargs_lens=kwargs_lens,
+            kwargs_lens_light=kwargs_lens_light,
+        )
+        default_logL = self.config_1.custom_logL_addition(
+            kwargs_lens=kwargs_lens,
+            kwargs_lens_light=kwargs_lens_light,
+        )
+        assert default_logL + 10 == logL
+
+        kwargs_likelihood5 = self.config_2.get_kwargs_likelihood(custom_logL_addition=_custom_logL_func)
+        assert kwargs_likelihood5["custom_logL_addition"] == _custom_logL_func
 
     def test_custom_logL_addition(self):
         """Test `custom_logL_addition` method."""

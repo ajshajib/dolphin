@@ -435,9 +435,13 @@ class ModelConfig(Config):
 
         return joint_source_with_source, num_source_profiles
 
-    def get_kwargs_likelihood(self, use_jax=False):
+    def get_kwargs_likelihood(self, custom_logL_addition=None, use_jax=False):
         """Create `kwargs_likelihood` dictionary for lenstronomy.
 
+        :param custom_logL_addition: a callable function that takes in the optional arguments kwargs_lens,
+            kwargs_source, kwargs_lens_light, kwargs_ps, kwargs_special, kwargs_extinction, kwargs_tracer_source
+            and outputs a float. If use_jax is also True, this function must be compatible with jax.jit
+        :type custom_logL_addition: callable function
         :param use_jax: If set to True, uses JAXtronomy for modeling instead of lenstronomy
         :type use_jax: `bool`
         :return: dictionary containing the likelihood configuration
@@ -516,34 +520,48 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood["prior_ps"].append(prior_param)
 
-        use_custom_logL_addition = False
+        use_default_logL_addition = False
 
         if "lens_option" in self.settings:
             if any(
                 key in self.settings["lens_option"]
                 for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
             ):
-                use_custom_logL_addition = True
+                use_default_logL_addition = True
 
         if "source_light_option" in self.settings:
             if (
                 "shapelet_scale_logarithmic_prior"
                 in self.settings["source_light_option"]
             ):
-                use_custom_logL_addition = True
+                use_default_logL_addition = True
 
-        if use_custom_logL_addition:
+        if use_default_logL_addition:
             if use_jax:
                 from functools import partial
                 from ..util.jax_util import custom_logL_addition_jax
 
-                custom_logL_addition = partial(
+                default_logL_addition = partial(
                     custom_logL_addition_jax,
                     model_config=self,
                 )
             else:
-                custom_logL_addition = self.custom_logL_addition
+                default_logL_addition = self.custom_logL_addition
 
+            if custom_logL_addition is not None:
+
+                def _combined_logL_addition(*args, **kwargs):
+                    return (
+                        custom_logL_addition(*args, **kwargs) + 
+                        default_logL_addition(*args, **kwargs)
+                    )
+
+                kwargs_likelihood["custom_logL_addition"] = _combined_logL_addition
+
+            else:
+                kwargs_likelihood["custom_logL_addition"] = default_logL_addition
+
+        elif custom_logL_addition is not None:
             kwargs_likelihood["custom_logL_addition"] = custom_logL_addition
 
         return kwargs_likelihood

@@ -39,6 +39,7 @@ class Processor(object):
         mpi=False,
         recipe_name="galaxy-quasar",
         thread_count=1,
+        custom_logL_addition=None,
         use_jax=False,
     ):
         """Run lens modeling optimizations for a single lens system.
@@ -55,6 +56,10 @@ class Processor(object):
         :type recipe_name: `str`
         :param thread_count: number of threads to use if multiprocess is enabled
         :type thread_count: `int`
+        :param custom_logL_addition: a callable function that takes in the optional arguments kwargs_lens,
+            kwargs_source, kwargs_lens_light, kwargs_ps, kwargs_special, kwargs_extinction, kwargs_tracer_source
+            and outputs a float. If use_jax is also True, this function must be compatible with jax.jit
+        :type custom_logL_addition: callable function
         :param use_jax: if `True`, performs modeling through JAXtronomy instead of lenstronomy
         :type use_jax: `bool`
         :return: None
@@ -89,7 +94,9 @@ class Processor(object):
             kwargs_data_joint,
             config.get_kwargs_model(),
             config.get_kwargs_constraints(use_jax=use_jax),
-            config.get_kwargs_likelihood(use_jax=use_jax),
+            config.get_kwargs_likelihood(
+                custom_logL_addition=custom_logL_addition, use_jax=use_jax
+            ),
             config.get_kwargs_params(),
             mpi=mpi,
         )

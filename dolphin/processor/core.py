@@ -177,7 +177,8 @@ class Processor(object):
             "multi_band_type": "multi-linear",
         }
 
-        if "time_delays_measured" in config.settings["point_source_option"]:
+        if ("point_source" in config.settings["model"] and 
+            "time_delays_measured" in config.settings["point_source_option"]):
             kwargs_data_joint.update(
                 {
                     "time_delays_measured": np.array(

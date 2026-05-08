@@ -178,14 +178,18 @@ class Processor(object):
         }
 
         if "time_delays_measured" in config.settings["point_source_option"]:
-            kwargs_data_joint.update({
-                "time_delays_measured": np.array(
-                    config.settings["point_source_option"]["time_delays_measured"]
-                ),
-                "time_delays_uncertainties": np.array(
-                    config.settings["point_source_option"]["time_delays_uncertainties"]
-                )
-            })
+            kwargs_data_joint.update(
+                {
+                    "time_delays_measured": np.array(
+                        config.settings["point_source_option"]["time_delays_measured"]
+                    ),
+                    "time_delays_uncertainties": np.array(
+                        config.settings["point_source_option"][
+                            "time_delays_uncertainties"
+                        ]
+                    ),
+                }
+            )
 
         return kwargs_data_joint
 

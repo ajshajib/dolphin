@@ -4,7 +4,6 @@
 from pathlib import Path
 
 from dolphin.processor.core import Processor
-import numpy as np
 import numpy.testing as npt
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]

@@ -66,6 +66,7 @@ class TestOutput(object):
 
         assert self.output.dolphin_version == "unknown"
         assert self.output.lenstronomy_version == "unknown"
+        assert self.output.jaxtronomy_version is None
 
         self.output._dolphin_version = "1.3.0"
         assert self.output.dolphin_version == "1.3.0"
@@ -74,6 +75,10 @@ class TestOutput(object):
         self.output._lenstronomy_version = "1.1.0"
         assert self.output.lenstronomy_version == "1.1.0"
         self.output._lenstronomy_version = None
+
+        self.output._jaxtronomy_version = "0.1.0"
+        assert self.output.jaxtronomy_version == "0.1.0"
+        self.output._jaxtronomy_version = None
 
     def test_load_output(self):
         """Test that outputs are saved and corresponding class variables are not None.
@@ -90,6 +95,7 @@ class TestOutput(object):
             "multi_band_list_out": ["band1", "band2"],
             "dolphin_version": dolphin.__version__,
             "lenstronomy_version": lenstronomy.__version__,
+            "jaxtronomy_version": "0.1.0",
         }
 
         self.processor.file_system.save_output("test", "post_process_load", save_dict)
@@ -103,6 +109,7 @@ class TestOutput(object):
         assert self.output.model_settings == save_dict["settings"]
         assert self.output.dolphin_version == dolphin.__version__
         assert self.output.lenstronomy_version == lenstronomy.__version__
+        assert self.output.jaxtronomy_version == "0.1.0"
 
     def test_load_output_version_warnings(self, capsys):
         """Test that correct warnings are printed when versions mismatch.
@@ -164,6 +171,7 @@ class TestOutput(object):
             "multi_band_list_out": ["band1", "band2"],
             "dolphin_version": "1.3.0",
             "lenstronomy_version": "1.1.0",
+            "jaxtronomy_version": "0.1.0",
         }
 
         self.processor.file_system.save_output("test", "version_bytes", save_dict)
@@ -172,7 +180,7 @@ class TestOutput(object):
 
         def mock_get(self_obj, name, default=None):
             val = original_get(self_obj, name, default)
-            if name in ["dolphin_version", "lenstronomy_version"]:
+            if name in ["dolphin_version", "lenstronomy_version", "jaxtronomy_version"]:
                 if isinstance(val, str):
                     return val.encode("utf-8")
             return val
@@ -182,6 +190,7 @@ class TestOutput(object):
 
         assert self.output.dolphin_version == "1.3.0"
         assert self.output.lenstronomy_version == "1.1.0"
+        assert self.output.jaxtronomy_version == "0.1.0"
 
     def test_plot_model_overview(self):
         """Test `plot_model_overview` method.

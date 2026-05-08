@@ -3,7 +3,7 @@
 
 __author__ = "ajshajib"
 
-import yaml
+from ruamel.yaml import YAML
 import numpy as np
 from copy import deepcopy
 
@@ -36,8 +36,9 @@ class Config(object):
         :return: a dictionary containing the loaded settings
         :rtype: `dict`
         """
+        yaml = YAML(typ="safe")
         with open(file, "r") as f:
-            settings = yaml.load(f, yaml.FullLoader)
+            settings = yaml.load(f)
 
         return settings
 
@@ -244,9 +245,11 @@ class ModelConfig(Config):
 
         return kwargs_model
 
-    def get_kwargs_constraints(self):
+    def get_kwargs_constraints(self, use_jax=False):
         """Create `kwargs_constraints` dictionary for lenstronomy.
 
+        :param use_jax: if `True`, performs modeling through JAXtronomy instead of lenstronomy
+        :type use_jax: `bool`
         :return: dictionary containing the constraint configuration
         :rtype: `dict`
         """
@@ -273,9 +276,14 @@ class ModelConfig(Config):
         if len(self.get_point_source_model_list()) > 0:
             num_image = len(self.settings["point_source_option"]["ra_init"])
             kwargs_constraints["num_point_source_list"] = [num_image]
-            kwargs_constraints["solver_type"] = (
-                "PROFILE_SHEAR" if num_image > 2 else "CENTER"
-            )
+
+            # solver type is not supported in JAXtronomy
+            if use_jax:
+                kwargs_constraints["solver_type"] = None
+            else:
+                kwargs_constraints["solver_type"] = (
+                    "PROFILE_SHEAR" if num_image > 2 else "CENTER"
+                )
 
         if (
             "kwargs_constraints" in self.settings
@@ -427,9 +435,15 @@ class ModelConfig(Config):
 
         return joint_source_with_source, num_source_profiles
 
-    def get_kwargs_likelihood(self):
+    def get_kwargs_likelihood(self, custom_logL_addition=None, use_jax=False):
         """Create `kwargs_likelihood` dictionary for lenstronomy.
 
+        :param custom_logL_addition: a callable function that takes in the optional arguments kwargs_lens,
+            kwargs_source, kwargs_lens_light, kwargs_ps, kwargs_special, kwargs_extinction, kwargs_tracer_source
+            and outputs a float. If use_jax is also True, this function must be compatible with jax.jit
+        :type custom_logL_addition: callable function
+        :param use_jax: If set to True, uses JAXtronomy for modeling instead of lenstronomy
+        :type use_jax: `bool`
         :return: dictionary containing the likelihood configuration
         :rtype: `dict`
         """
@@ -506,24 +520,48 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood["prior_ps"].append(prior_param)
 
-        use_custom_logL_addition = False
+        use_default_logL_addition = False
 
         if "lens_option" in self.settings:
             if any(
                 key in self.settings["lens_option"]
                 for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
             ):
-                use_custom_logL_addition = True
+                use_default_logL_addition = True
 
         if "source_light_option" in self.settings:
             if (
                 "shapelet_scale_logarithmic_prior"
                 in self.settings["source_light_option"]
             ):
-                use_custom_logL_addition = True
+                use_default_logL_addition = True
 
-        if use_custom_logL_addition:
-            kwargs_likelihood["custom_logL_addition"] = self.custom_logL_addition
+        if use_default_logL_addition:
+            if use_jax:
+                from functools import partial
+                from ..util.jax_util import custom_logL_addition_jax
+
+                default_logL_addition = partial(
+                    custom_logL_addition_jax,
+                    model_config=self,
+                )
+            else:
+                default_logL_addition = self.custom_logL_addition
+
+            if custom_logL_addition is not None:
+
+                def _combined_logL_addition(*args, **kwargs):
+                    return custom_logL_addition(
+                        *args, **kwargs
+                    ) + default_logL_addition(*args, **kwargs)
+
+                kwargs_likelihood["custom_logL_addition"] = _combined_logL_addition
+
+            else:
+                kwargs_likelihood["custom_logL_addition"] = default_logL_addition
+
+        elif custom_logL_addition is not None:
+            kwargs_likelihood["custom_logL_addition"] = custom_logL_addition
 
         return kwargs_likelihood
 
@@ -1269,19 +1307,19 @@ class ModelConfig(Config):
                 upper.append(_upper)
             elif model == "UNIFORM":
                 _fixed = {}
-    
+
                 _init = {
                     "amp": 0.0,
                 }
-    
+
                 _sigma = {
                     "amp": 1.0,
                 }
-    
+
                 _lower = {
                     "amp": -100.0,
                 }
-    
+
                 _upper = {
                     "amp": 100.0,
                 }

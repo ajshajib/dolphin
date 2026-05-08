@@ -5,7 +5,7 @@ model."""
 __author__ = "ajshajib"
 
 import numpy as np
-import yaml
+from ruamel.yaml import YAML
 
 from .ai import AI
 
@@ -83,8 +83,11 @@ class Modeler(AI):
         """
         config_file_path = self.file_system.get_config_file_path(lens_name)
 
+        yaml = YAML()
+        yaml.default_flow_style = None
+        yaml.indent(mapping=2, sequence=4, offset=2)
         with open(config_file_path, "w") as config_file:
-            yaml.dump(config, config_file, default_flow_style=False, sort_keys=False)
+            yaml.dump(config, config_file)
 
     def get_configuration(
         self,

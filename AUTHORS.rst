@@ -21,6 +21,7 @@ Contributors
 
 * Simon Birrer, |github| `sibirrer <https://github.com/sibirrer>`_
 * Ryan Brady, |github| `brady-ryan <https://github.com/brady-ryan>`_
+* Alan Huang, |github| `ahuang314 <https://github.com/ahuang314>`_
 * Vedant Sahu, |github| `Vedant-Sahu <https://github.com/Vedant-Sahu>`_
 * Bryce Wedig, |github| `bryce-wedig <https://github.com/bryce-wedig>`_
 

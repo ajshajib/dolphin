@@ -39,6 +39,7 @@ class Output(Processor):
         self._params_sampled = None
         self._dolphin_version = None
         self._lenstronomy_version = None
+        self._jaxtronomy_version = None
 
     @property
     def fit_output(self):
@@ -150,6 +151,15 @@ class Output(Processor):
         else:
             return self._lenstronomy_version
 
+    @property
+    def jaxtronomy_version(self):
+        """The jaxtronomy version used for the run.
+
+        :return: the jaxtronomy version or None if jaxtronomy was not used
+        :rtype: `str` or `None`
+        """
+        return self._jaxtronomy_version
+
     def swim(self, *args, **kwargs):
         """Override the `swim` method of the `Processor` class to make it not callable.
 
@@ -182,6 +192,7 @@ class Output(Processor):
         self._multi_band_list_out = output["multi_band_list_out"]
         self._dolphin_version = output.get("dolphin_version", "unknown")
         self._lenstronomy_version = output.get("lenstronomy_version", "unknown")
+        self._jaxtronomy_version = output.get("jaxtronomy_version", None)
 
         if self.fit_output[-1][0] in ["emcee", "Nautilus"]:
             self._posterior_samples = self.fit_output[-1][1]
@@ -191,6 +202,8 @@ class Output(Processor):
             print(f"Loaded output for {lens_name} with model ID {model_id}.")
             print(f"dolphin version used: {self.dolphin_version}")
             print(f"lenstronomy version used: {self.lenstronomy_version}")
+            if self.jaxtronomy_version is not None:
+                print(f"jaxtronomy version used: {self.jaxtronomy_version}")
 
             if self.dolphin_version != __version__:
                 if self.dolphin_version == "unknown":

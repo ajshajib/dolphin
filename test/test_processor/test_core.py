@@ -31,27 +31,24 @@ class TestProcessor(object):
         )
 
     def test_get_kwargs_data_joint(self):
-        """Test `get_kwargs_data_joint` method."""        
+        """Test `get_kwargs_data_joint` method."""
         kwargs_data_joint = self.processor.get_kwargs_data_joint("lens_system1")
 
         assert kwargs_data_joint["multi_band_type"] == "multi-linear"
 
         assert len(kwargs_data_joint["multi_band_list"]) == 1
-        assert len(kwargs_data_joint["multi_band_list"][0]) == 3        
+        assert len(kwargs_data_joint["multi_band_list"][0]) == 3
 
         kwargs_data_joint = self.processor.get_kwargs_data_joint("lens_system5")
 
         npt.assert_array_equal(
-            kwargs_data_joint["time_delays_measured"],
-            [1., 1., 1.]
+            kwargs_data_joint["time_delays_measured"], [1.0, 1.0, 1.0]
         )
         npt.assert_array_equal(
             kwargs_data_joint["time_delays_uncertainties"],
-            [[0.5, 0., 0.],
-            [0., 0.5, 0.],
-            [0., 0., 0.5]]
+            [[0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]],
         )
-    
+
     def test_get_image_data(self):
         """Test `get_image_data` method."""
         image_data = self.processor.get_image_data("lens_system1", "F390W")

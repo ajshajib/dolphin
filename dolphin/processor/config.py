@@ -287,14 +287,10 @@ class ModelConfig(Config):
 
         if "special" in self.settings["model"]:
             special_list = self.get_special_list()
-            
+
             for i, model in enumerate(special_list):
                 if model == "astrometric_uncertainty":
-                    kwargs_constraints.update(
-                        {
-                            "point_source_offset": True
-                        }
-                    )
+                    kwargs_constraints.update({"point_source_offset": True})
 
         if (
             "kwargs_constraints" in self.settings
@@ -536,11 +532,7 @@ class ModelConfig(Config):
                 "time_delays_measured" in self.settings["point_source_option"]
                 and "time_delays_uncertainties" in self.settings["point_source_option"]
             ):
-                kwargs_likelihood.update(
-                    {
-                        "time_delay_likelihood": True
-                    }
-                )
+                kwargs_likelihood.update({"time_delay_likelihood": True})
 
         use_default_logL_addition = False
 
@@ -563,11 +555,7 @@ class ModelConfig(Config):
 
             for i, model in enumerate(special_list):
                 if model == "astrometric_uncertainty":
-                    kwargs_likelihood.update(
-                        {
-                            "astrometric_likelihood": True
-                        }
-                    )
+                    kwargs_likelihood.update({"astrometric_likelihood": True})
 
         if use_default_logL_addition:
             if use_jax:

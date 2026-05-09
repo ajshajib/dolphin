@@ -180,10 +180,7 @@ class Processor(object):
         model = config.settings.get("model", {})
         point_source_option = config.settings.get("point_source_option", {})
 
-        if (
-            "point_source" in model
-            and "time_delays_measured" in point_source_option
-            ):
+        if "point_source" in model and "time_delays_measured" in point_source_option:
             kwargs_data_joint.update(
                 {
                     "time_delays_measured": np.array(

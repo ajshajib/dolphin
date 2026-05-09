@@ -224,6 +224,12 @@ class TestModelConfig(object):
 
         assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
+        config_5 = deepcopy(self.config_5)
+        config_5.settings["model"]["special"] = ["astrometric_uncertainty"]
+
+        kwargs_constraints5 = config_5.get_kwargs_constraints()
+        assert kwargs_constraints5["point_source_offset"] == True
+
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method."""
         test_likelihood = {
@@ -273,6 +279,13 @@ class TestModelConfig(object):
 
         kwargs_likelihood3 = config.get_kwargs_likelihood()
         assert kwargs_likelihood3["prior_ps"] == [[0, "ra_image", 0.21, 0.15]]
+
+        config = deepcopy(self.config_5)
+        config.settings["model"]["special"] = ["astrometric_uncertainty"]
+        kwargs_likelihood5 = config.get_kwargs_likelihood()
+
+        assert kwargs_likelihood5["time_delay_likelihood"] == True
+        assert kwargs_likelihood5["astrometric_likelihood"] == True
 
         # tests user-supplied custom logL functions
         def _custom_logL_func(

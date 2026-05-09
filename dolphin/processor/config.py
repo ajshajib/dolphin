@@ -285,6 +285,17 @@ class ModelConfig(Config):
                     "PROFILE_SHEAR" if num_image > 2 else "CENTER"
                 )
 
+        if "special" in self.settings["model"]:
+            special_list = self.get_special_list()
+            
+            for i, model in enumerate(special_list):
+                if model == "astrometric_uncertainty":
+                    kwargs_constraints.update(
+                        {
+                            "point_source_offset": True
+                        }
+                    )
+
         if (
             "kwargs_constraints" in self.settings
             and self.settings["kwargs_constraints"] is not None
@@ -520,6 +531,17 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood["prior_ps"].append(prior_param)
 
+        if "point_source_option" in self.settings:
+            if (
+                "time_delays_measured" in self.settings["point_source_option"]
+                and "time_delays_uncertainties" in self.settings["point_source_option"]
+            ):
+                kwargs_likelihood.update(
+                    {
+                        "time_delay_likelihood": True
+                    }
+                )
+
         use_default_logL_addition = False
 
         if "lens_option" in self.settings:
@@ -535,6 +557,17 @@ class ModelConfig(Config):
                 in self.settings["source_light_option"]
             ):
                 use_default_logL_addition = True
+
+        if "special" in self.settings["model"]:
+            special_list = self.get_special_list()
+
+            for i, model in enumerate(special_list):
+                if model == "astrometric_uncertainty":
+                    kwargs_likelihood.update(
+                        {
+                            "astrometric_likelihood": True
+                        }
+                    )
 
         if use_default_logL_addition:
             if use_jax:

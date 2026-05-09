@@ -228,7 +228,7 @@ class TestModelConfig(object):
         config_5.settings["model"]["special"] = ["astrometric_uncertainty"]
 
         kwargs_constraints5 = config_5.get_kwargs_constraints()
-        assert kwargs_constraints5["point_source_offset"] == True
+        assert kwargs_constraints5["point_source_offset"]
 
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method."""
@@ -284,8 +284,8 @@ class TestModelConfig(object):
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
         kwargs_likelihood5 = config.get_kwargs_likelihood()
 
-        assert kwargs_likelihood5["time_delay_likelihood"] == True
-        assert kwargs_likelihood5["astrometric_likelihood"] == True
+        assert kwargs_likelihood5["time_delay_likelihood"]
+        assert kwargs_likelihood5["astrometric_likelihood"]
 
         # tests user-supplied custom logL functions
         def _custom_logL_func(

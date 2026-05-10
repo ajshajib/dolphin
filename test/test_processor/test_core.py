@@ -4,6 +4,7 @@
 from pathlib import Path
 
 from dolphin.processor.core import Processor
+import numpy.testing as npt
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
@@ -36,6 +37,16 @@ class TestProcessor(object):
 
         assert len(kwargs_data_joint["multi_band_list"]) == 1
         assert len(kwargs_data_joint["multi_band_list"][0]) == 3
+
+        kwargs_data_joint = self.processor.get_kwargs_data_joint("lens_system5")
+
+        npt.assert_array_equal(
+            kwargs_data_joint["time_delays_measured"], [1.0, 1.0, 1.0]
+        )
+        npt.assert_array_equal(
+            kwargs_data_joint["time_delays_uncertainties"],
+            [[0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]],
+        )
 
     def test_get_image_data(self):
         """Test `get_image_data` method."""

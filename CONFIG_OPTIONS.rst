@@ -326,7 +326,7 @@ Point Source Options
 
           time_delays_measured: [3., 2., 1.]
 
-    - ``time_delays_covariance``: Full covariance matrix that describes the uncertainties.
+    - ``time_delays_covariance``: Full covariance matrix of the provided time delay measurements.
   
       - Type: ``list of list of floats``
       - Example:

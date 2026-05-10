@@ -44,7 +44,7 @@ class TestProcessor(object):
             kwargs_data_joint["time_delays_measured"], [1.0, 1.0, 1.0]
         )
         npt.assert_array_equal(
-            kwargs_data_joint["time_delays_uncertainties"],
+            kwargs_data_joint["time_delays_covariance"],
             [[0.5, 0.0, 0.0], [0.0, 0.5, 0.0], [0.0, 0.0, 0.5]],
         )
 

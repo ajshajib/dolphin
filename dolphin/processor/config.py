@@ -530,7 +530,7 @@ class ModelConfig(Config):
         if "point_source_option" in self.settings:
             if (
                 "time_delays_measured" in self.settings["point_source_option"]
-                and "time_delays_uncertainties" in self.settings["point_source_option"]
+                and "time_delays_covariance" in self.settings["point_source_option"]
             ):
                 kwargs_likelihood.update({"time_delay_likelihood": True})
 

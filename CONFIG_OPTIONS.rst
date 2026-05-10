@@ -317,7 +317,7 @@ Point Source Options
            gaussian_prior:
              0: [[ra_image, 0.1, 0.05]]
 
-    - ``time_delays_measured``: Relative time delays (in days) with respect to the first image of the point source.
+    - ``time_delays_measured``: Relative time delays (in days) with respect to the first point-source image. If this is provided, ``time_delays_covariance`` must also be provided to compute the time-delay likelihood, which is then added to the combined likelihood.
 
       - Type: ``list of floats```
       - Example:
@@ -326,14 +326,14 @@ Point Source Options
 
           time_delays_measured: [3., 2., 1.]
 
-    - ``time_delays_uncertainties``: Full covariance matrix that describes the uncertainties.
+    - ``time_delays_covariance``: Full covariance matrix of the provided time delay measurements.
   
       - Type: ``list of list of floats``
       - Example:
 
         .. code-block:: yaml
 
-          time_delays_uncertainties: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]
+          time_delays_covariance: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]
 
 Special Options
 ---------------

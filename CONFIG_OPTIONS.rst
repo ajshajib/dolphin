@@ -317,7 +317,7 @@ Point Source Options
            gaussian_prior:
              0: [[ra_image, 0.1, 0.05]]
 
-    - ``time_delays_measured``: Relative time delays (in days) with respect to the first image of the point source.
+    - ``time_delays_measured``: Relative time delays (in days) with respect to the first point-source image. If this is provided, ``time_delays_covariance`` must also be provided to compute the time-delay likelihood, which is then added to the combined likelihood.
 
       - Type: ``list of floats```
       - Example:

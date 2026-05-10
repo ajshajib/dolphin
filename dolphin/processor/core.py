@@ -186,10 +186,8 @@ class Processor(object):
                     "time_delays_measured": np.array(
                         config.settings["point_source_option"]["time_delays_measured"]
                     ),
-                    "time_delays_uncertainties": np.array(
-                        config.settings["point_source_option"][
-                            "time_delays_uncertainties"
-                        ]
+                    "time_delays_covariance": np.array(
+                        config.settings["point_source_option"]["time_delays_covariance"]
                     ),
                 }
             )

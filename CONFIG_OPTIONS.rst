@@ -326,14 +326,14 @@ Point Source Options
 
           time_delays_measured: [3., 2., 1.]
 
-    - ``time_delays_uncertainties``: Full covariance matrix that describes the uncertainties.
+    - ``time_delays_covariance``: Full covariance matrix that describes the uncertainties.
   
       - Type: ``list of list of floats``
       - Example:
 
         .. code-block:: yaml
 
-          time_delays_uncertainties: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]
+          time_delays_covariance: [[1., 0., 0.], [0., 1., 0.], [0., 0., 1.]]
 
 Special Options
 ---------------

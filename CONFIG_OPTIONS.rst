@@ -387,7 +387,7 @@ Special Options
 
           H0: 70.0
 
-    - ``Om0``: Fiducial baryonic matter density.
+    - ``Om0``: Fiducial matter energy density.
 
       - Type: ``float``
       - Example:

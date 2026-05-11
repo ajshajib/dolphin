@@ -24,6 +24,10 @@ point_source_option:
   time_delays_measured: [1., 1., 1.]
   time_delays_covariance: [[0.5, 0., 0.], [0., 0.5, 0.], [0., 0., 0.5]]
 
+special_option:
+  H0: 70.0
+  Om0: 0.3
+
 fitting:
   psf_iteration: true
   psf_iteration_settings:
@@ -48,3 +52,7 @@ fitting:
 
 numeric_option:
   supersampling_factor: [2]
+
+kwargs_model:
+  z_lens: 0.5
+  z_source: 1.0

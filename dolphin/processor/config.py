@@ -12,6 +12,10 @@ import lenstronomy.Util.util as util
 import lenstronomy.Util.mask_util as mask_util
 import os
 
+from astropy import units as u
+from astropy.cosmology import FlatLambdaCDM
+from lenstronomy.Cosmo.lens_cosmo import LensCosmo
+
 from .data import ImageData
 from .files import FileSystem
 
@@ -291,6 +295,8 @@ class ModelConfig(Config):
             for i, model in enumerate(special_list):
                 if model == "astrometric_uncertainty":
                     kwargs_constraints.update({"point_source_offset": True})
+                if model == "time_delay_likelihood":
+                    kwargs_constraints.update({"Ddt_sampling": True})
 
         if (
             "kwargs_constraints" in self.settings
@@ -1012,22 +1018,24 @@ class ModelConfig(Config):
             return []
 
     def get_special_list(self):
-        """Return `special_list`.
-
-        :return: list of special parameters
-        :rtype: `list` of `str`
-        """
         special_list = []
 
         if "special" in self.settings["model"]:
-            if "astrometric_uncertainty" in self.settings["model"]["special"]:
-                special_list.append("astrometric_uncertainty")
-                return special_list
-            elif self.settings["model"]["special"] != "astrometric_uncertainty":
-                special = self.settings["model"]["special"]
-                raise ValueError(f"{special} not supported")
-        else:
-            return []
+            for model in self.settings["model"]["special"]:
+                if model == "astrometric_uncertainty":
+                    special_list.append("astrometric_uncertainty")
+                else:
+                    raise ValueError(f"{model} not supported")
+
+        if "point_source_option" in self.settings:
+            if (
+                "time_delays_measured" in self.settings["point_source_option"]
+                 and "time_delays_covariance"
+                in self.settings["point_source_option"]
+             ):
+                special_list.append("time_delay_likelihood")
+
+        return special_list
 
     def get_index_list(self, light_type="lens_light"):
         """Create a list of indices for the different light profiles (for multiple
@@ -1593,7 +1601,39 @@ class ModelConfig(Config):
                 )
 
                 fixed.update({})
+            elif model == "time_delay_likelihood":
+                H0 = self.settings["special_option"]["H0"] * u.km / u.s / u.Mpc
+                Om0 = self.settings["special_option"]["Om0"]
+                cosmo = FlatLambdaCDM(H0=H0, Om0=Om0, Ob0=None)
+                lens_cosmo_for_Ddt = LensCosmo(
+                    z_lens=self.settings["kwargs_model"]["z_lens"],
+                    z_source=self.settings["kwargs_model"]["z_source"],
+                    cosmo=cosmo,
+                )
+                D_dt_fiducial = float(lens_cosmo_for_Ddt.ddt)
 
+                init.update(
+                    {
+                        "D_dt": D_dt_fiducial
+                    }
+                )
+                sigma.update(
+                    {
+                        "D_dt": 0.25 * D_dt_fiducial
+                    }
+                )
+                lower.update(
+                    {
+                        "D_dt": 0.5 * D_dt_fiducial
+                    }
+                )
+                upper.update(
+                    {
+                        "D_dt": 2.0 * D_dt_fiducial
+                    }
+                )
+                fixed.update({})
+    
         params = [init, sigma, fixed, lower, upper]
         return params
 
@@ -1645,6 +1685,10 @@ class ModelConfig(Config):
             "special": self.get_special_params(),
             # 'cosmography': []
         }
+
+        special_list = self.get_special_list()
+        if "time_delay_likelihood" in special_list:
+            kwargs_params.update({"Ddt_sampling": True})
 
         return kwargs_params
 

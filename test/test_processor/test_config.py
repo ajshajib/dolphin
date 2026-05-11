@@ -229,6 +229,7 @@ class TestModelConfig(object):
 
         kwargs_constraints5 = config_5.get_kwargs_constraints()
         assert kwargs_constraints5["point_source_offset"]
+        assert kwargs_constraints5["Ddt_sampling"]
 
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method."""
@@ -499,6 +500,9 @@ class TestModelConfig(object):
 
             assert len(kwargs_params[key]) == 5
 
+        kwargs_params = self.config_5.get_kwargs_params()
+        assert kwargs_params["Ddt_sampling"]
+
     def test_get_kwargs_numerics(self):
         """Test `get_kwargs_numerics` method."""
         test_numerics = [
@@ -623,7 +627,7 @@ class TestModelConfig(object):
         # if specified in config file
         config = deepcopy(self.config_5)
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
-        assert config.get_special_list() == ["astrometric_uncertainty"]
+        assert config.get_special_list() == ["astrometric_uncertainty", "time_delay_likelihood"]
 
         # Test 2: ensure special list is empty if not
         # specified in the config file
@@ -750,6 +754,8 @@ class TestModelConfig(object):
             "delta_y_image": [0.004, 0.004, 0.004, 0.004],
             "delta_image_lower": -0.004,
             "delta_image_upper": 0.004,
+            "H0": 70,
+            "Om0": 0.3
         }
 
         params = config.get_special_params()
@@ -773,6 +779,11 @@ class TestModelConfig(object):
 
         assert np.all(lower["delta_y_image"] == -0.004)
         assert np.all(upper["delta_y_image"] == 0.004)
+
+        assert "D_dt" in init
+        assert "D_dt" in sigma
+        assert "D_dt" in lower
+        assert "D_dt" in upper
 
         assert fixed == {}
 

@@ -627,7 +627,10 @@ class TestModelConfig(object):
         # if specified in config file
         config = deepcopy(self.config_5)
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
-        assert config.get_special_list() == ["astrometric_uncertainty", "time_delay_likelihood"]
+        assert config.get_special_list() == [
+            "astrometric_uncertainty",
+            "time_delay_likelihood",
+        ]
 
         # Test 2: ensure special list is empty if not
         # specified in the config file
@@ -755,7 +758,7 @@ class TestModelConfig(object):
             "delta_image_lower": -0.004,
             "delta_image_upper": 0.004,
             "H0": 70,
-            "Om0": 0.3
+            "Om0": 0.3,
         }
 
         params = config.get_special_params()

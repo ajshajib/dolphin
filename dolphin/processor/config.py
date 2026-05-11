@@ -1030,9 +1030,8 @@ class ModelConfig(Config):
         if "point_source_option" in self.settings:
             if (
                 "time_delays_measured" in self.settings["point_source_option"]
-                 and "time_delays_covariance"
-                in self.settings["point_source_option"]
-             ):
+                and "time_delays_covariance" in self.settings["point_source_option"]
+            ):
                 special_list.append("time_delay_likelihood")
 
         return special_list
@@ -1612,28 +1611,12 @@ class ModelConfig(Config):
                 )
                 D_dt_fiducial = float(lens_cosmo_for_Ddt.ddt)
 
-                init.update(
-                    {
-                        "D_dt": D_dt_fiducial
-                    }
-                )
-                sigma.update(
-                    {
-                        "D_dt": 0.25 * D_dt_fiducial
-                    }
-                )
-                lower.update(
-                    {
-                        "D_dt": 0.5 * D_dt_fiducial
-                    }
-                )
-                upper.update(
-                    {
-                        "D_dt": 2.0 * D_dt_fiducial
-                    }
-                )
+                init.update({"D_dt": D_dt_fiducial})
+                sigma.update({"D_dt": 0.25 * D_dt_fiducial})
+                lower.update({"D_dt": 0.5 * D_dt_fiducial})
+                upper.update({"D_dt": 2.0 * D_dt_fiducial})
                 fixed.update({})
-    
+
         params = [init, sigma, fixed, lower, upper]
         return params
 

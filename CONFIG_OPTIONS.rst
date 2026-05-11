@@ -378,6 +378,24 @@ Special Options
         
            delta_image_upper: 0.004
 
+    - ``H0``: Fiducial Hubble constant in km/s/Mpc.
+  
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+          H0: 70.0
+
+    - ``Om0``: Fiducial matter energy density.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+          Om0: 0.3
+
 Guess Parameters
 ----------------
 

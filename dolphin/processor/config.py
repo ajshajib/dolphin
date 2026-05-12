@@ -246,12 +246,12 @@ class ModelConfig(Config):
         ):
             for key, value in self.settings["kwargs_model"].items():
                 kwargs_model[key] = value
-                if (key == "multi_plane" and True):
-                        H0 = self.settings["special_option"]["H0"] * u.km / u.s / u.Mpc
-                        Om0 = self.settings["special_option"]["Om0"]
-                        cosmo = FlatLambdaCDM(H0=H0, Om0=Om0, Ob0=None)
-                        kwargs_model.update({"cosmo": cosmo})
-        
+                if key == "multi_plane" and True:
+                    H0 = self.settings["special_option"]["H0"] * u.km / u.s / u.Mpc
+                    Om0 = self.settings["special_option"]["Om0"]
+                    cosmo = FlatLambdaCDM(H0=H0, Om0=Om0, Ob0=None)
+                    kwargs_model.update({"cosmo": cosmo})
+
         return kwargs_model
 
     def get_kwargs_constraints(self, use_jax=False):

@@ -122,13 +122,8 @@ class TestModelConfig(object):
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
 
         config1 = deepcopy(self.config_1)
-        config1.settings["kwargs_model"] = {
-            "multi_plane": True
-        }
-        config1.settings["special_option"] = {
-            "H0": 70,
-            "Om0": 0.3
-        }
+        config1.settings["kwargs_model"] = {"multi_plane": True}
+        config1.settings["special_option"] = {"H0": 70, "Om0": 0.3}
         kwargs_model_1 = config1.get_kwargs_model()
         assert "cosmo" in kwargs_model_1
 

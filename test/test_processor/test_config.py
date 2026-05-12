@@ -121,6 +121,17 @@ class TestModelConfig(object):
         kwargs_model_4 = self.config_4.get_kwargs_model()
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
 
+        config1 = deepcopy(self.config_1)
+        config1.settings["kwargs_model"] = {
+            "multi_plane": True
+        }
+        config1.settings["special_option"] = {
+            "H0": 70,
+            "Om0": 0.3
+        }
+        kwargs_model_1 = config1.get_kwargs_model()
+        assert "cosmo" in kwargs_model_1
+
     def test_get_kwargs_model_mge(self):
         """Test `get_kwargs_model` MGE_SET / MGE_SET_ELLIPSE handling."""
         # MGE_SET_ELLIPSE with explicit n_comp in mge_config

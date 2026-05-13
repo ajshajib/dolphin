@@ -378,7 +378,16 @@ Special Options
         
            delta_image_upper: 0.004
 
-    - ``H0``: Fiducial Hubble constant in km/s/Mpc.
+    - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``.
+
+      - Type: ``string``
+      - Example:
+
+        .. code-block:: yaml
+
+           cosmology: "FlatLambdaCDM"
+
+    - ``H0``: Fiducial Hubble constant in km/s/Mpc (required for all cosmologies).
   
       - Type: ``float``
       - Example:
@@ -387,7 +396,7 @@ Special Options
 
           H0: 70.0
 
-    - ``Om0``: Fiducial matter energy density.
+    - ``Om0``: Fiducial matter energy density at z=0 (required for all cosmologies).
 
       - Type: ``float``
       - Example:
@@ -395,6 +404,42 @@ Special Options
         .. code-block:: yaml
 
           Om0: 0.3
+
+    - ``Ode0``: *(Optional)* Fiducial dark energy density at z=0 (required for non-flat cosmologies like ``LambdaCDM``, ``wCDM``, ``w0waCDM``).
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+          Ode0: 0.7
+
+    - ``w0``: *(Optional)* Dark energy equation of state parameter at z=0 (used in ``wCDM``, ``FlatwCDM``, ``w0waCDM``, ``Flatw0waCDM``).
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+          w0: -1.0
+
+    - ``wa``: *(Optional)* Dark energy equation of state parameter derivative (used in ``w0waCDM``, ``Flatw0waCDM``).
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+          wa: 0.0
+
+    - ``Tcmb0``: *(Optional)* Temperature of the CMB at z=0 in Kelvin.
+
+      - Type: ``float``
+      - Example:
+
+        .. code-block:: yaml
+
+          Tcmb0: 2.725
 
 Guess Parameters
 ----------------

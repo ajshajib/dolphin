@@ -56,9 +56,7 @@ class TestConfig(object):
         assert cosmo.Tcmb0.value == 2.725
 
         # Test unsupported cosmology
-        with pytest.raises(
-            ValueError, match="Unsupported cosmology 'InvalidCosmo'"
-        ):
+        with pytest.raises(ValueError, match="Unsupported cosmology 'InvalidCosmo'"):
             _build_cosmology({"cosmology": "InvalidCosmo", "H0": 70, "Om0": 0.3})
 
         # Test missing required parameters

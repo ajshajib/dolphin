@@ -96,8 +96,14 @@ class ModelConfig(Config):
             "likelihood",
             "special",
         ]:
-            if f"{opt}_option" in self.settings and f"{opt}_options" not in self.settings:
-                self.settings[f"{opt}_options"] = self.settings[f"{opt}_option"]
+            if (
+                f"{opt}_option" in self.settings
+                and f"{opt}_options" not in self.settings
+            ):
+                self.settings[f"{opt}_options"] = deepcopy(
+                    self.settings[f"{opt}_option"]
+                )
+                del self.settings[f"{opt}_option"]
 
     @property
     def lens_name(self):
@@ -254,8 +260,7 @@ class ModelConfig(Config):
                     profile_kwargs_list.append({})
             kwargs_model["lens_light_profile_kwargs_list"] = profile_kwargs_list
 
-        for option_name in ["model_options", "model_options", "kwargs_model"]:
-        for option_name in ["model_option", "model_options", "kwargs_model"]:
+        for option_name in ["model_options", "kwargs_model"]:
             if option_name in self.settings and self.settings[option_name] is not None:
                 for key, value in self.settings[option_name].items():
                     kwargs_model[key] = value
@@ -900,8 +905,8 @@ class ModelConfig(Config):
         :rtype: `list` of `dict`
         """
         numeric_options = {}
-        for option_name in ["numeric_options", "numeric_options", "kwargs_numerics"]:
-        for option_name in ["numeric_option", "numeric_options", "kwargs_numerics"]:
+
+        for option_name in ["numeric_options", "kwargs_numerics"]:
             if option_name in self.settings and self.settings[option_name] is not None:
                 for key, value in self.settings[option_name].items():
                     numeric_options[key] = deepcopy(value)

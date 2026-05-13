@@ -263,8 +263,7 @@ class ModelConfig(Config):
 
     @staticmethod
     def _get_cosmology_instance(special):
-        """
-        Build and return a cosmology instance from the "special_option" settings.
+        """Build and return a cosmology instance from the "special_option" settings.
 
         This is a helper method for backward compatibility with older config files that
         specified cosmology settings in "special_option" without the "cosmology" key. It
@@ -1790,8 +1789,7 @@ _LOADER_KEYS = {
 
 
 def _build_cosmology(special_option):
-    """
-    Build and return an astropy cosmology object from *special_option*.
+    """Build and return an astropy cosmology object from *special_option*.
 
     The ``cosmology`` key selects the model (default: ``"FlatLambdaCDM"``).
     All other keys are forwarded as constructor arguments, with unit

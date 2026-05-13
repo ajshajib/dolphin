@@ -182,20 +182,20 @@ class Modeler(AI):
         galaxy_center_x, galaxy_center_y = self.get_lens_galaxy_center_init(
             semantic_segmentation, coordinate_system
         )
-        config["lens_option"] = {
+        config["lens_options"] = {
             "centroid_init": [galaxy_center_x.item(), galaxy_center_y.item()],
             "centroid_bound": 0.2,
         }
-        config["lens_light_option"] = {"fix": {0: {"n_sersic": 4.0}}}
+        config["lens_light_options"] = {"fix": {0: {"n_sersic": 4.0}}}
         if source_n_max is not None:
-            config["source_light_option"] = {"n_max": [source_n_max]}
+            config["source_light_options"] = {"n_max": [source_n_max]}
 
         # Set point source options
         if self._source_type == "quasar":
             point_source_init = self.get_quasar_image_position(
                 semantic_segmentation, coordinate_system, clear_center=clear_center
             )
-            config["point_source_option"] = {
+            config["point_source_options"] = {
                 "ra_init": point_source_init[0].tolist(),
                 "dec_init": point_source_init[1].tolist(),
                 "bound": 0.2,
@@ -219,7 +219,7 @@ class Modeler(AI):
         config["guess_params"] = {"lens": {0: {"theta_E": float(theta_E_init)}}}
 
         # Set numeric options
-        config["numeric_option"] = {"supersampling_factor": supersampling_factor}
+        config["numeric_options"] = {"supersampling_factor": supersampling_factor}
 
         # Set fitting options
         config["fitting"] = {

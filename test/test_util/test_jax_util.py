@@ -91,9 +91,9 @@ def test_custom_logL_addition_jax():
 
     # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
     config2 = deepcopy(CONFIG_1)
-    config2.settings["lens_option"]["limit_mass_pa_from_light"] = np.inf
-    config2.settings["lens_option"]["limit_mass_q_from_light"] = np.inf
-    config2.settings["source_light_option"]["shapelet_scale_logarithmic_prior"] = False
+    config2.settings["lens_options"]["limit_mass_pa_from_light"] = np.inf
+    config2.settings["lens_options"]["limit_mass_q_from_light"] = np.inf
+    config2.settings["source_light_options"]["shapelet_scale_logarithmic_prior"] = False
     kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
     kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
     prior_ref = config2.custom_logL_addition(
@@ -109,8 +109,8 @@ def test_custom_logL_addition_jax():
 
     # Change setting data type (phi_L = 20 deg, q_L = 0.9)
     config3 = deepcopy(CONFIG_1)
-    config3.settings["lens_option"]["limit_mass_q_from_light"] = 0.2
-    config3.settings["lens_option"]["limit_mass_pa_from_light"] = 5
+    config3.settings["lens_options"]["limit_mass_q_from_light"] = 0.2
+    config3.settings["lens_options"]["limit_mass_pa_from_light"] = 5
     kwargs_lens = [{"e1": 0.111, "e2": 0.0}]
     kwargs_lens_light = [{"e1": 0.0403, "e2": 0.0338}]
     prior_ref = config3.custom_logL_addition(
@@ -126,7 +126,7 @@ def test_custom_logL_addition_jax():
 
     # Raise error when settings are not bool, int or float
     config4a = deepcopy(CONFIG_1)
-    config4a.settings["lens_option"]["limit_mass_pa_from_light"] = "Test"
+    config4a.settings["lens_options"]["limit_mass_pa_from_light"] = "Test"
     with pytest.raises(ValueError):
         custom_logL_addition_jax(
             model_config=config4a,
@@ -135,7 +135,7 @@ def test_custom_logL_addition_jax():
         )
 
     config4b = deepcopy(CONFIG_1)
-    config4b.settings["lens_option"]["limit_mass_q_from_light"] = "Test"
+    config4b.settings["lens_options"]["limit_mass_q_from_light"] = "Test"
     with pytest.raises(ValueError):
         custom_logL_addition_jax(
             model_config=config4b,

@@ -178,7 +178,7 @@ class Processor(object):
         }
 
         model = config.settings.get("model", {})
-        point_source_option = config.settings.get("point_source_option", {})
+        point_source_option = config.settings.get("point_source_options", {})
 
         if (
             "point_source" in model
@@ -188,10 +188,12 @@ class Processor(object):
             kwargs_data_joint.update(
                 {
                     "time_delays_measured": np.array(
-                        config.settings["point_source_option"]["time_delays_measured"]
+                        config.settings["point_source_options"]["time_delays_measured"]
                     ),
                     "time_delays_uncertainties": np.array(
-                        config.settings["point_source_option"]["time_delays_covariance"]
+                        config.settings["point_source_options"][
+                            "time_delays_covariance"
+                        ]
                     ),
                 }
             )

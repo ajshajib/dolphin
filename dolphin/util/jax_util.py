@@ -47,10 +47,10 @@ def custom_logL_addition_jax(
     # Limit the difference between pa_light and pa_mass for the deflector, where pa is the
     # position angle of the major axis
     if (
-        "lens_option" in model_config.settings
-        and "limit_mass_pa_from_light" in model_config.settings["lens_option"]
+        "lens_options" in model_config.settings
+        and "limit_mass_pa_from_light" in model_config.settings["lens_options"]
     ):
-        max_mass_pa_difference = model_config.settings["lens_option"][
+        max_mass_pa_difference = model_config.settings["lens_options"][
             "limit_mass_pa_from_light"
         ]
 
@@ -83,10 +83,10 @@ def custom_logL_addition_jax(
     # Limit the difference between q_light and q_mass for the deflector, where q is the axis
     # ratio of the elliptical profile
     if (
-        "lens_option" in model_config.settings
-        and "limit_mass_q_from_light" in model_config.settings["lens_option"]
+        "lens_options" in model_config.settings
+        and "limit_mass_q_from_light" in model_config.settings["lens_options"]
     ):
-        max_mass_q_difference = model_config.settings["lens_option"][
+        max_mass_q_difference = model_config.settings["lens_options"][
             "limit_mass_q_from_light"
         ]
 
@@ -113,11 +113,11 @@ def custom_logL_addition_jax(
 
     # Provide logarithmic_prior on the source light profile beta param
     if (
-        "source_light_option" in model_config.settings
+        "source_light_options" in model_config.settings
         and "shapelet_scale_logarithmic_prior"
-        in model_config.settings["source_light_option"]
+        in model_config.settings["source_light_options"]
     ):
-        if model_config.settings["source_light_option"][
+        if model_config.settings["source_light_options"][
             "shapelet_scale_logarithmic_prior"
         ]:
             for i, model in enumerate(model_config.get_source_light_model_list()):

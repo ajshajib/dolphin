@@ -122,7 +122,7 @@ class TestModelConfig(object):
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
 
         config = deepcopy(self.config_1)
-        config.settings["model_option"] = {"multi_plane": True}
+        config.settings["model_options"] = {"multi_plane": True}
         kwargs_model_alias = config.get_kwargs_model()
         assert kwargs_model_alias["multi_plane"] is True
 
@@ -131,7 +131,7 @@ class TestModelConfig(object):
         # MGE_SET_ELLIPSE with explicit n_comp in mge_config
         config_mge = deepcopy(self.config_1)
         config_mge.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
-        config_mge.settings["lens_light_option"] = {"mge_config": {0: {"n_comp": 15}}}
+        config_mge.settings["lens_light_options"] = {"mge_config": {0: {"n_comp": 15}}}
         kwargs = config_mge.get_kwargs_model()
         assert "lens_light_profile_kwargs_list" in kwargs
         assert kwargs["lens_light_profile_kwargs_list"] == [{"n_comp": 15}]
@@ -279,7 +279,7 @@ class TestModelConfig(object):
         assert kwargs_likelihood2["prior_source"] == [[0, "beta", 0.15, 0.05]]
 
         config = deepcopy(self.config_3)
-        config.settings["point_source_option"] = {
+        config.settings["point_source_options"] = {
             "gaussian_prior": {0: [["ra_image", 0.21, 0.15]]}
         }
 
@@ -327,7 +327,7 @@ class TestModelConfig(object):
         assert kwargs_likelihood5["custom_logL_addition"] == _custom_logL_func
 
         config = deepcopy(self.config_2)
-        config.settings["likelihood_option"] = {
+        config.settings["likelihood_options"] = {
             "check_bounds": False,
             "source_marg": True,
         }
@@ -374,9 +374,9 @@ class TestModelConfig(object):
 
         # Settings set to False  (phi_L = 20 deg, q_L = 0.9)
         config2 = deepcopy(self.config_1)
-        config2.settings["lens_option"]["limit_mass_pa_from_light"] = np.inf
-        config2.settings["lens_option"]["limit_mass_q_from_light"] = np.inf
-        config2.settings["source_light_option"][
+        config2.settings["lens_options"]["limit_mass_pa_from_light"] = np.inf
+        config2.settings["lens_options"]["limit_mass_q_from_light"] = np.inf
+        config2.settings["source_light_options"][
             "shapelet_scale_logarithmic_prior"
         ] = False
         prior = config2.custom_logL_addition(
@@ -387,8 +387,8 @@ class TestModelConfig(object):
 
         # Change setting data type (phi_L = 20 deg, q_L = 0.9)
         config3 = deepcopy(self.config_1)
-        config3.settings["lens_option"]["limit_mass_q_from_light"] = 0.2
-        config3.settings["lens_option"]["limit_mass_pa_from_light"] = 5
+        config3.settings["lens_options"]["limit_mass_q_from_light"] = 0.2
+        config3.settings["lens_options"]["limit_mass_pa_from_light"] = 5
         prior = config3.custom_logL_addition(
             kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
             kwargs_lens_light=[{"e1": 0.0403, "e2": 0.0338}],
@@ -397,7 +397,7 @@ class TestModelConfig(object):
 
         # Raise error when settings are not bool, int or float
         config4a = deepcopy(self.config_1)
-        config4a.settings["lens_option"]["limit_mass_pa_from_light"] = "Test"
+        config4a.settings["lens_options"]["limit_mass_pa_from_light"] = "Test"
         with pytest.raises(ValueError):
             config4a.custom_logL_addition(
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
@@ -405,7 +405,7 @@ class TestModelConfig(object):
             )
 
         config4b = deepcopy(self.config_1)
-        config4b.settings["lens_option"]["limit_mass_q_from_light"] = "Test"
+        config4b.settings["lens_options"]["limit_mass_q_from_light"] = "Test"
         with pytest.raises(ValueError):
             config4b.custom_logL_addition(
                 kwargs_lens=[{"e1": 0.111, "e2": 0.0}],
@@ -533,12 +533,12 @@ class TestModelConfig(object):
         assert test_numerics == self.config_1.get_kwargs_numerics()
 
         self.config_5.settings["band"] = ["F390W"]
-        if "numeric_option" in self.config_5.settings:
-            del self.config_5.settings["numeric_option"]
+        if "numeric_options" in self.config_5.settings:
+            del self.config_5.settings["numeric_options"]
         assert test_numerics == self.config_5.get_kwargs_numerics()
 
         config = deepcopy(self.config_1)
-        config.settings["numeric_option"]["supersampling_factor"] = None
+        config.settings["numeric_options"]["supersampling_factor"] = None
         kwargs_numerics = config.get_kwargs_numerics()
         for kwargs_numerics_band in kwargs_numerics:
             assert kwargs_numerics_band["supersampling_factor"] == 3
@@ -755,7 +755,7 @@ class TestModelConfig(object):
 
         config2 = deepcopy(self.config_1)
         config2.settings["model"]["lens_light"] = ["UNIFORM"]
-        config2.settings["lens_light_option"]["fix"] = {}
+        config2.settings["lens_light_options"]["fix"] = {}
         params = config2.get_lens_light_model_params()
 
         assert params[0] == [{"amp": 0.0}]
@@ -773,12 +773,12 @@ class TestModelConfig(object):
 
         config2 = deepcopy(self.config_3)
         config2.get_source_light_model_params()
-        assert config2.settings["source_light_option"]["n_max"] == [2, 4]
+        assert config2.settings["source_light_options"]["n_max"] == [2, 4]
 
         config3 = deepcopy(self.config_3)
-        config3.settings["source_light_option"]["n_max"] = 2
+        config3.settings["source_light_options"]["n_max"] = 2
         config3.get_source_light_model_params()
-        assert config3.settings["source_light_option"]["n_max"] == [2, 2]
+        assert config3.settings["source_light_options"]["n_max"] == [2, 2]
 
     def test_get_special_params(self):
         """Test `get_special_params` method."""
@@ -788,7 +788,7 @@ class TestModelConfig(object):
         config = deepcopy(self.config_5)
 
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
-        config.settings["special_option"] = {
+        config.settings["special_options"] = {
             "delta_x_image": [0.004, 0.004, 0.004, 0.004],
             "delta_y_image": [0.004, 0.004, 0.004, 0.004],
             "delta_image_lower": -0.004,
@@ -957,12 +957,12 @@ class TestModelConfig(object):
         assert config._get_mge_n_comp(0) == 20
 
         # With mge_config using integer keys (hits `if` branch)
-        config.settings["lens_light_option"] = {"mge_config": {0: {"n_comp": 15}}}
+        config.settings["lens_light_options"] = {"mge_config": {0: {"n_comp": 15}}}
         assert config._get_mge_n_comp(0) == 15
         assert config._get_mge_n_comp(1) == 20  # Not configured, returns default
 
         # With mge_config using string keys (hits `elif` branch)
-        config.settings["lens_light_option"] = {"mge_config": {"0": {"n_comp": 12}}}
+        config.settings["lens_light_options"] = {"mge_config": {"0": {"n_comp": 12}}}
         assert config._get_mge_n_comp(0) == 12
         assert config._get_mge_n_comp(1) == 20  # Not configured, returns default
 

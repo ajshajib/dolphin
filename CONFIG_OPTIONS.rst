@@ -713,17 +713,30 @@ Fitting Options
 
 Lenstronomy Arbitrary Keyword Arguments
 ---------------------------------------
+Model Options
+-------------
 
 - ``kwargs_model``: *(Optional)* Pass any arbitrary arguments strictly allowed in `lenstronomy.LensModel`, `lenstronomy.LightModel` inside this section.
+- ``model_options`` (or ``kwargs_model``): *(Optional)* Pass any arbitrary arguments strictly allowed in `lenstronomy.Util.class_creator.create_class_instances()` inside this section.
 
 - ``kwargs_constraints``: *(Optional)* Pass any arbitrary constraints strictly allowed in `lenstronomy.Workflow.fitting_sequence` inside this section.
+Constraints Options
+-------------------
+
+- ``constraints_options`` (or ``kwargs_constraints``): *(Optional)* Pass any arbitrary constraints strictly allowed in `lenstronomy.Sampling.parameters.Param()` inside this section.
 
   - Example:
 
     .. code-block:: yaml
 
        kwargs_constraints:
+       constraints_options:
          joint_lens_with_light: [[0, 0, ['center_x', 'center_y']]]
+
+Likelihood Options
+------------------
+
+- ``likelihood_options`` (or ``kwargs_likelihood``): *(Optional)* Pass any arbitrary likelihood arguments strictly allowed in `lenstronomy.Sampling.likelihood.Likelihood()` inside this section.
 
 Mask Options
 ------------

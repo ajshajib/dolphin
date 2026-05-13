@@ -240,12 +240,10 @@ class ModelConfig(Config):
                     profile_kwargs_list.append({})
             kwargs_model["lens_light_profile_kwargs_list"] = profile_kwargs_list
 
-        if (
-            "kwargs_model" in self.settings
-            and self.settings["kwargs_model"] is not None
-        ):
-            for key, value in self.settings["kwargs_model"].items():
-                kwargs_model[key] = value
+        for option_name in ["model_option", "model_options", "kwargs_model"]:
+            if option_name in self.settings and self.settings[option_name] is not None:
+                for key, value in self.settings[option_name].items():
+                    kwargs_model[key] = value
 
         return kwargs_model
 
@@ -590,6 +588,15 @@ class ModelConfig(Config):
         elif custom_logL_addition is not None:
             kwargs_likelihood["custom_logL_addition"] = custom_logL_addition
 
+        for option_name in [
+            "likelihood_option",
+            "likelihood_options",
+            "kwargs_likelihood",
+        ]:
+            if option_name in self.settings and self.settings[option_name] is not None:
+                for key, value in self.settings[option_name].items():
+                    kwargs_likelihood[key] = value
+
         return kwargs_likelihood
 
     def custom_logL_addition(
@@ -874,30 +881,39 @@ class ModelConfig(Config):
         :return: list containing the numerics configuration
         :rtype: `list` of `dict`
         """
-        try:
-            self.settings["numeric_option"]["supersampling_factor"]
-        except (KeyError, NameError, TypeError):
-            supersampling_factor = [3] * self.number_of_bands
-        else:
-            supersampling_factor = deepcopy(
-                self.settings["numeric_option"]["supersampling_factor"]
-            )
+        numeric_options = {}
+        for option_name in ["numeric_option", "numeric_options", "kwargs_numerics"]:
+            if option_name in self.settings and self.settings[option_name] is not None:
+                for key, value in self.settings[option_name].items():
+                    numeric_options[key] = deepcopy(value)
 
-            if supersampling_factor is None:
-                supersampling_factor = [3] * self.number_of_bands
+        supersampling_factor = numeric_options.get(
+            "supersampling_factor", [3] * self.number_of_bands
+        )
+        if supersampling_factor is None:
+            supersampling_factor = [3] * self.number_of_bands
 
         kwargs_numerics = []
         for n in range(self.number_of_bands):
-            kwargs_numerics.append(
-                {
-                    "supersampling_factor": supersampling_factor[n],
-                    "supersampling_convolution": False,
-                    "supersampling_kernel_size": 3,
-                    "flux_evaluate_indexes": None,
-                    "point_source_supersampling_factor": 1,
-                    "compute_mode": "regular",
-                }
-            )
+            kwargs_num = {
+                "supersampling_factor": supersampling_factor[n],
+                "supersampling_convolution": False,
+                "supersampling_kernel_size": 3,
+                "flux_evaluate_indexes": None,
+                "point_source_supersampling_factor": 1,
+                "compute_mode": "regular",
+            }
+
+            for key, value in numeric_options.items():
+                if key == "supersampling_factor":
+                    continue
+
+                if isinstance(value, list) and len(value) == self.number_of_bands:
+                    kwargs_num[key] = deepcopy(value[n])
+                else:
+                    kwargs_num[key] = deepcopy(value)
+
+            kwargs_numerics.append(kwargs_num)
 
         return kwargs_numerics
 

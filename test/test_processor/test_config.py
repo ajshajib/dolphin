@@ -121,6 +121,11 @@ class TestModelConfig(object):
         kwargs_model_4 = self.config_4.get_kwargs_model()
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
 
+        config = deepcopy(self.config_1)
+        config.settings["model_option"] = {"multi_plane": True}
+        kwargs_model_alias = config.get_kwargs_model()
+        assert kwargs_model_alias["multi_plane"] is True
+
     def test_get_kwargs_model_mge(self):
         """Test `get_kwargs_model` MGE_SET / MGE_SET_ELLIPSE handling."""
         # MGE_SET_ELLIPSE with explicit n_comp in mge_config
@@ -320,6 +325,15 @@ class TestModelConfig(object):
             custom_logL_addition=_custom_logL_func
         )
         assert kwargs_likelihood5["custom_logL_addition"] == _custom_logL_func
+
+        config = deepcopy(self.config_2)
+        config.settings["likelihood_option"] = {
+            "check_bounds": False,
+            "source_marg": True,
+        }
+        kwargs_likelihood_alias = config.get_kwargs_likelihood()
+        assert kwargs_likelihood_alias["check_bounds"] is False
+        assert kwargs_likelihood_alias["source_marg"] is True
 
     def test_custom_logL_addition(self):
         """Test `custom_logL_addition` method."""
@@ -528,6 +542,20 @@ class TestModelConfig(object):
         kwargs_numerics = config.get_kwargs_numerics()
         for kwargs_numerics_band in kwargs_numerics:
             assert kwargs_numerics_band["supersampling_factor"] == 3
+
+        config = deepcopy(self.config_3)
+        config.settings["numeric_options"] = {
+            "supersampling_factor": [2, 4],
+            "compute_mode": ["adaptive", "regular"],
+            "point_source_supersampling_factor": [1, 2],
+        }
+        kwargs_numerics = config.get_kwargs_numerics()
+        assert kwargs_numerics[0]["supersampling_factor"] == 2
+        assert kwargs_numerics[1]["supersampling_factor"] == 4
+        assert kwargs_numerics[0]["compute_mode"] == "adaptive"
+        assert kwargs_numerics[1]["compute_mode"] == "regular"
+        assert kwargs_numerics[0]["point_source_supersampling_factor"] == 1
+        assert kwargs_numerics[1]["point_source_supersampling_factor"] == 2
 
     def test_get_point_source_params(self):
         """Test `get_point_source_params` method."""

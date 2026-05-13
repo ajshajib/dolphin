@@ -557,6 +557,14 @@ class TestModelConfig(object):
         assert kwargs_numerics[0]["point_source_supersampling_factor"] == 1
         assert kwargs_numerics[1]["point_source_supersampling_factor"] == 2
 
+        # Scalar override should be broadcast to each band (hits the non-list branch).
+        config = deepcopy(self.config_1)
+        config.settings["numeric_options"] = {
+            "compute_mode": "adaptive",
+        }
+        kwargs_numerics = config.get_kwargs_numerics()
+        assert kwargs_numerics[0]["compute_mode"] == "adaptive"
+
     def test_get_point_source_params(self):
         """Test `get_point_source_params` method."""
         ps_params = self.config_1.get_point_source_params()

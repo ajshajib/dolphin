@@ -85,6 +85,20 @@ class ModelConfig(Config):
 
         assert self.settings["lens_name"] == self._lens_name
 
+        # Backward compatibility for singular option names
+        for opt in [
+            "lens",
+            "lens_light",
+            "source_light",
+            "point_source",
+            "numeric",
+            "model",
+            "likelihood",
+            "special",
+        ]:
+            if f"{opt}_option" in self.settings and f"{opt}_options" not in self.settings:
+                self.settings[f"{opt}_options"] = self.settings[f"{opt}_option"]
+
     @property
     def lens_name(self):
         """The name of the lens system.
@@ -241,6 +255,7 @@ class ModelConfig(Config):
             kwargs_model["lens_light_profile_kwargs_list"] = profile_kwargs_list
 
         for option_name in ["model_options", "model_options", "kwargs_model"]:
+        for option_name in ["model_option", "model_options", "kwargs_model"]:
             if option_name in self.settings and self.settings[option_name] is not None:
                 for key, value in self.settings[option_name].items():
                     kwargs_model[key] = value
@@ -589,6 +604,7 @@ class ModelConfig(Config):
             kwargs_likelihood["custom_logL_addition"] = custom_logL_addition
 
         for option_name in [
+            "likelihood_option",
             "likelihood_options",
             "likelihood_options",
             "kwargs_likelihood",
@@ -885,6 +901,7 @@ class ModelConfig(Config):
         """
         numeric_options = {}
         for option_name in ["numeric_options", "numeric_options", "kwargs_numerics"]:
+        for option_name in ["numeric_option", "numeric_options", "kwargs_numerics"]:
             if option_name in self.settings and self.settings[option_name] is not None:
                 for key, value in self.settings[option_name].items():
                     numeric_options[key] = deepcopy(value)

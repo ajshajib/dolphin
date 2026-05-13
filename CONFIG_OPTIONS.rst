@@ -102,7 +102,7 @@ Model Section
 Lens Options
 ------------
 
-- ``lens_option``: Additional options for the lens model.
+- ``lens_options``: Additional options for the lens model.
 
   - Suboptions:
 
@@ -203,7 +203,7 @@ Satellites Option
 Lens Light Options
 ------------------
 
-- ``lens_light_option``: *(Optional)* Additional options for the lens light model.
+- ``lens_light_options``: *(Optional)* Additional options for the lens light model.
 
   - Suboptions:
 
@@ -241,7 +241,7 @@ Lens Light Options
 Source Light Options
 --------------------
 
-- ``source_light_option``: *(Optional)* Additional options for the source light model.
+- ``source_light_options``: *(Optional)* Additional options for the source light model.
 
   - Suboptions:
 
@@ -276,7 +276,7 @@ Source Light Options
 Point Source Options
 --------------------
 
-- ``point_source_option``: *(Optional)* Options for point source models.
+- ``point_source_options``: *(Optional)* Options for point source models.
 
   - Suboptions:
 
@@ -338,7 +338,7 @@ Point Source Options
 Special Options
 ---------------
 
-- ``special_option``: *(Optional)* Initialization of special parameters.
+- ``special_options``: *(Optional)* Initialization of special parameters.
 
   - Suboptions:
 
@@ -423,7 +423,7 @@ Guess Parameters
 Numeric Options
 ---------------
 
-- ``numeric_option``: Numerical settings for the modeling process.
+- ``numeric_options``: Numerical settings for the modeling process.
 
   - Suboptions:
 
@@ -434,7 +434,7 @@ Numeric Options
 
         .. code-block:: yaml
 
-           numeric_option:
+           numeric_options:
              supersampling_factor: [2]
 
 Fitting Options

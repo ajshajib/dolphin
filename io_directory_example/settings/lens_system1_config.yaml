@@ -8,7 +8,7 @@ model:
   source_light: [SERSIC_ELLIPSE]
   point_source: [] # 'LENSED_POSITION', 'SOURCE_POSITION'
 
-lens_option:
+lens_options:
   centroid_init: [0.04, -0.04]
   # initial guess for the deflector centroid in arcsec
   centroid_bound: 0.2
@@ -20,13 +20,13 @@ lens_option:
   # optional constraint on the light axis ratio to be smaller
   # than that of the mass, i.e., imposes q_M > q_L - limit_mass_q_from_light.
 
-lens_light_option:
+lens_light_options:
   fix: {0: {n_sersic: 4.}}   # fix n_sersic to 4, for 0-th light profile
 
-source_light_option:
+source_light_options:
   n_max: [2] # array with n_max for each band
 
-point_source_option:
+point_source_options:
   ra_init: []
   dec_init: []
   bound: 0.
@@ -56,7 +56,7 @@ fitting:
 
 kwargs_model:
 
-numeric_option:
+numeric_options:
   supersampling_factor: [3] # list specifying for each band
 
 guess_params:

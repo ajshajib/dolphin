@@ -177,33 +177,7 @@ class Processor(object):
             "multi_band_type": "multi-linear",
         }
 
-        model = config.settings.get("model", {})
-        point_source_option = config.settings.get("point_source_options", {})
-        point_source_options = config.settings.get(
-            "point_source_options", config.settings.get("point_source_option", {})
-        )
-
-        if (
-            "point_source" in model
-            and "time_delays_measured" in point_source_option
-            and "time_delays_covariance" in point_source_option
-            and "time_delays_measured" in point_source_options
-            and "time_delays_covariance" in point_source_options
-        ):
-            kwargs_data_joint.update(
-                {
-                    "time_delays_measured": np.array(
-                        config.settings["point_source_options"]["time_delays_measured"]
-                        point_source_options["time_delays_measured"]
-                    ),
-                    "time_delays_uncertainties": np.array(
-                        config.settings["point_source_options"][
-                            "time_delays_covariance"
-                        ]
-                        point_source_options["time_delays_covariance"]
-                    ),
-                }
-            )
+        kwargs_data_joint.update(config.get_measured_time_delays())
 
         return kwargs_data_joint
 

@@ -1710,6 +1710,36 @@ class ModelConfig(Config):
 
         return kwargs_params
 
+    def get_measured_time_delays(self):
+        """Get time delays and uncertainties if specified in the configuration.
+
+        :return: dictionary with time delays and uncertainties, or an empty dictionary if not specified
+        :rtype: `dict`
+        """
+        kwargs_time_delays = {}
+        model = self.settings.get("model", {})
+        point_source_options = self.settings.get(
+            "point_source_options", self.settings.get("point_source_option", {})
+        )
+
+        if (
+            "point_source" in model
+            and "time_delays_measured" in point_source_options
+            and "time_delays_covariance" in point_source_options
+        ):
+            kwargs_time_delays.update(
+                {
+                    "time_delays_measured": np.array(
+                        point_source_options["time_delays_measured"]
+                    ),
+                    "time_delays_uncertainties": np.array(
+                        point_source_options["time_delays_covariance"]
+                    ),
+                }
+            )
+
+        return kwargs_time_delays
+
     def get_psf_supersampled_factor(self):
         """Retrieve PSF supersampling factor if specified in the config file.
 

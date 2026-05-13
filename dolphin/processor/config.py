@@ -1789,7 +1789,7 @@ _LOADER_KEYS = {
 }
 
 
-def _build_cosmology(special_option: dict):
+def _build_cosmology(special_option):
     """
     Build and return an astropy cosmology object from *special_option*.
 
@@ -1797,11 +1797,11 @@ def _build_cosmology(special_option: dict):
     All other keys are forwarded as constructor arguments, with unit
     conversions applied where required.
 
-    Raises
-    ------
-    ValueError
-        If the requested cosmology is not in the registry, or a required
-        parameter is missing.
+    :param special_option: dictionary of options for special likelihoods, including cosmology parameters
+    :type special_option: `dict`
+    :return: an instance of the selected astropy cosmology class
+    :rtype: `astropy.cosmology.Cosmology`
+    :raises ValueError: if the specified cosmology is not supported or if required parameters are missing
     """
     cosmo_name = special_option.get("cosmology", "FlatLambdaCDM")
 

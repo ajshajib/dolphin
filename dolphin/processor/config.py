@@ -1232,7 +1232,7 @@ class ModelConfig(Config):
                         "g1": 0.01,
                         "g2": 0.01,
                         "g3": 0.01,
-                        "g4": 0.01,    
+                        "g4": 0.01,
                     }
                 )
                 lower.append(
@@ -1240,7 +1240,7 @@ class ModelConfig(Config):
                         "g1": -0.1,
                         "g2": -0.1,
                         "g3": -0.1,
-                        "g4": -0.1,                    
+                        "g4": -0.1,
                     }
                 )
                 upper.append(
@@ -1248,7 +1248,7 @@ class ModelConfig(Config):
                         "g1": 0.1,
                         "g2": 0.1,
                         "g3": 0.1,
-                        "g4": 0.1,                    
+                        "g4": 0.1,
                     }
                 )
             else:

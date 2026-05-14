@@ -677,33 +677,20 @@ class TestModelConfig(object):
         config1 = deepcopy(self.config_1)
         config1.settings["model"]["lens"] = ["FLEXION"]
         params1 = config1.get_lens_model_params()
-        assert params1[0][0] == {
-            "g1": 0,
-            "g2": 0,
-            "g3": 0,
-            "g4": 0
-        }
-        assert params1[1][0] == {
-            "g1": 0.01,
-            "g2": 0.01,
-            "g3": 0.01,
-            "g4": 0.01
-        }
-        assert params1[2][0] == {
-            "ra_0": 0,
-            "dec_0": 0
-        }
+        assert params1[0][0] == {"g1": 0, "g2": 0, "g3": 0, "g4": 0}
+        assert params1[1][0] == {"g1": 0.01, "g2": 0.01, "g3": 0.01, "g4": 0.01}
+        assert params1[2][0] == {"ra_0": 0, "dec_0": 0}
         assert params1[3][0] == {
             "g1": -0.1,
             "g2": -0.1,
             "g3": -0.1,
-            "g4": -0.1,    
+            "g4": -0.1,
         }
         assert params1[4][0] == {
             "g1": 0.1,
             "g2": 0.1,
             "g3": 0.1,
-            "g4": 0.1,    
+            "g4": 0.1,
         }
 
     def test_get_lens_light_model_params(self):

@@ -378,7 +378,6 @@ Special Options
         
            delta_image_upper: 0.004
 
-    - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``.
     - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``, ``w0wzCDM``, ``Flatw0wzCDM``, ``wpwaCDM``, ``FlatwpwaCDM``.
 
       - Type: ``string``
@@ -406,7 +405,6 @@ Special Options
 
           Om0: 0.3
 
-    - ``Ode0``: *(Optional)* Fiducial dark energy density at z=0 (required for non-flat cosmologies like ``LambdaCDM``, ``wCDM``, ``w0waCDM``).
     - ``Ode0``: *(Optional)* Fiducial dark energy density at z=0 (required for non-flat cosmologies like ``LambdaCDM``, ``wCDM``, ``w0waCDM``, ``w0wzCDM``, ``wpwaCDM``).
 
       - Type: ``float``
@@ -416,7 +414,6 @@ Special Options
 
           Ode0: 0.7
 
-    - ``w0``: *(Optional)* Dark energy equation of state parameter at z=0 (used in ``wCDM``, ``FlatwCDM``, ``w0waCDM``, ``Flatw0waCDM``).
     - ``w0``: *(Optional)* Dark energy equation of state parameter at z=0 (used in ``wCDM``, ``FlatwCDM``, ``w0waCDM``, ``Flatw0waCDM``, ``w0wzCDM``, ``Flatw0wzCDM``).
 
       - Type: ``float``
@@ -426,7 +423,6 @@ Special Options
 
           w0: -1.0
 
-    - ``wa``: *(Optional)* Dark energy equation of state parameter derivative (used in ``w0waCDM``, ``Flatw0waCDM``).
     - ``wa``: *(Optional)* Dark energy equation of state parameter derivative (used in ``w0waCDM``, ``Flatw0waCDM``, ``wpwaCDM``, ``FlatwpwaCDM``).
 
       - Type: ``float``

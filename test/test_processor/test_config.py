@@ -92,6 +92,41 @@ class TestConfig(object):
             }
         )
         assert type(cosmo).__name__ == "w0waCDM"
+        
+        cosmo = _build_cosmology(
+            {"cosmology": "Flatw0wzCDM", "H0": 70, "Om0": 0.3, "w0": -0.9, "wz": 0.1}
+        )
+        assert type(cosmo).__name__ == "Flatw0wzCDM"
+
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "w0wzCDM",
+                "H0": 70,
+                "Om0": 0.3,
+                "Ode0": 0.7,
+                "w0": -0.9,
+                "wz": 0.1,
+            }
+        )
+        assert type(cosmo).__name__ == "w0wzCDM"
+
+        cosmo = _build_cosmology(
+            {"cosmology": "FlatwpwaCDM", "H0": 70, "Om0": 0.3, "wp": -0.9, "wa": 0.1, "zp": 0.5}
+        )
+        assert type(cosmo).__name__ == "FlatwpwaCDM"
+
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "wpwaCDM",
+                "H0": 70,
+                "Om0": 0.3,
+                "Ode0": 0.7,
+                "wp": -0.9,
+                "wa": 0.1,
+                "zp": 0.5,
+            }
+        )
+        assert type(cosmo).__name__ == "wpwaCDM"
 
 
 class TestModelConfig(object):

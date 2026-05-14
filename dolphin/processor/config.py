@@ -20,6 +20,10 @@ from astropy.cosmology import (
     wCDM,
     Flatw0waCDM,
     w0waCDM,
+    w0wzCDM,
+    Flatw0wzCDM,
+    wpwaCDM,
+    FlatwpwaCDM,
 )
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 
@@ -276,7 +280,7 @@ class ModelConfig(Config):
         :return: a cosmology instance
         :rtype: `astropy.cosmology.Cosmology` or `None`
         """
-        cosmo_keys = set(special) - _LOADER_KEYS
+        cosmo_keys = set(special) & _COSMOLOGY_KEYS
         cosmo = None
         if cosmo_keys:
             cosmo = _build_cosmology(special)
@@ -1775,16 +1779,54 @@ COSMOLOGY_REGISTRY = {
         },
         "required": {"H0", "Om0", "Ode0"},
     },
+    "w0wzCDM": {
+        "class": w0wzCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0", "w0", "wz"},
+    },
+    "Flatw0wzCDM": {
+        "class": Flatw0wzCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "w0", "wz"},
+    },
+    "wpwaCDM": {
+        "class": wpwaCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0", "wp", "wa", "zp"},
+    },
+    "FlatwpwaCDM": {
+        "class": FlatwpwaCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "wp", "wa", "zp"},
+    },
 }
 
-# Parameters that are intentionally NOT forwarded to the cosmology constructor
-# (they are meta-keys used only by this loader).
-_LOADER_KEYS = {
-    "cosmology",
-    "delta_x_image",
-    "delta_y_image",
-    "delta_image_lower",
-    "delta_image_upper",
+# Parameters that are forwarded to the cosmology constructor
+_COSMOLOGY_KEYS = {
+    "H0",
+    "Om0",
+    "Ode0",
+    "Tcmb0",
+    "Neff",
+    "m_nu",
+    "Ob0",
+    "w0",
+    "wa",
+    "wz",
+    "wp",
+    "zp",
 }
 
 
@@ -1816,7 +1858,7 @@ def _build_cosmology(special_option):
     required = entry["required"]
 
     # Collect all keys that are cosmology constructor arguments.
-    cosmo_kwargs = {k: v for k, v in special_option.items() if k not in _LOADER_KEYS}
+    cosmo_kwargs = {k: v for k, v in special_option.items() if k in _COSMOLOGY_KEYS}
 
     # Validate required parameters.
     missing = required - cosmo_kwargs.keys()

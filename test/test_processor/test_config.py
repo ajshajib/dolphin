@@ -10,6 +10,7 @@ from pathlib import Path
 
 from dolphin.processor.config import Config
 from dolphin.processor.config import ModelConfig
+from dolphin.processor.config import _build_cosmology
 from dolphin.processor.files import FileSystem
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -31,6 +32,108 @@ class TestConfig(object):
         )
         config = Config()
         config.load_config_from_yaml(str(test_setting_file.resolve()))
+
+    def test_build_cosmology(self):
+        """Test the `_build_cosmology` function."""
+        # Test default FlatLambdaCDM with loader keys filtered out
+        cosmo = _build_cosmology({"H0": 70, "Om0": 0.3, "delta_x_image": [0.01]})
+        assert type(cosmo).__name__ == "FlatLambdaCDM"
+        assert cosmo.H0.value == 70
+        assert cosmo.Om0 == 0.3
+
+        # Test LambdaCDM with Tcmb0
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "LambdaCDM",
+                "H0": 72,
+                "Om0": 0.28,
+                "Ode0": 0.72,
+                "Tcmb0": 2.725,
+            }
+        )
+        assert type(cosmo).__name__ == "LambdaCDM"
+        assert cosmo.H0.value == 72
+        assert cosmo.Tcmb0.value == 2.725
+
+        # Test unsupported cosmology
+        with pytest.raises(ValueError, match="Unsupported cosmology 'InvalidCosmo'"):
+            _build_cosmology({"cosmology": "InvalidCosmo", "H0": 70, "Om0": 0.3})
+
+        # Test missing required parameters
+        with pytest.raises(
+            ValueError, match="requires the following missing parameter"
+        ):
+            _build_cosmology({"cosmology": "LambdaCDM", "H0": 70, "Om0": 0.3})
+
+        # Test other models to ensure full registry functions
+        cosmo = _build_cosmology(
+            {"cosmology": "FlatwCDM", "H0": 70, "Om0": 0.3, "w0": -0.9}
+        )
+        assert type(cosmo).__name__ == "FlatwCDM"
+
+        cosmo = _build_cosmology(
+            {"cosmology": "wCDM", "H0": 70, "Om0": 0.3, "Ode0": 0.7, "w0": -0.9}
+        )
+        assert type(cosmo).__name__ == "wCDM"
+
+        cosmo = _build_cosmology(
+            {"cosmology": "Flatw0waCDM", "H0": 70, "Om0": 0.3, "w0": -0.9, "wa": 0.1}
+        )
+        assert type(cosmo).__name__ == "Flatw0waCDM"
+
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "w0waCDM",
+                "H0": 70,
+                "Om0": 0.3,
+                "Ode0": 0.7,
+                "w0": -0.9,
+                "wa": 0.1,
+            }
+        )
+        assert type(cosmo).__name__ == "w0waCDM"
+
+        cosmo = _build_cosmology(
+            {"cosmology": "Flatw0wzCDM", "H0": 70, "Om0": 0.3, "w0": -0.9, "wz": 0.1}
+        )
+        assert type(cosmo).__name__ == "Flatw0wzCDM"
+
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "w0wzCDM",
+                "H0": 70,
+                "Om0": 0.3,
+                "Ode0": 0.7,
+                "w0": -0.9,
+                "wz": 0.1,
+            }
+        )
+        assert type(cosmo).__name__ == "w0wzCDM"
+
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "FlatwpwaCDM",
+                "H0": 70,
+                "Om0": 0.3,
+                "wp": -0.9,
+                "wa": 0.1,
+                "zp": 0.5,
+            }
+        )
+        assert type(cosmo).__name__ == "FlatwpwaCDM"
+
+        cosmo = _build_cosmology(
+            {
+                "cosmology": "wpwaCDM",
+                "H0": 70,
+                "Om0": 0.3,
+                "Ode0": 0.7,
+                "wp": -0.9,
+                "wa": 0.1,
+                "zp": 0.5,
+            }
+        )
+        assert type(cosmo).__name__ == "wpwaCDM"
 
 
 class TestModelConfig(object):
@@ -120,6 +223,11 @@ class TestModelConfig(object):
 
         kwargs_model_4 = self.config_4.get_kwargs_model()
         assert kwargs_model_4["lens_model_list"] == ["EPL", "SHEAR_GAMMA_PSI"]
+
+        config1 = deepcopy(self.config_1)
+        config1.settings["special_option"] = {"H0": 70, "Om0": 0.3}
+        kwargs_model_1 = config1.get_kwargs_model()
+        assert "cosmo" in kwargs_model_1
 
     def test_get_kwargs_model_mge(self):
         """Test `get_kwargs_model` MGE_SET / MGE_SET_ELLIPSE handling."""

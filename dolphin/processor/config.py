@@ -13,7 +13,18 @@ import lenstronomy.Util.mask_util as mask_util
 import os
 
 from astropy import units as u
-from astropy.cosmology import FlatLambdaCDM
+from astropy.cosmology import (
+    FlatLambdaCDM,
+    LambdaCDM,
+    FlatwCDM,
+    wCDM,
+    Flatw0waCDM,
+    w0waCDM,
+    w0wzCDM,
+    Flatw0wzCDM,
+    wpwaCDM,
+    FlatwpwaCDM,
+)
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 
 from .data import ImageData
@@ -247,7 +258,34 @@ class ModelConfig(Config):
             for key, value in self.settings["kwargs_model"].items():
                 kwargs_model[key] = value
 
+        if "special_option" in self.settings:
+            special = self.settings["special_option"]
+            cosmo = self._get_cosmology_instance(special)
+            kwargs_model.update({"cosmo": cosmo})
+
         return kwargs_model
+
+    @staticmethod
+    def _get_cosmology_instance(special):
+        """Build and return a cosmology instance from the "special_option" settings.
+
+        This is a helper method for backward compatibility with older config files that
+        specified cosmology settings in "special_option" without the "cosmology" key. It
+        checks for the presence of cosmology-related keys and attempts to build a cosmology
+        instance if they are found. If the "cosmology" key is present, it uses the new
+        registry-based approach. If not, it falls back to the old method of checking for
+        specific cosmology parameters.
+        :param special: the "special_option" dictionary from settings
+        :type special: `dict`
+        :return: a cosmology instance
+        :rtype: `astropy.cosmology.Cosmology` or `None`
+        """
+        cosmo_keys = set(special) & _COSMOLOGY_KEYS
+        cosmo = None
+        if cosmo_keys:
+            cosmo = _build_cosmology(special)
+
+        return cosmo
 
     def get_kwargs_constraints(self, use_jax=False):
         """Create `kwargs_constraints` dictionary for lenstronomy.
@@ -1601,9 +1639,8 @@ class ModelConfig(Config):
 
                 fixed.update({})
             elif model == "time_delay_likelihood":
-                H0 = self.settings["special_option"]["H0"] * u.km / u.s / u.Mpc
-                Om0 = self.settings["special_option"]["Om0"]
-                cosmo = FlatLambdaCDM(H0=H0, Om0=Om0, Ob0=None)
+                special = self.settings["special_option"]
+                cosmo = self._get_cosmology_instance(special)
                 lens_cosmo_for_Ddt = LensCosmo(
                     z_lens=self.settings["kwargs_model"]["z_lens"],
                     z_source=self.settings["kwargs_model"]["z_source"],
@@ -1687,3 +1724,153 @@ class ModelConfig(Config):
             return 1
         else:
             return self.settings["psf_supersampled_factor"]
+
+
+# Registry of supported cosmology classes and their unitful parameters.
+# Keys are the string names a user puts in settings["special_option"]["cosmology"].
+COSMOLOGY_REGISTRY = {
+    "FlatLambdaCDM": {
+        "class": FlatLambdaCDM,
+        # Parameters that require units before being passed to the constructor.
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        # Required parameters (must be present in settings).
+        "required": {"H0", "Om0"},
+    },
+    "LambdaCDM": {
+        "class": LambdaCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0"},
+    },
+    "FlatwCDM": {
+        "class": FlatwCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0"},
+    },
+    "wCDM": {
+        "class": wCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0"},
+    },
+    "Flatw0waCDM": {
+        "class": Flatw0waCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0"},
+    },
+    "w0waCDM": {
+        "class": w0waCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0"},
+    },
+    "w0wzCDM": {
+        "class": w0wzCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0", "w0", "wz"},
+    },
+    "Flatw0wzCDM": {
+        "class": Flatw0wzCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "w0", "wz"},
+    },
+    "wpwaCDM": {
+        "class": wpwaCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "Ode0", "wp", "wa", "zp"},
+    },
+    "FlatwpwaCDM": {
+        "class": FlatwpwaCDM,
+        "unit_params": {
+            "H0": u.km / u.s / u.Mpc,
+            "Tcmb0": u.K,
+        },
+        "required": {"H0", "Om0", "wp", "wa", "zp"},
+    },
+}
+
+# Parameters that are forwarded to the cosmology constructor
+_COSMOLOGY_KEYS = {
+    "H0",
+    "Om0",
+    "Ode0",
+    "Tcmb0",
+    "Neff",
+    "m_nu",
+    "Ob0",
+    "w0",
+    "wa",
+    "wz",
+    "wp",
+    "zp",
+}
+
+
+def _build_cosmology(special_option):
+    """Build and return an astropy cosmology object from *special_option*.
+
+    The ``cosmology`` key selects the model (default: ``"FlatLambdaCDM"``).
+    All other keys are forwarded as constructor arguments, with unit
+    conversions applied where required.
+
+    :param special_option: dictionary of options for special likelihoods, including cosmology parameters
+    :type special_option: `dict`
+    :return: an instance of the selected astropy cosmology class
+    :rtype: `astropy.cosmology.Cosmology`
+    :raises ValueError: if the specified cosmology is not supported or if required parameters are missing
+    """
+    cosmo_name = special_option.get("cosmology", "FlatLambdaCDM")
+
+    if cosmo_name not in COSMOLOGY_REGISTRY:
+        supported = ", ".join(COSMOLOGY_REGISTRY)
+        raise ValueError(
+            f"Unsupported cosmology '{cosmo_name}'. "
+            f"Supported options are: {supported}"
+        )
+
+    entry = COSMOLOGY_REGISTRY[cosmo_name]
+    cosmo_cls = entry["class"]
+    unit_params = entry["unit_params"]
+    required = entry["required"]
+
+    # Collect all keys that are cosmology constructor arguments.
+    cosmo_kwargs = {k: v for k, v in special_option.items() if k in _COSMOLOGY_KEYS}
+
+    # Validate required parameters.
+    missing = required - cosmo_kwargs.keys()
+    if missing:
+        raise ValueError(
+            f"Cosmology '{cosmo_name}' requires the following missing "
+            f"parameter(s): {', '.join(sorted(missing))}"
+        )
+
+    # Apply units to parameters that need them.
+    for param, unit in unit_params.items():
+        if param in cosmo_kwargs:
+            cosmo_kwargs[param] = cosmo_kwargs[param] * unit
+
+    return cosmo_cls(**cosmo_kwargs)

@@ -276,8 +276,8 @@ class ModelConfig(Config):
                 for key, value in self.settings[option_name].items():
                     kwargs_model[key] = value
 
-        if "special_option" in self.settings:
-            special = self.settings["special_option"]
+        if "special_options" in self.settings:
+            special = self.settings["special_options"]
             cosmo = self._get_cosmology_instance(special)
             kwargs_model.update({"cosmo": cosmo})
 
@@ -285,15 +285,15 @@ class ModelConfig(Config):
 
     @staticmethod
     def _get_cosmology_instance(special):
-        """Build and return a cosmology instance from the "special_option" settings.
+        """Build and return a cosmology instance from the "special_options" settings.
 
         This is a helper method for backward compatibility with older config files that
-        specified cosmology settings in "special_option" without the "cosmology" key. It
+        specified cosmology settings in "special_options" without the "cosmology" key. It
         checks for the presence of cosmology-related keys and attempts to build a cosmology
         instance if they are found. If the "cosmology" key is present, it uses the new
         registry-based approach. If not, it falls back to the old method of checking for
         specific cosmology parameters.
-        :param special: the "special_option" dictionary from settings
+        :param special: the "special_options" dictionary from settings
         :type special: `dict`
         :return: a cosmology instance
         :rtype: `astropy.cosmology.Cosmology` or `None`
@@ -1679,7 +1679,7 @@ class ModelConfig(Config):
 
                 fixed.update({})
             elif model == "time_delay_likelihood":
-                special = self.settings["special_option"]
+                special = self.settings["special_options"]
                 cosmo = self._get_cosmology_instance(special)
                 lens_cosmo_for_Ddt = LensCosmo(
                     z_lens=self.settings["kwargs_model"]["z_lens"],
@@ -1797,7 +1797,7 @@ class ModelConfig(Config):
 
 
 # Registry of supported cosmology classes and their unitful parameters.
-# Keys are the string names a user puts in settings["special_option"]["cosmology"].
+# Keys are the string names a user puts in settings["special_options"]["cosmology"].
 COSMOLOGY_REGISTRY = {
     "FlatLambdaCDM": {
         "class": FlatLambdaCDM,
@@ -1900,20 +1900,20 @@ _COSMOLOGY_KEYS = {
 }
 
 
-def _build_cosmology(special_option):
+def _build_cosmology(special_options):
     """Build and return an astropy cosmology object from *special_option*.
 
     The ``cosmology`` key selects the model (default: ``"FlatLambdaCDM"``).
     All other keys are forwarded as constructor arguments, with unit
     conversions applied where required.
 
-    :param special_option: dictionary of options for special likelihoods, including cosmology parameters
-    :type special_option: `dict`
+    :param special_options: dictionary of options for special likelihoods, including cosmology parameters
+    :type special_options: `dict`
     :return: an instance of the selected astropy cosmology class
     :rtype: `astropy.cosmology.Cosmology`
     :raises ValueError: if the specified cosmology is not supported or if required parameters are missing
     """
-    cosmo_name = special_option.get("cosmology", "FlatLambdaCDM")
+    cosmo_name = special_options.get("cosmology", "FlatLambdaCDM")
 
     if cosmo_name not in COSMOLOGY_REGISTRY:
         supported = ", ".join(COSMOLOGY_REGISTRY)

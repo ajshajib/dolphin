@@ -1255,6 +1255,40 @@ class ModelConfig(Config):
                         "center_y": center_y + bound,
                     }
                 )
+            elif model == "FLEXION":
+                fixed.append({"ra_0": 0, "dec_0": 0})
+                init.append(
+                    {
+                        "g1": 0,
+                        "g2": 0,
+                        "g3": 0,
+                        "g4": 0,
+                    }
+                )
+                sigma.append(
+                    {
+                        "g1": 0.01,
+                        "g2": 0.01,
+                        "g3": 0.01,
+                        "g4": 0.01,
+                    }
+                )
+                lower.append(
+                    {
+                        "g1": -0.1,
+                        "g2": -0.1,
+                        "g3": -0.1,
+                        "g4": -0.1,
+                    }
+                )
+                upper.append(
+                    {
+                        "g1": 0.1,
+                        "g2": 0.1,
+                        "g3": 0.1,
+                        "g4": 0.1,
+                    }
+                )
             else:
                 raise ValueError("{} not implemented as a lens " "model!".format(model))
 

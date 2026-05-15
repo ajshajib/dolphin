@@ -53,7 +53,7 @@ Model Section
 
   - Suboptions:
 
-    - ``lens``: List of lens mass profiles. Supported models include: ``EPL``, ``SIE``, ``SIS``, ``SPEP``, ``PEMD``, ``SHEAR_GAMMA_PSI``.
+    - ``lens``: List of lens mass profiles. Supported models include: ``EPL``, ``SIE``, ``SIS``, ``SPEP``, ``PEMD``, ``SHEAR_GAMMA_PSI``, ``FLEXION``.
 
       - Type: ``list of strings``
       - Example:

@@ -1901,7 +1901,7 @@ _COSMOLOGY_KEYS = {
 
 
 def _build_cosmology(special_options):
-    """Build and return an astropy cosmology object from *special_option*.
+    """Build and return an astropy cosmology object from *special_options*.
 
     The ``cosmology`` key selects the model (default: ``"FlatLambdaCDM"``).
     All other keys are forwarded as constructor arguments, with unit
@@ -1928,7 +1928,7 @@ def _build_cosmology(special_options):
     required = entry["required"]
 
     # Collect all keys that are cosmology constructor arguments.
-    cosmo_kwargs = {k: v for k, v in special_option.items() if k in _COSMOLOGY_KEYS}
+    cosmo_kwargs = {k: v for k, v in special_options.items() if k in _COSMOLOGY_KEYS}
 
     # Validate required parameters.
     missing = required - cosmo_kwargs.keys()

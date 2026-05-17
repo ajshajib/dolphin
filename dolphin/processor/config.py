@@ -647,8 +647,6 @@ class ModelConfig(Config):
             kwargs_likelihood["custom_logL_addition"] = custom_logL_addition
 
         for option_name in [
-            "likelihood_option",
-            "likelihood_options",
             "likelihood_options",
             "kwargs_likelihood",
         ]:

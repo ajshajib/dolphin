@@ -468,6 +468,44 @@ Special Options
 
           Tcmb0: 2.725
 
+    - ``general_scaling``: Scale specific model parameters together across multiple profiles.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+          general_scaling:
+            theta_E:
+              [False, 1, 1]
+
+    - ``{param_name}_scale_factor``: Defines the scaling relation factor for the specified `param_name` across multiple profiles.
+
+      - Type: ``list``
+      - Example
+
+        .. code-block:: yaml
+
+          theta_E_scale_factor: [1]
+
+    - ``{param_name}_scale_factor_sigma``: Initial paramater spread relative to ``{param_name}_scale_factor``.
+
+      - Type: ``list``
+      - Example
+
+        .. code-block:: yaml
+
+          theta_E_scale_factor_sigma: [0.05]
+
+    - ``{param_name}_scale_pow``: Power-law scaling factor for the specified `param_name` scaling.
+
+      - Type: ``list``
+      - Example
+
+        .. code-block:: yaml
+
+          theta_E_scale_pow: [1]
+
 Guess Parameters
 ----------------
 

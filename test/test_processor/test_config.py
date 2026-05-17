@@ -766,8 +766,14 @@ class TestModelConfig(object):
         # if specified in config file
         config = deepcopy(self.config_5)
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
+        config.settings["special_options"] = {
+            "general_scaling": {
+                "theta_E": [False, 1, 1]
+            }
+        }
         assert config.get_special_list() == [
             "astrometric_uncertainty",
+            "general_scaling",
             "time_delay_likelihood",
         ]
 
@@ -905,7 +911,7 @@ class TestModelConfig(object):
     def test_get_special_params(self):
         """Test `get_special_params` method."""
 
-        # Test 1: ensure consistency of astrometric uncertainty params
+        # Test 1: ensure consistency of special params
         # if specified in config file
         config = deepcopy(self.config_5)
 
@@ -917,6 +923,12 @@ class TestModelConfig(object):
             "delta_image_upper": 0.004,
             "H0": 70,
             "Om0": 0.3,
+            "general_scaling": {
+                "theta_E": [False, 1, 1]
+            },
+            "theta_E_scale_factor": [1],
+            "theta_E_scale_factor_sigma": [0.05],
+            "theta_E_scale_pow": [1]
         }
 
         params = config.get_special_params()
@@ -941,12 +953,17 @@ class TestModelConfig(object):
         assert np.all(lower["delta_y_image"] == -0.004)
         assert np.all(upper["delta_y_image"] == 0.004)
 
+        assert init["theta_E_scale_factor"] == [1]
+        assert sigma["theta_E_scale_factor"] == [0.05]
+        assert lower["theta_E_scale_factor"] == [0.5]
+        assert upper["theta_E_scale_factor"] == [2]
+
         assert "D_dt" in init
         assert "D_dt" in sigma
         assert "D_dt" in lower
         assert "D_dt" in upper
 
-        assert fixed == {}
+        assert fixed == {"theta_E_scale_pow": [1]}
 
         # Test 2: ensure special params is empty list of dictionaries
         # if not specified in the config file
@@ -955,6 +972,19 @@ class TestModelConfig(object):
         params = config.get_special_params()
 
         assert params == [{}, {}, {}, {}, {}]
+
+        # Test 3: ensure proper error codes
+
+        config5 = deepcopy(self.config_5)
+
+        config5.settings["special_options"] = {
+            "general_scaling": {
+                "theta_E": [False, 1, 1]
+            }
+        }
+
+        with pytest.raises(ValueError):
+            config5.get_special_params()
 
     def test_fill_in_fixed_from_settings(self):
         """Test `fill_in_fixed_from_settings` method."""

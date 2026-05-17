@@ -351,6 +351,8 @@ class ModelConfig(Config):
             for i, model in enumerate(special_list):
                 if model == "astrometric_uncertainty":
                     kwargs_constraints.update({"point_source_offset": True})
+                if model == "general_scaling":
+                    kwargs_constraints.update({"general_scaling": self.settings["special_options"]["general_scaling"]})
                 if model == "time_delay_likelihood":
                     kwargs_constraints.update({"Ddt_sampling": True})
 
@@ -1102,6 +1104,10 @@ class ModelConfig(Config):
                     special_list.append("astrometric_uncertainty")
                 else:
                     raise ValueError(f"{model} not supported")
+            
+        if "special_options" in self.settings:
+                if "general_scaling" in self.settings["special_options"]:
+                    special_list.append("general_scaling")
 
         if "point_source_options" in self.settings:
             if (
@@ -1710,6 +1716,24 @@ class ModelConfig(Config):
                 )
 
                 fixed.update({})
+            elif model == "general_scaling":
+                general_scaling = self.settings["special_options"]["general_scaling"]
+
+                for param_name, values in general_scaling.items():
+                    if f"{param_name}_scale_factor" in self.settings["special_options"]:
+                        init.update({f"{param_name}_scale_factor": self.settings["special_options"][f"{param_name}_scale_factor"]})
+                    else:
+                        raise ValueError(f"{param_name}_scale_factor not found in special_options!")
+                    if f"{param_name}_scale_factor_sigma" in self.settings["special_options"]:
+                        sigma.update({f"{param_name}_scale_factor": self.settings["special_options"][f"{param_name}_scale_factor_sigma"]})
+                    else:
+                        raise ValueError(f"{param_name}_scale_factor_sigma not in special_options!")
+                    lower.update({f"{param_name}_scale_factor": [0.5 * self.settings["special_options"][f"{param_name}_scale_factor"][0]]})
+                    upper.update({f"{param_name}_scale_factor": [2.0 * self.settings["special_options"][f"{param_name}_scale_factor"][0]]})
+                    if f"{param_name}_scale_pow" in self.settings["special_options"]:
+                        fixed.update({f"{param_name}_scale_pow": self.settings["special_options"][f"{param_name}_scale_pow"]})
+                    else:
+                        raise ValueError(f"{param_name}_scale_pow not found in special_options!")
             elif model == "time_delay_likelihood":
                 special = self.settings["special_options"]
                 cosmo = self._get_cosmology_instance(special)

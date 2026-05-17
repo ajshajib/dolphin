@@ -335,9 +335,7 @@ class TestModelConfig(object):
         config_5 = deepcopy(self.config_5)
         config_5.settings["model"]["special"] = ["astrometric_uncertainty"]
         config_5.settings["special_options"] = {
-            "general_scaling": {
-                "theta_E": [False, 1, 1]
-            }
+            "general_scaling": {"theta_E": [False, 1, 1]}
         }
 
         kwargs_constraints5 = config_5.get_kwargs_constraints()
@@ -986,20 +984,18 @@ class TestModelConfig(object):
         with pytest.raises(ValueError):
             config5.get_special_params()
 
-        config5.settings["special_options"].update({
-            "theta_E_scale_factor": [1]
-        })
+        config5.settings["special_options"].update({"theta_E_scale_factor": [1]})
 
         with pytest.raises(ValueError):
             config5.get_special_params()
 
-        config5.settings["special_options"].update({
-            "theta_E_scale_factor_sigma": [0.05]
-        })
+        config5.settings["special_options"].update(
+            {"theta_E_scale_factor_sigma": [0.05]}
+        )
 
         with pytest.raises(ValueError):
             config5.get_special_params()
-    
+
     def test_fill_in_fixed_from_settings(self):
         """Test `fill_in_fixed_from_settings` method."""
         fixed = [{}]

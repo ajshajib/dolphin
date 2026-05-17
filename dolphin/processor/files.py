@@ -601,8 +601,8 @@ class FileSystem(object):
             # Download the model using gdown
             index = ["galaxy", "quasar"].index(source_type)
             file_id = [
-                "1MAR2i5WlLlW_mAub3lbLLIlL6MPGXG8s",
-                "1xO6Mniir3169H-7K5nThXR4lLvOUp6OQ",
+                "1iM4ayxdmAz_Qc-Z8-nT-uXlBmA1X3tYU",
+                "1SVANCzCGCXLgKskd_6F7AZAM-UY7nowU",
             ][index]
 
             print("AI model not found in local storage. Downloading from the web...")

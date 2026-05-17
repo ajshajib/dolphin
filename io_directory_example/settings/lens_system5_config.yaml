@@ -8,23 +8,23 @@ model:
   source_light: [SHAPELETS]
   point_source: [LENSED_POSITION]   # 'LENSED_POSITION', 'SOURCE_POSITION'
 
-# lens_option:
+# lens_options:
 #   centroid_init: [0.0, 0.0]
 
-lens_light_option:
+lens_light_options:
   fix: {0: {n_sersic: 4.}}   # fix n_sersic to 4. for 0-th light profile
 
-source_light_option:
+source_light_options:
   n_max: [4] # array with n_max for each band
 
-point_source_option:
+point_source_options:
   ra_init: [1., 0., 1., 0.]
   dec_init: [0., 1., 0., -1.]
   bound: 0.1
   time_delays_measured: [1., 1., 1.]
   time_delays_covariance: [[0.5, 0., 0.], [0., 0.5, 0.], [0., 0., 0.5]]
 
-special_option:
+special_options:
   H0: 70.0
   Om0: 0.3
 
@@ -50,7 +50,7 @@ fitting:
     n_run: 100
     walkerRatio: 2
 
-numeric_option:
+numeric_options:
   supersampling_factor: [2]
 
 kwargs_model:

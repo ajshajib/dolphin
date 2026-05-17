@@ -110,11 +110,11 @@ class TestModeler:
             "lens_name",
             "band",
             "model",
-            "lens_option",
-            "lens_light_option",
-            "source_light_option",
-            "point_source_option",
-            "numeric_option",
+            "lens_options",
+            "lens_light_options",
+            "source_light_options",
+            "point_source_options",
+            "numeric_options",
             "fitting",
             "mask",
         ]
@@ -130,10 +130,10 @@ class TestModeler:
         config = self.qso_modeler.get_configuration(
             lens_system,
             "F814W",
-            additional_settings={"lens_option": {"new_option": "new_value"}},
+            additional_settings={"lens_options": {"new_options": "new_value"}},
         )
-        assert "lens_option" in config
-        assert config["lens_option"]["new_option"] == "new_value"
+        assert "lens_options" in config
+        assert config["lens_options"]["new_options"] == "new_value"
 
     def test_get_half_second_neighbor_distance(self):
         """Test `_get_half_second_neighbor_distance` method."""

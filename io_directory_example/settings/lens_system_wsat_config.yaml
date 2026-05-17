@@ -14,10 +14,10 @@ satellites:
   centroid_bound: 0.5
   is_elliptical: [true, false]
 
-numeric_option:
+numeric_options:
   supersampling_factor: [2]
 
-lens_option:
+lens_options:
   centroid_init: [0.04, -0.04]
   gaussian_prior:
     0: [[gamma, 2.11, 0.03], [theta_E, 1.11, 0.13]]
@@ -27,14 +27,14 @@ lens_option:
     0:
       gamma: 2.0
 
-lens_light_option:
+lens_light_options:
   fix:
     0:
       n_sersic: 4.0
   gaussian_prior:
     0: [[R_sersic, 0.21, 0.15]]
 
-source_light_option:
+source_light_options:
   gaussian_prior:
     0: [[beta, 0.15, 0.05]]
   shapelet_scale_logarithmic_prior: true

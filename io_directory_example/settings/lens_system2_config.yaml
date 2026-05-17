@@ -7,13 +7,13 @@ model:
   lens_light: [SERSIC_ELLIPSE]
   source_light: [SHAPELETS]
 
-lens_option:
+lens_options:
   centroid_init: [0.04, -0.04]
 
-lens_light_option:
+lens_light_options:
   fix: {0: {n_sersic: 4.}}   # fix n_sersic to 4. for 0-th light profile
 
-source_light_option:
+source_light_options:
   n_max: [4] # array with n_max for each band
 
 fitting:
@@ -29,5 +29,5 @@ fitting:
     n_run: 100
     walkerRatio: 2
 
-numeric_option:
+numeric_options:
   supersampling_factor: [2]

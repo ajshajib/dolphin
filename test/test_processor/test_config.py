@@ -334,10 +334,16 @@ class TestModelConfig(object):
 
         config_5 = deepcopy(self.config_5)
         config_5.settings["model"]["special"] = ["astrometric_uncertainty"]
+        config_5.settings["special_options"] = {
+            "general_scaling": {
+                "theta_E": [False, 1, 1]
+            }
+        }
 
         kwargs_constraints5 = config_5.get_kwargs_constraints()
         assert kwargs_constraints5["point_source_offset"]
         assert kwargs_constraints5["Ddt_sampling"]
+        assert kwargs_constraints5["general_scaling"]
 
     def test_get_kwargs_likelihood(self):
         """Test `get_kwargs_likelihood` method."""
@@ -980,6 +986,20 @@ class TestModelConfig(object):
         with pytest.raises(ValueError):
             config5.get_special_params()
 
+        config5.settings["special_options"].update({
+            "theta_E_scale_factor": [1]
+        })
+
+        with pytest.raises(ValueError):
+            config5.get_special_params()
+
+        config5.settings["special_options"].update({
+            "theta_E_scale_factor_sigma": [0.05]
+        })
+
+        with pytest.raises(ValueError):
+            config5.get_special_params()
+    
     def test_fill_in_fixed_from_settings(self):
         """Test `fill_in_fixed_from_settings` method."""
         fixed = [{}]

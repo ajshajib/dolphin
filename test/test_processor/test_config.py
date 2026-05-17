@@ -767,9 +767,7 @@ class TestModelConfig(object):
         config = deepcopy(self.config_5)
         config.settings["model"]["special"] = ["astrometric_uncertainty"]
         config.settings["special_options"] = {
-            "general_scaling": {
-                "theta_E": [False, 1, 1]
-            }
+            "general_scaling": {"theta_E": [False, 1, 1]}
         }
         assert config.get_special_list() == [
             "astrometric_uncertainty",
@@ -923,12 +921,10 @@ class TestModelConfig(object):
             "delta_image_upper": 0.004,
             "H0": 70,
             "Om0": 0.3,
-            "general_scaling": {
-                "theta_E": [False, 1, 1]
-            },
+            "general_scaling": {"theta_E": [False, 1, 1]},
             "theta_E_scale_factor": [1],
             "theta_E_scale_factor_sigma": [0.05],
-            "theta_E_scale_pow": [1]
+            "theta_E_scale_pow": [1],
         }
 
         params = config.get_special_params()
@@ -978,9 +974,7 @@ class TestModelConfig(object):
         config5 = deepcopy(self.config_5)
 
         config5.settings["special_options"] = {
-            "general_scaling": {
-                "theta_E": [False, 1, 1]
-            }
+            "general_scaling": {"theta_E": [False, 1, 1]}
         }
 
         with pytest.raises(ValueError):

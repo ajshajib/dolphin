@@ -435,7 +435,7 @@ class Output(Processor):
         else:
             kwargs_subtract_lens_light_plot.setdefault("kwargs_title", {})
             kwargs_subtract_lens_light_plot["kwargs_title"].setdefault(
-                {"title": "Data - Lens Light"}
+                "title", "Data - Lens Light"
             )
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],
@@ -448,7 +448,7 @@ class Output(Processor):
 
             kwargs_reconstructed_source_plot.setdefault("kwargs_title", {})
             kwargs_reconstructed_source_plot["kwargs_title"].setdefault(
-                {"title": "Reconstructed Source"}
+                "title", "Reconstructed Source"
             )
             model_plot.decomposition_plot(
                 ax=axes[1, 2],

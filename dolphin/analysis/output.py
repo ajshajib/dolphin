@@ -440,7 +440,7 @@ class Output(Processor):
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],
                 band_index=band_index,
-                lens_light_add=True,
+                subtract_lens_light=True,
                 vmax=vmax,
                 vmin=vmin,
                 **kwargs_subtract_lens_light_plot,

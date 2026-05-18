@@ -288,16 +288,18 @@ class Output(Processor):
         model_id=None,
         kwargs_result=None,
         band_index=0,
-        data_cmap="cubehelix",
-        residual_cmap="RdBu_r",
-        convergence_cmap="afmhot",
-        magnification_cmap="viridis",
         vmin=None,
         vmax=None,
         source_vmin=None,
         source_vmax=None,
         print_results=False,
         show_source_light=False,
+        kwargs_data_plot=None,
+        kwargs_model_plot=None,
+        kwargs_residual_plot=None,
+        kwargs_source_plot=None,
+        kwargs_convergence_plot=None,
+        kwargs_magnification_plot=None,
     ):
         """Plot the model, residual, reconstructed source, convergence, and
         magnification profiles. Either `model_id` or `kwargs_result` needs to be
@@ -334,6 +336,18 @@ class Output(Processor):
         :type print_results: `bool`
         :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
         :type show_source_light: `bool`
+        :param kwargs_data_plot: kwargs for the data plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.data_plot()` for available keywords.
+        :type kwargs_data_plot: `dict`
+        :param kwargs_model_plot: kwargs for the model plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.model_plot()` for available keywords.
+        :type kwargs_model_plot: `dict`
+        :param kwargs_residual_plot: kwargs for the residual plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.normalized_residual_plot()` for available keywords.
+        :type kwargs_residual_plot: `dict`
+        :param kwargs_source_plot: kwargs for the source plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.source_plot()` for available keywords.
+        :type kwargs_source_plot: `dict`
+        :param kwargs_convergence_plot: kwargs for the convergence plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.convergence_plot()` for available keywords.
+        :type kwargs_convergence_plot: `dict`
+        :param kwargs_magnification_plot: kwargs for the magnification plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.magnification_plot()` for available keywords.
+        :type kwargs_magnification_plot: `dict`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
@@ -360,19 +374,35 @@ class Output(Processor):
                 band_index=band_index,
             )[0]
 
+        for kwargs in [
+            kwargs_data_plot,
+            kwargs_model_plot,
+            kwargs_residual_plot,
+            kwargs_convergence_plot,
+            kwargs_magnification_plot,
+            kwargs_source_plot,
+        ]:
+            if kwargs is None:
+                kwargs = {}
+
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
         model_plot.data_plot(
             ax=axes[0, 0],
             band_index=band_index,
+            vmin=vmin,
+            vmax=vmax,
+            **kwargs_data_plot,
         )
         model_plot.model_plot(
             ax=axes[0, 1],
             band_index=band_index,
+            vmin=vmin,
+            vmax=vmax,
+            **kwargs_model_plot,
         )
         model_plot.normalized_residual_plot(
-            ax=axes[0, 2],
-            band_index=band_index,
+            ax=axes[0, 2], band_index=band_index, **kwargs_residual_plot
         )
         model_plot.source_plot(
             ax=axes[1, 0],
@@ -381,10 +411,15 @@ class Output(Processor):
             band_index=band_index,
             vmax=source_vmax,
             vmin=source_vmin,
+            **kwargs_source_plot,
         )
         if not show_source_light:
-            model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index)
-            model_plot.magnification_plot(ax=axes[1, 2], band_index=band_index)
+            model_plot.convergence_plot(
+                ax=axes[1, 1], band_index=band_index, **kwargs_convergence_plot
+            )
+            model_plot.magnification_plot(
+                ax=axes[1, 2], band_index=band_index, **kwargs_magnification_plot
+            )
         else:
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],

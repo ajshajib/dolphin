@@ -985,7 +985,7 @@ class Output(Processor):
         kwargs_model = config.get_kwargs_model()
 
         lens_model_class = LensModel(lens_model_list=kwargs_model["lens_model_list"])
-        lensEquationSolver = LensEquationSolver(lens_model_class)
+        lens_equation_solver = LensEquationSolver(lens_model_class)
         x_source = kwargs_result["kwargs_source"][0]["center_x"]
         y_source = kwargs_result["kwargs_source"][0]["center_y"]
 
@@ -997,7 +997,7 @@ class Output(Processor):
         image_data = multi_band_list_out[band_index][0]["image_data"]
         image_size = image_data.shape[0] * image_pixel_size
 
-        x_image, y_image = lensEquationSolver.findBrightImage(
+        x_image, y_image = lens_equation_solver.find_bright_image(
             x_source,
             y_source,
             kwargs_lens,

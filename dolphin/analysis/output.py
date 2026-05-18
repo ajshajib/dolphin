@@ -406,8 +406,8 @@ class Output(Processor):
         )
         model_plot.source_plot(
             ax=axes[1, 0],
-            deltaPix_source=0.02,
-            numPix=100,
+            delta_pix_source=0.02,
+            num_pix=100,
             band_index=band_index,
             vmax=source_vmax,
             vmin=source_vmin,
@@ -887,8 +887,8 @@ class Output(Processor):
         delta_pix = image_pixel_size / 2
         num_pix = source_lensed.shape[0]
         source_unlensed = model_plot.source(
-            deltaPix=delta_pix,
-            numPix=num_pix,
+            delta_pix=delta_pix,
+            num_pix=num_pix,
             band_index=band_index,
             center=[
                 kwargs_result["kwargs_source"][0]["center_x"],

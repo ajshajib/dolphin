@@ -468,10 +468,10 @@ Special Options
 
           Tcmb0: 2.725
 
-    - ``general_scaling``: Scale specific model parameters together across multiple profiles.
+    - ``general_scaling``: Scale specific model parameters together across multiple profiles. Input should be a dictionary mapping parameter names to the masks defining which lens models are scaled together.
 
       - Type: ``dictionary``
-      - Example:
+      - Example: Scaling ``theta_E`` for the second and third mass profiles together, but not the first.
 
         .. code-block:: yaml
 
@@ -479,10 +479,10 @@ Special Options
             theta_E:
               [False, 1, 1]
 
-    - ``{param_name}_scale_factor``: Defines the scaling relation factor for the specified `param_name` across multiple profiles.
-
+    - ``{param_name}_scale_factor``: The scaling relation factor for the specified `param_name` across multiple profiles. Instead of individually sampling the connected parameters, only this scale factor will be sampled, and all the connected parameters will be scaled based on the same factor.
+  
       - Type: ``list``
-      - Example
+      - Example:
 
         .. code-block:: yaml
 
@@ -491,7 +491,7 @@ Special Options
     - ``{param_name}_scale_factor_sigma``: Initial paramater spread relative to ``{param_name}_scale_factor``.
 
       - Type: ``list``
-      - Example
+      - Example:
 
         .. code-block:: yaml
 
@@ -500,11 +500,18 @@ Special Options
     - ``{param_name}_scale_pow``: Power-law scaling factor for the specified `param_name` scaling.
 
       - Type: ``list``
-      - Example
+      - Example:
 
         .. code-block:: yaml
 
           theta_E_scale_pow: [1]
+
+    - Combining all of the above, a specified parameter, :math:`p`, is scaled from the sampled scale factor, :math:`f_p`, and sampled power-law index, :math:`\alpha_p`, as:
+
+      .. math::
+
+        p \rightarrow p_{\mathrm{scaled}} =
+        f_p \, p^{\alpha_p}
 
 Guess Parameters
 ----------------

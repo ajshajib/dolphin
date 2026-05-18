@@ -300,6 +300,8 @@ class Output(Processor):
         kwargs_source_plot=None,
         kwargs_convergence_plot=None,
         kwargs_magnification_plot=None,
+        kwargs_subtract_lens_light_plot=None,
+        kwargs_reconstructed_source_plot=None,
     ):
         """Plot the model, residual, reconstructed source, convergence, and
         magnification profiles. Either `model_id` or `kwargs_result` needs to be
@@ -348,6 +350,10 @@ class Output(Processor):
         :type kwargs_convergence_plot: `dict`
         :param kwargs_magnification_plot: kwargs for the magnification plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.magnification_plot()` for available keywords.
         :type kwargs_magnification_plot: `dict`
+        :param kwargs_subtract_lens_light_plot: kwargs for the subtracted lens light plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.subtract_from_data_plot()` for available keywords.
+        :type kwargs_subtract_lens_light_plot: `dict`
+        :param kwargs_reconstructed_source_plot: kwargs for the reconstructed source plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.decomposition_plot()` for available keywords.
+        :type kwargs_reconstructed_source_plot: `dict`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
@@ -374,16 +380,22 @@ class Output(Processor):
                 band_index=band_index,
             )[0]
 
-        for kwargs in [
-            kwargs_data_plot,
-            kwargs_model_plot,
-            kwargs_residual_plot,
-            kwargs_convergence_plot,
-            kwargs_magnification_plot,
-            kwargs_source_plot,
-        ]:
-            if kwargs is None:
-                kwargs = {}
+        if kwargs_data_plot is None:
+            kwargs_data_plot = {}
+        if kwargs_model_plot is None:
+            kwargs_model_plot = {}
+        if kwargs_residual_plot is None:
+            kwargs_residual_plot = {}
+        if kwargs_convergence_plot is None:
+            kwargs_convergence_plot = {}
+        if kwargs_magnification_plot is None:
+            kwargs_magnification_plot = {}
+        if kwargs_source_plot is None:
+            kwargs_source_plot = {}
+        if kwargs_subtract_lens_light_plot is None:
+            kwargs_subtract_lens_light_plot = {}
+        if kwargs_reconstructed_source_plot is None:
+            kwargs_reconstructed_source_plot = {}
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
@@ -421,20 +433,30 @@ class Output(Processor):
                 ax=axes[1, 2], band_index=band_index, **kwargs_magnification_plot
             )
         else:
+            kwargs_subtract_lens_light_plot.setdefault("kwargs_title", {})
+            kwargs_subtract_lens_light_plot["kwargs_title"].setdefault(
+                {"title": "Data - Lens Light"}
+            )
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],
                 band_index=band_index,
                 lens_light_add=True,
                 vmax=vmax,
                 vmin=vmin,
+                **kwargs_subtract_lens_light_plot,
+            )
+
+            kwargs_reconstructed_source_plot.setdefault("kwargs_title", {})
+            kwargs_reconstructed_source_plot["kwargs_title"].setdefault(
+                {"title": "Reconstructed Source"}
             )
             model_plot.decomposition_plot(
                 ax=axes[1, 2],
-                text="Source light convolved",
                 source_add=True,
                 band_index=band_index,
-                vmax=vmax,
-                vmin=vmin,
+                vmax=source_vmax,
+                vmin=source_vmin,
+                **kwargs_reconstructed_source_plot,
             )
         fig.tight_layout()
         fig.subplots_adjust(
@@ -487,7 +509,6 @@ class Output(Processor):
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )
         else:
             model_plot = self.get_model_plot_instance(
@@ -495,7 +516,6 @@ class Output(Processor):
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )[0]
 
         if kwargs_decomposition_plot is None:
@@ -504,7 +524,6 @@ class Output(Processor):
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
         model_plot.decomposition_plot(
             ax=axes[0, 0],
-            text="Lens light",
             lens_light_add=True,
             unconvolved=True,
             band_index=band_index,
@@ -512,18 +531,18 @@ class Output(Processor):
             vmin=vmin,
             **kwargs_decomposition_plot,
         )
+        axes[0, 0].set_title("Lens light")
         model_plot.decomposition_plot(
             ax=axes[1, 0],
-            text="Lens light convolved",
             lens_light_add=True,
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
             **kwargs_decomposition_plot,
         )
+        axes[1, 0].set_title("Lens light convolved")
         model_plot.decomposition_plot(
             ax=axes[0, 1],
-            text="Source light",
             source_add=True,
             unconvolved=True,
             band_index=band_index,
@@ -531,18 +550,18 @@ class Output(Processor):
             vmin=vmin,
             **kwargs_decomposition_plot,
         )
+        axes[0, 1].set_title("Source light")
         model_plot.decomposition_plot(
             ax=axes[1, 1],
-            text="Source light convolved",
             source_add=True,
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
             **kwargs_decomposition_plot,
         )
+        axes[1, 1].set_title("Source light convolved")
         model_plot.decomposition_plot(
             ax=axes[0, 2],
-            text="All components",
             source_add=True,
             lens_light_add=True,
             unconvolved=True,
@@ -551,9 +570,9 @@ class Output(Processor):
             vmin=vmin,
             **kwargs_decomposition_plot,
         )
+        axes[0, 2].set_title("All components")
         model_plot.decomposition_plot(
             ax=axes[1, 2],
-            text="All components convolved",
             source_add=True,
             lens_light_add=True,
             point_source_add=True,
@@ -562,6 +581,7 @@ class Output(Processor):
             vmin=vmin,
             **kwargs_decomposition_plot,
         )
+        axes[1, 2].set_title("All components convolved")
         fig.tight_layout()
         fig.subplots_adjust(
             left=None, bottom=None, right=None, top=None, wspace=0.0, hspace=0.05

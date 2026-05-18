@@ -452,6 +452,7 @@ class Output(Processor):
         data_cmap="cubehelix",
         vmin=None,
         vmax=None,
+        kwargs_decomposition_plot=None,
     ):
         """Plot lens light and source light model decomposition, both with convolved and
         unconvolved light. Either `model_id` or `kwargs_result` needs to be provided.
@@ -474,6 +475,8 @@ class Output(Processor):
         :type vmin: `float` or `int` or `None`
         :param vmax: maximum plotting scale for the component plots
         :type vmax: `float` or `int` or `None`
+        :param kwargs_decomposition_plot: additional keyword arguments for the decomposition plots, see :func: `lenstronomy.Plots.model_plot.ModelPlot.decomposition_plot()` for available keywords.
+        :type kwargs_decomposition_plot: `dict`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
@@ -495,6 +498,9 @@ class Output(Processor):
                 data_cmap=data_cmap,
             )[0]
 
+        if kwargs_decomposition_plot is None:
+            kwargs_decomposition_plot = {}
+
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
         model_plot.decomposition_plot(
             ax=axes[0, 0],
@@ -504,6 +510,7 @@ class Output(Processor):
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
+            **kwargs_decomposition_plot,
         )
         model_plot.decomposition_plot(
             ax=axes[1, 0],
@@ -512,6 +519,7 @@ class Output(Processor):
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
+            **kwargs_decomposition_plot,
         )
         model_plot.decomposition_plot(
             ax=axes[0, 1],
@@ -521,6 +529,7 @@ class Output(Processor):
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
+            **kwargs_decomposition_plot,
         )
         model_plot.decomposition_plot(
             ax=axes[1, 1],
@@ -529,6 +538,7 @@ class Output(Processor):
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
+            **kwargs_decomposition_plot,
         )
         model_plot.decomposition_plot(
             ax=axes[0, 2],
@@ -539,6 +549,7 @@ class Output(Processor):
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
+            **kwargs_decomposition_plot,
         )
         model_plot.decomposition_plot(
             ax=axes[1, 2],
@@ -549,6 +560,7 @@ class Output(Processor):
             band_index=band_index,
             vmax=vmax,
             vmin=vmin,
+            **kwargs_decomposition_plot,
         )
         fig.tight_layout()
         fig.subplots_adjust(

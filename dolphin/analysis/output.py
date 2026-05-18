@@ -232,7 +232,6 @@ class Output(Processor):
         model_id=None,
         kwargs_result=None,
         band_index=0,
-        data_cmap="cubehelix",
     ):
         """Get the `ModelPlot` instance from lenstronomy for the lens.
 
@@ -278,8 +277,6 @@ class Output(Processor):
             multi_band_list_out,
             kwargs_model,
             kwargs_result,
-            arrow_size=0.02,
-            cmap_string=data_cmap,
             image_likelihood_mask_list=mask,
             multi_band_type="multi-linear",
         )
@@ -295,10 +292,10 @@ class Output(Processor):
         residual_cmap="RdBu_r",
         convergence_cmap="afmhot",
         magnification_cmap="viridis",
-        v_min=None,
-        v_max=None,
-        source_v_min=None,
-        source_v_max=None,
+        vmin=None,
+        vmax=None,
+        source_vmin=None,
+        source_vmax=None,
         print_results=False,
         show_source_light=False,
     ):
@@ -325,14 +322,14 @@ class Output(Processor):
         :type convergence_cmap: `str` or `matplotlib.colors.Colormap`
         :param magnification_cmap: colormap for magnification plot
         :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the model & data plots
-        :type v_min: `float` or `int` or `None`
-        :param v_max: maximum plotting scale for the model & data plots
-        :type v_max: `float` or `int` or `None`
-        :param source_v_min: minimum plotting scale for the source plot
-        :type source_v_min: `float` or `int` or `None`
-        :param source_v_max: maximum plotting scale for the source plot
-        :type source_v_max: `float` or `int` or `None`
+        :param vmin: minimum plotting scale for the model & data plots
+        :type vmin: `float` or `int` or `None`
+        :param vmax: maximum plotting scale for the model & data plots
+        :type vmax: `float` or `int` or `None`
+        :param source_vmin: minimum plotting scale for the source plot
+        :type source_vmin: `float` or `int` or `None`
+        :param source_vmax: maximum plotting scale for the source plot
+        :type source_vmax: `float` or `int` or `None`
         :param print_results: if `True`, prints the `kwargs_result` dictionary
         :type print_results: `bool`
         :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
@@ -348,13 +345,12 @@ class Output(Processor):
                 ]
             print(print_kwargs_result)
 
-        if v_max is None:
-            model_plot, v_max = self.get_model_plot_instance(
+        if vmax is None:
+            model_plot, vmax = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )
         else:
             model_plot = self.get_model_plot_instance(
@@ -362,51 +358,48 @@ class Output(Processor):
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )[0]
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
         model_plot.data_plot(
-            ax=axes[0, 0], band_index=band_index, v_max=v_max, v_min=v_min
+            ax=axes[0, 0],
+            band_index=band_index,
         )
         model_plot.model_plot(
-            ax=axes[0, 1], band_index=band_index, v_max=v_max, v_min=v_min
+            ax=axes[0, 1],
+            band_index=band_index,
         )
         model_plot.normalized_residual_plot(
-            ax=axes[0, 2], band_index=band_index, cmap=residual_cmap, v_max=3, v_min=-3
+            ax=axes[0, 2],
+            band_index=band_index,
         )
         model_plot.source_plot(
             ax=axes[1, 0],
             deltaPix_source=0.02,
             numPix=100,
             band_index=band_index,
-            v_max=source_v_max,
-            v_min=source_v_min,
-            scale_size=0.4,
+            vmax=source_vmax,
+            vmin=source_vmin,
         )
         if not show_source_light:
-            model_plot.convergence_plot(
-                ax=axes[1, 1], band_index=band_index, cmap=convergence_cmap
-            )
-            model_plot.magnification_plot(
-                ax=axes[1, 2], band_index=band_index, cmap=magnification_cmap
-            )
+            model_plot.convergence_plot(ax=axes[1, 1], band_index=band_index)
+            model_plot.magnification_plot(ax=axes[1, 2], band_index=band_index)
         else:
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],
                 band_index=band_index,
                 lens_light_add=True,
-                v_max=v_max,
-                v_min=v_min,
+                vmax=vmax,
+                vmin=vmin,
             )
             model_plot.decomposition_plot(
                 ax=axes[1, 2],
                 text="Source light convolved",
                 source_add=True,
                 band_index=band_index,
-                v_max=v_max,
-                v_min=v_min,
+                vmax=vmax,
+                vmin=vmin,
             )
         fig.tight_layout()
         fig.subplots_adjust(
@@ -422,8 +415,8 @@ class Output(Processor):
         kwargs_result=None,
         band_index=0,
         data_cmap="cubehelix",
-        v_min=None,
-        v_max=None,
+        vmin=None,
+        vmax=None,
     ):
         """Plot lens light and source light model decomposition, both with convolved and
         unconvolved light. Either `model_id` or `kwargs_result` needs to be provided.
@@ -442,16 +435,16 @@ class Output(Processor):
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the component plots
-        :type v_min: `float` or `int` or `None`
-        :param v_max: maximum plotting scale for the component plots
-        :type v_max: `float` or `int` or `None`
+        :param vmin: minimum plotting scale for the component plots
+        :type vmin: `float` or `int` or `None`
+        :param vmax: maximum plotting scale for the component plots
+        :type vmax: `float` or `int` or `None`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
 
-        if v_max is None:
-            model_plot, v_max = self.get_model_plot_instance(
+        if vmax is None:
+            model_plot, vmax = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
@@ -474,16 +467,16 @@ class Output(Processor):
             lens_light_add=True,
             unconvolved=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
         )
         model_plot.decomposition_plot(
             ax=axes[1, 0],
             text="Lens light convolved",
             lens_light_add=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
         )
         model_plot.decomposition_plot(
             ax=axes[0, 1],
@@ -491,16 +484,16 @@ class Output(Processor):
             source_add=True,
             unconvolved=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
         )
         model_plot.decomposition_plot(
             ax=axes[1, 1],
             text="Source light convolved",
             source_add=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
         )
         model_plot.decomposition_plot(
             ax=axes[0, 2],
@@ -509,8 +502,8 @@ class Output(Processor):
             lens_light_add=True,
             unconvolved=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
         )
         model_plot.decomposition_plot(
             ax=axes[1, 2],
@@ -519,8 +512,8 @@ class Output(Processor):
             lens_light_add=True,
             point_source_add=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
         )
         fig.tight_layout()
         fig.subplots_adjust(

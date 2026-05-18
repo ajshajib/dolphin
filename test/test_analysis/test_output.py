@@ -208,8 +208,8 @@ class TestOutput(object):
         fig2 = self.output.plot_model_overview(
             "lens_system2",
             "example",
-            v_min=-3.0,
-            v_max=1.0,
+            vmin=-3.0,
+            vmax=1.0,
             print_results=True,
             show_source_light=True,
         )
@@ -230,7 +230,7 @@ class TestOutput(object):
         plt.close(fig)
 
         fig2 = self.output.plot_model_decomposition(
-            "lens_system2", "example", v_min=-3.0, v_max=1.0
+            "lens_system2", "example", vmin=-3.0, vmax=1.0
         )
 
         plt.close(fig2)

@@ -1671,8 +1671,8 @@ class ModelConfig(Config):
         upper = {}
         fixed = {}
 
-        for i, model in enumerate(special_list):
-            if model == "astrometric_uncertainty":
+        for item in special_list:
+            if item == "astrometric_uncertainty":
                 num_point_sources = len(
                     np.array(self.settings["special_options"]["delta_x_image"])
                 )
@@ -1722,7 +1722,7 @@ class ModelConfig(Config):
                 )
 
                 fixed.update({})
-            elif model == "general_scaling":
+            elif item == "general_scaling":
                 general_scaling = self.settings["special_options"]["general_scaling"]
 
                 for param_name, values in general_scaling.items():
@@ -1785,7 +1785,7 @@ class ModelConfig(Config):
                         raise ValueError(
                             f"{param_name}_scale_pow not found in special_options!"
                         )
-            elif model == "time_delay_likelihood":
+            elif item == "time_delay_likelihood":
                 special = self.settings["special_options"]
                 cosmo = self._get_cosmology_instance(special)
                 lens_cosmo_for_Ddt = LensCosmo(

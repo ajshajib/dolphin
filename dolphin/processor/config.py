@@ -348,10 +348,10 @@ class ModelConfig(Config):
         if "special" in self.settings["model"]:
             special_list = self.get_special_list()
 
-            for i, model in enumerate(special_list):
-                if model == "astrometric_uncertainty":
+            for item in special_list:
+                if item == "astrometric_uncertainty":
                     kwargs_constraints.update({"point_source_offset": True})
-                if model == "general_scaling":
+                if item == "general_scaling":
                     kwargs_constraints.update(
                         {
                             "general_scaling": self.settings["special_options"][
@@ -359,7 +359,7 @@ class ModelConfig(Config):
                             ]
                         }
                     )
-                if model == "time_delay_likelihood":
+                if item == "time_delay_likelihood":
                     kwargs_constraints.update({"Ddt_sampling": True})
 
         if (

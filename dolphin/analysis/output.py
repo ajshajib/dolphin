@@ -232,7 +232,6 @@ class Output(Processor):
         model_id=None,
         kwargs_result=None,
         band_index=0,
-        data_cmap="cubehelix",
     ):
         """Get the `ModelPlot` instance from lenstronomy for the lens.
 
@@ -278,8 +277,6 @@ class Output(Processor):
             multi_band_list_out,
             kwargs_model,
             kwargs_result,
-            arrow_size=0.02,
-            cmap_string=data_cmap,
             image_likelihood_mask_list=mask,
             multi_band_type="multi-linear",
         )
@@ -291,16 +288,20 @@ class Output(Processor):
         model_id=None,
         kwargs_result=None,
         band_index=0,
-        data_cmap="cubehelix",
-        residual_cmap="RdBu_r",
-        convergence_cmap="afmhot",
-        magnification_cmap="viridis",
-        v_min=None,
-        v_max=None,
-        source_v_min=None,
-        source_v_max=None,
+        vmin=None,
+        vmax=None,
+        source_vmin=None,
+        source_vmax=None,
         print_results=False,
         show_source_light=False,
+        kwargs_data_plot=None,
+        kwargs_model_plot=None,
+        kwargs_residual_plot=None,
+        kwargs_source_plot=None,
+        kwargs_convergence_plot=None,
+        kwargs_magnification_plot=None,
+        kwargs_subtract_lens_light_plot=None,
+        kwargs_reconstructed_source_plot=None,
     ):
         """Plot the model, residual, reconstructed source, convergence, and
         magnification profiles. Either `model_id` or `kwargs_result` needs to be
@@ -325,18 +326,34 @@ class Output(Processor):
         :type convergence_cmap: `str` or `matplotlib.colors.Colormap`
         :param magnification_cmap: colormap for magnification plot
         :type magnification_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the model & data plots
-        :type v_min: `float` or `int` or `None`
-        :param v_max: maximum plotting scale for the model & data plots
-        :type v_max: `float` or `int` or `None`
-        :param source_v_min: minimum plotting scale for the source plot
-        :type source_v_min: `float` or `int` or `None`
-        :param source_v_max: maximum plotting scale for the source plot
-        :type source_v_max: `float` or `int` or `None`
+        :param vmin: minimum plotting scale for the model & data plots
+        :type vmin: `float` or `int` or `None`
+        :param vmax: maximum plotting scale for the model & data plots
+        :type vmax: `float` or `int` or `None`
+        :param source_vmin: minimum plotting scale for the source plot
+        :type source_vmin: `float` or `int` or `None`
+        :param source_vmax: maximum plotting scale for the source plot
+        :type source_vmax: `float` or `int` or `None`
         :param print_results: if `True`, prints the `kwargs_result` dictionary
         :type print_results: `bool`
         :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
         :type show_source_light: `bool`
+        :param kwargs_data_plot: kwargs for the data plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.data_plot()` for available keywords.
+        :type kwargs_data_plot: `dict`
+        :param kwargs_model_plot: kwargs for the model plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.model_plot()` for available keywords.
+        :type kwargs_model_plot: `dict`
+        :param kwargs_residual_plot: kwargs for the residual plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.normalized_residual_plot()` for available keywords.
+        :type kwargs_residual_plot: `dict`
+        :param kwargs_source_plot: kwargs for the source plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.source_plot()` for available keywords.
+        :type kwargs_source_plot: `dict`
+        :param kwargs_convergence_plot: kwargs for the convergence plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.convergence_plot()` for available keywords.
+        :type kwargs_convergence_plot: `dict`
+        :param kwargs_magnification_plot: kwargs for the magnification plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.magnification_plot()` for available keywords.
+        :type kwargs_magnification_plot: `dict`
+        :param kwargs_subtract_lens_light_plot: kwargs for the subtracted lens light plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.subtract_from_data_plot()` for available keywords.
+        :type kwargs_subtract_lens_light_plot: `dict`
+        :param kwargs_reconstructed_source_plot: kwargs for the reconstructed source plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.decomposition_plot()` for available keywords.
+        :type kwargs_reconstructed_source_plot: `dict`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
@@ -348,13 +365,12 @@ class Output(Processor):
                 ]
             print(print_kwargs_result)
 
-        if v_max is None:
-            model_plot, v_max = self.get_model_plot_instance(
+        if vmax is None:
+            model_plot, vmax = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )
         else:
             model_plot = self.get_model_plot_instance(
@@ -362,51 +378,85 @@ class Output(Processor):
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )[0]
+
+        if kwargs_data_plot is None:
+            kwargs_data_plot = {}
+        if kwargs_model_plot is None:
+            kwargs_model_plot = {}
+        if kwargs_residual_plot is None:
+            kwargs_residual_plot = {}
+        if kwargs_convergence_plot is None:
+            kwargs_convergence_plot = {}
+        if kwargs_magnification_plot is None:
+            kwargs_magnification_plot = {}
+        if kwargs_source_plot is None:
+            kwargs_source_plot = {}
+        if kwargs_subtract_lens_light_plot is None:
+            kwargs_subtract_lens_light_plot = {}
+        if kwargs_reconstructed_source_plot is None:
+            kwargs_reconstructed_source_plot = {}
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
 
         model_plot.data_plot(
-            ax=axes[0, 0], band_index=band_index, v_max=v_max, v_min=v_min
+            ax=axes[0, 0],
+            band_index=band_index,
+            vmin=vmin,
+            vmax=vmax,
+            **kwargs_data_plot,
         )
         model_plot.model_plot(
-            ax=axes[0, 1], band_index=band_index, v_max=v_max, v_min=v_min
+            ax=axes[0, 1],
+            band_index=band_index,
+            vmin=vmin,
+            vmax=vmax,
+            **kwargs_model_plot,
         )
         model_plot.normalized_residual_plot(
-            ax=axes[0, 2], band_index=band_index, cmap=residual_cmap, v_max=3, v_min=-3
+            ax=axes[0, 2], band_index=band_index, **kwargs_residual_plot
         )
         model_plot.source_plot(
             ax=axes[1, 0],
-            deltaPix_source=0.02,
-            numPix=100,
+            delta_pix_source=0.02,
+            num_pix=100,
             band_index=band_index,
-            v_max=source_v_max,
-            v_min=source_v_min,
-            scale_size=0.4,
+            vmax=source_vmax,
+            vmin=source_vmin,
+            **kwargs_source_plot,
         )
         if not show_source_light:
             model_plot.convergence_plot(
-                ax=axes[1, 1], band_index=band_index, cmap=convergence_cmap
+                ax=axes[1, 1], band_index=band_index, **kwargs_convergence_plot
             )
             model_plot.magnification_plot(
-                ax=axes[1, 2], band_index=band_index, cmap=magnification_cmap
+                ax=axes[1, 2], band_index=band_index, **kwargs_magnification_plot
             )
         else:
+            kwargs_subtract_lens_light_plot.setdefault("kwargs_title", {})
+            kwargs_subtract_lens_light_plot["kwargs_title"].setdefault(
+                "title", "Data - Lens Light"
+            )
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],
                 band_index=band_index,
-                lens_light_add=True,
-                v_max=v_max,
-                v_min=v_min,
+                subtract_lens_light=True,
+                vmax=vmax,
+                vmin=vmin,
+                **kwargs_subtract_lens_light_plot,
+            )
+
+            kwargs_reconstructed_source_plot.setdefault("kwargs_title", {})
+            kwargs_reconstructed_source_plot["kwargs_title"].setdefault(
+                "title", "Reconstructed Source"
             )
             model_plot.decomposition_plot(
                 ax=axes[1, 2],
-                text="Source light convolved",
                 source_add=True,
                 band_index=band_index,
-                v_max=v_max,
-                v_min=v_min,
+                vmax=source_vmax,
+                vmin=source_vmin,
+                **kwargs_reconstructed_source_plot,
             )
         fig.tight_layout()
         fig.subplots_adjust(
@@ -422,8 +472,9 @@ class Output(Processor):
         kwargs_result=None,
         band_index=0,
         data_cmap="cubehelix",
-        v_min=None,
-        v_max=None,
+        vmin=None,
+        vmax=None,
+        kwargs_decomposition_plot=None,
     ):
         """Plot lens light and source light model decomposition, both with convolved and
         unconvolved light. Either `model_id` or `kwargs_result` needs to be provided.
@@ -442,21 +493,22 @@ class Output(Processor):
         :type band_index: `int`
         :param data_cmap: colormap for image, reconstruction, and source plots
         :type data_cmap: `str` or `matplotlib.colors.Colormap`
-        :param v_min: minimum plotting scale for the component plots
-        :type v_min: `float` or `int` or `None`
-        :param v_max: maximum plotting scale for the component plots
-        :type v_max: `float` or `int` or `None`
+        :param vmin: minimum plotting scale for the component plots
+        :type vmin: `float` or `int` or `None`
+        :param vmax: maximum plotting scale for the component plots
+        :type vmax: `float` or `int` or `None`
+        :param kwargs_decomposition_plot: additional keyword arguments for the decomposition plots, see :func: `lenstronomy.Plots.model_plot.ModelPlot.decomposition_plot()` for available keywords.
+        :type kwargs_decomposition_plot: `dict`
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
 
-        if v_max is None:
-            model_plot, v_max = self.get_model_plot_instance(
+        if vmax is None:
+            model_plot, vmax = self.get_model_plot_instance(
                 lens_name,
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )
         else:
             model_plot = self.get_model_plot_instance(
@@ -464,64 +516,72 @@ class Output(Processor):
                 model_id=model_id,
                 kwargs_result=kwargs_result,
                 band_index=band_index,
-                data_cmap=data_cmap,
             )[0]
+
+        if kwargs_decomposition_plot is None:
+            kwargs_decomposition_plot = {}
 
         fig, axes = plt.subplots(2, 3, figsize=(16, 8))
         model_plot.decomposition_plot(
             ax=axes[0, 0],
-            text="Lens light",
             lens_light_add=True,
             unconvolved=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
+            **kwargs_decomposition_plot,
         )
+        axes[0, 0].set_title("Lens light")
         model_plot.decomposition_plot(
             ax=axes[1, 0],
-            text="Lens light convolved",
             lens_light_add=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
+            **kwargs_decomposition_plot,
         )
+        axes[1, 0].set_title("Lens light convolved")
         model_plot.decomposition_plot(
             ax=axes[0, 1],
-            text="Source light",
             source_add=True,
             unconvolved=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
+            **kwargs_decomposition_plot,
         )
+        axes[0, 1].set_title("Source light")
         model_plot.decomposition_plot(
             ax=axes[1, 1],
-            text="Source light convolved",
             source_add=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
+            **kwargs_decomposition_plot,
         )
+        axes[1, 1].set_title("Source light convolved")
         model_plot.decomposition_plot(
             ax=axes[0, 2],
-            text="All components",
             source_add=True,
             lens_light_add=True,
             unconvolved=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
+            **kwargs_decomposition_plot,
         )
+        axes[0, 2].set_title("All components")
         model_plot.decomposition_plot(
             ax=axes[1, 2],
-            text="All components convolved",
             source_add=True,
             lens_light_add=True,
             point_source_add=True,
             band_index=band_index,
-            v_max=v_max,
-            v_min=v_min,
+            vmax=vmax,
+            vmin=vmin,
+            **kwargs_decomposition_plot,
         )
+        axes[1, 2].set_title("All components convolved")
         fig.tight_layout()
         fig.subplots_adjust(
             left=None, bottom=None, right=None, top=None, wspace=0.0, hspace=0.05
@@ -847,8 +907,8 @@ class Output(Processor):
         delta_pix = image_pixel_size / 2
         num_pix = source_lensed.shape[0]
         source_unlensed = model_plot.source(
-            deltaPix=delta_pix,
-            numPix=num_pix,
+            delta_pix=delta_pix,
+            num_pix=num_pix,
             band_index=band_index,
             center=[
                 kwargs_result["kwargs_source"][0]["center_x"],
@@ -992,7 +1052,7 @@ class Output(Processor):
         kwargs_model = config.get_kwargs_model()
 
         lens_model_class = LensModel(lens_model_list=kwargs_model["lens_model_list"])
-        lensEquationSolver = LensEquationSolver(lens_model_class)
+        lens_equation_solver = LensEquationSolver(lens_model_class)
         x_source = kwargs_result["kwargs_source"][0]["center_x"]
         y_source = kwargs_result["kwargs_source"][0]["center_y"]
 
@@ -1004,7 +1064,7 @@ class Output(Processor):
         image_data = multi_band_list_out[band_index][0]["image_data"]
         image_size = image_data.shape[0] * image_pixel_size
 
-        x_image, y_image = lensEquationSolver.findBrightImage(
+        x_image, y_image = lens_equation_solver.find_bright_image(
             x_source,
             y_source,
             kwargs_lens,

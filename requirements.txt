@@ -3,7 +3,7 @@ astropy
 scipy>=0.19.1
 emcee>=3.0.0
 matplotlib
-lenstronomy
+lenstronomy @ https://github.com/lenstronomy/lenstronomy/archive/refs/heads/main.zip
 schwimmbad>=0.3.2
 corner>=2.2.1
 ruamel.yaml

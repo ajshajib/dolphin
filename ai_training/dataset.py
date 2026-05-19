@@ -242,7 +242,7 @@ class TrainingData(object):
             }
 
             sim_api = SimAPI(
-                numpix=self.num_pixel,
+                num_pix=self.num_pixel,
                 kwargs_single_band=self.filter_settings,
                 kwargs_model=kwargs_model,
             )
@@ -251,7 +251,7 @@ class TrainingData(object):
 
             kwargs_model_copy["source_light_model_list"] = ["SERSIC_ELLIPSE"]
             sim_api_smooth_source = SimAPI(
-                numpix=self.num_pixel,
+                num_pix=self.num_pixel,
                 kwargs_single_band=self.filter_settings,
                 kwargs_model=kwargs_model_copy,
             )

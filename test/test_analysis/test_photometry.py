@@ -50,7 +50,6 @@ class TestPhotometry(object):
         """Test the functionality of loading JWST _load_photometry
         """
 
-        mock_filename = "mock_jwst.h5"
         monkeypatch.setattr(os.path, "exists", lambda x: True)
 
         class MockH5File:
@@ -372,8 +371,6 @@ class TestPhotometry(object):
                 assert filt in f
 
                 grp = f[filt]
-
-                labels = list(grp.keys())
 
                 expected_labels = (
                     [f"Image{i+1}" for i in range(self.photometry1.n_images)]

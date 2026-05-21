@@ -1,4 +1,3 @@
-from lenstronomy.Sampling.parameters import Param
 from lenstronomy.ImSim.image_linear_solve import ImageLinearFit
 from lenstronomy.Data.psf import PSF
 from lenstronomy.Data.imaging_data import ImageData
@@ -516,7 +515,7 @@ class Photometry:
                 labels = list(grp.keys())
 
                 # ensure consistent ordering
-                image_labels = sorted([l for l in labels if "Image" in l])
+                image_labels = sorted([label for label in labels if "Image" in label])
                 other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
 
                 ordered_labels = image_labels + other_labels
@@ -550,7 +549,7 @@ class Photometry:
 
                 labels = list(grp.keys())
 
-                image_labels = sorted([l for l in labels if "Image" in l])
+                image_labels = sorted([label for label in labels if "Image" in label])
                 other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
 
                 ordered_labels = image_labels + other_labels

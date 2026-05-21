@@ -517,4 +517,4 @@ class TestPhotometry(object):
 
         loaded_morph = self.photometry1.get_morphology_chain()
 
-        assert loaded_morph == None
+        assert loaded_morph is None

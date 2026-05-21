@@ -359,8 +359,6 @@ class TestPhotometry(object):
 
                 grp = f[filt]
 
-                labels = list(grp.keys())
-
                 expected_labels = [
                     f"Image{i+1}" for i in range(self.photometry1.n_images)
                 ] + ["Lens", "Host_lensed", "Host_intrinsic"]

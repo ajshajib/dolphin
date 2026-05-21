@@ -14,12 +14,15 @@ _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 _TEST_MODEL_ID_F814W = "example"
 
+
 class TestPhotometry(object):
     def setup_class(self):
         self.output = Output(_TEST_IO_DIR)
-        self.loaded_output1 = self.output.load_output("lensed_quasar", _TEST_MODEL_ID_F814W)
+        self.loaded_output1 = self.output.load_output(
+            "lensed_quasar", _TEST_MODEL_ID_F814W
+        )
         self.band_config1 = {
-                "F814W": {
+            "F814W": {
                 "lens_light_indices": [0],
                 "source_indices": [0],
                 "exclude_lens_light_indices": [],
@@ -31,12 +34,11 @@ class TestPhotometry(object):
             band_config=self.band_config1,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
-            burn_in=99
+            burn_in=99,
         )
-        
+
     def test_build_band_models(self):
-        """Test that _build_band_models properly functions
-        """
+        """Test that _build_band_models properly functions."""
 
         band_models = self.photometry1._build_band_models()
 
@@ -47,8 +49,7 @@ class TestPhotometry(object):
         assert "likelihood_mask" in band_models["F814W"]
 
     def test_load_photometry_jwst(self, monkeypatch):
-        """Test the functionality of loading JWST _load_photometry
-        """
+        """Test the functionality of loading JWST _load_photometry."""
 
         monkeypatch.setattr(os.path, "exists", lambda x: True)
 
@@ -79,8 +80,7 @@ class TestPhotometry(object):
         assert calib["pixar_sr"] == 2.29e-14
 
     def test_load_photometry_hst(self):
-        """Test the functionality of loading HST _load_photometry
-        """
+        """Test the functionality of loading HST _load_photometry."""
 
         calib = self.photometry1._load_photometry(filt="F814W")
 
@@ -93,8 +93,7 @@ class TestPhotometry(object):
             _ = self.photometry1._load_photometry(filt="INVALID")
 
     def test_get_ab_magnitude_jwst(self, monkeypatch):
-        """Test JWST branch of _get_abmag
-        """
+        """Test JWST branch of _get_abmag."""
 
         mock_calib = {
             "instrument": "JWST",
@@ -121,11 +120,10 @@ class TestPhotometry(object):
             expected_abmag,
             rtol=1e-10,
             atol=1e-10,
-        )       
-    
+        )
+
     def test_get_ab_magnitude_hst(self):
-        """Test HST branch of _get_abmag
-        """
+        """Test HST branch of _get_abmag."""
 
         calib = self.photometry1._load_photometry(filt="F814W")
 
@@ -152,11 +150,10 @@ class TestPhotometry(object):
             expected_abmag,
             rtol=1e-10,
             atol=1e-10,
-        ) 
+        )
 
     def test_evaluate_band(self):
-        """Test evaluate_band returns expected structure and finite values
-        """
+        """Test evaluate_band returns expected structure and finite values."""
 
         # grab one posterior sample
         sample = self.output._posterior_samples[-1]
@@ -213,9 +210,9 @@ class TestPhotometry(object):
 
         # Test error messages
         band_config = {
-                "F814W": {
-                #"lens_light_indices": [],
-                #"source_indices": [],
+            "F814W": {
+                # "lens_light_indices": [],
+                # "source_indices": [],
                 "exclude_lens_light_indices": [],
             }
         }
@@ -225,7 +222,7 @@ class TestPhotometry(object):
             band_config=band_config,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
-            burn_in=99
+            burn_in=99,
         )
 
         with pytest.raises(ValueError):
@@ -238,9 +235,7 @@ class TestPhotometry(object):
                 kwargs_ps_all=kwargs_ps,
             )
 
-        band_config.update({
-            "lens_light_indices": [0]
-        })
+        band_config.update({"lens_light_indices": [0]})
 
         with pytest.raises(ValueError):
 
@@ -253,8 +248,7 @@ class TestPhotometry(object):
             )
 
     def test_get_flux_and_morphology(self):
-        """Test get_flux_and_morphology output structure and shapes
-        """
+        """Test get_flux_and_morphology output structure and shapes."""
 
         flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
 
@@ -290,8 +284,7 @@ class TestPhotometry(object):
             assert np.all(r_eff > 0)
 
     def test_get_ab_magnitude(self):
-        """Test get_ab_magnitude shape and consistency
-        """
+        """Test get_ab_magnitude shape and consistency."""
 
         flux_chain, _ = self.photometry1.get_flux_and_morphology()
 
@@ -320,10 +313,7 @@ class TestPhotometry(object):
 
         flux_block = flux_chain[:, :n_flux_per_filt]
 
-        expected_mag = self.photometry1._get_abmag(
-            flux_block,
-            filt
-        )
+        expected_mag = self.photometry1._get_abmag(flux_block, filt)
 
         np.testing.assert_allclose(
             mag_chain[:, :n_flux_per_filt],
@@ -333,13 +323,10 @@ class TestPhotometry(object):
         )
 
     def test_save_to_hdf5(self):
-        """Test save_to_hdf5 writes expected structure
-        """
+        """Test save_to_hdf5 writes expected structure."""
 
         # generate chains
-        flux_chain, morph_chain = (
-            self.photometry1.get_flux_and_morphology()
-        )
+        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
 
         mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
 
@@ -372,10 +359,11 @@ class TestPhotometry(object):
 
                 grp = f[filt]
 
-                expected_labels = (
-                    [f"Image{i+1}" for i in range(self.photometry1.n_images)]
-                    + ["Lens", "Host_lensed", "Host_intrinsic"]
-                )
+                labels = list(grp.keys())
+
+                expected_labels = [
+                    f"Image{i+1}" for i in range(self.photometry1.n_images)
+                ] + ["Lens", "Host_lensed", "Host_intrinsic"]
 
                 for label in expected_labels:
 
@@ -415,12 +403,9 @@ class TestPhotometry(object):
                 assert np.all(np.isfinite(r_eff))
 
     def test_get_flux_chain(self):
-        """Test get_flux_chain correctly reloads saved flux chain
-        """
+        """Test get_flux_chain correctly reloads saved flux chain."""
 
-        flux_chain, morph_chain = (
-            self.photometry1.get_flux_and_morphology()
-        )
+        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
 
         mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
 
@@ -446,12 +431,9 @@ class TestPhotometry(object):
         )
 
     def test_get_magnitude_chain(self):
-        """Test get_magnitude_chain correctly reloads saved magnitude chain
-        """
+        """Test get_magnitude_chain correctly reloads saved magnitude chain."""
 
-        flux_chain, morph_chain = (
-            self.photometry1.get_flux_and_morphology()
-        )
+        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
 
         mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
 
@@ -477,12 +459,9 @@ class TestPhotometry(object):
         )
 
     def test_get_morphology_chain(self):
-        """Test get_morphology_chain correctly reloads saved morphology chain
-        """
+        """Test get_morphology_chain correctly reloads saved morphology chain."""
 
-        flux_chain, morph_chain = (
-            self.photometry1.get_flux_and_morphology()
-        )
+        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
 
         mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
 

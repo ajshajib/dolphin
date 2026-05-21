@@ -60,11 +60,17 @@ Inside your workspace directory, create the following subdirectories. **Note:** 
 - ``dec_at_xy_0``: ΔDec (arcsec) of the (0, 0) pixel relative to the cutout center.
 - ``transform_pix2angle``: A rotation and scaling matrix mapping pixel index differences (Δx, Δy) to angular differences (ΔRA, ΔDec) in arcseconds.
 
+The Image Data File May *Optionally* contain parameters needed for post-modeling photometric calculations, which are dependent on the instrument:
+- `PHOTFLAM`: mean flux density (in erg cm-2 sec-1 Å-1) that produces 1 count per second in the HST observing mode
+- `PHOTZPT`: HST STMAG zeropoint
+- `PHOTPLAM`: HST filter pivot wavelength
+- `PIXAR_SR`: JWST average pixel area in units of steradians
+
 **The PSF Data File MUST contain:**
 - ``kernel_point_source``: A pixelated Point Spread Function (PSF).
 - ``psf_variance_map``: *(Optional)* A map of the uncertainty in the provided PSF (must match the PSF dimensions).
 
-4. Running the Fully Automated AI Pipeline
+1. Running the Fully Automated AI Pipeline
 ------------------------------------------
 
 With your workspace set up, you can now run the ``dolphin`` AI pipeline! The following Python code demonstrates a complete run for a lensed quasar system:

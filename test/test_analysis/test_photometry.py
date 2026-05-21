@@ -237,7 +237,7 @@ class TestPhotometry(object):
 
         band_config = {
             "F814W": {
-                 "lens_light_indices": [0],
+                "lens_light_indices": [0],
                 # "source_indices": [],
                 "exclude_lens_light_indices": [],
             }
@@ -512,10 +512,9 @@ class TestPhotometry(object):
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
-            #morph_chain=morph_chain,
+            # morph_chain=morph_chain,
         )
 
         loaded_morph = self.photometry1.get_morphology_chain()
 
         assert loaded_morph == None
-

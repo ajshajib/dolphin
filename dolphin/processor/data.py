@@ -40,6 +40,7 @@ class Data(object):
 
         return data
 
+
 class ImageData(Data):
     """This class manages the image data of a lens system."""
 

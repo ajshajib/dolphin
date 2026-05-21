@@ -13,16 +13,16 @@ import numpy as np
 import h5py
 import os
 
+
 class Photometry:
-    """This class performs a linear inversion on the model outputs to 
-    obtain lens, image, and source fluxes/magnitudes, as well as morphological properties of the lens
+    """This class performs a linear inversion on the model outputs to obtain lens,
+    image, and source fluxes/magnitudes, as well as morphological properties of the lens
     light."""
 
-    def __init__(self, output, band_config, 
-                 model_id, walker_ratio, burn_in=0):
+    def __init__(self, output, band_config, model_id, walker_ratio, burn_in=0):
         """Initiate the class from the following inputs:
-        
-        :param output: `Output` instance 
+
+        :param output: `Output` instance
         :type output: `class`
         :param band_config: Dictionary describing the filters and profile indices to
         utilize in the inversion.
@@ -48,9 +48,7 @@ class Photometry:
             self.filters.append(filter_name)
 
         band_list = self.output._model_settings["band"]
-        self.band_map = {
-            band: i for i, band in enumerate(band_list)
-        }
+        self.band_map = {band: i for i, band in enumerate(band_list)}
 
         self.multi_band_list = output._multi_band_list_out
 
@@ -64,15 +62,13 @@ class Photometry:
         self.kwargs_likelihood = config.get_kwargs_likelihood()
 
         self.param = output.get_param_class(
-            lens_name=self.system_name,
-            model_id=self.model_id
+            lens_name=self.system_name, model_id=self.model_id
         )
 
         self.band_models = self._build_band_models()
 
     def _build_band_models(self):
-        """Build model components per band from results chain
-        """
+        """Build model components per band from results chain."""
         band_models = {}
 
         for filt in self.filters:
@@ -87,7 +83,7 @@ class Photometry:
                 likelihood_mask = None
             else:
                 likelihood_mask = mask_list[i_band]
-        
+
             band_models[filt] = {
                 "data_class": ImageData(**kwargs_data),
                 "psf_class": PSF(**kwargs_psf),
@@ -138,18 +134,16 @@ class Photometry:
         print(f"Instrument identified as: {calib['instrument']}")
 
         return calib
-    
+
     def _get_abmag(self, flux, filt):
-        """
-        Convert integrated flux to AB magnitude
-        """
+        """Convert integrated flux to AB magnitude."""
 
         calib = self._load_photometry(filt)
 
         flux = np.asarray(flux)
 
         if calib["instrument"] == "JWST":
-    
+
             pixar_sr = calib["pixar_sr"]
 
             # MJy/sr to Jy
@@ -170,10 +164,7 @@ class Photometry:
             stmag = -2.5 * np.log10(flux_cgs) + photzpt
 
             abmag = (
-                stmag
-                - 5.0 * np.log10(photplam)
-                + 2.5 * np.log10(299792458e10) 
-                - 27.5
+                stmag - 5.0 * np.log10(photplam) + 2.5 * np.log10(299792458e10) - 27.5
             )
 
             return abmag
@@ -188,8 +179,7 @@ class Photometry:
         grid_spacing=0.02,
         grid_num=200,
     ):
-        """Perform linear inversion on a band
-        """
+        """Perform linear inversion on a band."""
 
         band = self.band_models[filt]
         band_config = self.band_config.get(filt)
@@ -197,35 +187,25 @@ class Photometry:
         lens_light_indices = band_config.get("lens_light_indices")
         source_indices = band_config.get("source_indices")
         exclude_lens_light_indices = band_config.get("exclude_lens_light_indices", [])
-        has_point_source = (
-            kwargs_ps_all is not None and len(kwargs_ps_all) > 0
-        )
+        has_point_source = kwargs_ps_all is not None and len(kwargs_ps_all) > 0
 
         if lens_light_indices is None:
             raise ValueError(f"lens_light_indices must be provided for filter {filt}")
 
         lens_light_model_list = [
-            self.kwargs_model["lens_light_model_list"][k]
-            for k in lens_light_indices
+            self.kwargs_model["lens_light_model_list"][k] for k in lens_light_indices
         ]
 
-        lens_light_kwargs = [
-            kwargs_lens_light_all[k]
-            for k in lens_light_indices
-        ]
+        lens_light_kwargs = [kwargs_lens_light_all[k] for k in lens_light_indices]
 
         if source_indices is None:
             raise ValueError(f"source_indices must be provided for filter {filt}")
-            
+
         source_model_list = [
-            self.kwargs_model["source_light_model_list"][k]
-            for k in source_indices
+            self.kwargs_model["source_light_model_list"][k] for k in source_indices
         ]
 
-        source_kwargs = [
-            kwargs_source_all[k]
-            for k in source_indices
-        ]
+        source_kwargs = [kwargs_source_all[k] for k in source_indices]
 
         lightModel = LightModel(lens_light_model_list)
         sourceModel = LightModel(source_model_list)
@@ -235,7 +215,7 @@ class Photometry:
             pointSource = PointSource(self.kwargs_model["point_source_model_list"])
         else:
             pointSource = None
-            
+
         imageLinearFit = ImageLinearFit(
             data_class=band["data_class"],
             psf_class=band["psf_class"],
@@ -272,9 +252,7 @@ class Photometry:
         for k in range(len(lens_light_model_list)):
             if k not in exclude_lens_light_indices:
                 flux_lens += np.sum(
-                    imageModel.lens_surface_brightness(
-                        lens_light_kwargs, k=k
-                    )
+                    imageModel.lens_surface_brightness(lens_light_kwargs, k=k)
                 )
 
         flux_host_lensed = np.sum(
@@ -285,7 +263,7 @@ class Photometry:
 
         flux_host_intrinsic = np.sum(
             imageModel.source_surface_brightness(
-             source_kwargs, kwargs_lens_all, de_lensed=True
+                source_kwargs, kwargs_lens_all, de_lensed=True
             )
         )
 
@@ -306,7 +284,7 @@ class Photometry:
             grid_spacing=grid_spacing,
             grid_num=grid_num,
             model_bool_list=model_bool_list,
-            iterative=True
+            iterative=True,
         )
 
         r_eff = light_analysis.half_light_radius(
@@ -328,15 +306,11 @@ class Photometry:
                 "host_lensed": flux_host_lensed,
                 "host_intrinsic": flux_host_intrinsic,
             },
-            "morphology": {
-                "phi": phi,
-                "q": q,
-                "r_eff": r_eff
-            }
+            "morphology": {"phi": phi, "q": q, "r_eff": r_eff},
         }
 
     def get_flux_and_morphology(self):
-        """Perform the linear inversion on all bands
+        """Perform the linear inversion on all bands.
 
         :return: Flux chains, Morphology Chains
         """
@@ -345,10 +319,7 @@ class Photometry:
         self.n_images = None  # will infer from first sample
 
         chain = self.output.get_reshaped_emcee_chain(
-            self.system_name,
-            self.model_id,
-            self.walker_ratio,
-            self.burn_in
+            self.system_name, self.model_id, self.walker_ratio, self.burn_in
         )
 
         flat_chain = chain.reshape(-1, chain.shape[-1])
@@ -366,12 +337,8 @@ class Photometry:
 
             for filt in self.filters:
                 res = self.evaluate_band(
-                    filt,
-                    kwargs_lens,
-                    kwargs_lens_light,
-                    kwargs_source,
-                    kwargs_ps
-             )
+                    filt, kwargs_lens, kwargs_lens_light, kwargs_source, kwargs_ps
+                )
 
                 flux_dict = res["fluxes"]
 
@@ -397,7 +364,6 @@ class Photometry:
 
         :param flux_chain: flux chain
         :type flux_chain: array
-
         :return mag_chain: AB magnitude chain
         :rtype mag_chain: array
         """
@@ -417,10 +383,10 @@ class Photometry:
             mag_chain[:, start:end] = mag_block
 
         return mag_chain
-    
+
     def save_to_hdf5(self, flux_chain, mag_chain=None, morph_chain=None):
         """Save linear inversion outputs to HDF5 for later analysis.
-        
+
         :param flux_chain: Flux chain as computed from `get_flux_and_morphology`
         :type flux_chain: array
         :param mag_chain: (Optional) AB magnitude chain as computed from `get_ab_magnitude`
@@ -431,10 +397,11 @@ class Photometry:
 
         n_flux_per_filt = self.n_images + 3
 
-        flux_labels = (
-            [f"Image{i+1}" for i in range(self.n_images)]
-            + ["Lens", "Host_lensed", "Host_intrinsic"]
-        )
+        flux_labels = [f"Image{i+1}" for i in range(self.n_images)] + [
+            "Lens",
+            "Host_lensed",
+            "Host_intrinsic",
+        ]
 
         filename = (
             f"{self.output.io_directory}/outputs/"
@@ -462,16 +429,10 @@ class Photometry:
 
                     subgrp = grp.create_group(label)
 
-                    subgrp.create_dataset(
-                        "flux",
-                        data=flux_block[:, j]
-                    )
+                    subgrp.create_dataset("flux", data=flux_block[:, j])
 
                     if mag_chain is not None:
-                        subgrp.create_dataset(
-                            "magnitude",
-                            data=mag_block[:, j]
-                        )
+                        subgrp.create_dataset("magnitude", data=mag_block[:, j])
 
             if morph_chain is not None:
 
@@ -482,23 +443,17 @@ class Photometry:
                     filt_grp = morph_grp.create_group(filt)
 
                     filt_grp.create_dataset(
-                        "phi",
-                        data=np.array(morph_chain[filt]["phi"])
+                        "phi", data=np.array(morph_chain[filt]["phi"])
                     )
 
-                    filt_grp.create_dataset(
-                        "q",
-                        data=np.array(morph_chain[filt]["q"])
-                    )
+                    filt_grp.create_dataset("q", data=np.array(morph_chain[filt]["q"]))
 
                     filt_grp.create_dataset(
-                        "r_eff",
-                        data=np.array(morph_chain[filt]["r_eff"])
+                        "r_eff", data=np.array(morph_chain[filt]["r_eff"])
                     )
-            
+
     def get_flux_chain(self):
-        """
-        Load flux chain
+        """Load flux chain.
 
         :return flux_chain: flux chain
         :rtype flux_chain: np.ndarray
@@ -506,7 +461,7 @@ class Photometry:
 
         filename = f"{self.output.io_directory}/outputs/photometry_{self.system_name}_{self.model_id}.h5"
         with h5py.File(filename, "r") as f:
-            
+
             filters = list(f.attrs["filters"])
             chains = []
 
@@ -521,9 +476,7 @@ class Photometry:
 
                 ordered_labels = image_labels + other_labels
 
-                block = np.vstack([
-                    grp[label]["flux"][:] for label in ordered_labels
-                ]).T
+                block = np.vstack([grp[label]["flux"][:] for label in ordered_labels]).T
 
                 chains.append(block)
 
@@ -532,8 +485,7 @@ class Photometry:
         return flux_chain
 
     def get_magnitude_chain(self):
-        """
-        Load magnitude chain
+        """Load magnitude chain.
 
         :return mag_chain: AB magnitude chain
         :type mag_chain: np.ndarray
@@ -541,7 +493,7 @@ class Photometry:
 
         filename = f"{self.output.io_directory}/outputs/photometry_{self.system_name}_{self.model_id}.h5"
         with h5py.File(filename, "r") as f:
-            
+
             filters = list(f.attrs["filters"])
             chains = []
 
@@ -555,9 +507,9 @@ class Photometry:
 
                 ordered_labels = image_labels + other_labels
 
-                block = np.vstack([
-                    grp[label]["magnitude"][:] for label in ordered_labels
-                ]).T
+                block = np.vstack(
+                    [grp[label]["magnitude"][:] for label in ordered_labels]
+                ).T
 
                 chains.append(block)
 
@@ -566,10 +518,10 @@ class Photometry:
         return mag_chain
 
     def get_morphology_chain(self):
-        """
-        Load morphology chains.
+        """Load morphology chains.
 
-        :return morph_chain: morphology chain: {filter: {"phi": array, "q": array, "r_eff": array}}
+        :return morph_chain: morphology chain: {filter: {"phi": array, "q": array,
+            "r_eff": array}}
         :rtype: dict
         """
 

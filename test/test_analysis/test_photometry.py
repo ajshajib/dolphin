@@ -34,19 +34,19 @@ class TestPhotometry(object):
             band_config=self.band_config1,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
-            burn_in=99,
+            burn_in=-1,
         )
 
     def test_build_band_models(self):
         """Test that _build_band_models properly functions."""
 
-        band_models = self.photometry1._build_band_models()
+        band_models1 = self.photometry1._build_band_models()
 
-        assert "F814W" in band_models
-        assert "data_class" in band_models["F814W"]
-        assert "psf_class" in band_models["F814W"]
-        assert "kwargs_numerics" in band_models["F814W"]
-        assert "likelihood_mask" in band_models["F814W"]
+        assert "F814W" in band_models1
+        assert "data_class" in band_models1["F814W"]
+        assert "psf_class" in band_models1["F814W"]
+        assert "kwargs_numerics" in band_models1["F814W"]
+        assert band_models1["F814W"]["likelihood_mask"] is None
 
     def test_load_photometry_jwst(self, monkeypatch):
         """Test the functionality of loading JWST _load_photometry."""
@@ -222,7 +222,7 @@ class TestPhotometry(object):
             band_config=band_config,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
-            burn_in=99,
+            burn_in=-1,
         )
 
         with pytest.raises(ValueError):
@@ -235,7 +235,21 @@ class TestPhotometry(object):
                 kwargs_ps_all=kwargs_ps,
             )
 
-        band_config.update({"lens_light_indices": [0]})
+        band_config = {
+            "F814W": {
+                 "lens_light_indices": [0],
+                # "source_indices": [],
+                "exclude_lens_light_indices": [],
+            }
+        }
+
+        photometry = Photometry(
+            self.output,
+            band_config=band_config,
+            model_id=_TEST_MODEL_ID_F814W,
+            walker_ratio=2,
+            burn_in=-1,
+        )
 
         with pytest.raises(ValueError):
 
@@ -494,3 +508,14 @@ class TestPhotometry(object):
                     rtol=1e-10,
                     atol=1e-10,
                 )
+
+        self.photometry1.save_to_hdf5(
+            flux_chain,
+            mag_chain,
+            #morph_chain=morph_chain,
+        )
+
+        loaded_morph = self.photometry1.get_morphology_chain()
+
+        assert loaded_morph == None
+

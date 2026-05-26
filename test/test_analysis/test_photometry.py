@@ -29,12 +29,29 @@ class TestPhotometry(object):
             }
         }
 
+        self.magnitude_config1 = {
+            "F814W": {
+                "photflam": 1.52122335e-19,
+                "photplam": 8034.189
+            }
+        }
+
+        self.magnitude_config2 = {
+            "F115W":
+            {
+                "pixar_sr": 2.29160304105492e-14
+            }
+        }
+        
         self.photometry1 = Photometry(
             self.output,
             band_config=self.band_config1,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
             burn_in=-1,
+            aperture_radius=None,
+            aperture_length=None,
+            do_morphology=True
         )
 
     def test_build_band_models(self):
@@ -48,93 +65,100 @@ class TestPhotometry(object):
         assert "kwargs_numerics" in band_models1["F814W"]
         assert band_models1["F814W"]["likelihood_mask"] is None
 
-    def test_load_photometry_jwst(self, monkeypatch):
-        """Test the functionality of loading JWST _load_photometry."""
+    def test_aperture_mask(self):
+        """Test `_aperature_mask` shapes and behavior."""
 
-        monkeypatch.setattr(os.path, "exists", lambda x: True)
+        data_class = self.photometry1.band_models["F814W"]["data_class"]
 
-        class MockH5File:
-            def __init__(self, *args, **kwargs):
-                self.data = {
-                    "PIXAR_SR": np.array(2.29e-14),
-                }
+        x_grid, y_grid = data_class.pixel_coordinates
 
-            def __enter__(self):
-                return self
+        expected_shape = x_grid.shape
 
-            def __exit__(self, exc_type, exc_val, exc_tb):
-                pass
+        center_x = 0.0
+        center_y = 0.0
 
-            def __contains__(self, key):
-                return key in self.data
+        # circular aperture
+        circular_mask = self.photometry1._aperture_mask(
+            data_class=data_class,
+            center_x=center_x,
+            center_y=center_y,
+            radius=1.0,
+        )
 
-            def __getitem__(self, key):
-                return self.data[key]
+        assert circular_mask.shape == expected_shape
+        assert circular_mask.dtype == bool
 
-        monkeypatch.setattr(h5py, "File", MockH5File)
+        # should contain some True and some False pixels
+        assert np.any(circular_mask)
+        assert not np.all(circular_mask)
 
-        calib = self.photometry1._load_photometry(filt="F115W")
+        # square aperture
+        square_mask = self.photometry1._aperture_mask(
+            data_class=data_class,
+            center_x=center_x,
+            center_y=center_y,
+            length=1.0,
+        )
 
-        assert calib["instrument"] == "JWST"
-        assert "pixar_sr" in calib
-        assert calib["pixar_sr"] == 2.29e-14
+        assert square_mask.shape == expected_shape
+        assert square_mask.dtype == bool
 
-    def test_load_photometry_hst(self):
-        """Test the functionality of loading HST _load_photometry."""
+        assert np.any(square_mask)
+        assert not np.all(square_mask)
 
-        calib = self.photometry1._load_photometry(filt="F814W")
+        # full image default mask
+        full_mask = self.photometry1._aperture_mask(
+            data_class=data_class,
+            center_x=center_x,
+            center_y=center_y,
+        )
 
-        assert calib["instrument"] == "HST"
-        assert calib["photflam"] == 1.52142145e-19
-        assert calib["photzpt"] == -21.1
-        assert calib["photplam"] == 8034.189
+        assert full_mask.shape == expected_shape
+        assert full_mask.dtype == bool
+        assert np.all(full_mask)
+        
+    def test_load_photometry(self):
+        """Test the functionality of `_load_photometry`."""
 
-        with pytest.raises(FileNotFoundError):
-            _ = self.photometry1._load_photometry(filt="INVALID")
-
-    def test_get_ab_magnitude_jwst(self, monkeypatch):
-        """Test JWST branch of _get_abmag."""
-
-        mock_calib = {
-            "instrument": "JWST",
-            "pixar_sr": 2.29e-14,
+        test_mag_config = {
+            "F814W": {
+                "photflam": 1.52122335e-19,
+                "photzpt": -21.1,
+                #"photplam": 8034.189
+            }
         }
 
-        monkeypatch.setattr(
-            self.photometry1,
-            "_load_photometry",
-            lambda filt: mock_calib,
-        )
+        with pytest.raises(ValueError):
+            _ = self.photometry1._load_photometry(data_band="F814W", magnitude_config=test_mag_config)
+            
+        calib = self.photometry1._load_photometry(data_band="F814W", magnitude_config=self.magnitude_config1)
 
-        flux = np.array([5000.0, 23152.0])
+        assert calib["instrument"] == "HST"
+        assert calib["photflam"] == 1.52122335e-19
+        assert calib["photplam"] == 8034.189
 
-        abmag = self.photometry1._get_abmag(flux, filt="F115W")
+        calib2 = self.photometry1._load_photometry(data_band="F115W", magnitude_config=self.magnitude_config2)
 
-        # manually compute expected AB magnitudes
-        flux_jy = flux * mock_calib["pixar_sr"] * 1e6
+        assert calib2["instrument"] == "JWST"
+        assert "pixar_sr" in calib2
+        assert calib2["pixar_sr"] == 2.29160304105492e-14
 
-        expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
-
-        np.testing.assert_allclose(
-            abmag,
-            expected_abmag,
-            rtol=1e-10,
-            atol=1e-10,
-        )
+        with pytest.raises(KeyError):
+            _ = self.photometry1._load_photometry(data_band="INVALID", magnitude_config=self.magnitude_config1)
 
     def test_get_ab_magnitude_hst(self):
-        """Test HST branch of _get_abmag."""
+        """Test `_get_abmag`."""
 
-        calib = self.photometry1._load_photometry(filt="F814W")
+        calib = self.photometry1._load_photometry(data_band="F814W", magnitude_config=self.magnitude_config1)
 
         flux = np.array([5000.0, 23152.0])
 
-        abmag = self.photometry1._get_abmag(flux, filt="F814W")
+        abmag = self.photometry1._get_abmag(flux, data_band="F814W", magnitude_config=self.magnitude_config1)
 
         # manually compute expected AB magnitudes
         flux_cgs = flux * calib["photflam"]
 
-        stmag = -2.5 * np.log10(flux_cgs) + calib["photzpt"]
+        stmag = -2.5 * np.log10(flux_cgs) - 21.1
 
         expected_abmag = (
             stmag
@@ -152,8 +176,24 @@ class TestPhotometry(object):
             atol=1e-10,
         )
 
-    def test_evaluate_band(self):
-        """Test evaluate_band returns expected structure and finite values."""
+        # Test JWST Calculations
+        calib2 = self.photometry1._load_photometry(data_band="F115W", magnitude_config=self.magnitude_config2)
+        abmag = self.photometry1._get_abmag(flux, data_band="F115W", magnitude_config=self.magnitude_config2)
+
+        # manually compute expected AB magnitudes
+        flux_jy = flux * calib2["pixar_sr"] * 1e6
+
+        expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
+
+        np.testing.assert_allclose(
+            abmag,
+            expected_abmag,
+            rtol=1e-10,
+            atol=1e-10,
+        )
+        
+    def test_do_linear_inversion_single_band(self):
+        """Test _do_linear_inversion_single_band returns expected structure and finite values."""
 
         # grab one posterior sample
         sample = self.output._posterior_samples[-1]
@@ -165,12 +205,12 @@ class TestPhotometry(object):
         kwargs_source = kwargs_out["kwargs_source"]
         kwargs_ps = kwargs_out["kwargs_ps"]
 
-        result = self.photometry1.evaluate_band(
-            filt="F814W",
+        result = self.photometry1._do_linear_inversion_single_band(
+            data_band="F814W",
             kwargs_lens_all=kwargs_lens,
             kwargs_lens_light_all=kwargs_lens_light,
             kwargs_source_all=kwargs_source,
-            kwargs_ps_all=kwargs_ps,
+            kwargs_ps_all=kwargs_ps
         )
 
         assert isinstance(result, dict)
@@ -227,8 +267,8 @@ class TestPhotometry(object):
 
         with pytest.raises(ValueError):
 
-            result = photometry.evaluate_band(
-                filt="F814W",
+            result = photometry._do_linear_inversion_single_band(
+                data_band="F814W",
                 kwargs_lens_all=kwargs_lens,
                 kwargs_lens_light_all=kwargs_lens_light,
                 kwargs_source_all=kwargs_source,
@@ -253,18 +293,18 @@ class TestPhotometry(object):
 
         with pytest.raises(ValueError):
 
-            result = photometry.evaluate_band(
-                filt="F814W",
+            result = photometry._do_linear_inversion_single_band(
+                data_band="F814W",
                 kwargs_lens_all=kwargs_lens,
                 kwargs_lens_light_all=kwargs_lens_light,
                 kwargs_source_all=kwargs_source,
                 kwargs_ps_all=kwargs_ps,
             )
 
-    def test_get_flux_and_morphology(self):
-        """Test get_flux_and_morphology output structure and shapes."""
+    def test_do_linear_inversion(self):
+        """Test `do_linear_inversion` output structure and shapes."""
 
-        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
         assert isinstance(flux_chain, np.ndarray)
 
@@ -273,13 +313,13 @@ class TestPhotometry(object):
         expected_cols = len(self.photometry1.filters) * n_flux_per_filt
 
         assert flux_chain.shape[1] == expected_cols
-        assert isinstance(morph_chain, dict)
+        assert isinstance(morphology_chain, dict)
 
-        for filt in self.photometry1.filters:
+        for data_band in self.photometry1.filters:
 
-            assert filt in morph_chain
+            assert data_band in morphology_chain
 
-            morph = morph_chain[filt]
+            morph = morphology_chain[data_band]
 
             assert "phi" in morph
             assert "q" in morph
@@ -298,11 +338,11 @@ class TestPhotometry(object):
             assert np.all(r_eff > 0)
 
     def test_get_ab_magnitude(self):
-        """Test get_ab_magnitude shape and consistency."""
+        """Test `get_ab_magnitude` shape and consistency."""
 
-        flux_chain, _ = self.photometry1.get_flux_and_morphology()
+        flux_chain, _ = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
+        mag_chain = self.photometry1.get_ab_magnitude(flux_chain=flux_chain, magnitude_config=self.magnitude_config1)
 
         assert isinstance(mag_chain, np.ndarray)
 
@@ -323,11 +363,11 @@ class TestPhotometry(object):
         n_images = self.photometry1.n_images
         n_flux_per_filt = n_images + 3
 
-        filt = self.photometry1.filters[0]
+        data_band = self.photometry1.filters[0]
 
         flux_block = flux_chain[:, :n_flux_per_filt]
 
-        expected_mag = self.photometry1._get_abmag(flux_block, filt)
+        expected_mag = self.photometry1._get_abmag(flux_block, data_band, magnitude_config=self.magnitude_config1)
 
         np.testing.assert_allclose(
             mag_chain[:, :n_flux_per_filt],
@@ -340,15 +380,15 @@ class TestPhotometry(object):
         """Test save_to_hdf5 writes expected structure."""
 
         # generate chains
-        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
+        mag_chain = self.photometry1.get_ab_magnitude(flux_chain, magnitude_config=self.magnitude_config1)
 
         # save
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
-            morph_chain=morph_chain,
+            morphology_chain=morphology_chain,
         )
 
         filename = (
@@ -367,11 +407,11 @@ class TestPhotometry(object):
 
             assert filters == self.photometry1.filters
 
-            for filt in self.photometry1.filters:
+            for data_band in self.photometry1.filters:
 
-                assert filt in f
+                assert data_band in f
 
-                grp = f[filt]
+                grp = f[data_band]
 
                 expected_labels = [
                     f"Image{i+1}" for i in range(self.photometry1.n_images)
@@ -396,11 +436,11 @@ class TestPhotometry(object):
 
             morph_grp = f["lens_light_morphology"]
 
-            for filt in self.photometry1.filters:
+            for data_band in self.photometry1.filters:
 
-                assert filt in morph_grp
+                assert data_band in morph_grp
 
-                filt_grp = morph_grp[filt]
+                filt_grp = morph_grp[data_band]
 
                 assert "phi" in filt_grp
                 assert "q" in filt_grp
@@ -417,14 +457,14 @@ class TestPhotometry(object):
     def test_get_flux_chain(self):
         """Test get_flux_chain correctly reloads saved flux chain."""
 
-        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
+        mag_chain = self.photometry1.get_ab_magnitude(flux_chain, magnitude_config=self.magnitude_config1)
 
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
-            morph_chain=morph_chain,
+            morphology_chain=morphology_chain,
         )
 
         loaded_flux_chain = self.photometry1.get_flux_chain()
@@ -445,14 +485,14 @@ class TestPhotometry(object):
     def test_get_magnitude_chain(self):
         """Test get_magnitude_chain correctly reloads saved magnitude chain."""
 
-        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
+        mag_chain = self.photometry1.get_ab_magnitude(flux_chain, magnitude_config=self.magnitude_config1)
 
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
-            morph_chain=morph_chain,
+            morphology_chain=morphology_chain,
         )
 
         loaded_mag_chain = self.photometry1.get_magnitude_chain()
@@ -473,30 +513,30 @@ class TestPhotometry(object):
     def test_get_morphology_chain(self):
         """Test get_morphology_chain correctly reloads saved morphology chain."""
 
-        flux_chain, morph_chain = self.photometry1.get_flux_and_morphology()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(flux_chain)
+        mag_chain = self.photometry1.get_ab_magnitude(flux_chain, magnitude_config=self.magnitude_config1)
 
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
-            morph_chain=morph_chain,
+            morphology_chain,
         )
 
         loaded_morph = self.photometry1.get_morphology_chain()
 
         assert isinstance(loaded_morph, dict)
 
-        for filt in self.photometry1.filters:
+        for data_band in self.photometry1.filters:
 
-            assert filt in loaded_morph
+            assert data_band in loaded_morph
 
             for key in ["phi", "q", "r_eff"]:
 
-                assert key in loaded_morph[filt]
+                assert key in loaded_morph[data_band]
 
-                original = np.array(morph_chain[filt][key])
-                loaded = np.array(loaded_morph[filt][key])
+                original = np.array(morphology_chain[data_band][key])
+                loaded = np.array(loaded_morph[data_band][key])
 
                 assert original.shape == loaded.shape
 
@@ -512,7 +552,7 @@ class TestPhotometry(object):
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
-            # morph_chain=morph_chain,
+            # morphology_chain=morphology_chain,
         )
 
         loaded_morph = self.photometry1.get_morphology_chain()

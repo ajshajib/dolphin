@@ -28,14 +28,6 @@ class Data(object):
         with h5py.File(file_path, "r") as f:
             data = {}
             for key in f:
-                # skip photometric calibration parameters
-                if key in [
-                    "PHOTFLAM",
-                    "PHOTZPT",
-                    "PHOTPLAM",
-                    "PIXAR_SR",
-                ]:
-                    continue
                 data[key] = f[key][()]
 
         return data

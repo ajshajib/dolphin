@@ -12,12 +12,23 @@ import numpy as np
 import h5py
 import os
 
+
 class Photometry:
 
-    def __init__(self, output, band_config, model_id, walker_ratio, burn_in=0, aperture_radius=None, aperture_length=None, do_morphology=False):
+    def __init__(
+        self,
+        output,
+        band_config,
+        model_id,
+        walker_ratio,
+        burn_in=0,
+        aperture_radius=None,
+        aperture_length=None,
+        do_morphology=False,
+    ):
         """This class performs a linear inversion on the model outputs to obtain lens,
-        image, and source fluxes/magnitudes, as well as morphological properties of the lens
-        light. Initiate the class from the following inputs:
+        image, and source fluxes/magnitudes, as well as morphological properties of the
+        lens light. Initiate the class from the following inputs:
 
         :param output: `Output` instance
         :type output: `class`
@@ -31,10 +42,10 @@ class Photometry:
         :param burn_in: (optional) number of burn-in steps to compute the medians after
             convergence of the MCMC chain
         :type burn_in: `int`
-        :param aperture_radius: (optional) Radius, in arcseconds, for a circular aperture centered around the 
+        :param aperture_radius: (optional) Radius, in arcseconds, for a circular aperture centered around the
             lens light centroid in which the inversion is evaluated. If `None`, uses the domain of the model grid.
         :type aperature_radius: `float`
-        :param aperture_length: (optional) Length, in arcseconds, for a square aperture centered around the 
+        :param aperture_length: (optional) Length, in arcseconds, for a square aperture centered around the
            lens light centroid in which the inversion is evaluated. If `None`, uses the domain of the model grid.
         :type aperature_length: `float`
         :param do_morphology: (optional) If `True`, solves for the morphological properties of multi-component
@@ -102,14 +113,7 @@ class Photometry:
 
         return band_models
 
-    def _aperture_mask(
-        self,
-        data_class,
-        center_x,
-        center_y,
-        radius=None,
-        length=None
-    ):
+    def _aperture_mask(self, data_class, center_x, center_y, radius=None, length=None):
         """Generate aperture mask centered around the lens light centroid."""
 
         x_grid, y_grid = data_class.pixel_coordinates
@@ -122,9 +126,8 @@ class Photometry:
 
         elif length is not None:
 
-            return (
-                (np.abs(x_grid - center_x) <= length / 2)
-                & (np.abs(y_grid - center_y) <= length / 2)
+            return (np.abs(x_grid - center_x) <= length / 2) & (
+                np.abs(y_grid - center_y) <= length / 2
             )
 
         else:
@@ -143,9 +146,7 @@ class Photometry:
                 "pixar_sr": calib["pixar_sr"],
             }
 
-        elif all(
-            key in calib for key in ["photflam", "photplam"]
-        ):
+        elif all(key in calib for key in ["photflam", "photplam"]):
 
             calib_out = {
                 "instrument": "HST",
@@ -191,10 +192,7 @@ class Photometry:
             stmag = -2.5 * np.log10(flux_cgs) + photzpt
 
             abmag = (
-                stmag
-                - 5.0 * np.log10(photplam)
-                + 2.5 * np.log10(299792458e10)
-                - 27.5
+                stmag - 5.0 * np.log10(photplam) + 2.5 * np.log10(299792458e10) - 27.5
             )
 
             return abmag
@@ -220,7 +218,9 @@ class Photometry:
         has_point_source = kwargs_ps_all is not None and len(kwargs_ps_all) > 0
 
         if lens_light_indices is None:
-            raise ValueError(f"lens_light_indices must be provided for filter {data_band}")
+            raise ValueError(
+                f"lens_light_indices must be provided for filter {data_band}"
+            )
 
         lens_light_model_list = [
             self.kwargs_model["lens_light_model_list"][k] for k in lens_light_indices
@@ -277,13 +277,13 @@ class Photometry:
             flux_images = np.array([])  # no images
 
         aperture_mask = self._aperture_mask(
-             data_class=band["data_class"],
-             center_x=lens_light_kwargs[0]["center_x"],
-             center_y=lens_light_kwargs[0]["center_y"],
-             radius=self.aperature_radius,
-             length=self.aperature_length
+            data_class=band["data_class"],
+            center_x=lens_light_kwargs[0]["center_x"],
+            center_y=lens_light_kwargs[0]["center_y"],
+            radius=self.aperature_radius,
+            length=self.aperature_length,
         )
-        
+
         flux_lens = 0
         flux_source_lensed = 0
         flux_source_instrinsic = 0
@@ -294,21 +294,19 @@ class Photometry:
                     k=k,
                 )
 
-                flux_lens += np.sum(
-                    lens_surface_brightness[aperture_mask]
-                )
+                flux_lens += np.sum(lens_surface_brightness[aperture_mask])
 
         source_lensed_surface_brightness = image_linear_fit.source_surface_brightness(
-                source_kwargs, kwargs_lens_all, de_lensed=False
-            )
-
-        flux_source_lensed += np.sum(
-            source_lensed_surface_brightness[aperture_mask]
+            source_kwargs, kwargs_lens_all, de_lensed=False
         )
 
-        source_intrinsic_surface_brightness = image_linear_fit.source_surface_brightness(
+        flux_source_lensed += np.sum(source_lensed_surface_brightness[aperture_mask])
+
+        source_intrinsic_surface_brightness = (
+            image_linear_fit.source_surface_brightness(
                 source_kwargs, kwargs_lens_all, de_lensed=True
             )
+        )
 
         flux_source_instrinsic += np.sum(
             source_intrinsic_surface_brightness[aperture_mask]
@@ -364,14 +362,17 @@ class Photometry:
     def do_linear_inversion(self):
         """Perform the linear inversion on all bands provided in `band_config`.
 
-        :return flux_results: Array corresponding to the flux results from the linear inversion for each
-          model component.
+        :return flux_results: Array corresponding to the flux results from the linear
+            inversion for each model component.
         :rtype flux_results: np.ndarray
-        :return morphology_results: Dictionary corresponding to the lens light parameters for mulit-component models
+        :return morphology_results: Dictionary corresponding to the lens light
+            parameters for mulit-component models
         :rtype morphology_results: dict
         """
         flux_results = []
-        morphology_results = {f: {"phi": [], "q": [], "r_eff": []} for f in self.filters}
+        morphology_results = {
+            f: {"phi": [], "q": [], "r_eff": []} for f in self.filters
+        }
         self.n_images = None  # will infer from first sample
 
         chain = self.output.get_reshaped_emcee_chain(
@@ -418,7 +419,7 @@ class Photometry:
     def get_ab_magnitude(self, flux_chain, magnitude_config):
         """Helper functions to calculate the AB magnitude from the flux chains. Currently supported instruments and
            needed calibration parameters are:
-           
+
            1) JWST:
                 - `pixar_sr`: for a given data band, the average pixel area in units of steradians
            2) HST:
@@ -511,7 +512,9 @@ class Photometry:
                         "phi", data=np.array(morphology_chain[data_band]["phi"])
                     )
 
-                    filter_group.create_dataset("q", data=np.array(morphology_chain[data_band]["q"]))
+                    filter_group.create_dataset(
+                        "q", data=np.array(morphology_chain[data_band]["q"])
+                    )
 
                     filter_group.create_dataset(
                         "r_eff", data=np.array(morphology_chain[data_band]["r_eff"])
@@ -541,7 +544,9 @@ class Photometry:
 
                 ordered_labels = image_labels + other_labels
 
-                block = np.vstack([group[label]["flux"][:] for label in ordered_labels]).T
+                block = np.vstack(
+                    [group[label]["flux"][:] for label in ordered_labels]
+                ).T
 
                 chains.append(block)
 

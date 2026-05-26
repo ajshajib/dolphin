@@ -10,7 +10,6 @@ from lenstronomy.Util import param_util
 from dolphin.processor.config import ModelConfig
 import numpy as np
 import h5py
-import os
 
 class Photometry:
 

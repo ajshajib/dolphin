@@ -46,6 +46,17 @@ class TestPhotometry(object):
             do_morphology=True,
         )
 
+        self.photometry2 = Photometry(
+            self.output,
+            band_config=self.band_config1,
+            model_id=_TEST_MODEL_ID_F814W,
+            walker_ratio=2,
+            burn_in=-1,
+            aperture_radius=None,
+            aperture_length=None,
+            do_morphology=False,
+        )
+
     def test_build_band_models(self):
         """Test that _build_band_models properly functions."""
 
@@ -231,15 +242,15 @@ class TestPhotometry(object):
 
         assert "images" in fluxes
         assert "lens" in fluxes
-        assert "host_lensed" in fluxes
-        assert "host_intrinsic" in fluxes
+        assert "source_lensed" in fluxes
+        assert "source_intrinsic" in fluxes
 
         assert isinstance(fluxes["images"], np.ndarray)
 
         # physical sanity checks
         assert np.isfinite(fluxes["lens"])
-        assert np.isfinite(fluxes["host_lensed"])
-        assert np.isfinite(fluxes["host_intrinsic"])
+        assert np.isfinite(fluxes["source_lensed"])
+        assert np.isfinite(fluxes["source_intrinsic"])
         assert np.all(np.isfinite(fluxes["images"]))
 
         morph = result["morphology"]
@@ -346,12 +357,12 @@ class TestPhotometry(object):
             assert np.all((q > 0) & (q <= 1))
             assert np.all(r_eff > 0)
 
-    def test_get_ab_magnitude(self):
-        """Test `get_ab_magnitude` shape and consistency."""
+    def test_calculate_ab_magnitude(self):
+        """Test `calculate_ab_magnitude` shape and consistency."""
 
         flux_chain, _ = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(
+        mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain=flux_chain, magnitude_config=self.magnitude_config1
         )
 
@@ -395,7 +406,7 @@ class TestPhotometry(object):
         # generate chains
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(
+        mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain, magnitude_config=self.magnitude_config1
         )
 
@@ -469,12 +480,12 @@ class TestPhotometry(object):
                 assert np.all(np.isfinite(q))
                 assert np.all(np.isfinite(r_eff))
 
-    def test_get_flux_chain(self):
-        """Test get_flux_chain correctly reloads saved flux chain."""
+    def test_load_flux_chain(self):
+        """Test load_flux_chain correctly reloads saved flux chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(
+        mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain, magnitude_config=self.magnitude_config1
         )
 
@@ -484,7 +495,7 @@ class TestPhotometry(object):
             morphology_chain=morphology_chain,
         )
 
-        loaded_flux_chain = self.photometry1.get_flux_chain()
+        loaded_flux_chain = self.photometry1.load_flux_chain()
 
         assert isinstance(loaded_flux_chain, np.ndarray)
 
@@ -499,12 +510,12 @@ class TestPhotometry(object):
             atol=1e-10,
         )
 
-    def test_get_magnitude_chain(self):
-        """Test get_magnitude_chain correctly reloads saved magnitude chain."""
+    def test_load_magnitude_chain(self):
+        """Test load_magnitude_chain correctly reloads saved magnitude chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(
+        mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain, magnitude_config=self.magnitude_config1
         )
 
@@ -514,7 +525,7 @@ class TestPhotometry(object):
             morphology_chain=morphology_chain,
         )
 
-        loaded_mag_chain = self.photometry1.get_magnitude_chain()
+        loaded_mag_chain = self.photometry1.load_magnitude_chain()
 
         assert isinstance(loaded_mag_chain, np.ndarray)
 
@@ -529,12 +540,12 @@ class TestPhotometry(object):
             atol=1e-10,
         )
 
-    def test_get_morphology_chain(self):
-        """Test get_morphology_chain correctly reloads saved morphology chain."""
+    def test_load_morphology_chain(self):
+        """Test load_morphology_chain correctly reloads saved morphology chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.get_ab_magnitude(
+        mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain, magnitude_config=self.magnitude_config1
         )
 
@@ -544,7 +555,7 @@ class TestPhotometry(object):
             morphology_chain,
         )
 
-        loaded_morph = self.photometry1.get_morphology_chain()
+        loaded_morph = self.photometry1.load_morphology_chain()
 
         assert isinstance(loaded_morph, dict)
 
@@ -570,12 +581,14 @@ class TestPhotometry(object):
                     atol=1e-10,
                 )
 
-        self.photometry1.save_to_hdf5(
-            flux_chain,
-            mag_chain,
-            # morphology_chain=morphology_chain,
+        # test that morphology dictionary is None if do_morphology
+        # is initialized as False
+        flux_chain, _ = self.photometry2.do_linear_inversion()
+
+        self.photometry2.save_to_hdf5(
+            flux_chain
         )
 
-        loaded_morph = self.photometry1.get_morphology_chain()
+        loaded_morph = self.photometry2.load_morphology_chain()
 
         assert loaded_morph is None

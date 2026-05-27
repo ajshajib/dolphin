@@ -352,8 +352,8 @@ class Photometry:
             "fluxes": {
                 "images": flux_images,
                 "lens": flux_lens,
-                "host_lensed": flux_source_lensed,
-                "host_intrinsic": flux_source_instrinsic,
+                "source_lensed": flux_source_lensed,
+                "source_intrinsic": flux_source_instrinsic,
             },
             "morphology": {"phi": phi, "q": q, "r_eff": r_eff},
         }
@@ -364,8 +364,8 @@ class Photometry:
         :return flux_results: Array corresponding to the flux results from the linear
             inversion for each model component.
         :rtype flux_results: np.ndarray
-        :return morphology_results: Dictionary corresponding to the lens light
-            parameters for mulit-component models
+        :return morphology_results: Dictionary corresponding to the fitted lens light
+            parameters of mulit-component models.
         :rtype morphology_results: dict
         """
         flux_results = []
@@ -403,8 +403,8 @@ class Photometry:
 
                 sample_fluxes.extend(flux_dict["images"])
                 sample_fluxes.append(flux_dict["lens"])
-                sample_fluxes.append(flux_dict["host_lensed"])
-                sample_fluxes.append(flux_dict["host_intrinsic"])
+                sample_fluxes.append(flux_dict["source_lensed"])
+                sample_fluxes.append(flux_dict["source_intrinsic"])
 
                 morphology = result["morphology"]
                 morphology_results[data_band]["phi"].append(morphology["phi"])
@@ -415,7 +415,7 @@ class Photometry:
 
         return np.array(flux_results), morphology_results
 
-    def get_ab_magnitude(self, flux_chain, magnitude_config):
+    def calculate_ab_magnitude(self, flux_chain, magnitude_config):
         """Helper functions to calculate the AB magnitude from the flux chains. Currently supported instruments and
            needed calibration parameters are:
 
@@ -425,7 +425,7 @@ class Photometry:
                 - `photflam`: mean flux density (in erg cm-2 sec-1 Angstrom-1) that produces 1 count per second in the HST observing mode
                 - `photplam`: HST data band pivot wavelength
 
-        :param flux_chain: flux chain
+        :param flux_chain: flux chain computed from `do_linear_inversion`
         :type flux_chain: np.ndarray
         :param magnitude_config: dictionary corresponding to the filter and keyword values for magnitude conversions
         :type magnitude_config: dict
@@ -452,11 +452,11 @@ class Photometry:
     def save_to_hdf5(self, flux_chain, magnitude_chain=None, morphology_chain=None):
         """Save linear inversion outputs to HDF5 for later analysis.
 
-        :param flux_chain: Flux chain as computed from `get_flux_and_morphology`
+        :param flux_chain: Flux chain as computed from `do_linear_inversion`
         :type flux_chain: np.ndarray
-        :param magnitude_chain: (Optional) AB magnitude chain as computed from `get_ab_magnitude`
+        :param magnitude_chain: (Optional) AB magnitude chain as computed from `calculate_ab_magnitude`
         :type magnitude_chain: np.ndarray
-        :param morphology_chain: (Optional) Morphology chain as computed from `get_flux_and_morphology`
+        :param morphology_chain: (Optional) Morphology chain as computed from `do_linear_inversion`
         :tpye morphology_chain: dict
         """
 
@@ -499,7 +499,7 @@ class Photometry:
                     if magnitude_chain is not None:
                         subgrp.create_dataset("magnitude", data=mag_block[:, j])
 
-            if morphology_chain is not None:
+            if self.do_morphology:
 
                 morphology_group = f.create_group("lens_light_morphology")
 
@@ -519,7 +519,7 @@ class Photometry:
                         "r_eff", data=np.array(morphology_chain[data_band]["r_eff"])
                     )
 
-    def get_flux_chain(self):
+    def load_flux_chain(self):
         """Load flux chain.
 
         :return flux_chain: flux chain
@@ -553,7 +553,7 @@ class Photometry:
 
         return flux_chain
 
-    def get_magnitude_chain(self):
+    def load_magnitude_chain(self):
         """Load magnitude chain.
 
         :return magnitude_chain: AB magnitude chain
@@ -586,7 +586,7 @@ class Photometry:
 
         return magnitude_chain
 
-    def get_morphology_chain(self):
+    def load_morphology_chain(self):
         """Load morphology chains.
 
         :return morphology_chain: morphology chain: {filter: {"phi": array, "q": array,

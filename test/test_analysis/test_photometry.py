@@ -13,13 +13,13 @@ from dolphin.analysis.photometry import Photometry
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 _TEST_MODEL_ID_F814W = "example"
-
+_TEST_MODEL_SYSTEM_NAME = "lensed_quasar"
 
 class TestPhotometry(object):
     def setup_class(self):
         self.output = Output(_TEST_IO_DIR)
         self.loaded_output1 = self.output.load_output(
-            "lensed_quasar", _TEST_MODEL_ID_F814W
+            _TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W
         )
         self.band_config1 = {
             "F814W": {
@@ -29,31 +29,33 @@ class TestPhotometry(object):
             }
         }
 
-        self.magnitude_config1 = {
-            "F814W": {"photflam": 1.52122335e-19, "photplam": 8034.189}
+        self.calibration_parameters1 = {
+            "F814W": {"photflam": 1.52122335e-19, "photzpt": -21.1, "photplam": 8034.189}
         }
 
-        self.magnitude_config2 = {"F115W": {"pixar_sr": 2.29160304105492e-14}}
+        self.calibration_parameters2 = {"F115W": {"pixar_sr": 2.29160304105492e-14}}
 
         self.photometry1 = Photometry(
             self.output,
-            band_config=self.band_config1,
+            lens_name=_TEST_MODEL_SYSTEM_NAME,
             model_id=_TEST_MODEL_ID_F814W,
+            band_config=self.band_config1,
             walker_ratio=2,
             burn_in=-1,
-            aperture_radius=None,
-            aperture_length=None,
+            aperture_type=None,
+            aperture_size=None,
             do_morphology=True,
         )
 
         self.photometry2 = Photometry(
             self.output,
-            band_config=self.band_config1,
+            lens_name=_TEST_MODEL_SYSTEM_NAME,
             model_id=_TEST_MODEL_ID_F814W,
+            band_config=self.band_config1,
             walker_ratio=2,
             burn_in=-1,
-            aperture_radius=None,
-            aperture_length=None,
+            aperture_type=None,
+            aperture_size=None,
             do_morphology=False,
         )
 
@@ -85,7 +87,8 @@ class TestPhotometry(object):
             data_class=data_class,
             center_x=center_x,
             center_y=center_y,
-            radius=1.0,
+            aperture_type="circle",
+            aperture_size=1.
         )
 
         assert circular_mask.shape == expected_shape
@@ -100,7 +103,8 @@ class TestPhotometry(object):
             data_class=data_class,
             center_x=center_x,
             center_y=center_y,
-            length=1.0,
+            aperture_type="square",
+            aperture_size=1.
         )
 
         assert square_mask.shape == expected_shape
@@ -120,97 +124,6 @@ class TestPhotometry(object):
         assert full_mask.dtype == bool
         assert np.all(full_mask)
 
-    def test_load_photometry(self):
-        """Test the functionality of `_load_photometry`."""
-
-        test_mag_config = {
-            "F814W": {
-                "photflam": 1.52122335e-19,
-                "photzpt": -21.1,
-                # "photplam": 8034.189
-            }
-        }
-
-        with pytest.raises(ValueError):
-            _ = self.photometry1._load_photometry(
-                data_band="F814W", magnitude_config=test_mag_config
-            )
-
-        calib = self.photometry1._load_photometry(
-            data_band="F814W", magnitude_config=self.magnitude_config1
-        )
-
-        assert calib["instrument"] == "HST"
-        assert calib["photflam"] == 1.52122335e-19
-        assert calib["photplam"] == 8034.189
-
-        calib2 = self.photometry1._load_photometry(
-            data_band="F115W", magnitude_config=self.magnitude_config2
-        )
-
-        assert calib2["instrument"] == "JWST"
-        assert "pixar_sr" in calib2
-        assert calib2["pixar_sr"] == 2.29160304105492e-14
-
-        with pytest.raises(KeyError):
-            _ = self.photometry1._load_photometry(
-                data_band="INVALID", magnitude_config=self.magnitude_config1
-            )
-
-    def test_get_ab_magnitude_hst(self):
-        """Test `_get_abmag`."""
-
-        calib = self.photometry1._load_photometry(
-            data_band="F814W", magnitude_config=self.magnitude_config1
-        )
-
-        flux = np.array([5000.0, 23152.0])
-
-        abmag = self.photometry1._get_abmag(
-            flux, data_band="F814W", magnitude_config=self.magnitude_config1
-        )
-
-        # manually compute expected AB magnitudes
-        flux_cgs = flux * calib["photflam"]
-
-        stmag = -2.5 * np.log10(flux_cgs) - 21.1
-
-        expected_abmag = (
-            stmag
-            - 5.0 * np.log10(calib["photplam"])
-            + 2.5 * np.log10(299792458e10)
-            - 27.5
-        )
-
-        assert isinstance(abmag, np.ndarray)
-
-        np.testing.assert_allclose(
-            abmag,
-            expected_abmag,
-            rtol=1e-10,
-            atol=1e-10,
-        )
-
-        # Test JWST Calculations
-        calib2 = self.photometry1._load_photometry(
-            data_band="F115W", magnitude_config=self.magnitude_config2
-        )
-        abmag = self.photometry1._get_abmag(
-            flux, data_band="F115W", magnitude_config=self.magnitude_config2
-        )
-
-        # manually compute expected AB magnitudes
-        flux_jy = flux * calib2["pixar_sr"] * 1e6
-
-        expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
-
-        np.testing.assert_allclose(
-            abmag,
-            expected_abmag,
-            rtol=1e-10,
-            atol=1e-10,
-        )
-
     def test_do_linear_inversion_single_band(self):
         """Test _do_linear_inversion_single_band returns expected structure and finite
         values."""
@@ -224,6 +137,7 @@ class TestPhotometry(object):
         kwargs_lens_light = kwargs_out["kwargs_lens_light"]
         kwargs_source = kwargs_out["kwargs_source"]
         kwargs_ps = kwargs_out["kwargs_ps"]
+        kwargs_special = kwargs_out["kwargs_special"]
 
         result = self.photometry1._do_linear_inversion_single_band(
             data_band="F814W",
@@ -231,6 +145,7 @@ class TestPhotometry(object):
             kwargs_lens_light_all=kwargs_lens_light,
             kwargs_source_all=kwargs_source,
             kwargs_ps_all=kwargs_ps,
+            kwargs_special_all=kwargs_special
         )
 
         assert isinstance(result, dict)
@@ -279,6 +194,7 @@ class TestPhotometry(object):
 
         photometry = Photometry(
             self.output,
+            lens_name=_TEST_MODEL_SYSTEM_NAME,
             band_config=band_config,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
@@ -293,6 +209,7 @@ class TestPhotometry(object):
                 kwargs_lens_light_all=kwargs_lens_light,
                 kwargs_source_all=kwargs_source,
                 kwargs_ps_all=kwargs_ps,
+                kwargs_special_all=kwargs_special
             )
 
         band_config = {
@@ -305,6 +222,7 @@ class TestPhotometry(object):
 
         photometry = Photometry(
             self.output,
+            lens_name=_TEST_MODEL_SYSTEM_NAME,
             band_config=band_config,
             model_id=_TEST_MODEL_ID_F814W,
             walker_ratio=2,
@@ -319,6 +237,7 @@ class TestPhotometry(object):
                 kwargs_lens_light_all=kwargs_lens_light,
                 kwargs_source_all=kwargs_source,
                 kwargs_ps_all=kwargs_ps,
+                kwargs_special_all=kwargs_special
             )
 
     def test_do_linear_inversion(self):
@@ -357,24 +276,23 @@ class TestPhotometry(object):
             assert np.all((q > 0) & (q <= 1))
             assert np.all(r_eff > 0)
 
-    def test_calculate_ab_magnitude(self):
-        """Test `calculate_ab_magnitude` shape and consistency."""
+    def test_calculate_ab_magnitude_hst(self):
+        """Test `calculate_ab_magnitude_hst` shape and consistency."""
 
-        flux_chain, _ = self.photometry1.do_linear_inversion()
-
-        mag_chain = self.photometry1.calculate_ab_magnitude(
-            flux_chain=flux_chain, magnitude_config=self.magnitude_config1
+        flux = np.array([[5000.0, 23152.0]])        
+        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+            flux_chain=flux, calibration_parameters=self.calibration_parameters1
         )
 
         assert isinstance(mag_chain, np.ndarray)
 
-        assert mag_chain.shape == flux_chain.shape
+        assert mag_chain.shape == flux.shape
 
         assert np.all(np.isfinite(mag_chain))
 
-        positive = flux_chain > 0
+        positive = flux > 0
 
-        reconstructed = np.zeros_like(flux_chain)
+        reconstructed = np.zeros_like(flux)
         reconstructed[positive] = mag_chain[positive]
 
         assert np.all(np.isfinite(reconstructed[positive]))
@@ -385,20 +303,106 @@ class TestPhotometry(object):
         n_images = self.photometry1.n_images
         n_flux_per_filt = n_images + 3
 
-        data_band = self.photometry1.filters[0]
+        calib = self.calibration_parameters1["F814W"]
 
-        flux_block = flux_chain[:, :n_flux_per_filt]
+        # manually compute expected AB magnitudes
+        flux_cgs = flux * calib["photflam"]
 
-        expected_mag = self.photometry1._get_abmag(
-            flux_block, data_band, magnitude_config=self.magnitude_config1
+        stmag = -2.5 * np.log10(flux_cgs) - 21.1
+
+        expected_abmag = (
+            stmag
+            - 5.0 * np.log10(calib["photplam"])
+            + 2.5 * np.log10(299792458e10)
+            - 27.5
         )
 
         np.testing.assert_allclose(
             mag_chain[:, :n_flux_per_filt],
-            expected_mag,
+            expected_abmag,
             rtol=1e-10,
             atol=1e-10,
         )
+
+        # test that error messages properly are called
+        test_calibration = {}
+
+        with pytest.raises(KeyError):
+            mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+                flux_chain=flux, calibration_parameters=test_calibration
+            )
+
+        test_calibration.update({"photplam": 1000})
+
+        with pytest.raises(KeyError):
+            mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+                flux_chain=flux, calibration_parameters=test_calibration
+            )
+
+        test_calibration.update({"photzpt": -21.1})
+
+        with pytest.raises(KeyError):
+            mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+                flux_chain=flux, calibration_parameters=test_calibration
+            )
+
+    def test_calculate_ab_magnitude_jwst(self):
+        """Test `calculate_ab_magnitude_jwst` shape and consistency."""
+
+        flux = np.array([[5000.0, 23152.0]])        
+
+        class MockPhotometry(Photometry):
+            def __init__(self):
+                self.n_images = 2
+                self.filters = ["F115W"]
+
+        phot = MockPhotometry()
+
+        mag_chain = phot.calculate_ab_magnitude_jwst(
+            flux_chain=flux,
+            calibration_parameters=self.calibration_parameters2,
+        )     
+
+        assert isinstance(mag_chain, np.ndarray)
+
+        assert mag_chain.shape == flux.shape
+
+        assert np.all(np.isfinite(mag_chain))
+
+        positive = flux > 0
+
+        reconstructed = np.zeros_like(flux)
+        reconstructed[positive] = mag_chain[positive]
+
+        assert np.all(np.isfinite(reconstructed[positive]))
+
+        assert np.all(mag_chain > -50)
+        assert np.all(mag_chain < 100)
+
+        n_images = self.photometry1.n_images
+        n_flux_per_filt = n_images + 3
+
+        calib = self.calibration_parameters2["F115W"]
+
+        # manually compute expected AB magnitudes
+        flux_jy = flux * calib["pixar_sr"] * 1e6
+
+        expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
+
+        np.testing.assert_allclose(
+            mag_chain[:, :n_flux_per_filt],
+            expected_abmag,
+            rtol=1e-10,
+            atol=1e-10,
+        )
+
+        # test that error messages properly are called
+        test_calibration = {}
+
+        with pytest.raises(KeyError):
+            mag_chain = self.photometry1.calculate_ab_magnitude_jwst(
+                flux_chain=flux, calibration_parameters=test_calibration
+            )
 
     def test_save_to_hdf5(self):
         """Test save_to_hdf5 writes expected structure."""
@@ -406,8 +410,8 @@ class TestPhotometry(object):
         # generate chains
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude(
-            flux_chain, magnitude_config=self.magnitude_config1
+        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+            flux_chain, calibration_parameters=self.calibration_parameters1
         )
 
         # save
@@ -419,7 +423,7 @@ class TestPhotometry(object):
 
         filename = (
             f"{self.photometry1.output.io_directory}/outputs/"
-            f"photometry_{self.photometry1.system_name}_"
+            f"photometry_{self.photometry1.lens_name}_"
             f"{self.photometry1.model_id}.h5"
         )
 
@@ -427,7 +431,7 @@ class TestPhotometry(object):
 
         with h5py.File(filename, "r") as f:
 
-            assert f.attrs["system_name"] == self.photometry1.system_name
+            assert f.attrs["lens_name"] == self.photometry1.lens_name
 
             filters = list(f.attrs["filters"])
 
@@ -485,8 +489,8 @@ class TestPhotometry(object):
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude(
-            flux_chain, magnitude_config=self.magnitude_config1
+        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+            flux_chain, calibration_parameters=self.calibration_parameters1
         )
 
         self.photometry1.save_to_hdf5(
@@ -515,8 +519,8 @@ class TestPhotometry(object):
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude(
-            flux_chain, magnitude_config=self.magnitude_config1
+        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+            flux_chain, calibration_parameters=self.calibration_parameters1
         )
 
         self.photometry1.save_to_hdf5(
@@ -545,8 +549,8 @@ class TestPhotometry(object):
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude(
-            flux_chain, magnitude_config=self.magnitude_config1
+        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+            flux_chain, calibration_parameters=self.calibration_parameters1
         )
 
         self.photometry1.save_to_hdf5(

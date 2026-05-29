@@ -8,58 +8,65 @@ from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.Util import param_util
 
 from dolphin.processor.config import ModelConfig
+from dolphin.processor.files import FileSystem
 import numpy as np
 import h5py
 
 
 class Photometry:
+    """This class performs a linear inversion on the model outputs to obtain lens,
+      image, and source fluxes/magnitudes, as well as morphological properties of the
+      lens light. Initiate the class from the following inputs:
+
+    :param output: `Output` instance
+    :type output: `class`
+    :param lens_name: name of the system to analyze
+    :type lens_name: `str`
+    :param model_id: Model ID of the lens system being analyzed
+    :type model_id: `str`
+    :param band_config: Dictionary describing the filters and profile indices to
+        utilize in the inversion.
+    :type band_config: `dict`
+    :param walker_ratio: number of walkers per parameter in MCMC
+    :type walker_ratio: `int`
+    :param burn_in: (optional) number of burn-in steps to compute the medians after
+            convergence of the MCMC chain
+    :type burn_in: `int`
+    :param aperture_type: (optional) type of aperture in which the inversion is to be calculated within.
+          Options are: "circle" and "square." If not specified, the inversion will be computed over
+          the full image grid.
+    :type aperture_type: `bool`
+    :param aperture_size: (optional) angular size (in arcsec) over which the aperture mask is applied. For
+        type "circle," this corresponds to the radius of the aperture. For type "square," this corresponds
+        to the length of one side of the aperture.
+    :param do_morphology: (optional) If `True`, solves for the morphological properties of multi-component
+            lens light profiles after the linear inversion.
+    :type do_morphology: `bool`
+    """
 
     def __init__(
         self,
         output,
-        band_config,
+        lens_name,
         model_id,
+        band_config,
         walker_ratio,
         burn_in=0,
-        aperture_radius=None,
-        aperture_length=None,
+        aperture_type=None,
+        aperture_size=None,
         do_morphology=False,
     ):
-        """This class performs a linear inversion on the model outputs to obtain lens,
-        image, and source fluxes/magnitudes, as well as morphological properties of the
-        lens light. Initiate the class from the following inputs:
-
-        :param output: `Output` instance
-        :type output: `class`
-        :param band_config: Dictionary describing the filters and profile indices to
-        utilize in the inversion.
-        :type band_config: `dict`
-        :param model_id: Model ID of the lens system being analyzed
-        :type model_id: `str`
-        :param walker_ratio: number of walkers per parameter in MCMC
-        :type walker_ratio: `int`
-        :param burn_in: (optional) number of burn-in steps to compute the medians after
-            convergence of the MCMC chain
-        :type burn_in: `int`
-        :param aperture_radius: (optional) Radius, in arcseconds, for a circular aperture centered around the
-            lens light centroid in which the inversion is evaluated. If `None`, uses the domain of the model grid.
-        :type aperature_radius: `float`
-        :param aperture_length: (optional) Length, in arcseconds, for a square aperture centered around the
-           lens light centroid in which the inversion is evaluated. If `None`, uses the domain of the model grid.
-        :type aperature_length: `float`
-        :param do_morphology: (optional) If `True`, solves for the morphological properties of multi-component
-            lens light profiles after the linear inversion.
-        :type do_morphology: `bool`
-        """
 
         self.output = output
-        self.system_name = output._model_settings["lens_name"]
-        self.band_config = band_config
+        self.lens_name = lens_name
         self.model_id = model_id
+        output.load_output(f"{self.lens_name}", f"{self.model_id}", verbose=False)
+
+        self.band_config = band_config
         self.walker_ratio = walker_ratio
         self.burn_in = burn_in
-        self.aperature_radius = aperture_radius
-        self.aperature_length = aperture_length
+        self.aperture_type = aperture_type
+        self.aperature_size = aperture_size
         self.do_morphology = do_morphology
 
         self.filters = []
@@ -72,7 +79,7 @@ class Photometry:
         self.multi_band_list = output._multi_band_list_out
 
         config = ModelConfig(
-            lens_name=self.system_name,
+            lens_name=self.lens_name,
             io_directory=self.output.io_directory,
             settings=output.model_settings,
         )
@@ -81,10 +88,11 @@ class Photometry:
         self.kwargs_likelihood = config.get_kwargs_likelihood()
 
         self.param = output.get_param_class(
-            lens_name=self.system_name, model_id=self.model_id
+            lens_name=self.lens_name, model_id=self.model_id
         )
 
         self.band_models = self._build_band_models()
+        self.file_system = FileSystem(self.output.io_directory)
 
     def _build_band_models(self):
         """Build model components per band from Dolphin model configuration."""
@@ -112,89 +120,40 @@ class Photometry:
 
         return band_models
 
-    def _aperture_mask(self, data_class, center_x, center_y, radius=None, length=None):
-        """Generate aperture mask centered around the lens light centroid."""
+    def _aperture_mask(self, data_class, center_x, center_y, aperture_type=None, aperture_size=None):
+        """Generate an aperture mask centered around the lens light centroid.
+
+        :param data_class: instance of `ImageData` class
+        :type data_class: `class`
+        :param center_x: center x-axis pixel (in arcesc) for the aperture
+        :type center_x: `float`
+        :param center_y: center y-axis pixel (in arcsec) for the aperture
+        :type center_y: `float`
+        :param aperture_type: type of aperture in which the inversion is to be calculated within.
+          Options are: "circle" and "square." If not specified, the inversion will be computed over
+          the full image grid.
+        :type aperture_type: `bool`
+        :param aperture_size: angular size (in arcsec) over which the aperture mask is applied. For
+        type "circle," this corresponds to the radius of the aperture. For type "square," this corresponds
+        to the length of one side of the aperture.
+        """
 
         x_grid, y_grid = data_class.pixel_coordinates
 
-        if radius is not None:
+        if aperture_type == 'circle':
 
             r = np.sqrt((x_grid - center_x) ** 2 + (y_grid - center_y) ** 2)
 
-            return r <= radius
+            return r <= aperture_size
 
-        elif length is not None:
+        elif aperture_type == 'square':
 
-            return (np.abs(x_grid - center_x) <= length / 2) & (
-                np.abs(y_grid - center_y) <= length / 2
+            return (np.abs(x_grid - center_x) <= aperture_size / 2) & (
+                np.abs(y_grid - center_y) <= aperture_size / 2
             )
 
         else:
             return np.ones_like(x_grid, dtype=bool)
-
-    def _load_photometry(self, data_band, magnitude_config):
-        """Load photometric calibration for a band."""
-
-        calib = magnitude_config[data_band]
-
-        # infer instrument type from keys
-        if "pixar_sr" in calib:
-
-            calib_out = {
-                "instrument": "JWST",
-                "pixar_sr": calib["pixar_sr"],
-            }
-
-        elif all(key in calib for key in ["photflam", "photplam"]):
-
-            calib_out = {
-                "instrument": "HST",
-                "photflam": calib["photflam"],
-                "photplam": calib["photplam"],
-            }
-
-        else:
-            raise ValueError(
-                f"Could not determine instrument type for band '{data_band}'"
-            )
-
-        print(f"Instrument identified as: {calib_out['instrument']}")
-
-        return calib_out
-
-    def _get_abmag(self, flux, data_band, magnitude_config):
-        """Convert flux to AB magnitude."""
-
-        calib = self._load_photometry(data_band, magnitude_config)
-
-        flux = np.asarray(flux)
-
-        if calib["instrument"] == "JWST":
-
-            pixar_sr = calib["pixar_sr"]
-
-            # MJy/sr to Jy
-            flux_jy = flux * pixar_sr * 1e6
-
-            abmag = -2.5 * np.log10(flux_jy / 3631.0)
-
-            return abmag
-
-        elif calib["instrument"] == "HST":
-
-            photflam = calib["photflam"]
-            photplam = calib["photplam"]
-            photzpt = -21.10
-
-            flux_cgs = flux * photflam
-
-            stmag = -2.5 * np.log10(flux_cgs) + photzpt
-
-            abmag = (
-                stmag - 5.0 * np.log10(photplam) + 2.5 * np.log10(299792458e10) - 27.5
-            )
-
-            return abmag
 
     def _do_linear_inversion_single_band(
         self,
@@ -203,6 +162,7 @@ class Photometry:
         kwargs_lens_light_all,
         kwargs_source_all,
         kwargs_ps_all,
+        kwargs_special_all,
         grid_spacing=0.02,
         grid_num=200,
     ):
@@ -262,6 +222,7 @@ class Photometry:
             kwargs_source=source_kwargs,
             kwargs_lens_light=lens_light_kwargs,
             kwargs_ps=kwargs_ps_all if has_point_source else None,
+            kwargs_special=kwargs_special_all
         )
 
         flux_images = []
@@ -279,8 +240,8 @@ class Photometry:
             data_class=band["data_class"],
             center_x=lens_light_kwargs[0]["center_x"],
             center_y=lens_light_kwargs[0]["center_y"],
-            radius=self.aperature_radius,
-            length=self.aperature_length,
+            aperture_type=self.aperture_type,
+            aperture_size=self.aperature_size,
         )
 
         flux_lens = 0
@@ -362,20 +323,20 @@ class Photometry:
         """Perform the linear inversion on all bands provided in `band_config`.
 
         :return flux_results: Array corresponding to the flux results from the linear
-            inversion for each model component.
-        :rtype flux_results: np.ndarray
+          inversion for each model component.
+        :type flux_results: np.ndarray
         :return morphology_results: Dictionary corresponding to the fitted lens light
-            parameters of mulit-component models.
-        :rtype morphology_results: dict
+          parameters of mulit-component models.
+        :type morphology_results: dict
         """
+        self.n_images = None # will infer from first sample
         flux_results = []
         morphology_results = {
             f: {"phi": [], "q": [], "r_eff": []} for f in self.filters
         }
-        self.n_images = None  # will infer from first sample
 
         chain = self.output.get_reshaped_emcee_chain(
-            self.system_name, self.model_id, self.walker_ratio, self.burn_in
+            self.lens_name, self.model_id, self.walker_ratio, self.burn_in
         )
 
         flat_chain = chain.reshape(-1, chain.shape[-1])
@@ -388,12 +349,13 @@ class Photometry:
             kwargs_lens_light = kwargs_out["kwargs_lens_light"]
             kwargs_source = kwargs_out["kwargs_source"]
             kwargs_ps = kwargs_out["kwargs_ps"]
+            kwargs_special = kwargs_out["kwargs_special"]
 
             sample_fluxes = []
 
             for data_band in self.filters:
                 result = self._do_linear_inversion_single_band(
-                    data_band, kwargs_lens, kwargs_lens_light, kwargs_source, kwargs_ps
+                    data_band, kwargs_lens, kwargs_lens_light, kwargs_source, kwargs_ps, kwargs_special
                 )
 
                 flux_dict = result["fluxes"]
@@ -415,22 +377,20 @@ class Photometry:
 
         return np.array(flux_results), morphology_results
 
-    def calculate_ab_magnitude(self, flux_chain, magnitude_config):
-        """Helper functions to calculate the AB magnitude from the flux chains. Currently supported instruments and
-           needed calibration parameters are:
+    def calculate_ab_magnitude_hst(self, flux_chain, calibration_parameters):
+        """Helper function to calculate the AB magnitude from the flux chains of HST data.
 
-           1) JWST:
-                - `pixar_sr`: for a given data band, the average pixel area in units of steradians
-           2) HST:
-                - `photflam`: mean flux density (in erg cm-2 sec-1 Angstrom-1) that produces 1 count per second in the HST observing mode
-                - `photplam`: HST data band pivot wavelength
+        The required calibartion parameters are:
+            - `photflam`: mean flux density (in erg cm-2 sec-1 Angstrom-1) that produces 1 count per second in the HST observing mode
+            - `photzpt`: STMAG HST data band zero point
+            - `photplam`: HST data band pivot wavelength
 
         :param flux_chain: flux chain computed from `do_linear_inversion`
         :type flux_chain: np.ndarray
-        :param magnitude_config: dictionary corresponding to the filter and keyword values for magnitude conversions
-        :type magnitude_config: dict
+        :param calibration_parameters: dictionary corresponding to the filter and keyword values for HST data magnitude conversions
+        :type calibration_parameters: dict
         :return magnitude_chain: AB magnitude chain
-        :rtype magnitude_chain: np.ndarray
+        :type magnitude_chain: np.ndarray
         """
 
         n_flux_per_filt = self.n_images + 3
@@ -443,7 +403,66 @@ class Photometry:
 
             flux_block = flux_chain[:, start:end]
 
-            mag_block = self._get_abmag(flux_block, data_band, magnitude_config)
+            calib = calibration_parameters[data_band]
+            required_keys = {"photflam", "photzpt", "photplam"}
+
+            for key in required_keys:
+                if key not in calib:
+                    raise KeyError(f"{key} required for HST magnitude conversions!")
+
+            photflam = calib["photflam"]
+            photzpt = calib["photzpt"]
+            photplam = calib["photplam"]
+
+            flux_cgs = flux_block * photflam
+
+            stmag = -2.5 * np.log10(flux_cgs) + photzpt
+
+            mag_block = (
+                stmag - 5.0 * np.log10(photplam) + 2.5 * np.log10(299792458e10) - 27.5
+            )
+
+            magnitude_chain[:, start:end] = mag_block
+
+        return magnitude_chain
+    
+    def calculate_ab_magnitude_jwst(self, flux_chain, calibration_parameters):
+        """Helper function to calculate the AB magnitude from the flux chains of JWST data.
+
+        The required calibartion parameter is:
+            - `pixar_sr`: JWST average pixel area in units of steradians
+
+        :param flux_chain: flux chain computed from `do_linear_inversion`
+        :type flux_chain: np.ndarray
+        :param calibration_parameters: dictionary corresponding to the filter and keyword value for JWST data magnitude conversions
+        :type calibration_parameters: dict
+        :return magnitude_chain: AB magnitude chain
+        :type magnitude_chain: np.ndarray
+        """
+
+        n_flux_per_filt = self.n_images + 3
+        magnitude_chain = np.zeros_like(flux_chain)
+        required_keys = {"pixar_sr"}
+
+        for i, data_band in enumerate(self.filters):
+
+            start = i * n_flux_per_filt
+            end = start + n_flux_per_filt
+
+            flux_block = flux_chain[:, start:end]
+
+            calib = calibration_parameters[data_band]
+
+            for key in required_keys:
+                if key not in calib:
+                    raise KeyError(f"{key} required for JWST magnitude conversions!")
+
+            pixar_sr = calib["pixar_sr"]
+
+            # MJy/sr to Jy
+            flux_jy = flux_block * pixar_sr * 1e6
+
+            mag_block = -2.5 * np.log10(flux_jy / 3631.0)
 
             magnitude_chain[:, start:end] = mag_block
 
@@ -457,159 +476,35 @@ class Photometry:
         :param magnitude_chain: (Optional) AB magnitude chain as computed from `calculate_ab_magnitude`
         :type magnitude_chain: np.ndarray
         :param morphology_chain: (Optional) Morphology chain as computed from `do_linear_inversion`
-        :tpye morphology_chain: dict
+        :type morphology_chain: dict
         """
 
-        n_flux_per_filt = self.n_images + 3
-
-        flux_labels = [f"Image{i+1}" for i in range(self.n_images)] + [
-            "Lens",
-            "Host_lensed",
-            "Host_intrinsic",
-        ]
-
-        filename = (
-            f"{self.output.io_directory}/outputs/"
-            f"photometry_{self.system_name}_{self.model_id}.h5"
-        )
-
-        with h5py.File(filename, "w") as f:
-
-            f.attrs["system_name"] = self.system_name
-            f.attrs["filters"] = self.filters
-
-            for i, data_band in enumerate(self.filters):
-
-                group = f.create_group(data_band)
-
-                start = i * n_flux_per_filt
-                end = start + n_flux_per_filt
-
-                flux_block = flux_chain[:, start:end]
-
-                if magnitude_chain is not None:
-                    mag_block = magnitude_chain[:, start:end]
-
-                for j, label in enumerate(flux_labels):
-
-                    subgrp = group.create_group(label)
-
-                    subgrp.create_dataset("flux", data=flux_block[:, j])
-
-                    if magnitude_chain is not None:
-                        subgrp.create_dataset("magnitude", data=mag_block[:, j])
-
-            if self.do_morphology:
-
-                morphology_group = f.create_group("lens_light_morphology")
-
-                for data_band in self.filters:
-
-                    filter_group = morphology_group.create_group(data_band)
-
-                    filter_group.create_dataset(
-                        "phi", data=np.array(morphology_chain[data_band]["phi"])
-                    )
-
-                    filter_group.create_dataset(
-                        "q", data=np.array(morphology_chain[data_band]["q"])
-                    )
-
-                    filter_group.create_dataset(
-                        "r_eff", data=np.array(morphology_chain[data_band]["r_eff"])
-                    )
+        self.file_system.save_photometry_to_hdf5(self, flux_chain, magnitude_chain, morphology_chain)
 
     def load_flux_chain(self):
-        """Load flux chain.
+        """Load flux chain as computed by `do_linear_inversion`.
 
         :return flux_chain: flux chain
-        :rtype flux_chain: np.ndarray
+        :type flux_chain: np.ndarray
         """
 
-        filename = f"{self.output.io_directory}/outputs/photometry_{self.system_name}_{self.model_id}.h5"
-        with h5py.File(filename, "r") as f:
-
-            filters = list(f.attrs["filters"])
-            chains = []
-
-            for data_band in filters:
-                group = f[data_band]
-
-                labels = list(group.keys())
-
-                # ensure consistent ordering
-                image_labels = sorted([label for label in labels if "Image" in label])
-                other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
-
-                ordered_labels = image_labels + other_labels
-
-                block = np.vstack(
-                    [group[label]["flux"][:] for label in ordered_labels]
-                ).T
-
-                chains.append(block)
-
-        flux_chain = np.hstack(chains)
-
-        return flux_chain
+        return self.file_system.load_flux_chain(self)        
 
     def load_magnitude_chain(self):
-        """Load magnitude chain.
+        """Load magnitude chain as computed by the respective helper function.
 
         :return magnitude_chain: AB magnitude chain
         :type magnitude_chain: np.ndarray
         """
 
-        filename = f"{self.output.io_directory}/outputs/photometry_{self.system_name}_{self.model_id}.h5"
-        with h5py.File(filename, "r") as f:
-
-            filters = list(f.attrs["filters"])
-            chains = []
-
-            for data_band in filters:
-                group = f[data_band]
-
-                labels = list(group.keys())
-
-                image_labels = sorted([label for label in labels if "Image" in label])
-                other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
-
-                ordered_labels = image_labels + other_labels
-
-                block = np.vstack(
-                    [group[label]["magnitude"][:] for label in ordered_labels]
-                ).T
-
-                chains.append(block)
-
-        magnitude_chain = np.hstack(chains)
-
-        return magnitude_chain
+        return self.file_system.load_magnitude_chain(self)        
 
     def load_morphology_chain(self):
-        """Load morphology chains.
+        """Load morphology dictionary as computed by `do_linear_inversion`.
 
         :return morphology_chain: morphology chain: {filter: {"phi": array, "q": array,
             "r_eff": array}}
-        :rtype: dict
+        :type: dict
         """
 
-        filename = f"{self.output.io_directory}/outputs/photometry_{self.system_name}_{self.model_id}.h5"
-        with h5py.File(filename, "r") as f:
-
-            if "lens_light_morphology" not in f:
-                return None
-
-            filters = list(f.attrs["filters"])
-            morphology = f["lens_light_morphology"]
-
-            morphology_chain = {}
-
-            for data_band in filters:
-                morphology_chain[data_band] = {
-                    "phi": morphology[data_band]["phi"][:],
-                    "q": morphology[data_band]["q"][:],
-                    "r_eff": morphology[data_band]["r_eff"][:],
-                }
-
-        return morphology_chain
+        return self.file_system.load_morphology_chain(self)

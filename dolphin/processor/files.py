@@ -613,3 +613,179 @@ class FileSystem(object):
             )
 
         return path
+    
+    def get_photometry_file_path(self, lens_name, model_id):
+        """Get the file path for photometry outputs."""
+
+        return self.path2str(
+            Path(self.get_outputs_directory())
+            / f"photometry_{lens_name}_{model_id}.h5"
+        )
+    
+    def save_photometry_to_hdf5(self, Photometry, flux_chain, magnitude_chain=None, morphology_chain=None):
+        """Save linear inversion outputs to HDF5 for later analysis.
+
+        :param Photometry: `Photometry` class instance
+        :type Photometry: `class`
+        :param flux_chain: Flux chain as computed from `do_linear_inversion`
+        :type flux_chain: np.ndarray
+        :param magnitude_chain: (Optional) AB magnitude chain as computed from `calculate_ab_magnitude`
+        :type magnitude_chain: np.ndarray
+        :param morphology_chain: (Optional) Morphology chain as computed from `do_linear_inversion`
+        :tpye morphology_chain: dict
+        """
+
+        n_flux_per_filt = Photometry.n_images + 3
+
+        flux_labels = [f"Image{i+1}" for i in range(Photometry.n_images)] + [
+            "Lens",
+            "Host_lensed",
+            "Host_intrinsic",
+        ]
+
+        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+
+        with h5py.File(filename, "w") as f:
+
+            f.attrs["lens_name"] = Photometry.lens_name
+            f.attrs["filters"] = Photometry.filters
+
+            for i, data_band in enumerate(Photometry.filters):
+
+                group = f.create_group(data_band)
+
+                start = i * n_flux_per_filt
+                end = start + n_flux_per_filt
+
+                flux_block = flux_chain[:, start:end]
+
+                if magnitude_chain is not None:
+                    mag_block = magnitude_chain[:, start:end]
+
+                for j, label in enumerate(flux_labels):
+
+                    subgrp = group.create_group(label)
+
+                    subgrp.create_dataset("flux", data=flux_block[:, j])
+
+                    if magnitude_chain is not None:
+                        subgrp.create_dataset("magnitude", data=mag_block[:, j])
+
+            if Photometry.do_morphology:
+
+                morphology_group = f.create_group("lens_light_morphology")
+
+                for data_band in Photometry.filters:
+
+                    filter_group = morphology_group.create_group(data_band)
+
+                    filter_group.create_dataset(
+                        "phi", data=np.array(morphology_chain[data_band]["phi"])
+                    )
+
+                    filter_group.create_dataset(
+                        "q", data=np.array(morphology_chain[data_band]["q"])
+                    )
+
+                    filter_group.create_dataset(
+                        "r_eff", data=np.array(morphology_chain[data_band]["r_eff"])
+                    )
+
+    def load_flux_chain(self, Photometry):
+        """Load flux chain as computed by `Photometry.do_linear_inversion`.
+
+        :param Photometry: `Photometry` class instance
+        :type Photometry: `class`
+        :return flux_chain: flux chain
+        :rtype flux_chain: np.ndarray
+        """
+
+        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        with h5py.File(filename, "r") as f:
+
+            filters = list(f.attrs["filters"])
+            chains = []
+
+            for data_band in filters:
+                group = f[data_band]
+
+                labels = list(group.keys())
+
+                # ensure consistent ordering
+                image_labels = sorted([label for label in labels if "Image" in label])
+                other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
+
+                ordered_labels = image_labels + other_labels
+
+                block = np.vstack(
+                    [group[label]["flux"][:] for label in ordered_labels]
+                ).T
+
+                chains.append(block)
+
+        flux_chain = np.hstack(chains)
+
+        return flux_chain
+
+    def load_magnitude_chain(self, Photometry):
+        """Load magnitude chain.
+
+        :param Photometry: `Photometry` class instance
+        :type Photometry: `class`
+        :return magnitude_chain: AB magnitude chain
+        :type magnitude_chain: np.ndarray
+        """
+
+        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        with h5py.File(filename, "r") as f:
+
+            filters = list(f.attrs["filters"])
+            chains = []
+
+            for data_band in filters:
+                group = f[data_band]
+
+                labels = list(group.keys())
+
+                image_labels = sorted([label for label in labels if "Image" in label])
+                other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
+
+                ordered_labels = image_labels + other_labels
+
+                block = np.vstack(
+                    [group[label]["magnitude"][:] for label in ordered_labels]
+                ).T
+
+                chains.append(block)
+
+        magnitude_chain = np.hstack(chains)
+
+        return magnitude_chain
+
+    def load_morphology_chain(self, Photometry):
+        """Load morphology chains as computed by `Photometry.do_linear_inversion`.
+
+        :return morphology_chain: morphology chain: {filter: {"phi": array, "q": array,
+            "r_eff": array}}
+        :rtype: dict
+        """
+
+        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        with h5py.File(filename, "r") as f:
+
+            if "lens_light_morphology" not in f:
+                return None
+
+            filters = list(f.attrs["filters"])
+            morphology = f["lens_light_morphology"]
+
+            morphology_chain = {}
+
+            for data_band in filters:
+                morphology_chain[data_band] = {
+                    "phi": morphology[data_band]["phi"][:],
+                    "q": morphology[data_band]["q"][:],
+                    "r_eff": morphology[data_band]["r_eff"][:],
+                }
+
+        return morphology_chain

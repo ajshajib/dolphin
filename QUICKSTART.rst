@@ -64,7 +64,7 @@ Inside your workspace directory, create the following subdirectories. **Note:** 
 - ``kernel_point_source``: A pixelated Point Spread Function (PSF).
 - ``psf_variance_map``: *(Optional)* A map of the uncertainty in the provided PSF (must match the PSF dimensions).
 
-1. Running the Fully Automated AI Pipeline
+4. Running the Fully Automated AI Pipeline
 ------------------------------------------
 
 With your workspace set up, you can now run the ``dolphin`` AI pipeline! The following Python code demonstrates a complete run for a lensed quasar system:

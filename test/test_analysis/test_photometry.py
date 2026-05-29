@@ -270,9 +270,7 @@ class TestPhotometry(object):
                 kwargs_special_all=kwargs_special,
             )
 
-        loaded_output2 = self.output.load_output(
-            "lens_system1", "example"
-        )
+        loaded_output2 = self.output.load_output("lens_system1", "example")
 
         sample = self.output._posterior_samples[-1]
 

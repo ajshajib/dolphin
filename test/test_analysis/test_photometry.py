@@ -156,7 +156,7 @@ class TestPhotometry(object):
         values."""
 
         # grab one posterior sample
-        loaded_output1 = self.output.load_output(
+        self.output.load_output(
             _TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W
         )
         sample = self.output._posterior_samples[-1]
@@ -270,7 +270,7 @@ class TestPhotometry(object):
                 kwargs_special_all=kwargs_special,
             )
 
-        loaded_output2 = self.output.load_output("lens_system1", "example")
+        self.output.load_output("lens_system1", "example")
 
         sample = self.output._posterior_samples[-1]
 

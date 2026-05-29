@@ -162,8 +162,8 @@ class Photometry:
         kwargs_lens_all,
         kwargs_lens_light_all,
         kwargs_source_all,
-        kwargs_ps_all,
         kwargs_special_all,
+        kwargs_ps_all=None,
         grid_spacing=0.02,
         grid_num=200,
     ):

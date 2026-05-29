@@ -19,9 +19,7 @@ _TEST_MODEL_SYSTEM_NAME = "lensed_quasar"
 class TestPhotometry(object):
     def setup_class(self):
         self.output = Output(_TEST_IO_DIR)
-        self.loaded_output1 = self.output.load_output(
-            _TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W
-        )
+
         self.band_config1 = {
             "F814W": {
                 "lens_light_indices": [0],
@@ -39,6 +37,14 @@ class TestPhotometry(object):
         }
 
         self.calibration_parameters2 = {"F115W": {"pixar_sr": 2.29160304105492e-14}}
+
+        self.band_config3 = {
+            "F390W": {
+                "lens_light_indices": [0],
+                "source_indices": [0],
+                "exclude_lens_light_indices": [],
+            }
+        }
 
         self.photometry1 = Photometry(
             self.output,
@@ -64,6 +70,18 @@ class TestPhotometry(object):
             do_morphology=False,
         )
 
+        self.photometry3 = Photometry(
+            self.output,
+            lens_name="lens_system1",
+            model_id="example",
+            band_config=self.band_config3,
+            walker_ratio=2,
+            burn_in=-1,
+            aperture_type=None,
+            aperture_size=None,
+            do_morphology=False,
+        )
+
     def test_build_band_models(self):
         """Test that _build_band_models properly functions."""
 
@@ -74,6 +92,10 @@ class TestPhotometry(object):
         assert "psf_class" in band_models1["F814W"]
         assert "kwargs_numerics" in band_models1["F814W"]
         assert band_models1["F814W"]["likelihood_mask"] is None
+
+        band_models3 = self.photometry3._build_band_models()
+
+        assert band_models3["F390W"]["likelihood_mask"] is not None
 
     def test_aperture_mask(self):
         """Test `_aperature_mask` shapes and behavior."""
@@ -134,6 +156,9 @@ class TestPhotometry(object):
         values."""
 
         # grab one posterior sample
+        loaded_output1 = self.output.load_output(
+            _TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W
+        )
         sample = self.output._posterior_samples[-1]
 
         kwargs_out = self.photometry1.param.args2kwargs(sample)
@@ -244,6 +269,31 @@ class TestPhotometry(object):
                 kwargs_ps_all=kwargs_ps,
                 kwargs_special_all=kwargs_special,
             )
+
+        loaded_output2 = self.output.load_output(
+            "lens_system1", "example"
+        )
+
+        sample = self.output._posterior_samples[-1]
+
+        kwargs_out = self.photometry1.param.args2kwargs(sample)
+
+        kwargs_lens = kwargs_out["kwargs_lens"]
+        kwargs_lens_light = kwargs_out["kwargs_lens_light"]
+        kwargs_source = kwargs_out["kwargs_source"]
+        kwargs_ps = None
+        kwargs_special = kwargs_out["kwargs_special"]
+
+        result = self.photometry3._do_linear_inversion_single_band(
+            data_band="F390W",
+            kwargs_lens_all=kwargs_lens,
+            kwargs_lens_light_all=kwargs_lens_light,
+            kwargs_source_all=kwargs_source,
+            kwargs_ps_all=kwargs_ps,
+            kwargs_special_all=kwargs_special,
+        )
+
+        assert len(result["fluxes"]["images"]) == 0
 
     def test_do_linear_inversion(self):
         """Test `do_linear_inversion` output structure and shapes."""

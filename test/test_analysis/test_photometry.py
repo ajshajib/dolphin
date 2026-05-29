@@ -156,9 +156,7 @@ class TestPhotometry(object):
         values."""
 
         # grab one posterior sample
-        self.output.load_output(
-            _TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W
-        )
+        self.output.load_output(_TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W)
         sample = self.output._posterior_samples[-1]
 
         kwargs_out = self.photometry1.param.args2kwargs(sample)

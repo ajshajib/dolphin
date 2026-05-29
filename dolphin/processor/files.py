@@ -613,16 +613,17 @@ class FileSystem(object):
             )
 
         return path
-    
+
     def get_photometry_file_path(self, lens_name, model_id):
         """Get the file path for photometry outputs."""
 
         return self.path2str(
-            Path(self.get_outputs_directory())
-            / f"photometry_{lens_name}_{model_id}.h5"
+            Path(self.get_outputs_directory()) / f"photometry_{lens_name}_{model_id}.h5"
         )
-    
-    def save_photometry_to_hdf5(self, Photometry, flux_chain, magnitude_chain=None, morphology_chain=None):
+
+    def save_photometry_to_hdf5(
+        self, Photometry, flux_chain, magnitude_chain=None, morphology_chain=None
+    ):
         """Save linear inversion outputs to HDF5 for later analysis.
 
         :param Photometry: `Photometry` class instance
@@ -643,7 +644,9 @@ class FileSystem(object):
             "Host_intrinsic",
         ]
 
-        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        filename = self.get_photometry_file_path(
+            Photometry.lens_name, Photometry.model_id
+        )
 
         with h5py.File(filename, "w") as f:
 
@@ -700,7 +703,9 @@ class FileSystem(object):
         :rtype flux_chain: np.ndarray
         """
 
-        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        filename = self.get_photometry_file_path(
+            Photometry.lens_name, Photometry.model_id
+        )
         with h5py.File(filename, "r") as f:
 
             filters = list(f.attrs["filters"])
@@ -736,7 +741,9 @@ class FileSystem(object):
         :type magnitude_chain: np.ndarray
         """
 
-        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        filename = self.get_photometry_file_path(
+            Photometry.lens_name, Photometry.model_id
+        )
         with h5py.File(filename, "r") as f:
 
             filters = list(f.attrs["filters"])
@@ -770,7 +777,9 @@ class FileSystem(object):
         :rtype: dict
         """
 
-        filename = self.get_photometry_file_path(Photometry.lens_name, Photometry.model_id)
+        filename = self.get_photometry_file_path(
+            Photometry.lens_name, Photometry.model_id
+        )
         with h5py.File(filename, "r") as f:
 
             if "lens_light_morphology" not in f:

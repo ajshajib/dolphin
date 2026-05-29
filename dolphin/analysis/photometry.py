@@ -15,8 +15,8 @@ import h5py
 
 class Photometry:
     """This class performs a linear inversion on the model outputs to obtain lens,
-      image, and source fluxes/magnitudes, as well as morphological properties of the
-      lens light. Initiate the class from the following inputs:
+    image, and source fluxes/magnitudes, as well as morphological properties of the lens
+    light. Initiate the class from the following inputs:
 
     :param output: `Output` instance
     :type output: `class`
@@ -120,7 +120,9 @@ class Photometry:
 
         return band_models
 
-    def _aperture_mask(self, data_class, center_x, center_y, aperture_type=None, aperture_size=None):
+    def _aperture_mask(
+        self, data_class, center_x, center_y, aperture_type=None, aperture_size=None
+    ):
         """Generate an aperture mask centered around the lens light centroid.
 
         :param data_class: instance of `ImageData` class
@@ -140,13 +142,13 @@ class Photometry:
 
         x_grid, y_grid = data_class.pixel_coordinates
 
-        if aperture_type == 'circle':
+        if aperture_type == "circle":
 
             r = np.sqrt((x_grid - center_x) ** 2 + (y_grid - center_y) ** 2)
 
             return r <= aperture_size
 
-        elif aperture_type == 'square':
+        elif aperture_type == "square":
 
             return (np.abs(x_grid - center_x) <= aperture_size / 2) & (
                 np.abs(y_grid - center_y) <= aperture_size / 2
@@ -222,7 +224,7 @@ class Photometry:
             kwargs_source=source_kwargs,
             kwargs_lens_light=lens_light_kwargs,
             kwargs_ps=kwargs_ps_all if has_point_source else None,
-            kwargs_special=kwargs_special_all
+            kwargs_special=kwargs_special_all,
         )
 
         flux_images = []
@@ -323,13 +325,13 @@ class Photometry:
         """Perform the linear inversion on all bands provided in `band_config`.
 
         :return flux_results: Array corresponding to the flux results from the linear
-          inversion for each model component.
+            inversion for each model component.
         :type flux_results: np.ndarray
         :return morphology_results: Dictionary corresponding to the fitted lens light
-          parameters of mulit-component models.
+            parameters of mulit-component models.
         :type morphology_results: dict
         """
-        self.n_images = None # will infer from first sample
+        self.n_images = None  # will infer from first sample
         flux_results = []
         morphology_results = {
             f: {"phi": [], "q": [], "r_eff": []} for f in self.filters
@@ -355,7 +357,12 @@ class Photometry:
 
             for data_band in self.filters:
                 result = self._do_linear_inversion_single_band(
-                    data_band, kwargs_lens, kwargs_lens_light, kwargs_source, kwargs_ps, kwargs_special
+                    data_band,
+                    kwargs_lens,
+                    kwargs_lens_light,
+                    kwargs_source,
+                    kwargs_ps,
+                    kwargs_special,
                 )
 
                 flux_dict = result["fluxes"]
@@ -378,7 +385,8 @@ class Photometry:
         return np.array(flux_results), morphology_results
 
     def calculate_ab_magnitude_hst(self, flux_chain, calibration_parameters):
-        """Helper function to calculate the AB magnitude from the flux chains of HST data.
+        """Helper function to calculate the AB magnitude from the flux chains of HST
+        data.
 
         The required calibartion parameters are:
             - `photflam`: mean flux density (in erg cm-2 sec-1 Angstrom-1) that produces 1 count per second in the HST observing mode
@@ -425,9 +433,10 @@ class Photometry:
             magnitude_chain[:, start:end] = mag_block
 
         return magnitude_chain
-    
+
     def calculate_ab_magnitude_jwst(self, flux_chain, calibration_parameters):
-        """Helper function to calculate the AB magnitude from the flux chains of JWST data.
+        """Helper function to calculate the AB magnitude from the flux chains of JWST
+        data.
 
         The required calibartion parameter is:
             - `pixar_sr`: JWST average pixel area in units of steradians
@@ -479,7 +488,9 @@ class Photometry:
         :type morphology_chain: dict
         """
 
-        self.file_system.save_photometry_to_hdf5(self, flux_chain, magnitude_chain, morphology_chain)
+        self.file_system.save_photometry_to_hdf5(
+            self, flux_chain, magnitude_chain, morphology_chain
+        )
 
     def load_flux_chain(self):
         """Load flux chain as computed by `do_linear_inversion`.
@@ -488,7 +499,7 @@ class Photometry:
         :type flux_chain: np.ndarray
         """
 
-        return self.file_system.load_flux_chain(self)        
+        return self.file_system.load_flux_chain(self)
 
     def load_magnitude_chain(self):
         """Load magnitude chain as computed by the respective helper function.
@@ -497,7 +508,7 @@ class Photometry:
         :type magnitude_chain: np.ndarray
         """
 
-        return self.file_system.load_magnitude_chain(self)        
+        return self.file_system.load_magnitude_chain(self)
 
     def load_morphology_chain(self):
         """Load morphology dictionary as computed by `do_linear_inversion`.

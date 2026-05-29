@@ -15,6 +15,7 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 _TEST_MODEL_ID_F814W = "example"
 _TEST_MODEL_SYSTEM_NAME = "lensed_quasar"
 
+
 class TestPhotometry(object):
     def setup_class(self):
         self.output = Output(_TEST_IO_DIR)
@@ -30,7 +31,11 @@ class TestPhotometry(object):
         }
 
         self.calibration_parameters1 = {
-            "F814W": {"photflam": 1.52122335e-19, "photzpt": -21.1, "photplam": 8034.189}
+            "F814W": {
+                "photflam": 1.52122335e-19,
+                "photzpt": -21.1,
+                "photplam": 8034.189,
+            }
         }
 
         self.calibration_parameters2 = {"F115W": {"pixar_sr": 2.29160304105492e-14}}
@@ -88,7 +93,7 @@ class TestPhotometry(object):
             center_x=center_x,
             center_y=center_y,
             aperture_type="circle",
-            aperture_size=1.
+            aperture_size=1.0,
         )
 
         assert circular_mask.shape == expected_shape
@@ -104,7 +109,7 @@ class TestPhotometry(object):
             center_x=center_x,
             center_y=center_y,
             aperture_type="square",
-            aperture_size=1.
+            aperture_size=1.0,
         )
 
         assert square_mask.shape == expected_shape
@@ -145,7 +150,7 @@ class TestPhotometry(object):
             kwargs_lens_light_all=kwargs_lens_light,
             kwargs_source_all=kwargs_source,
             kwargs_ps_all=kwargs_ps,
-            kwargs_special_all=kwargs_special
+            kwargs_special_all=kwargs_special,
         )
 
         assert isinstance(result, dict)
@@ -209,7 +214,7 @@ class TestPhotometry(object):
                 kwargs_lens_light_all=kwargs_lens_light,
                 kwargs_source_all=kwargs_source,
                 kwargs_ps_all=kwargs_ps,
-                kwargs_special_all=kwargs_special
+                kwargs_special_all=kwargs_special,
             )
 
         band_config = {
@@ -237,7 +242,7 @@ class TestPhotometry(object):
                 kwargs_lens_light_all=kwargs_lens_light,
                 kwargs_source_all=kwargs_source,
                 kwargs_ps_all=kwargs_ps,
-                kwargs_special_all=kwargs_special
+                kwargs_special_all=kwargs_special,
             )
 
     def test_do_linear_inversion(self):
@@ -279,7 +284,7 @@ class TestPhotometry(object):
     def test_calculate_ab_magnitude_hst(self):
         """Test `calculate_ab_magnitude_hst` shape and consistency."""
 
-        flux = np.array([[5000.0, 23152.0]])        
+        flux = np.array([[5000.0, 23152.0]])
         mag_chain = self.photometry1.calculate_ab_magnitude_hst(
             flux_chain=flux, calibration_parameters=self.calibration_parameters1
         )
@@ -349,7 +354,7 @@ class TestPhotometry(object):
     def test_calculate_ab_magnitude_jwst(self):
         """Test `calculate_ab_magnitude_jwst` shape and consistency."""
 
-        flux = np.array([[5000.0, 23152.0]])        
+        flux = np.array([[5000.0, 23152.0]])
 
         class MockPhotometry(Photometry):
             def __init__(self):
@@ -361,7 +366,7 @@ class TestPhotometry(object):
         mag_chain = phot.calculate_ab_magnitude_jwst(
             flux_chain=flux,
             calibration_parameters=self.calibration_parameters2,
-        )     
+        )
 
         assert isinstance(mag_chain, np.ndarray)
 

@@ -589,9 +589,7 @@ class TestPhotometry(object):
         # is initialized as False
         flux_chain, _ = self.photometry2.do_linear_inversion()
 
-        self.photometry2.save_to_hdf5(
-            flux_chain
-        )
+        self.photometry2.save_to_hdf5(flux_chain)
 
         loaded_morph = self.photometry2.load_morphology_chain()
 

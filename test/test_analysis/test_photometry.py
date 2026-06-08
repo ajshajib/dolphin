@@ -37,7 +37,9 @@ class TestPhotometry(object):
             }
         }
 
-        self.calibration_parameters2 = {"F115W": {"instrument": "JWST", "pixar_sr": 2.29160304105492e-14}}
+        self.calibration_parameters2 = {
+            "F115W": {"instrument": "JWST", "pixar_sr": 2.29160304105492e-14}
+        }
 
         self.band_config3 = {
             "F390W": {
@@ -384,7 +386,7 @@ class TestPhotometry(object):
         stmag = -2.5 * np.log10(flux_cgs) + calib["photzpt"]
 
         expected_abmag = (
-        stmag
+            stmag
             - 5.0 * np.log10(calib["photplam"])
             + 2.5 * np.log10(299792458e10)
             - 27.5
@@ -397,7 +399,7 @@ class TestPhotometry(object):
             atol=1e-10,
         )
 
-        # Test JWST branch 
+        # Test JWST branch
 
         class MockPhotometry(Photometry):
             def __init__(self):
@@ -407,8 +409,7 @@ class TestPhotometry(object):
         phot = MockPhotometry()
 
         flux_chain = {
-            "F115W": 
-            {
+            "F115W": {
                 "image1": np.array([5000.0]),
                 "lens": np.array([23152.0]),
             }
@@ -427,9 +428,7 @@ class TestPhotometry(object):
 
         flux_jy = flux * calib["pixar_sr"] * 1e6
 
-        expected_abmag = -2.5 * np.log10(
-            flux_jy / 3631.0
-        )
+        expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
 
         np.testing.assert_allclose(
             mag_chain["F115W"]["image1"],
@@ -492,9 +491,7 @@ class TestPhotometry(object):
 
                 grp = f[data_band]
 
-                expected_components = set(
-                    flux_chain[data_band].keys()
-                )
+                expected_components = set(flux_chain[data_band].keys())
 
                 assert set(grp.keys()) == expected_components
 

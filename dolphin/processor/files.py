@@ -708,9 +708,7 @@ class FileSystem(object):
 
                 for component in group.keys():
 
-                    flux_chain[data_band][component] = (
-                        group[component]["flux"][:]
-                    )
+                    flux_chain[data_band][component] = group[component]["flux"][:]
 
         return flux_chain
 
@@ -742,9 +740,9 @@ class FileSystem(object):
 
                 for component in group.keys():
 
-                    magnitude_chain[data_band][component] = (
-                        group[component]["magnitude"][:]
-                    )
+                    magnitude_chain[data_band][component] = group[component][
+                        "magnitude"
+                    ][:]
 
         return magnitude_chain
 

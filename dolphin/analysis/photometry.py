@@ -323,8 +323,8 @@ class Photometry:
     def do_linear_inversion(self):
         """Perform the linear inversion on all bands provided in `band_config`.
 
-        :return flux_results: Dictionary corresponding to the flux results from the linear
-            inversion for each model component per data band.
+        :return flux_results: Dictionary corresponding to the flux results from the
+            linear inversion for each model component per data band.
         :type flux_results: dict
         :return morphology_results: Dictionary corresponding to the fitted lens light
             parameters of mulit-component models per data band.
@@ -338,7 +338,7 @@ class Photometry:
                 "lens": [],
                 "source_lensed": [],
                 "source_intrinsic": [],
-            }        
+            }
         morphology_results = {
             f: {"phi": [], "q": [], "r_eff": []} for f in self.filters
         }
@@ -366,7 +366,7 @@ class Photometry:
                     kwargs_lens_light_all=kwargs_lens_light,
                     kwargs_source_all=kwargs_source,
                     kwargs_special_all=kwargs_special,
-                    kwargs_ps_all=kwargs_ps
+                    kwargs_ps_all=kwargs_ps,
                 )
 
                 flux_dict = result["fluxes"]
@@ -380,9 +380,7 @@ class Photometry:
                 for i, flux in enumerate(flux_dict["images"]):
                     flux_results[data_band][f"image{i+1}"].append(flux)
 
-                flux_results[data_band]["lens"].append(
-                    flux_dict["lens"]
-                )
+                flux_results[data_band]["lens"].append(flux_dict["lens"])
 
                 flux_results[data_band]["source_lensed"].append(
                     flux_dict["source_lensed"]
@@ -399,10 +397,7 @@ class Photometry:
 
         for band in self.filters:
             for key in flux_results[band]:
-                flux_results[band][key] = np.array(
-                    flux_results[band][key]
-                    
-                )
+                flux_results[band][key] = np.array(flux_results[band][key])
         return flux_results, morphology_results
 
     def calculate_ab_magnitude(self, flux_chain, calibration_parameters):
@@ -422,12 +417,12 @@ class Photometry:
           JWST and HST data conversions:
 
           calibration_parameters = {
-          
+
           "F115W":
-            {"instrument": JWST, "pixar_sr": ####}, 
-            
+            {"instrument": JWST, "pixar_sr": ####},
+
             "F814W": {"instrument": HST, "photplam": ##, "photzpt": ##, "photflam": ##}
-            
+
             }
 
         :type calibration_parameters: dict
@@ -443,16 +438,12 @@ class Photometry:
             calib = calibration_parameters[data_band]
 
             if "instrument" not in calib:
-                raise ValueError(
-                    f"Instrument not specified for data band {data_band}!"
-                )
+                raise ValueError(f"Instrument not specified for data band {data_band}!")
 
             instrument = calib["instrument"]
 
             if instrument not in ["JWST", "HST"]:
-                raise ValueError(
-                    f"{instrument} not yet supported!"
-                )
+                raise ValueError(f"{instrument} not yet supported!")
 
             magnitude_results[data_band] = {}
 
@@ -462,8 +453,8 @@ class Photometry:
                     pixar_sr = calib["pixar_sr"]
 
                     flux_jy = flux * pixar_sr * 1e6
-                    magnitude_results[data_band][component] = (
-                        -2.5 * np.log10(flux_jy / 3631.0)
+                    magnitude_results[data_band][component] = -2.5 * np.log10(
+                        flux_jy / 3631.0
                     )
                 elif instrument == "HST":
                     photflam = calib["photflam"]
@@ -500,7 +491,7 @@ class Photometry:
         """Load flux chain as computed by `do_linear_inversion`.
 
         :return flux_chain: flux dictionary: {filter: {"image1": array, "image2": array,
-            "lens": array, ...}}        
+            "lens": array, ...}}
         :type flux_chain: dict
         """
 

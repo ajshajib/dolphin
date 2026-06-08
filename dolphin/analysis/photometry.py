@@ -323,15 +323,22 @@ class Photometry:
     def do_linear_inversion(self):
         """Perform the linear inversion on all bands provided in `band_config`.
 
-        :return flux_results: Array corresponding to the flux results from the linear
-            inversion for each model component.
-        :type flux_results: np.ndarray
+        :return flux_results: Dictionary corresponding to the flux results from the linear
+            inversion for each model component per data band.
+        :type flux_results: dict
         :return morphology_results: Dictionary corresponding to the fitted lens light
-            parameters of mulit-component models.
+            parameters of mulit-component models per data band.
         :type morphology_results: dict
         """
         self.n_images = None  # will infer from first sample
-        flux_results = []
+        flux_results = {}
+
+        for f in self.filters:
+            flux_results[f] = {
+                "lens": [],
+                "source_lensed": [],
+                "source_intrinsic": [],
+            }        
         morphology_results = {
             f: {"phi": [], "q": [], "r_eff": []} for f in self.filters
         }
@@ -352,129 +359,127 @@ class Photometry:
             kwargs_ps = kwargs_out["kwargs_ps"]
             kwargs_special = kwargs_out["kwargs_special"]
 
-            sample_fluxes = []
-
             for data_band in self.filters:
                 result = self._do_linear_inversion_single_band(
-                    data_band,
-                    kwargs_lens,
-                    kwargs_lens_light,
-                    kwargs_source,
-                    kwargs_ps,
-                    kwargs_special,
+                    data_band=data_band,
+                    kwargs_lens_all=kwargs_lens,
+                    kwargs_lens_light_all=kwargs_lens_light,
+                    kwargs_source_all=kwargs_source,
+                    kwargs_special_all=kwargs_special,
+                    kwargs_ps_all=kwargs_ps
                 )
 
                 flux_dict = result["fluxes"]
 
                 if self.n_images is None:
                     self.n_images = len(flux_dict["images"])
+                    for f in self.filters:
+                        for i in range(self.n_images):
+                            flux_results[f][f"image{i+1}"] = []
 
-                sample_fluxes.extend(flux_dict["images"])
-                sample_fluxes.append(flux_dict["lens"])
-                sample_fluxes.append(flux_dict["source_lensed"])
-                sample_fluxes.append(flux_dict["source_intrinsic"])
+                for i, flux in enumerate(flux_dict["images"]):
+                    flux_results[data_band][f"image{i+1}"].append(flux)
+
+                flux_results[data_band]["lens"].append(
+                    flux_dict["lens"]
+                )
+
+                flux_results[data_band]["source_lensed"].append(
+                    flux_dict["source_lensed"]
+                )
+
+                flux_results[data_band]["source_intrinsic"].append(
+                    flux_dict["source_intrinsic"]
+                )
 
                 morphology = result["morphology"]
                 morphology_results[data_band]["phi"].append(morphology["phi"])
                 morphology_results[data_band]["q"].append(morphology["q"])
                 morphology_results[data_band]["r_eff"].append(morphology["r_eff"])
 
-            flux_results.append(sample_fluxes)
+        for band in self.filters:
+            for key in flux_results[band]:
+                flux_results[band][key] = np.array(
+                    flux_results[band][key]
+                    
+                )
+        return flux_results, morphology_results
 
-        return np.array(flux_results), morphology_results
+    def calculate_ab_magnitude(self, flux_chain, calibration_parameters):
+        """Helper function to calculate the AB magnitude from the flux chains computed
+        by `do_linear_inversion`.
 
-    def calculate_ab_magnitude_hst(self, flux_chain, calibration_parameters):
-        """Helper function to calculate the AB magnitude from the flux chains of HST
-        data.
-
-        The required calibartion parameters are:
+        1) For JWST data, the required calibration parameter is:
+            - `pixar_sr`: JWST average pixel area in units of steradians
+        2) For HST data, the required calibartion parameters are:
             - `photflam`: mean flux density (in erg cm-2 sec-1 Angstrom-1) that produces 1 count per second in the HST observing mode
             - `photzpt`: STMAG HST data band zero point
             - `photplam`: HST data band pivot wavelength
 
         :param flux_chain: flux chain computed from `do_linear_inversion`
         :type flux_chain: np.ndarray
-        :param calibration_parameters: dictionary corresponding to the filter and keyword values for HST data magnitude conversions
+        :param calibration_parameters: dictionary corresponding to the filters, instruments, and keyword values for magnitude conversions. For example, if doing
+          JWST and HST data conversions:
+
+          calibration_parameters = {
+          
+          "F115W":
+            {"instrument": JWST, "pixar_sr": ####}, 
+            
+            "F814W": {"instrument": HST, "photplam": ##, "photzpt": ##, "photflam": ##}
+            
+            }
+
         :type calibration_parameters: dict
-        :return magnitude_chain: AB magnitude chain
-        :type magnitude_chain: np.ndarray
+        :return magnitude_results: Dictionary corresponding to the converted AB magnitudes for each
+          model component per band.
+        :type magnitude_results: dict
         """
 
-        n_flux_per_filt = self.n_images + 3
-        magnitude_chain = np.zeros_like(flux_chain)
+        magnitude_results = {}
 
-        for i, data_band in enumerate(self.filters):
-
-            start = i * n_flux_per_filt
-            end = start + n_flux_per_filt
-
-            flux_block = flux_chain[:, start:end]
-
-            calib = calibration_parameters[data_band]
-            required_keys = {"photflam", "photzpt", "photplam"}
-
-            for key in required_keys:
-                if key not in calib:
-                    raise KeyError(f"{key} required for HST magnitude conversions!")
-
-            photflam = calib["photflam"]
-            photzpt = calib["photzpt"]
-            photplam = calib["photplam"]
-
-            flux_cgs = flux_block * photflam
-
-            stmag = -2.5 * np.log10(flux_cgs) + photzpt
-
-            mag_block = (
-                stmag - 5.0 * np.log10(photplam) + 2.5 * np.log10(299792458e10) - 27.5
-            )
-
-            magnitude_chain[:, start:end] = mag_block
-
-        return magnitude_chain
-
-    def calculate_ab_magnitude_jwst(self, flux_chain, calibration_parameters):
-        """Helper function to calculate the AB magnitude from the flux chains of JWST
-        data.
-
-        The required calibartion parameter is:
-            - `pixar_sr`: JWST average pixel area in units of steradians
-
-        :param flux_chain: flux chain computed from `do_linear_inversion`
-        :type flux_chain: np.ndarray
-        :param calibration_parameters: dictionary corresponding to the filter and keyword value for JWST data magnitude conversions
-        :type calibration_parameters: dict
-        :return magnitude_chain: AB magnitude chain
-        :type magnitude_chain: np.ndarray
-        """
-
-        n_flux_per_filt = self.n_images + 3
-        magnitude_chain = np.zeros_like(flux_chain)
-        required_keys = {"pixar_sr"}
-
-        for i, data_band in enumerate(self.filters):
-
-            start = i * n_flux_per_filt
-            end = start + n_flux_per_filt
-
-            flux_block = flux_chain[:, start:end]
+        for data_band in self.filters:
 
             calib = calibration_parameters[data_band]
 
-            for key in required_keys:
-                if key not in calib:
-                    raise KeyError(f"{key} required for JWST magnitude conversions!")
+            if "instrument" not in calib:
+                raise ValueError(
+                    f"Instrument not specified for data band {data_band}!"
+                )
 
-            pixar_sr = calib["pixar_sr"]
+            instrument = calib["instrument"]
 
-            # MJy/sr to Jy
-            flux_jy = flux_block * pixar_sr * 1e6
+            if instrument not in ["JWST", "HST"]:
+                raise ValueError(
+                    f"{instrument} not yet supported!"
+                )
 
-            mag_block = -2.5 * np.log10(flux_jy / 3631.0)
+            magnitude_results[data_band] = {}
 
-            magnitude_chain[:, start:end] = mag_block
+            for component, flux in flux_chain[data_band].items():
 
-        return magnitude_chain
+                if instrument == "JWST":
+                    pixar_sr = calib["pixar_sr"]
+
+                    flux_jy = flux * pixar_sr * 1e6
+                    magnitude_results[data_band][component] = (
+                        -2.5 * np.log10(flux_jy / 3631.0)
+                    )
+                elif instrument == "HST":
+                    photflam = calib["photflam"]
+                    photzpt = calib["photzpt"]
+                    photplam = calib["photplam"]
+
+                    flux_cgs = flux * photflam
+                    stmag = -2.5 * np.log10(flux_cgs) + photzpt
+                    magnitude_results[data_band][component] = (
+                        stmag
+                        - 5.0 * np.log10(photplam)
+                        + 2.5 * np.log10(299792458e10)
+                        - 27.5
+                    )
+
+        return magnitude_results
 
     def save_to_hdf5(self, flux_chain, magnitude_chain=None, morphology_chain=None):
         """Save linear inversion outputs to HDF5 for later analysis.
@@ -494,8 +499,9 @@ class Photometry:
     def load_flux_chain(self):
         """Load flux chain as computed by `do_linear_inversion`.
 
-        :return flux_chain: flux chain
-        :type flux_chain: np.ndarray
+        :return flux_chain: flux dictionary: {filter: {"image1": array, "image2": array,
+            "lens": array, ...}}        
+        :type flux_chain: dict
         """
 
         return self.file_system.load_flux_chain(self)
@@ -503,8 +509,9 @@ class Photometry:
     def load_magnitude_chain(self):
         """Load magnitude chain as computed by the respective helper function.
 
-        :return magnitude_chain: AB magnitude chain
-        :type magnitude_chain: np.ndarray
+        :return magnitude_chain: AB magnitude dictionary: {filter: {"image1": array, "image2": array,
+            "lens": array, ...}}
+        :type magnitude_chain: dict
         """
 
         return self.file_system.load_magnitude_chain(self)

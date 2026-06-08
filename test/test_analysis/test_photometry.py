@@ -30,13 +30,14 @@ class TestPhotometry(object):
 
         self.calibration_parameters1 = {
             "F814W": {
+                "instrument": "HST",
                 "photflam": 1.52122335e-19,
                 "photzpt": -21.1,
                 "photplam": 8034.189,
             }
         }
 
-        self.calibration_parameters2 = {"F115W": {"pixar_sr": 2.29160304105492e-14}}
+        self.calibration_parameters2 = {"F115W": {"instrument": "JWST", "pixar_sr": 2.29160304105492e-14}}
 
         self.band_config3 = {
             "F390W": {
@@ -296,16 +297,33 @@ class TestPhotometry(object):
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        assert isinstance(flux_chain, np.ndarray)
-
-        n_images = self.photometry1.n_images
-        n_flux_per_filt = n_images + 3
-        expected_cols = len(self.photometry1.filters) * n_flux_per_filt
-
-        assert flux_chain.shape[1] == expected_cols
+        assert isinstance(flux_chain, dict)
         assert isinstance(morphology_chain, dict)
 
+        n_images = self.photometry1.n_images
+
         for data_band in self.photometry1.filters:
+
+            assert data_band in flux_chain
+
+            flux_dict = flux_chain[data_band]
+
+            for i in range(n_images):
+                key = f"image{i+1}"
+
+                assert key in flux_dict
+                assert isinstance(flux_dict[key], np.ndarray)
+                assert np.all(np.isfinite(flux_dict[key]))
+
+            for key in ["lens", "source_lensed", "source_intrinsic"]:
+                assert key in flux_dict
+                assert isinstance(flux_dict[key], np.ndarray)
+                assert np.all(np.isfinite(flux_dict[key]))
+
+            chain_length = len(flux_dict["lens"])
+
+            for value in flux_dict.values():
+                assert len(value) == chain_length
 
             assert data_band in morphology_chain
 
@@ -315,9 +333,9 @@ class TestPhotometry(object):
             assert "q" in morph
             assert "r_eff" in morph
 
-            phi = np.array(morph["phi"])
-            q = np.array(morph["q"])
-            r_eff = np.array(morph["r_eff"])
+            phi = np.asarray(morph["phi"])
+            q = np.asarray(morph["q"])
+            r_eff = np.asarray(morph["r_eff"])
 
             assert np.all(np.isfinite(phi))
             assert np.all(np.isfinite(q))
@@ -327,80 +345,59 @@ class TestPhotometry(object):
             assert np.all((q > 0) & (q <= 1))
             assert np.all(r_eff > 0)
 
-    def test_calculate_ab_magnitude_hst(self):
-        """Test `calculate_ab_magnitude_hst` shape and consistency."""
+    def test_calculate_ab_magnitude(self):
+        """Test calculate_ab_magnitude HST conversion."""
 
-        flux = np.array([[5000.0, 23152.0]])
-        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-            flux_chain=flux, calibration_parameters=self.calibration_parameters1
+        flux_chain = {
+            "F814W": {
+                "image1": np.array([5000.0]),
+                "lens": np.array([23152.0]),
+            }
+        }
+
+        mag_chain = self.photometry1.calculate_ab_magnitude(
+            flux_chain=flux_chain,
+            calibration_parameters=self.calibration_parameters1,
         )
 
-        assert isinstance(mag_chain, np.ndarray)
+        assert isinstance(mag_chain, dict)
 
-        assert mag_chain.shape == flux.shape
+        assert "F814W" in mag_chain
+        assert "image1" in mag_chain["F814W"]
+        assert "lens" in mag_chain["F814W"]
 
-        assert np.all(np.isfinite(mag_chain))
+        for component in mag_chain["F814W"]:
 
-        positive = flux > 0
+            mags = mag_chain["F814W"][component]
 
-        reconstructed = np.zeros_like(flux)
-        reconstructed[positive] = mag_chain[positive]
-
-        assert np.all(np.isfinite(reconstructed[positive]))
-
-        assert np.all(mag_chain > -50)
-        assert np.all(mag_chain < 100)
-
-        n_images = self.photometry1.n_images
-        n_flux_per_filt = n_images + 3
+            assert isinstance(mags, np.ndarray)
+            assert np.all(np.isfinite(mags))
+            assert np.all(mags > -50)
+            assert np.all(mags < 100)
 
         calib = self.calibration_parameters1["F814W"]
 
-        # manually compute expected AB magnitudes
+        flux = flux_chain["F814W"]["image1"]
+
         flux_cgs = flux * calib["photflam"]
 
-        stmag = -2.5 * np.log10(flux_cgs) - 21.1
+        stmag = -2.5 * np.log10(flux_cgs) + calib["photzpt"]
 
         expected_abmag = (
-            stmag
+        stmag
             - 5.0 * np.log10(calib["photplam"])
             + 2.5 * np.log10(299792458e10)
             - 27.5
         )
 
         np.testing.assert_allclose(
-            mag_chain[:, :n_flux_per_filt],
+            mag_chain["F814W"]["image1"],
             expected_abmag,
             rtol=1e-10,
             atol=1e-10,
         )
 
-        # test that error messages properly are called
-        test_calibration = {}
-
-        with pytest.raises(KeyError):
-            mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-                flux_chain=flux, calibration_parameters=test_calibration
-            )
-
-        test_calibration.update({"photplam": 1000})
-
-        with pytest.raises(KeyError):
-            mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-                flux_chain=flux, calibration_parameters=test_calibration
-            )
-
-        test_calibration.update({"photzpt": -21.1})
-
-        with pytest.raises(KeyError):
-            mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-                flux_chain=flux, calibration_parameters=test_calibration
-            )
-
-    def test_calculate_ab_magnitude_jwst(self):
-        """Test `calculate_ab_magnitude_jwst` shape and consistency."""
-
-        flux = np.array([[5000.0, 23152.0]])
+        # Test JWST branch 
 
         class MockPhotometry(Photometry):
             def __init__(self):
@@ -409,63 +406,64 @@ class TestPhotometry(object):
 
         phot = MockPhotometry()
 
-        mag_chain = phot.calculate_ab_magnitude_jwst(
-            flux_chain=flux,
+        flux_chain = {
+            "F115W": 
+            {
+                "image1": np.array([5000.0]),
+                "lens": np.array([23152.0]),
+            }
+        }
+
+        mag_chain = phot.calculate_ab_magnitude(
+            flux_chain=flux_chain,
             calibration_parameters=self.calibration_parameters2,
         )
 
-        assert isinstance(mag_chain, np.ndarray)
-
-        assert mag_chain.shape == flux.shape
-
-        assert np.all(np.isfinite(mag_chain))
-
-        positive = flux > 0
-
-        reconstructed = np.zeros_like(flux)
-        reconstructed[positive] = mag_chain[positive]
-
-        assert np.all(np.isfinite(reconstructed[positive]))
-
-        assert np.all(mag_chain > -50)
-        assert np.all(mag_chain < 100)
-
-        n_images = self.photometry1.n_images
-        n_flux_per_filt = n_images + 3
+        assert isinstance(mag_chain, dict)
 
         calib = self.calibration_parameters2["F115W"]
 
-        # manually compute expected AB magnitudes
+        flux = flux_chain["F115W"]["image1"]
+
         flux_jy = flux * calib["pixar_sr"] * 1e6
 
-        expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
+        expected_abmag = -2.5 * np.log10(
+            flux_jy / 3631.0
+        )
 
         np.testing.assert_allclose(
-            mag_chain[:, :n_flux_per_filt],
+            mag_chain["F115W"]["image1"],
             expected_abmag,
             rtol=1e-10,
             atol=1e-10,
         )
 
-        # test that error messages properly are called
-        test_calibration = {}
+        test_calibration = {"F814W": {}}
 
-        with pytest.raises(KeyError):
-            mag_chain = self.photometry1.calculate_ab_magnitude_jwst(
-                flux_chain=flux, calibration_parameters=test_calibration
+        with pytest.raises(ValueError):
+            self.photometry1.calculate_ab_magnitude(
+                flux_chain=flux_chain,
+                calibration_parameters=test_calibration,
+            )
+
+        test_calibration = {"F814W": {"instrument": "INVALID"}}
+
+        with pytest.raises(ValueError):
+            self.photometry1.calculate_ab_magnitude(
+                flux_chain=flux_chain,
+                calibration_parameters=test_calibration,
             )
 
     def test_save_to_hdf5(self):
-        """Test save_to_hdf5 writes expected structure."""
+        """Test `save_to_hdf5` writes expected structure."""
 
-        # generate chains
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-            flux_chain, calibration_parameters=self.calibration_parameters1
+        mag_chain = self.photometry1.calculate_ab_magnitude(
+            flux_chain,
+            calibration_parameters=self.calibration_parameters1,
         )
 
-        # save
         self.photometry1.save_to_hdf5(
             flux_chain,
             mag_chain,
@@ -494,15 +492,15 @@ class TestPhotometry(object):
 
                 grp = f[data_band]
 
-                expected_labels = [
-                    f"Image{i+1}" for i in range(self.photometry1.n_images)
-                ] + ["Lens", "Host_lensed", "Host_intrinsic"]
+                expected_components = set(
+                    flux_chain[data_band].keys()
+                )
 
-                for label in expected_labels:
+                assert set(grp.keys()) == expected_components
 
-                    assert label in grp
+                for component in expected_components:
 
-                    subgrp = grp[label]
+                    subgrp = grp[component]
 
                     assert "flux" in subgrp
                     assert "magnitude" in subgrp
@@ -512,6 +510,16 @@ class TestPhotometry(object):
 
                     assert np.all(np.isfinite(flux_data))
                     assert np.all(np.isfinite(mag_data))
+
+                    np.testing.assert_array_equal(
+                        flux_data,
+                        flux_chain[data_band][component],
+                    )
+
+                    np.testing.assert_array_equal(
+                        mag_data,
+                        mag_chain[data_band][component],
+                    )
 
             assert "lens_light_morphology" in f
 
@@ -535,13 +543,29 @@ class TestPhotometry(object):
                 assert np.all(np.isfinite(q))
                 assert np.all(np.isfinite(r_eff))
 
+                np.testing.assert_array_equal(
+                    phi,
+                    np.asarray(morphology_chain[data_band]["phi"]),
+                )
+
+                np.testing.assert_array_equal(
+                    q,
+                    np.asarray(morphology_chain[data_band]["q"]),
+                )
+
+                np.testing.assert_array_equal(
+                    r_eff,
+                    np.asarray(morphology_chain[data_band]["r_eff"]),
+                )
+
     def test_load_flux_chain(self):
-        """Test load_flux_chain correctly reloads saved flux chain."""
+        """Test `load_flux_chain` correctly reloads saved flux chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-            flux_chain, calibration_parameters=self.calibration_parameters1
+        mag_chain = self.photometry1.calculate_ab_magnitude(
+            flux_chain,
+            calibration_parameters=self.calibration_parameters1,
         )
 
         self.photometry1.save_to_hdf5(
@@ -552,26 +576,36 @@ class TestPhotometry(object):
 
         loaded_flux_chain = self.photometry1.load_flux_chain()
 
-        assert isinstance(loaded_flux_chain, np.ndarray)
+        assert isinstance(loaded_flux_chain, dict)
 
-        assert loaded_flux_chain.shape == flux_chain.shape
+        for data_band in flux_chain:
 
-        assert np.all(np.isfinite(loaded_flux_chain))
+            assert data_band in loaded_flux_chain
 
-        np.testing.assert_allclose(
-            loaded_flux_chain,
-            flux_chain,
-            rtol=1e-10,
-            atol=1e-10,
-        )
+            for component in flux_chain[data_band]:
+
+                loaded = loaded_flux_chain[data_band][component]
+                original = flux_chain[data_band][component]
+
+                assert isinstance(loaded, np.ndarray)
+
+                assert np.all(np.isfinite(loaded))
+
+                np.testing.assert_allclose(
+                    loaded,
+                    original,
+                    rtol=1e-10,
+                    atol=1e-10,
+                )
 
     def test_load_magnitude_chain(self):
-        """Test load_magnitude_chain correctly reloads saved magnitude chain."""
+        """Test `load_magnitude_chain` correctly reloads saved magnitude chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
-            flux_chain, calibration_parameters=self.calibration_parameters1
+        mag_chain = self.photometry1.calculate_ab_magnitude(
+            flux_chain,
+            calibration_parameters=self.calibration_parameters1,
         )
 
         self.photometry1.save_to_hdf5(
@@ -582,25 +616,34 @@ class TestPhotometry(object):
 
         loaded_mag_chain = self.photometry1.load_magnitude_chain()
 
-        assert isinstance(loaded_mag_chain, np.ndarray)
+        assert isinstance(loaded_mag_chain, dict)
 
-        assert loaded_mag_chain.shape == mag_chain.shape
+        for data_band in mag_chain:
 
-        assert np.all(np.isfinite(loaded_mag_chain))
+            assert data_band in loaded_mag_chain
 
-        np.testing.assert_allclose(
-            loaded_mag_chain,
-            mag_chain,
-            rtol=1e-10,
-            atol=1e-10,
-        )
+            for component in mag_chain[data_band]:
+
+                loaded = loaded_mag_chain[data_band][component]
+                original = mag_chain[data_band][component]
+
+                assert isinstance(loaded, np.ndarray)
+
+                assert np.all(np.isfinite(loaded))
+
+                np.testing.assert_allclose(
+                    loaded,
+                    original,
+                    rtol=1e-10,
+                    atol=1e-10,
+                )
 
     def test_load_morphology_chain(self):
-        """Test load_morphology_chain correctly reloads saved morphology chain."""
+        """Test `load_morphology_chain` correctly reloads saved morphology chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
 
-        mag_chain = self.photometry1.calculate_ab_magnitude_hst(
+        mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain, calibration_parameters=self.calibration_parameters1
         )
 

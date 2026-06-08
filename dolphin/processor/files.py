@@ -636,43 +636,29 @@ class FileSystem(object):
         :tpye morphology_chain: dict
         """
 
-        n_flux_per_filt = Photometry.n_images + 3
-
-        flux_labels = [f"Image{i+1}" for i in range(Photometry.n_images)] + [
-            "Lens",
-            "Host_lensed",
-            "Host_intrinsic",
-        ]
-
         filename = self.get_photometry_file_path(
             Photometry.lens_name, Photometry.model_id
         )
 
         with h5py.File(filename, "w") as f:
-
             f.attrs["lens_name"] = Photometry.lens_name
             f.attrs["filters"] = Photometry.filters
 
-            for i, data_band in enumerate(Photometry.filters):
+            for data_band in Photometry.filters:
 
                 group = f.create_group(data_band)
 
-                start = i * n_flux_per_filt
-                end = start + n_flux_per_filt
+                for component, flux in flux_chain[data_band].items():
 
-                flux_block = flux_chain[:, start:end]
+                    subgrp = group.create_group(component)
 
-                if magnitude_chain is not None:
-                    mag_block = magnitude_chain[:, start:end]
-
-                for j, label in enumerate(flux_labels):
-
-                    subgrp = group.create_group(label)
-
-                    subgrp.create_dataset("flux", data=flux_block[:, j])
+                    subgrp.create_dataset("flux", data=flux)
 
                     if magnitude_chain is not None:
-                        subgrp.create_dataset("magnitude", data=mag_block[:, j])
+                        subgrp.create_dataset(
+                            "magnitude",
+                            data=magnitude_chain[data_band][component],
+                        )
 
             if Photometry.do_morphology:
 
@@ -699,36 +685,32 @@ class FileSystem(object):
 
         :param Photometry: `Photometry` class instance
         :type Photometry: `class`
-        :return flux_chain: flux chain
-        :rtype flux_chain: np.ndarray
+        :return flux_chain: flux dictionary: {filter: {"image1": array, "image2": array,
+            "lens": array, ...}}
+        :type flux_chain: dict
         """
 
         filename = self.get_photometry_file_path(
             Photometry.lens_name, Photometry.model_id
         )
+
+        flux_chain = {}
+
         with h5py.File(filename, "r") as f:
 
             filters = list(f.attrs["filters"])
-            chains = []
 
             for data_band in filters:
+
                 group = f[data_band]
 
-                labels = list(group.keys())
+                flux_chain[data_band] = {}
 
-                # ensure consistent ordering
-                image_labels = sorted([label for label in labels if "Image" in label])
-                other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
+                for component in group.keys():
 
-                ordered_labels = image_labels + other_labels
-
-                block = np.vstack(
-                    [group[label]["flux"][:] for label in ordered_labels]
-                ).T
-
-                chains.append(block)
-
-        flux_chain = np.hstack(chains)
+                    flux_chain[data_band][component] = (
+                        group[component]["flux"][:]
+                    )
 
         return flux_chain
 
@@ -737,35 +719,32 @@ class FileSystem(object):
 
         :param Photometry: `Photometry` class instance
         :type Photometry: `class`
-        :return magnitude_chain: AB magnitude chain
-        :type magnitude_chain: np.ndarray
+        :return magnitude_chain: AB magnitude dictionary: {filter: {"image1": array, "image2": array,
+            "lens": array, ...}}
+        :type magnitude_chain: dict
         """
 
         filename = self.get_photometry_file_path(
             Photometry.lens_name, Photometry.model_id
         )
+
+        magnitude_chain = {}
+
         with h5py.File(filename, "r") as f:
 
             filters = list(f.attrs["filters"])
-            chains = []
 
             for data_band in filters:
+
                 group = f[data_band]
 
-                labels = list(group.keys())
+                magnitude_chain[data_band] = {}
 
-                image_labels = sorted([label for label in labels if "Image" in label])
-                other_labels = ["Lens", "Host_lensed", "Host_intrinsic"]
+                for component in group.keys():
 
-                ordered_labels = image_labels + other_labels
-
-                block = np.vstack(
-                    [group[label]["magnitude"][:] for label in ordered_labels]
-                ).T
-
-                chains.append(block)
-
-        magnitude_chain = np.hstack(chains)
+                    magnitude_chain[data_band][component] = (
+                        group[component]["magnitude"][:]
+                    )
 
         return magnitude_chain
 
@@ -774,7 +753,7 @@ class FileSystem(object):
 
         :return morphology_chain: morphology chain: {filter: {"phi": array, "q": array,
             "r_eff": array}}
-        :rtype: dict
+        :type morphology_chain: dict
         """
 
         filename = self.get_photometry_file_path(

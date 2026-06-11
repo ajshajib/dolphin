@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """Tests for photometry module."""
 
-from pathlib import Path
-import pytest
+from copy import deepcopy
 import h5py
 import numpy as np
+from pathlib import Path
+import pytest
 import os
 
 from dolphin.analysis.output import Output
@@ -30,7 +31,7 @@ class TestPhotometry(object):
 
         self.calibration_parameters1 = {
             "F814W": {
-                "instrument": "HST",
+                "instrument": "HST-WFC3",
                 "photflam": 1.52122335e-19,
                 "photzpt": -21.1,
                 "photplam": 8034.189,
@@ -38,7 +39,7 @@ class TestPhotometry(object):
         }
 
         self.calibration_parameters2 = {
-            "F115W": {"instrument": "JWST", "pixar_sr": 2.29160304105492e-14}
+            "F115W": {"instrument": "JWST-NIRCam", "pixar_sr": 2.29160304105492e-14}
         }
 
         self.band_config3 = {
@@ -50,46 +51,51 @@ class TestPhotometry(object):
         }
 
         self.photometry1 = Photometry(
-            self.output,
+            io_directory=_TEST_IO_DIR,
             lens_name=_TEST_MODEL_SYSTEM_NAME,
             model_id=_TEST_MODEL_ID_F814W,
-            band_config=self.band_config1,
-            walker_ratio=2,
-            burn_in=-1,
-            aperture_type=None,
-            aperture_size=None,
-            do_morphology=True,
         )
+
+        # explicitly define some of the other needed parameters here for convenience
+        self.photometry1.band_config=self.band_config1
+        self.photometry1.walker_ratio=2
+        self.photometry1.burn_in=-1
+        self.photometry1.aperture_type=None
+        self.photometry1.aperture_size=None
+        self.photometry1.do_morphology=True
 
         self.photometry2 = Photometry(
-            self.output,
+            io_directory=_TEST_IO_DIR,
             lens_name=_TEST_MODEL_SYSTEM_NAME,
             model_id=_TEST_MODEL_ID_F814W,
-            band_config=self.band_config1,
-            walker_ratio=2,
-            burn_in=-1,
-            aperture_type=None,
-            aperture_size=None,
-            do_morphology=False,
         )
+
+        # explicitly define some of the other needed parameters here for convenience
+        self.photometry2.band_config=self.band_config1
+        self.photometry2.walker_ratio=2
+        self.photometry2.burn_in=-1
+        self.photometry2.aperture_type=None
+        self.photometry2.aperture_size=None
+        self.photometry2.do_morphology=False
 
         self.photometry3 = Photometry(
-            self.output,
+            io_directory=_TEST_IO_DIR,
             lens_name="lens_system1",
             model_id="example",
-            band_config=self.band_config3,
-            walker_ratio=2,
-            burn_in=-1,
-            aperture_type=None,
-            aperture_size=None,
-            do_morphology=False,
         )
 
+        # explicitly define some of the other needed parameters here for convenience
+        self.photometry3.band_config=self.band_config3
+        self.photometry3.walker_ratio=2
+        self.photometry3.burn_in=-1
+        self.photometry3.aperture_type=None
+        self.photometry3.aperture_size=None
+        self.photometry3.do_morphology=False
+
     def test_build_band_models(self):
-        """Test that _build_band_models properly functions."""
+        """Test that :meth:`~_build_band_models` properly functions."""
 
         band_models1 = self.photometry1._build_band_models()
-
         assert "F814W" in band_models1
         assert "data_class" in band_models1["F814W"]
         assert "psf_class" in band_models1["F814W"]
@@ -97,18 +103,14 @@ class TestPhotometry(object):
         assert band_models1["F814W"]["likelihood_mask"] is None
 
         band_models3 = self.photometry3._build_band_models()
-
         assert band_models3["F390W"]["likelihood_mask"] is not None
 
     def test_aperture_mask(self):
-        """Test `_aperature_mask` shapes and behavior."""
+        """Test :meth:`~_aperature_mask` shapes and behavior."""
 
         data_class = self.photometry1.band_models["F814W"]["data_class"]
-
         x_grid, y_grid = data_class.pixel_coordinates
-
         expected_shape = x_grid.shape
-
         center_x = 0.0
         center_y = 0.0
 
@@ -139,7 +141,6 @@ class TestPhotometry(object):
 
         assert square_mask.shape == expected_shape
         assert square_mask.dtype == bool
-
         assert np.any(square_mask)
         assert not np.all(square_mask)
 
@@ -155,15 +156,13 @@ class TestPhotometry(object):
         assert np.all(full_mask)
 
     def test_do_linear_inversion_single_band(self):
-        """Test _do_linear_inversion_single_band returns expected structure and finite
+        """Test :meth:`~_do_linear_inversion_single_band` returns expected structure and finite
         values."""
 
         # grab one posterior sample
         self.output.load_output(_TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W)
         sample = self.output._posterior_samples[-1]
-
         kwargs_out = self.photometry1.param.args2kwargs(sample)
-
         kwargs_lens = kwargs_out["kwargs_lens"]
         kwargs_lens_light = kwargs_out["kwargs_lens_light"]
         kwargs_source = kwargs_out["kwargs_source"]
@@ -172,25 +171,22 @@ class TestPhotometry(object):
 
         result = self.photometry1._do_linear_inversion_single_band(
             data_band="F814W",
-            kwargs_lens_all=kwargs_lens,
-            kwargs_lens_light_all=kwargs_lens_light,
-            kwargs_source_all=kwargs_source,
-            kwargs_ps_all=kwargs_ps,
-            kwargs_special_all=kwargs_special,
+            kwargs_lens=kwargs_lens,
+            kwargs_lens_light=kwargs_lens_light,
+            kwargs_source=kwargs_source,
+            kwargs_ps=kwargs_ps,
+            kwargs_special=kwargs_special,
         )
 
         assert isinstance(result, dict)
-
         assert "fluxes" in result
         assert "morphology" in result
 
         fluxes = result["fluxes"]
-
         assert "images" in fluxes
         assert "lens" in fluxes
         assert "source_lensed" in fluxes
         assert "source_intrinsic" in fluxes
-
         assert isinstance(fluxes["images"], np.ndarray)
 
         # physical sanity checks
@@ -200,11 +196,9 @@ class TestPhotometry(object):
         assert np.all(np.isfinite(fluxes["images"]))
 
         morph = result["morphology"]
-
         assert "phi" in morph
         assert "q" in morph
         assert "r_eff" in morph
-
         assert np.isfinite(morph["phi"])
         assert np.isfinite(morph["q"])
         assert np.isfinite(morph["r_eff"])
@@ -223,24 +217,18 @@ class TestPhotometry(object):
             }
         }
 
-        photometry = Photometry(
-            self.output,
-            lens_name=_TEST_MODEL_SYSTEM_NAME,
-            band_config=band_config,
-            model_id=_TEST_MODEL_ID_F814W,
-            walker_ratio=2,
-            burn_in=-1,
-        )
+        # create temporary Photometry instance
+        photometry_temporary = deepcopy(self.photometry1)
+        photometry_temporary.band_config = band_config
 
         with pytest.raises(ValueError):
-
-            result = photometry._do_linear_inversion_single_band(
+            result = photometry_temporary._do_linear_inversion_single_band(
                 data_band="F814W",
-                kwargs_lens_all=kwargs_lens,
-                kwargs_lens_light_all=kwargs_lens_light,
-                kwargs_source_all=kwargs_source,
-                kwargs_ps_all=kwargs_ps,
-                kwargs_special_all=kwargs_special,
+                kwargs_lens=kwargs_lens,
+                kwargs_lens_light=kwargs_lens_light,
+                kwargs_source=kwargs_source,
+                kwargs_ps=kwargs_ps,
+                kwargs_special=kwargs_special,
             )
 
         band_config = {
@@ -251,32 +239,23 @@ class TestPhotometry(object):
             }
         }
 
-        photometry = Photometry(
-            self.output,
-            lens_name=_TEST_MODEL_SYSTEM_NAME,
-            band_config=band_config,
-            model_id=_TEST_MODEL_ID_F814W,
-            walker_ratio=2,
-            burn_in=-1,
-        )
+        photometry_temporary.band_config = band_config
 
         with pytest.raises(ValueError):
-
-            result = photometry._do_linear_inversion_single_band(
+            result = photometry_temporary._do_linear_inversion_single_band(
                 data_band="F814W",
-                kwargs_lens_all=kwargs_lens,
-                kwargs_lens_light_all=kwargs_lens_light,
-                kwargs_source_all=kwargs_source,
-                kwargs_ps_all=kwargs_ps,
-                kwargs_special_all=kwargs_special,
+                kwargs_lens=kwargs_lens,
+                kwargs_lens_light=kwargs_lens_light,
+                kwargs_source=kwargs_source,
+                kwargs_ps=kwargs_ps,
+                kwargs_special=kwargs_special,
             )
 
+        # test that there are no images in the results for models
+        # that do not include point sources
         self.output.load_output("lens_system1", "example")
-
         sample = self.output._posterior_samples[-1]
-
         kwargs_out = self.photometry1.param.args2kwargs(sample)
-
         kwargs_lens = kwargs_out["kwargs_lens"]
         kwargs_lens_light = kwargs_out["kwargs_lens_light"]
         kwargs_source = kwargs_out["kwargs_source"]
@@ -285,70 +264,66 @@ class TestPhotometry(object):
 
         result = self.photometry3._do_linear_inversion_single_band(
             data_band="F390W",
-            kwargs_lens_all=kwargs_lens,
-            kwargs_lens_light_all=kwargs_lens_light,
-            kwargs_source_all=kwargs_source,
-            kwargs_ps_all=kwargs_ps,
-            kwargs_special_all=kwargs_special,
+            kwargs_lens=kwargs_lens,
+            kwargs_lens_light=kwargs_lens_light,
+            kwargs_source=kwargs_source,
+            kwargs_ps=kwargs_ps,
+            kwargs_special=kwargs_special,
         )
 
         assert len(result["fluxes"]["images"]) == 0
 
     def test_do_linear_inversion(self):
-        """Test `do_linear_inversion` output structure and shapes."""
+        """Test :meth:`~do_linear_inversion` output structure and shapes."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+            self.photometry1.band_config,
+            self.photometry1.walker_ratio,
+            self.photometry1.burn_in,
+            self.photometry1.aperture_type,
+            self.photometry1.aperture_size,
+            self.photometry1.do_morphology
+        )
 
         assert isinstance(flux_chain, dict)
         assert isinstance(morphology_chain, dict)
 
         n_images = self.photometry1.n_images
 
-        for data_band in self.photometry1.filters:
-
+        for data_band in self.photometry1.band_list:
             assert data_band in flux_chain
-
             flux_dict = flux_chain[data_band]
-
             for i in range(n_images):
                 key = f"image{i+1}"
-
                 assert key in flux_dict
                 assert isinstance(flux_dict[key], np.ndarray)
                 assert np.all(np.isfinite(flux_dict[key]))
-
             for key in ["lens", "source_lensed", "source_intrinsic"]:
                 assert key in flux_dict
                 assert isinstance(flux_dict[key], np.ndarray)
                 assert np.all(np.isfinite(flux_dict[key]))
-
             chain_length = len(flux_dict["lens"])
-
             for value in flux_dict.values():
                 assert len(value) == chain_length
-
+            
             assert data_band in morphology_chain
-
+            
             morph = morphology_chain[data_band]
-
             assert "phi" in morph
             assert "q" in morph
             assert "r_eff" in morph
-
             phi = np.asarray(morph["phi"])
             q = np.asarray(morph["q"])
             r_eff = np.asarray(morph["r_eff"])
-
             assert np.all(np.isfinite(phi))
             assert np.all(np.isfinite(q))
             assert np.all(np.isfinite(r_eff))
-
             assert np.all((phi >= 0) & (phi <= 180))
             assert np.all((q > 0) & (q <= 1))
             assert np.all(r_eff > 0)
 
     def test_calculate_ab_magnitude(self):
-        """Test calculate_ab_magnitude HST conversion."""
+        """Test :meth:`~calculate_ab_magnitude` functionality."""
 
         flux_chain = {
             "F814W": {
@@ -363,28 +338,21 @@ class TestPhotometry(object):
         )
 
         assert isinstance(mag_chain, dict)
-
         assert "F814W" in mag_chain
         assert "image1" in mag_chain["F814W"]
         assert "lens" in mag_chain["F814W"]
 
         for component in mag_chain["F814W"]:
-
             mags = mag_chain["F814W"][component]
-
             assert isinstance(mags, np.ndarray)
             assert np.all(np.isfinite(mags))
             assert np.all(mags > -50)
             assert np.all(mags < 100)
 
         calib = self.calibration_parameters1["F814W"]
-
         flux = flux_chain["F814W"]["image1"]
-
         flux_cgs = flux * calib["photflam"]
-
         stmag = -2.5 * np.log10(flux_cgs) + calib["photzpt"]
-
         expected_abmag = (
             stmag
             - 5.0 * np.log10(calib["photplam"])
@@ -400,14 +368,12 @@ class TestPhotometry(object):
         )
 
         # Test JWST branch
-
         class MockPhotometry(Photometry):
             def __init__(self):
                 self.n_images = 2
-                self.filters = ["F115W"]
+                self.band_list = ["F115W"]
 
         phot = MockPhotometry()
-
         flux_chain = {
             "F115W": {
                 "image1": np.array([5000.0]),
@@ -423,11 +389,8 @@ class TestPhotometry(object):
         assert isinstance(mag_chain, dict)
 
         calib = self.calibration_parameters2["F115W"]
-
         flux = flux_chain["F115W"]["image1"]
-
         flux_jy = flux * calib["pixar_sr"] * 1e6
-
         expected_abmag = -2.5 * np.log10(flux_jy / 3631.0)
 
         np.testing.assert_allclose(
@@ -454,9 +417,16 @@ class TestPhotometry(object):
             )
 
     def test_save_to_hdf5(self):
-        """Test `save_to_hdf5` writes expected structure."""
+        """Test :meth:`~save_to_hdf5` writes expected structure."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+            self.photometry1.band_config,
+            self.photometry1.walker_ratio,
+            self.photometry1.burn_in,
+            self.photometry1.aperture_type,
+            self.photometry1.aperture_size,
+            self.photometry1.do_morphology
+        )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain,
@@ -478,25 +448,18 @@ class TestPhotometry(object):
         assert os.path.exists(filename)
 
         with h5py.File(filename, "r") as f:
-
             assert f.attrs["lens_name"] == self.photometry1.lens_name
-
             filters = list(f.attrs["filters"])
-
-            assert filters == self.photometry1.filters
-
-            for data_band in self.photometry1.filters:
-
+            assert filters == self.photometry1.band_list
+            for data_band in self.photometry1.band_list:
                 assert data_band in f
 
                 grp = f[data_band]
-
                 expected_components = set(flux_chain[data_band].keys())
 
                 assert set(grp.keys()) == expected_components
 
                 for component in expected_components:
-
                     subgrp = grp[component]
 
                     assert "flux" in subgrp
@@ -522,12 +485,10 @@ class TestPhotometry(object):
 
             morph_grp = f["lens_light_morphology"]
 
-            for data_band in self.photometry1.filters:
-
+            for data_band in self.photometry1.band_list:
                 assert data_band in morph_grp
 
                 filt_grp = morph_grp[data_band]
-
                 assert "phi" in filt_grp
                 assert "q" in filt_grp
                 assert "r_eff" in filt_grp
@@ -535,7 +496,6 @@ class TestPhotometry(object):
                 phi = filt_grp["phi"][:]
                 q = filt_grp["q"][:]
                 r_eff = filt_grp["r_eff"][:]
-
                 assert np.all(np.isfinite(phi))
                 assert np.all(np.isfinite(q))
                 assert np.all(np.isfinite(r_eff))
@@ -556,9 +516,16 @@ class TestPhotometry(object):
                 )
 
     def test_load_flux_chain(self):
-        """Test `load_flux_chain` correctly reloads saved flux chain."""
+        """Test :meth:`~load_flux_chain` correctly reloads saved flux chain."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+            self.photometry1.band_config,
+            self.photometry1.walker_ratio,
+            self.photometry1.burn_in,
+            self.photometry1.aperture_type,
+            self.photometry1.aperture_size,
+            self.photometry1.do_morphology
+        )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain,
@@ -576,16 +543,12 @@ class TestPhotometry(object):
         assert isinstance(loaded_flux_chain, dict)
 
         for data_band in flux_chain:
-
             assert data_band in loaded_flux_chain
 
             for component in flux_chain[data_band]:
-
                 loaded = loaded_flux_chain[data_band][component]
                 original = flux_chain[data_band][component]
-
                 assert isinstance(loaded, np.ndarray)
-
                 assert np.all(np.isfinite(loaded))
 
                 np.testing.assert_allclose(
@@ -596,9 +559,16 @@ class TestPhotometry(object):
                 )
 
     def test_load_magnitude_chain(self):
-        """Test `load_magnitude_chain` correctly reloads saved magnitude chain."""
+        """Test :meth:`~load_magnitude_chain` correctly reloads saved magnitude chain."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+            self.photometry1.band_config,
+            self.photometry1.walker_ratio,
+            self.photometry1.burn_in,
+            self.photometry1.aperture_type,
+            self.photometry1.aperture_size,
+            self.photometry1.do_morphology
+        )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain,
@@ -612,20 +582,14 @@ class TestPhotometry(object):
         )
 
         loaded_mag_chain = self.photometry1.load_magnitude_chain()
-
         assert isinstance(loaded_mag_chain, dict)
 
         for data_band in mag_chain:
-
             assert data_band in loaded_mag_chain
-
             for component in mag_chain[data_band]:
-
                 loaded = loaded_mag_chain[data_band][component]
                 original = mag_chain[data_band][component]
-
                 assert isinstance(loaded, np.ndarray)
-
                 assert np.all(np.isfinite(loaded))
 
                 np.testing.assert_allclose(
@@ -636,9 +600,16 @@ class TestPhotometry(object):
                 )
 
     def test_load_morphology_chain(self):
-        """Test `load_morphology_chain` correctly reloads saved morphology chain."""
+        """Test :meth:`~load_morphology_chain` correctly reloads saved morphology chain."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion()
+        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+            self.photometry1.band_config,
+            self.photometry1.walker_ratio,
+            self.photometry1.burn_in,
+            self.photometry1.aperture_type,
+            self.photometry1.aperture_size,
+            self.photometry1.do_morphology
+        )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
             flux_chain, calibration_parameters=self.calibration_parameters1
@@ -651,22 +622,15 @@ class TestPhotometry(object):
         )
 
         loaded_morph = self.photometry1.load_morphology_chain()
-
         assert isinstance(loaded_morph, dict)
 
-        for data_band in self.photometry1.filters:
-
+        for data_band in self.photometry1.band_list:
             assert data_band in loaded_morph
-
             for key in ["phi", "q", "r_eff"]:
-
                 assert key in loaded_morph[data_band]
-
                 original = np.array(morphology_chain[data_band][key])
                 loaded = np.array(loaded_morph[data_band][key])
-
                 assert original.shape == loaded.shape
-
                 assert np.all(np.isfinite(loaded))
 
                 np.testing.assert_allclose(
@@ -678,10 +642,15 @@ class TestPhotometry(object):
 
         # test that morphology dictionary is None if do_morphology
         # is initialized as False
-        flux_chain, _ = self.photometry2.do_linear_inversion()
+        flux_chain, _ = self.photometry2.do_linear_inversion(
+            self.photometry2.band_config,
+            self.photometry2.walker_ratio,
+            self.photometry2.burn_in,
+            self.photometry2.aperture_type,
+            self.photometry2.aperture_size,
+            self.photometry2.do_morphology
+        )
 
         self.photometry2.save_to_hdf5(flux_chain)
-
         loaded_morph = self.photometry2.load_morphology_chain()
-
         assert loaded_morph is None

@@ -615,43 +615,48 @@ class FileSystem(object):
         return path
 
     def get_photometry_file_path(self, lens_name, model_id):
-        """Get the file path for photometry outputs."""
+        """Get the file path for `Photometry` outputs.
+        
+        :param lens_name: name of the system to analyze
+        :type lens_name: `str`
+        :param model_id: model ID of the lens system being analyzed
+        :type model_id: `str`
+        :return: path to the `Photometry` output `.h5` file
+        :rtype: `str`
+        """
 
         return self.path2str(
             Path(self.get_outputs_directory()) / f"photometry_{lens_name}_{model_id}.h5"
         )
 
     def save_photometry_to_hdf5(
-        self, Photometry, flux_chain, magnitude_chain=None, morphology_chain=None
+        self, photometry_class, flux_chain, magnitude_chain=None, morphology_chain=None
     ):
-        """Save linear inversion outputs to HDF5 for later analysis.
+        """Save linear inversion outputs in `.h5` format for later analysis.
 
-        :param Photometry: `Photometry` class instance
-        :type Photometry: `class`
+        :param photometry_class: `Photometry` class instance
+        :type photometry_class: `class`
         :param flux_chain: Flux chain as computed from `do_linear_inversion`
-        :type flux_chain: np.ndarray
+        :type flux_chain: `np.ndarray`
         :param magnitude_chain: (Optional) AB magnitude chain as computed from `calculate_ab_magnitude`
-        :type magnitude_chain: np.ndarray
+        :type magnitude_chain: `np.ndarray`
         :param morphology_chain: (Optional) Morphology chain as computed from `do_linear_inversion`
-        :tpye morphology_chain: dict
+        :type morphology_chain: `dict`
         """
 
         filename = self.get_photometry_file_path(
-            Photometry.lens_name, Photometry.model_id
+            photometry_class.lens_name, photometry_class.model_id
         )
 
         with h5py.File(filename, "w") as f:
-            f.attrs["lens_name"] = Photometry.lens_name
-            f.attrs["filters"] = Photometry.filters
+            f.attrs["lens_name"] = photometry_class.lens_name
+            f.attrs["filters"] = photometry_class.band_list
 
-            for data_band in Photometry.filters:
-
+            for data_band in photometry_class.band_list:
                 group = f.create_group(data_band)
 
                 for component, flux in flux_chain[data_band].items():
-
                     subgrp = group.create_group(component)
-
                     subgrp.create_dataset("flux", data=flux)
 
                     if magnitude_chain is not None:
@@ -660,111 +665,97 @@ class FileSystem(object):
                             data=magnitude_chain[data_band][component],
                         )
 
-            if Photometry.do_morphology:
-
+            if photometry_class.do_morphology:
                 morphology_group = f.create_group("lens_light_morphology")
 
-                for data_band in Photometry.filters:
-
+                for data_band in photometry_class.band_list:
                     filter_group = morphology_group.create_group(data_band)
-
                     filter_group.create_dataset(
                         "phi", data=np.array(morphology_chain[data_band]["phi"])
                     )
-
                     filter_group.create_dataset(
                         "q", data=np.array(morphology_chain[data_band]["q"])
                     )
-
                     filter_group.create_dataset(
                         "r_eff", data=np.array(morphology_chain[data_band]["r_eff"])
                     )
 
-    def load_flux_chain(self, Photometry):
-        """Load flux chain as computed by `Photometry.do_linear_inversion`.
+    def load_flux_chain(self, photometry_class):
+        """Load flux chain as computed by :meth:`~do_linear_inversion`.
 
-        :param Photometry: `Photometry` class instance
-        :type Photometry: `class`
-        :return flux_chain: flux dictionary: {filter: {"image1": array, "image2": array,
-            "lens": array, ...}}
-        :type flux_chain: dict
+        :param photometry_class: `Photometry` class instance
+        :type photometry_class: `class`
+        :return: dictionary containing flux chains. Format: ``{filter: {"image1": array, "image2": array,
+            "lens": array, ...}}``
+        :rtype: `dict`
         """
 
         filename = self.get_photometry_file_path(
-            Photometry.lens_name, Photometry.model_id
+            photometry_class.lens_name, photometry_class.model_id
         )
 
         flux_chain = {}
 
         with h5py.File(filename, "r") as f:
-
             filters = list(f.attrs["filters"])
 
             for data_band in filters:
-
                 group = f[data_band]
-
                 flux_chain[data_band] = {}
 
                 for component in group.keys():
-
                     flux_chain[data_band][component] = group[component]["flux"][:]
 
         return flux_chain
 
-    def load_magnitude_chain(self, Photometry):
+    def load_magnitude_chain(self, photometry_class):
         """Load magnitude chain.
 
-        :param Photometry: `Photometry` class instance
-        :type Photometry: `class`
-        :return magnitude_chain: AB magnitude dictionary: {filter: {"image1": array, "image2": array,
-            "lens": array, ...}}
-        :type magnitude_chain: dict
+        :param photometry_class: `Photometry` class instance
+        :type photometry_class: `class`
+        :return: dictionary containing AB magnitude chains. Format: ``{filter: {"image1": array, "image2": array,
+            "lens": array, ...}}``
+        :rtype: `dict`
         """
 
         filename = self.get_photometry_file_path(
-            Photometry.lens_name, Photometry.model_id
+            photometry_class.lens_name, photometry_class.model_id
         )
 
         magnitude_chain = {}
 
         with h5py.File(filename, "r") as f:
-
             filters = list(f.attrs["filters"])
 
             for data_band in filters:
-
                 group = f[data_band]
-
                 magnitude_chain[data_band] = {}
 
                 for component in group.keys():
-
                     magnitude_chain[data_band][component] = group[component][
                         "magnitude"
                     ][:]
 
         return magnitude_chain
 
-    def load_morphology_chain(self, Photometry):
-        """Load morphology chains as computed by `Photometry.do_linear_inversion`.
+    def load_morphology_chain(self, photometry_class):
+        """Load morphology chains as computed by :meth:`~do_linear_inversion`.
 
-        :return morphology_chain: morphology chain: {filter: {"phi": array, "q": array,
-            "r_eff": array}}
-        :type morphology_chain: dict
+        :return: dictionary containing morphological parameter chains for each
+            filter. Format:
+            ``{filter: {"phi": array, "q": array, "r_eff": array}}``
+        :rtype: `dict`
         """
 
         filename = self.get_photometry_file_path(
-            Photometry.lens_name, Photometry.model_id
+            photometry_class.lens_name, photometry_class.model_id
         )
         with h5py.File(filename, "r") as f:
-
             if "lens_light_morphology" not in f:
                 return None
 
             filters = list(f.attrs["filters"])
             morphology = f["lens_light_morphology"]
-
             morphology_chain = {}
 
             for data_band in filters:

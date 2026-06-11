@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""This class contains the methods to perform a linear inversion on the model outputs in order
-  to obtain lens, image, and source fluxes/magnitudes, as well as morphological properties of 
-  the lens light for multi-component models.
-"""
+"""This class contains the methods to perform a linear inversion on the model outputs in
+order to obtain lens, image, and source fluxes/magnitudes, as well as morphological
+properties of the lens light for multi-component models."""
 
 __author__ = "brady-ryan"
 
@@ -23,17 +22,11 @@ from ..processor.config import ModelConfig
 
 
 class Photometry:
-    """This class contains the methods to perform a linear inversion on the model outputs in order
-    to obtain lens, image, and source fluxes/magnitudes, as well as morphological properties of 
-    the lens light for multi-component models.
-    """
+    """This class contains the methods to perform a linear inversion on the model
+    outputs in order to obtain lens, image, and source fluxes/magnitudes, as well as
+    morphological properties of the lens light for multi-component models."""
 
-    def __init__(
-        self,
-        io_directory,
-        lens_name,
-        model_id
-    ):
+    def __init__(self, io_directory, lens_name, model_id):
         """Initiate the class from the following inputs:
 
         :param io_directory: path to the input/output directory. Should not end with slash.
@@ -141,7 +134,7 @@ class Photometry:
         kwargs_ps=None,
     ):
         """Perform linear inversion on a single band.
-        
+
         :param data_band: filter name corresponding to the data that is to be fit
         :type data_band: `str`
         :param kwargs_lens: keyword arguments corresponding to the superposition
@@ -186,7 +179,7 @@ class Photometry:
             self.kwargs_model["source_light_model_list"][k] for k in source_indices
         ]
         source_kwargs = [kwargs_source[k] for k in source_indices]
-        
+
         light_model = LightModel(lens_light_model_list)
         source_model = LightModel(source_model_list)
         lens_model = LensModel(self.kwargs_model["lens_model_list"])
@@ -269,8 +262,8 @@ class Photometry:
 
         if self.do_morphology:
             light_analysis = LightProfileAnalysis(light_model)
-            grid_spacing=0.02
-            grid_num=200
+            grid_spacing = 0.02
+            grid_num = 200
             cx = lens_light_kwargs[0]["center_x"]
             cy = lens_light_kwargs[0]["center_y"]
             model_bool_list = [
@@ -310,14 +303,15 @@ class Photometry:
             "morphology": {"phi": phi, "q": q, "r_eff": r_eff},
         }
 
-    def do_linear_inversion(self,
-                            band_config,
-                            walker_ratio,
-                            burn_in=0,
-                            aperture_type=None,
-                            aperture_size=None,
-                            do_morphology=False
-        ):
+    def do_linear_inversion(
+        self,
+        band_config,
+        walker_ratio,
+        burn_in=0,
+        aperture_type=None,
+        aperture_size=None,
+        do_morphology=False,
+    ):
         """Perform the linear inversion on all bands provided in `band_config`.
 
         :param band_config: dictionary describing the filters and profile indices to
@@ -339,7 +333,7 @@ class Photometry:
         :param do_morphology: (optional) if `True`, solves for the morphological properties of multi-component
             lens light profiles after the linear inversion
         :type do_morphology: `bool`
-        :return: a tuple containing a dictionary of the fitted fluxes and a dictionary 
+        :return: a tuple containing a dictionary of the fitted fluxes and a dictionary
           of the fitted multi-component lens light morphological properties
         :rtype: `tuple` (`dict`, `dict`)
         """
@@ -358,7 +352,7 @@ class Photometry:
                 "source_lensed": [],
                 "source_intrinsic": [],
             }
-        
+
         morphology_results = {
             f: {"phi": [], "q": [], "r_eff": []} for f in self.band_list
         }
@@ -430,7 +424,7 @@ class Photometry:
         :type flux_chain: `np.ndarray`
         :param calibration_parameters: dictionary corresponding to the filters, instruments, and keyword values for magnitude conversions. For example, if doing
           JWST and HST data conversions:
-          ``calibration_parameters = {"F115W": {"instrument": JWST-NIRCam, "pixar_sr": ##}, 
+          ``calibration_parameters = {"F115W": {"instrument": JWST-NIRCam, "pixar_sr": ##},
             "F814W": {"instrument": HST-WFC3, "photplam": ##, "photzpt": ##, "photflam": ##}}``
 
         :type calibration_parameters: `dict`
@@ -502,7 +496,8 @@ class Photometry:
         return self.file_system.load_flux_chain(self)
 
     def load_magnitude_chain(self):
-        """Load magnitude chain as computed by the respective helper function from :meth:`~calculate_ab_magnitude`.
+        """Load magnitude chain as computed by the respective helper function from
+        :meth:`~calculate_ab_magnitude`.
 
         :return: dictionary containing AB magnitude chains. Format: ``{filter: {"image1": array, "image2": array,
             "lens": array, ...}}``

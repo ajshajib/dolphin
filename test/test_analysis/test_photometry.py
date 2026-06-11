@@ -57,12 +57,12 @@ class TestPhotometry(object):
         )
 
         # explicitly define some of the other needed parameters here for convenience
-        self.photometry1.band_config=self.band_config1
-        self.photometry1.walker_ratio=2
-        self.photometry1.burn_in=-1
-        self.photometry1.aperture_type=None
-        self.photometry1.aperture_size=None
-        self.photometry1.do_morphology=True
+        self.photometry1.band_config = self.band_config1
+        self.photometry1.walker_ratio = 2
+        self.photometry1.burn_in = -1
+        self.photometry1.aperture_type = None
+        self.photometry1.aperture_size = None
+        self.photometry1.do_morphology = True
 
         self.photometry2 = Photometry(
             io_directory=_TEST_IO_DIR,
@@ -71,12 +71,12 @@ class TestPhotometry(object):
         )
 
         # explicitly define some of the other needed parameters here for convenience
-        self.photometry2.band_config=self.band_config1
-        self.photometry2.walker_ratio=2
-        self.photometry2.burn_in=-1
-        self.photometry2.aperture_type=None
-        self.photometry2.aperture_size=None
-        self.photometry2.do_morphology=False
+        self.photometry2.band_config = self.band_config1
+        self.photometry2.walker_ratio = 2
+        self.photometry2.burn_in = -1
+        self.photometry2.aperture_type = None
+        self.photometry2.aperture_size = None
+        self.photometry2.do_morphology = False
 
         self.photometry3 = Photometry(
             io_directory=_TEST_IO_DIR,
@@ -85,12 +85,12 @@ class TestPhotometry(object):
         )
 
         # explicitly define some of the other needed parameters here for convenience
-        self.photometry3.band_config=self.band_config3
-        self.photometry3.walker_ratio=2
-        self.photometry3.burn_in=-1
-        self.photometry3.aperture_type=None
-        self.photometry3.aperture_size=None
-        self.photometry3.do_morphology=False
+        self.photometry3.band_config = self.band_config3
+        self.photometry3.walker_ratio = 2
+        self.photometry3.burn_in = -1
+        self.photometry3.aperture_type = None
+        self.photometry3.aperture_size = None
+        self.photometry3.do_morphology = False
 
     def test_build_band_models(self):
         """Test that :meth:`~_build_band_models` properly functions."""
@@ -156,8 +156,8 @@ class TestPhotometry(object):
         assert np.all(full_mask)
 
     def test_do_linear_inversion_single_band(self):
-        """Test :meth:`~_do_linear_inversion_single_band` returns expected structure and finite
-        values."""
+        """Test :meth:`~_do_linear_inversion_single_band` returns expected structure and
+        finite values."""
 
         # grab one posterior sample
         self.output.load_output(_TEST_MODEL_SYSTEM_NAME, _TEST_MODEL_ID_F814W)
@@ -282,7 +282,7 @@ class TestPhotometry(object):
             self.photometry1.burn_in,
             self.photometry1.aperture_type,
             self.photometry1.aperture_size,
-            self.photometry1.do_morphology
+            self.photometry1.do_morphology,
         )
 
         assert isinstance(flux_chain, dict)
@@ -305,9 +305,9 @@ class TestPhotometry(object):
             chain_length = len(flux_dict["lens"])
             for value in flux_dict.values():
                 assert len(value) == chain_length
-            
+
             assert data_band in morphology_chain
-            
+
             morph = morphology_chain[data_band]
             assert "phi" in morph
             assert "q" in morph
@@ -425,7 +425,7 @@ class TestPhotometry(object):
             self.photometry1.burn_in,
             self.photometry1.aperture_type,
             self.photometry1.aperture_size,
-            self.photometry1.do_morphology
+            self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -524,7 +524,7 @@ class TestPhotometry(object):
             self.photometry1.burn_in,
             self.photometry1.aperture_type,
             self.photometry1.aperture_size,
-            self.photometry1.do_morphology
+            self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -559,7 +559,8 @@ class TestPhotometry(object):
                 )
 
     def test_load_magnitude_chain(self):
-        """Test :meth:`~load_magnitude_chain` correctly reloads saved magnitude chain."""
+        """Test :meth:`~load_magnitude_chain` correctly reloads saved magnitude
+        chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
             self.photometry1.band_config,
@@ -567,7 +568,7 @@ class TestPhotometry(object):
             self.photometry1.burn_in,
             self.photometry1.aperture_type,
             self.photometry1.aperture_size,
-            self.photometry1.do_morphology
+            self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -600,7 +601,8 @@ class TestPhotometry(object):
                 )
 
     def test_load_morphology_chain(self):
-        """Test :meth:`~load_morphology_chain` correctly reloads saved morphology chain."""
+        """Test :meth:`~load_morphology_chain` correctly reloads saved morphology
+        chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
             self.photometry1.band_config,
@@ -608,7 +610,7 @@ class TestPhotometry(object):
             self.photometry1.burn_in,
             self.photometry1.aperture_type,
             self.photometry1.aperture_size,
-            self.photometry1.do_morphology
+            self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -648,7 +650,7 @@ class TestPhotometry(object):
             self.photometry2.burn_in,
             self.photometry2.aperture_type,
             self.photometry2.aperture_size,
-            self.photometry2.do_morphology
+            self.photometry2.do_morphology,
         )
 
         self.photometry2.save_to_hdf5(flux_chain)

@@ -616,7 +616,7 @@ class FileSystem(object):
 
     def get_photometry_file_path(self, lens_name, model_id):
         """Get the file path for `Photometry` outputs.
-        
+
         :param lens_name: name of the system to analyze
         :type lens_name: `str`
         :param model_id: model ID of the lens system being analyzed

@@ -615,7 +615,8 @@ class FileSystem(object):
         return path
 
     def get_photometry_file_path(self, lens_name, model_id):
-        """Get the file path for :class:`~dolphin.analysis.photometry.Photometry` outputs.
+        """Get the file path for :class:`~dolphin.analysis.photometry.Photometry`
+        outputs.
 
         :param lens_name: name of the system to analyze
         :type lens_name: `str`

@@ -681,7 +681,8 @@ class FileSystem(object):
                     )
 
     def load_flux_chain(self, photometry_class):
-        """Load flux chain as computed by :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`.
+        """Load flux chain as computed by
+        :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`.
 
         :param photometry_class: :class:`~dolphin.analysis.photometry.Photometry` class instance
         :type photometry_class: `class`
@@ -739,7 +740,8 @@ class FileSystem(object):
         return magnitude_chain
 
     def load_morphology_chain(self, photometry_class):
-        """Load morphology chains as computed by :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`.
+        """Load morphology chains as computed by
+        :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`.
 
         :return: dictionary containing morphological parameter chains for each
             filter. Format:

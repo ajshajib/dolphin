@@ -840,6 +840,19 @@ class TestModelConfig(object):
             "g4": 0.1,
         }
 
+        # Test uniform prior functionality
+        config3 = deepcopy(self.config_3)
+        config3.settings["lens_options"]["uniform_prior"] = {
+            0: [["theta_E", 0.2, 1.3]],
+            1: [["gamma_ext", 0.04, 0.1]]
+        }
+        params = config3.get_lens_model_params()
+
+        assert params[3][0]["theta_E"] == .2
+        assert params[3][1]["gamma_ext"] == .04
+        assert params[4][0]["theta_E"] == 1.3
+        assert params[4][1]["gamma_ext"] == .1
+
     def test_get_lens_light_model_params(self):
         """Test `get_lens_light_model_params` method."""
         config = deepcopy(self.config_5)
@@ -894,6 +907,18 @@ class TestModelConfig(object):
         assert params[3] == [{"amp": -100.0}]
         assert params[4] == [{"amp": 100.0}]
 
+        # Test uniform prior functionality
+        config5 = deepcopy(self.config_5)
+        config5.settings["lens_light_options"]["uniform_prior"] = {
+            0: [["R_sersic", 0.345, 6.], ["e1", 0., .723]]
+        }
+        params = config5.get_lens_light_model_params()
+
+        assert params[3][0]["R_sersic"] == 0.345
+        assert params[3][0]["e1"] == 0.
+        assert params[4][0]["R_sersic"] == 6.
+        assert params[4][0]["e1"] == .723
+
     def test_get_source_light_model_params(self):
         """Test `get_source_light_model_params` method."""
         config = deepcopy(self.config_1)
@@ -909,6 +934,18 @@ class TestModelConfig(object):
         config3.settings["source_light_options"]["n_max"] = 2
         config3.get_source_light_model_params()
         assert config3.settings["source_light_options"]["n_max"] == [2, 2]
+
+        # Test uniform prior functionality
+        config3 = deepcopy(self.config_3)
+        config3.settings["source_light_options"]["uniform_prior"] = {
+            0: [["R_sersic", 0.345, 6.], ["e1", 0., .723]]
+        }
+        params = config3.get_source_light_model_params()
+
+        assert params[3][0]["R_sersic"] == 0.345
+        assert params[3][0]["e1"] == 0.
+        assert params[4][0]["R_sersic"] == 6.
+        assert params[4][0]["e1"] == .723
 
     def test_get_special_params(self):
         """Test `get_special_params` method."""
@@ -1142,3 +1179,53 @@ class TestModelConfig(object):
         config_mge_e = deepcopy(self.config_1)
         config_mge_e.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
         assert config_mge_e.get_kwargs_likelihood()["check_positive_flux"] is False
+
+    def test_get_uniform_priors(self):
+        """Test the functionality of
+          :meth:`~dolphin.processor.config.ModelConfig.get_uniform_priors`."""
+        
+        config5 = deepcopy(self.config_5)
+        config5.settings["model"]["lens_light"] = ["SIS"]
+        config5.settings["lens_light_options"]["uniform_prior"] = {
+            0: [["R_sersic", 0.5, 6.]]
+        }
+        lower_default = {0: 
+                         {
+                            "n_sersic": 0.5, 
+                            "R_sersic": 0.1, 
+                            "center_x": 0.04 - 0.5, 
+                            "center_y": -0.04 - 0.5
+                        }                   
+                    }
+        upper_default = {0: 
+                         {
+                            "n_sersic": 8., 
+                            "R_sersic": 5., 
+                            "center_x": 0.04 + 0.5, 
+                            "center_y": -0.04 + 0.5
+                         }
+        }
+
+        lower_test = {0: 
+                         {
+                            "n_sersic": 0.5, 
+                            "R_sersic": 0.5, 
+                            "center_x": 0.04 - 0.5, 
+                            "center_y": -0.04 - 0.5
+                        }                   
+                    }
+        upper_test = {0: 
+                         {
+                            "n_sersic": 8., 
+                            "R_sersic": 6., 
+                            "center_x": 0.04 + 0.5, 
+                            "center_y": -0.04 + 0.5
+                         }
+        }
+            
+        lower, upper = config5.get_uniform_priors("lens_light", lower_default, upper_default)
+        assert lower == lower_test
+        assert upper == upper_test
+
+        with pytest.raises(AssertionError):
+            self.config_3.get_uniform_priors("invalid", lower_default, upper_default)

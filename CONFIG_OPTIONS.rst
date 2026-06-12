@@ -135,6 +135,17 @@ Lens Options
            gaussian_prior:
              0: [[gamma, 2.11, 0.03], [theta_E, 1.11, 0.13]]
 
+    - ``uniform_prior``: *(Optional)* Adjust dolphin's default lower and upper bounds for lens parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           uniform_prior:
+             0: [[theta_E, 0.2, 1.4]]
+             1: [[gamma_ext, 0.02, 0.8]]
+
     - ``fix``: *(Optional)* Fix specific parameters for the lens model.
 
       - Type: ``dictionary``
@@ -227,6 +238,16 @@ Lens Light Options
              0: 
                [[R_sersic, 0.21, 0.15]]
 
+    - ``uniform_prior``: *(Optional)* Adjust dolphin's default lower and upper bounds for lens light parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           uniform_prior:
+             0: [[R_sersic, 0.2, 7.], [n_sersic, 0.5, 4.]]
+
     - ``mge_config``: *(Optional)* Configuration for MGE_SET and MGE_SET_ELLIPSE light profiles. Can be used to set the number of Gaussian components.
 
       - Type: ``dictionary``
@@ -254,6 +275,16 @@ Source Light Options
 
            gaussian_prior:
              0: [[beta, 0.15, 0.05]]
+
+    - ``uniform_prior``: *(Optional)* Adjust dolphin's default lower and upper bounds for source light parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           uniform_prior:
+             0: [[R_sersic, 0.2, 7.], [n_sersic, 0.5, 4.]]
 
     - ``shapelet_scale_logarithmic_prior``: Whether to apply a logarithmic prior on the shapelet scale parameter.
 

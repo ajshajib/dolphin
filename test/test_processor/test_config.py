@@ -844,14 +844,14 @@ class TestModelConfig(object):
         config3 = deepcopy(self.config_3)
         config3.settings["lens_options"]["uniform_prior"] = {
             0: [["theta_E", 0.2, 1.3]],
-            1: [["gamma_ext", 0.04, 0.1]]
+            1: [["gamma_ext", 0.04, 0.1]],
         }
         params = config3.get_lens_model_params()
 
-        assert params[3][0]["theta_E"] == .2
-        assert params[3][1]["gamma_ext"] == .04
+        assert params[3][0]["theta_E"] == 0.2
+        assert params[3][1]["gamma_ext"] == 0.04
         assert params[4][0]["theta_E"] == 1.3
-        assert params[4][1]["gamma_ext"] == .1
+        assert params[4][1]["gamma_ext"] == 0.1
 
     def test_get_lens_light_model_params(self):
         """Test `get_lens_light_model_params` method."""
@@ -910,14 +910,14 @@ class TestModelConfig(object):
         # Test uniform prior functionality
         config5 = deepcopy(self.config_5)
         config5.settings["lens_light_options"]["uniform_prior"] = {
-            0: [["R_sersic", 0.345, 6.], ["e1", 0., .723]]
+            0: [["R_sersic", 0.345, 6.0], ["e1", 0.0, 0.723]]
         }
         params = config5.get_lens_light_model_params()
 
         assert params[3][0]["R_sersic"] == 0.345
-        assert params[3][0]["e1"] == 0.
-        assert params[4][0]["R_sersic"] == 6.
-        assert params[4][0]["e1"] == .723
+        assert params[3][0]["e1"] == 0.0
+        assert params[4][0]["R_sersic"] == 6.0
+        assert params[4][0]["e1"] == 0.723
 
     def test_get_source_light_model_params(self):
         """Test `get_source_light_model_params` method."""
@@ -938,14 +938,14 @@ class TestModelConfig(object):
         # Test uniform prior functionality
         config3 = deepcopy(self.config_3)
         config3.settings["source_light_options"]["uniform_prior"] = {
-            0: [["R_sersic", 0.345, 6.], ["e1", 0., .723]]
+            0: [["R_sersic", 0.345, 6.0], ["e1", 0.0, 0.723]]
         }
         params = config3.get_source_light_model_params()
 
         assert params[3][0]["R_sersic"] == 0.345
-        assert params[3][0]["e1"] == 0.
-        assert params[4][0]["R_sersic"] == 6.
-        assert params[4][0]["e1"] == .723
+        assert params[3][0]["e1"] == 0.0
+        assert params[4][0]["R_sersic"] == 6.0
+        assert params[4][0]["e1"] == 0.723
 
     def test_get_special_params(self):
         """Test `get_special_params` method."""
@@ -1182,48 +1182,50 @@ class TestModelConfig(object):
 
     def test_get_uniform_priors(self):
         """Test the functionality of
-          :meth:`~dolphin.processor.config.ModelConfig.get_uniform_priors`."""
-        
+        :meth:`~dolphin.processor.config.ModelConfig.get_uniform_priors`."""
+
         config5 = deepcopy(self.config_5)
         config5.settings["model"]["lens_light"] = ["SIS"]
         config5.settings["lens_light_options"]["uniform_prior"] = {
-            0: [["R_sersic", 0.5, 6.]]
+            0: [["R_sersic", 0.5, 6.0]]
         }
-        lower_default = {0: 
-                         {
-                            "n_sersic": 0.5, 
-                            "R_sersic": 0.1, 
-                            "center_x": 0.04 - 0.5, 
-                            "center_y": -0.04 - 0.5
-                        }                   
-                    }
-        upper_default = {0: 
-                         {
-                            "n_sersic": 8., 
-                            "R_sersic": 5., 
-                            "center_x": 0.04 + 0.5, 
-                            "center_y": -0.04 + 0.5
-                         }
+        lower_default = {
+            0: {
+                "n_sersic": 0.5,
+                "R_sersic": 0.1,
+                "center_x": 0.04 - 0.5,
+                "center_y": -0.04 - 0.5,
+            }
+        }
+        upper_default = {
+            0: {
+                "n_sersic": 8.0,
+                "R_sersic": 5.0,
+                "center_x": 0.04 + 0.5,
+                "center_y": -0.04 + 0.5,
+            }
         }
 
-        lower_test = {0: 
-                         {
-                            "n_sersic": 0.5, 
-                            "R_sersic": 0.5, 
-                            "center_x": 0.04 - 0.5, 
-                            "center_y": -0.04 - 0.5
-                        }                   
-                    }
-        upper_test = {0: 
-                         {
-                            "n_sersic": 8., 
-                            "R_sersic": 6., 
-                            "center_x": 0.04 + 0.5, 
-                            "center_y": -0.04 + 0.5
-                         }
+        lower_test = {
+            0: {
+                "n_sersic": 0.5,
+                "R_sersic": 0.5,
+                "center_x": 0.04 - 0.5,
+                "center_y": -0.04 - 0.5,
+            }
         }
-            
-        lower, upper = config5.get_uniform_priors("lens_light", lower_default, upper_default)
+        upper_test = {
+            0: {
+                "n_sersic": 8.0,
+                "R_sersic": 6.0,
+                "center_x": 0.04 + 0.5,
+                "center_y": -0.04 + 0.5,
+            }
+        }
+
+        lower, upper = config5.get_uniform_priors(
+            "lens_light", lower_default, upper_default
+        )
         assert lower == lower_test
         assert upper == upper_test
 

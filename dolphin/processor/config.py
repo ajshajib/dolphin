@@ -1843,15 +1843,15 @@ class ModelConfig(Config):
                             fixed_list[int(index)][key] = value
 
         return fixed_list
-    
+
     def get_uniform_priors(self, component, lower_dict, upper_dict):
         """Adjust the default uniform prior bounds provided by dolphin.
-        
+
         :param component: name of the model component for which the uniform
           bounds will be altered
         :type component: `str`
         :param lower_dict: the dictionary which contains the default lower bounds
-          of the specified model component 
+          of the specified model component
         :type lower_dict: `dict`
         :param upper_dict: the dictionary which contains the default upper bounds
           of the specified model component
@@ -1870,7 +1870,9 @@ class ModelConfig(Config):
             pass
         else:
             if self.settings[option_str]["uniform_prior"] is not None:
-                for index, param_dict in self.settings[option_str]["uniform_prior"].items():
+                for index, param_dict in self.settings[option_str][
+                    "uniform_prior"
+                ].items():
                     for key, lower, upper in param_dict:
                         new_lower_dict[index][key] = lower
                         new_upper_dict[index][key] = upper

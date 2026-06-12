@@ -621,7 +621,7 @@ class FileSystem(object):
         :type lens_name: `str`
         :param model_id: model ID of the lens system being analyzed
         :type model_id: `str`
-        :return: path to the `Photometry` output `.h5` file
+        :return: path to the `Photometry` output HDF5 file
         :rtype: `str`
         """
 
@@ -632,15 +632,15 @@ class FileSystem(object):
     def save_photometry_to_hdf5(
         self, photometry_class, flux_chain, magnitude_chain=None, morphology_chain=None
     ):
-        """Save linear inversion outputs in `.h5` format for later analysis.
+        """Save linear inversion outputs in HDF5 format for later analysis.
 
-        :param photometry_class: `Photometry` class instance
+        :param photometry_class: :class:`~dolphin.analysis.photometry.Photometry` class instance
         :type photometry_class: `class`
-        :param flux_chain: Flux chain as computed from `do_linear_inversion`
+        :param flux_chain: Flux chain as computed from :meth:`~dolphin.analysis.photometry.Photometrydo_linear_inversion`
         :type flux_chain: `np.ndarray`
-        :param magnitude_chain: (Optional) AB magnitude chain as computed from `calculate_ab_magnitude`
+        :param magnitude_chain: (Optional) AB magnitude chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.calculate_ab_magnitude`
         :type magnitude_chain: `np.ndarray`
-        :param morphology_chain: (Optional) Morphology chain as computed from `do_linear_inversion`
+        :param morphology_chain: (Optional) Morphology chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
         :type morphology_chain: `dict`
         """
 
@@ -681,9 +681,9 @@ class FileSystem(object):
                     )
 
     def load_flux_chain(self, photometry_class):
-        """Load flux chain as computed by :meth:`~do_linear_inversion`.
+        """Load flux chain as computed by :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`.
 
-        :param photometry_class: `Photometry` class instance
+        :param photometry_class: :class:`~dolphin.analysis.photometry.Photometry` class instance
         :type photometry_class: `class`
         :return: dictionary containing flux chains. Format: ``{filter: {"image1": array, "image2": array,
             "lens": array, ...}}``
@@ -711,7 +711,7 @@ class FileSystem(object):
     def load_magnitude_chain(self, photometry_class):
         """Load magnitude chain.
 
-        :param photometry_class: `Photometry` class instance
+        :param photometry_class: :class:`~dolphin.analysis.photometry.Photometry` class instance
         :type photometry_class: `class`
         :return: dictionary containing AB magnitude chains. Format: ``{filter: {"image1": array, "image2": array,
             "lens": array, ...}}``
@@ -739,7 +739,7 @@ class FileSystem(object):
         return magnitude_chain
 
     def load_morphology_chain(self, photometry_class):
-        """Load morphology chains as computed by :meth:`~do_linear_inversion`.
+        """Load morphology chains as computed by :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`.
 
         :return: dictionary containing morphological parameter chains for each
             filter. Format:

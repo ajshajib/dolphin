@@ -107,7 +107,6 @@ class Photometry:
           type "circle," this corresponds to the radius of the aperture. For type "square," this corresponds
           to the length of one side of the aperture.
         :type aperture_size: `float`
-
         :return: aperture mask of the specified configuration
         :rtype: `np.ndarray`
         """
@@ -426,7 +425,6 @@ class Photometry:
           JWST and HST data conversions:
           ``calibration_parameters = {"F115W": {"instrument": JWST-NIRCam, "pixar_sr": ##},
             "F814W": {"instrument": HST-WFC3, "photplam": ##, "photzpt": ##, "photflam": ##}}``
-
         :type calibration_parameters: `dict`
         :return: dictionary corresponding to the converted AB magnitudes for each
           model component per band
@@ -471,7 +469,7 @@ class Photometry:
         return magnitude_results
 
     def save_to_hdf5(self, flux_chain, magnitude_chain=None, morphology_chain=None):
-        """Save the linear inversion outputs in `.h5` format for later analysis.
+        """Save the linear inversion outputs in HDF5 format for later analysis.
 
         :param flux_chain: Flux result dictionary as computed from :meth:`~do_linear_inversion`
         :type flux_chain: `dict`

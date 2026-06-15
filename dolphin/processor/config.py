@@ -1342,6 +1342,8 @@ class ModelConfig(Config):
             else:
                 raise ValueError("{} not implemented as a lens " "model!".format(model))
 
+        lower, upper = self.update_uniform_priors("lens", lower, upper)
+
         fixed = self.fill_in_fixed_from_settings("lens", fixed)
 
         params = [init, sigma, fixed, lower, upper]
@@ -1483,6 +1485,8 @@ class ModelConfig(Config):
                     "{} not implemented as a lens light" "model!".format(model)
                 )
 
+        lower, upper = self.update_uniform_priors("lens_light", lower, upper)
+
         fixed = self.fill_in_fixed_from_settings("lens_light", fixed)
 
         params = [init, sigma, fixed, lower, upper]
@@ -1590,6 +1594,8 @@ class ModelConfig(Config):
                 raise ValueError(
                     "{} not implemented as a source light" "model!".format(model)
                 )
+
+        lower, upper = self.update_uniform_priors("source_light", lower, upper)
 
         fixed = self.fill_in_fixed_from_settings("source_light", fixed)
 
@@ -1837,6 +1843,42 @@ class ModelConfig(Config):
                             fixed_list[int(index)][key] = value
 
         return fixed_list
+
+    def update_uniform_priors(self, component, lower_dict, upper_dict):
+        """Update the default uniform prior bounds with those provided by the user in
+        the config file.
+
+        :param component: name of the model component for which the uniform
+          bounds will be altered
+        :type component: `str`
+        :param lower_dict: the dictionary which contains the default lower bounds
+          of the specified model component
+        :type lower_dict: `dict`
+        :param upper_dict: the dictionary which contains the default upper bounds
+          of the specified model component
+        :type upper_dict: `dict`
+        :return: a tuple containing the modified lower and upper parameter bound dictionaries
+        :rtype: `tuple` (`dict`, `dict`)
+        """
+        assert component in ["lens", "lens_light", "source_light"]
+        option_str = component + "_options"
+        new_lower_dict = deepcopy(lower_dict)
+        new_upper_dict = deepcopy(upper_dict)
+
+        try:
+            self.settings[option_str]["uniform_prior"]
+        except (NameError, KeyError):
+            pass
+        else:
+            if self.settings[option_str]["uniform_prior"] is not None:
+                for index, param_dict in self.settings[option_str][
+                    "uniform_prior"
+                ].items():
+                    for key, lower, upper in param_dict:
+                        new_lower_dict[index][key] = lower
+                        new_upper_dict[index][key] = upper
+
+        return new_lower_dict, new_upper_dict
 
     def get_kwargs_params(self):
         """Create `kwargs_params`.

@@ -276,7 +276,7 @@ Source Light Options
            gaussian_prior:
              0: [[beta, 0.15, 0.05]]
 
-    - ``uniform_prior``: *(Optional)* Adjust dolphin's default lower and upper bounds for source light parameters.
+    - ``uniform_prior``: *(Optional)* Adjust ``dolphin``'s default lower and upper bounds for source light parameters.
 
       - Type: ``dictionary``
       - Example:

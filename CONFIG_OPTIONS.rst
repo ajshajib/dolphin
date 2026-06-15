@@ -135,7 +135,7 @@ Lens Options
            gaussian_prior:
              0: [[gamma, 2.11, 0.03], [theta_E, 1.11, 0.13]]
 
-    - ``uniform_prior``: *(Optional)* Adjust dolphin's default lower and upper bounds for lens parameters.
+    - ``uniform_prior``: *(Optional)* Adjust ``dolphin``'s default lower and upper bounds for lens parameters.
 
       - Type: ``dictionary``
       - Example:

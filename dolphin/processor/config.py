@@ -1595,7 +1595,7 @@ class ModelConfig(Config):
                     "{} not implemented as a source light" "model!".format(model)
                 )
 
-        lower, upper = self.get_uniform_priors("source_light", lower, upper)
+        lower, upper = self.update_uniform_priors("source_light", lower, upper)
 
         fixed = self.fill_in_fixed_from_settings("source_light", fixed)
 

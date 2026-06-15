@@ -1223,7 +1223,7 @@ class TestModelConfig(object):
             }
         }
 
-        lower, upper = config5.get_uniform_priors(
+        lower, upper = config5.update_uniform_priors(
             "lens_light", lower_default, upper_default
         )
         assert lower == lower_test

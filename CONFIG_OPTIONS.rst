@@ -238,7 +238,7 @@ Lens Light Options
              0: 
                [[R_sersic, 0.21, 0.15]]
 
-    - ``uniform_prior``: *(Optional)* Adjust dolphin's default lower and upper bounds for lens light parameters.
+    - ``uniform_prior``: *(Optional)* Adjust ``dolphin``'s default lower and upper bounds for lens light parameters.
 
       - Type: ``dictionary``
       - Example:

@@ -1230,4 +1230,4 @@ class TestModelConfig(object):
         assert upper == upper_test
 
         with pytest.raises(AssertionError):
-            self.config_3.get_uniform_priors("invalid", lower_default, upper_default)
+            self.config_3.update_uniform_priors("invalid", lower_default, upper_default)

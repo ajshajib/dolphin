@@ -1180,7 +1180,7 @@ class TestModelConfig(object):
         config_mge_e.settings["model"]["lens_light"] = ["MGE_SET_ELLIPSE"]
         assert config_mge_e.get_kwargs_likelihood()["check_positive_flux"] is False
 
-    def test_get_uniform_priors(self):
+    def test_update_uniform_priors(self):
         """Test the functionality of
         :meth:`~dolphin.processor.config.ModelConfig.get_uniform_priors`."""
 

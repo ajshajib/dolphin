@@ -1874,6 +1874,7 @@ class ModelConfig(Config):
                 for index, param_dict in self.settings[option_str][
                     "uniform_prior"
                 ].items():
+                    index = int(index)
                     for key, lower, upper in param_dict:
                         new_lower_dict[index][key] = lower
                         new_upper_dict[index][key] = upper

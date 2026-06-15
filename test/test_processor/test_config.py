@@ -1182,7 +1182,7 @@ class TestModelConfig(object):
 
     def test_update_uniform_priors(self):
         """Test the functionality of
-        :meth:`~dolphin.processor.config.ModelConfig.get_uniform_priors`."""
+        :meth:`~dolphin.processor.config.ModelConfig.update_uniform_priors`."""
 
         config5 = deepcopy(self.config_5)
         config5.settings["model"]["lens_light"] = ["SIS"]

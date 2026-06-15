@@ -1845,7 +1845,7 @@ class ModelConfig(Config):
         return fixed_list
 
     def get_uniform_priors(self, component, lower_dict, upper_dict):
-        """Adjust the default uniform prior bounds provided by dolphin.
+        """Update the default uniform prior bounds with those provided by the user in the config file.
 
         :param component: name of the model component for which the uniform
           bounds will be altered

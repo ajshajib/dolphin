@@ -11,6 +11,7 @@ import h5py
 import gdown
 from warnings import warn
 
+
 class FileSystem(object):
     """This class contains methods to handle the file system, directory paths, and
     standard IO operations."""

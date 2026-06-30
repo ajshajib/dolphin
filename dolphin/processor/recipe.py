@@ -90,7 +90,9 @@ class Recipe(object):
             try:
                 self._config.settings["fitting_kwargs_list"]
             except (KeyError, NameError):
-                raise KeyError("custom recipe_name requires fitting_kwargs_list key in yaml settings")
+                raise KeyError(
+                    "custom recipe_name requires fitting_kwargs_list key in yaml settings"
+                )
             else:
                 if self._config.settings["fitting_kwargs_list"] is not None:
                     fitting_kwargs_list += self._config.settings["fitting_kwargs_list"]

@@ -66,6 +66,13 @@ class TestRecipe(object):
         assert isinstance(recipe.get_recipe(recipe_name="custom"), list)
         assert recipe.get_recipe(recipe_name="custom")[0][0] == "emcee"
 
+        # Check that an error is raised if a custom recipe is demanded
+        # without supplying the fitting_kwargs_list
+        with pytest.raises(KeyError):
+            del config.settings["fitting_kwargs_list"]
+            recipe = Recipe(config)
+            recipe.get_recipe(recipe_name="custom")
+
         # check requirement to pass `kwargs_data_joint`
         with pytest.raises(ValueError):
             recipe.get_recipe(recipe_name="galaxy-galaxy")

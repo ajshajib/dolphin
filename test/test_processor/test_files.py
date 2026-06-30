@@ -191,7 +191,7 @@ class TestFileSystem(object):
         for key in save_nautilus[6]:
             assert np.all(out_nautilus[6][key] == save_nautilus[6][key])
 
-        with pytest.raises(ValueError):
+        with pytest.warns(UserWarning):
             save_dict["fit_output"].append(
                 [
                     "INVALID",

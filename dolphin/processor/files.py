@@ -9,6 +9,7 @@ import json
 import numpy as np
 import h5py
 import gdown
+from warnings import warn
 
 
 class FileSystem(object):
@@ -293,9 +294,9 @@ class FileSystem(object):
                             "log_l", data=np.array(single_output[6]["log_l"])
                         )
                 else:
-                    raise ValueError(
-                        f"Fitting type {single_output[0]} not recognized for "
-                        "saving output!"
+                    warn(
+                        f"Fitting type {single_output[0]} not recognized for saving output!"
+                        "Saved output will not be available for this fitting type."
                     )
 
     def load_output(self, lens_name, model_id, file_type="h5"):

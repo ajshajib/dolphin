@@ -52,7 +52,9 @@ class Processor(object):
         :type log: `bool`
         :param mpi: enable MPI for parallel processing
         :type mpi: `bool`
-        :param recipe_name: recipe for pre-sampling optimization. Supported: 'galaxy-quasar', 'galaxy-galaxy', 'skip'. 'skip' will skip pre-sampling optimization and directly sample the full model. See `Recipe` class for details.
+        :param recipe_name: recipe for pre-sampling optimization. Supported: 'galaxy-quasar', 'galaxy-galaxy', 'custom', 'skip'.
+            'custom' will use the fitting_kwargs_list directly from the yaml settings for pre-sampling optimization.
+            'skip' will skip pre-sampling optimization and directly sample the full model. See `Recipe` class for details.
         :type recipe_name: `str`
         :param thread_count: number of threads to use if multiprocess is enabled
         :type thread_count: `int`

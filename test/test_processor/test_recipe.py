@@ -59,11 +59,11 @@ class TestRecipe(object):
 
         config.settings["fitting_kwargs_list"] = [{}, {}]
         recipe = Recipe(config)
-        assert recipe.get_recipe(recipe_name='custom')[:2] == [{}, {}]
+        assert recipe.get_recipe(recipe_name="custom")[:2] == [{}, {}]
 
         config.settings["fitting_kwargs_list"] = None
         recipe = Recipe(config)
-        assert isinstance(recipe.get_recipe(recipe_name='custom'), list)
+        assert isinstance(recipe.get_recipe(recipe_name="custom"), list)
         assert recipe.get_recipe(recipe_name="custom")[0][0] == "emcee"
 
         # check requirement to pass `kwargs_data_joint`

@@ -778,7 +778,7 @@ class FileSystem(object):
         return morphology_chain
 
     def get_preprocessing_path(self, preprocessing_class):
-        """Get the file path for preprocessing outputs. 
+        """Get the file path for preprocessing outputs.
 
         :param data_band: band of the data being analyzed
         :type lens_name: `str`
@@ -790,9 +790,11 @@ class FileSystem(object):
         """
 
         return self.path2str(
-            Path(self.get_data_directory()) / f"{preprocessing_class.lens_name}" / "preprocessing"
+            Path(self.get_data_directory())
+            / f"{preprocessing_class.lens_name}"
+            / "preprocessing"
         )
-    
+
     def save_star_cutouts(self, psf_class, star_exposures, star_weights, noise_maps):
         """Save the star cutouts, star weight maps, and star noise maps determined by
         :meth:`~dolphin.preprocessing.psf.PSF.get_psf_candidates`.
@@ -807,7 +809,7 @@ class FileSystem(object):
           background noise
         :type noise_maps: `np.ndarray`
         """
-        
+
         preprocessing_str = Path(self.get_preprocessing_path(psf_class))
         star_dir = preprocessing_str / psf_class.data_band / "stars"
         weight_dir = preprocessing_str / psf_class.data_band / "weights"
@@ -821,18 +823,15 @@ class FileSystem(object):
 
         for i in range(len(star_exposures)):
             fits.PrimaryHDU(star_exposures[i]).writeto(
-                star_dir / f"star_{i}.fits",
-                overwrite=True
+                star_dir / f"star_{i}.fits", overwrite=True
             )
 
             fits.PrimaryHDU(star_weights[i]).writeto(
-                weight_dir / f"weight_{i}.fits",
-                overwrite=True
+                weight_dir / f"weight_{i}.fits", overwrite=True
             )
 
             fits.PrimaryHDU(noise_maps[i]).writeto(
-                noise_dir / f"noise_map_{i}.fits",
-                overwrite=True
+                noise_dir / f"noise_map_{i}.fits", overwrite=True
             )
 
     def save_psf_and_variance_map(self, psf_class, psf_guess, variance_map):
@@ -840,7 +839,7 @@ class FileSystem(object):
 
         :param psf_class: instance of :class:`~dolphin.preprocessing.psf.PSF` class
         :type psf_class: `class`
-        :param psf_guess: PSF guess determined by either 
+        :param psf_guess: PSF guess determined by either
           :meth:`~dolphin.preprocessing.psf.PSF.make_psf_psfr` or
           :meth:`~dolphin.preprocessing.psf.PSF.make_psf_starred`
         :type psf_guess: `np.ndarray`
@@ -853,19 +852,13 @@ class FileSystem(object):
         filename = data_dir / f"psf_{psf_class.lens_name}_{psf_class.data_band}.h5"
 
         with h5py.File(filename, "w") as f:
-            f.create_dataset(
-                "kernel_point_source",
-                data=psf_guess
-            )
+            f.create_dataset("kernel_point_source", data=psf_guess)
 
-            f.create_dataset(
-                "psf_variance_map",
-                data=variance_map
-            )
+            f.create_dataset("psf_variance_map", data=variance_map)
 
     def load_catalog_table(self, psf_class):
         """Get the SExtractor catalog if already made.
-        
+
         :return: fits table SExtractor catalog as determined by
             :meth:`~dolphin.preprocessing.psf.PSF.get_kwargs_cut`
         :rtype: `table`
@@ -873,9 +866,9 @@ class FileSystem(object):
 
         preprocessing_str = Path(self.get_preprocessing_path(psf_class))
         catalog_path = (
-            preprocessing_str / 
-            psf_class.data_band / 
-            f"{psf_class.lens_name}_{psf_class.data_band}.cat"
+            preprocessing_str
+            / psf_class.data_band
+            / f"{psf_class.lens_name}_{psf_class.data_band}.cat"
         )
 
         with fits.open(catalog_path) as hdul:
@@ -884,8 +877,8 @@ class FileSystem(object):
         return catalog
 
     def load_psf_candidate_attributes(self, psf_class):
-        """Reload the saved star cutouts, corresponding masks, weight maps, and noise maps needed by
-        :class:`~dolphin.preprocessing.psf.PSF`.
+        """Reload the saved star cutouts, corresponding masks, weight maps, and noise
+        maps needed by :class:`~dolphin.preprocessing.psf.PSF`.
 
         :return: A tuple containing the saved star cutouts, matched masks, weight maps, and saved noise maps.
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`, `np.ndarray`)
@@ -894,77 +887,88 @@ class FileSystem(object):
         star_path_str = f"{preprocessing_str}/{psf_class.data_band}/stars/star_*.fits"
         star_list = sorted(
             glob.glob(star_path_str),
-            key=lambda x: int(re.search(r"star_(\d+)", x).group(1))
+            key=lambda x: int(re.search(r"star_(\d+)", x).group(1)),
         )
         star_data_list = []
         for file in star_list:
             with fits.open(file) as hdul:
-                data = hdul[0].data  
+                data = hdul[0].data
                 image_shape = data.shape
                 star_data_list.append(np.array(data))
         star_data_list = np.array(star_data_list)
-                
+
         mask_data_list = []
         # Automatically match masks by star number
         for file in star_list:
-            star_num = int(re.search(r'star_(\d+)', file).group(1))
-            mask_path_str = f"{preprocessing_str}/{psf_class.data_band}/masks/mask_{star_num}.reg"
+            star_num = int(re.search(r"star_(\d+)", file).group(1))
+            mask_path_str = (
+                f"{preprocessing_str}/{psf_class.data_band}/masks/mask_{star_num}.reg"
+            )
             if os.path.exists(mask_path_str):
-                print(f'Using mask {mask_path_str} for star {star_num}!')
+                print(f"Using mask {mask_path_str} for star {star_num}!")
                 regions = Regions.read(mask_path_str)
                 mask = np.zeros(image_shape, dtype=bool)
                 for region in regions:
-                    mask_region = region.to_mask(mode='center')
+                    mask_region = region.to_mask(mode="center")
                     region_mask = mask_region.to_image(image_shape)
                     if region_mask is not None:
                         mask |= region_mask.astype(bool)
                 mask = ~mask
             else:
-                print(f'No mask found for star {star_num}, using default (all True).')
+                print(f"No mask found for star {star_num}, using default (all True).")
                 mask = np.ones(image_shape, dtype=bool)
             mask_data_list.append(mask)
         mask_data_list = np.array(mask_data_list)
 
-        weight_path_str = f"{preprocessing_str}/{psf_class.data_band}/weights/weight_*.fits"
+        weight_path_str = (
+            f"{preprocessing_str}/{psf_class.data_band}/weights/weight_*.fits"
+        )
         weight_list = sorted(
             glob.glob(weight_path_str),
-            key=lambda x: int(re.search(r"weight_(\d+)", x).group(1))
+            key=lambda x: int(re.search(r"weight_(\d+)", x).group(1)),
         )
         weight_map_list = []
         for file in weight_list:
             with fits.open(file) as hdul:
-                data = hdul[0].data  
-                weight_map_list.append(np.array(data))  
+                data = hdul[0].data
+                weight_map_list.append(np.array(data))
         weight_map_list = np.array(weight_map_list)
-        
-        noise_path_str = f"{preprocessing_str}/{psf_class.data_band}/noise_maps/noise_map_*.fits"
+
+        noise_path_str = (
+            f"{preprocessing_str}/{psf_class.data_band}/noise_maps/noise_map_*.fits"
+        )
         noise_list = sorted(
             glob.glob(noise_path_str),
-            key=lambda x: int(re.search(r"noise_map_(\d+)", x).group(1))
+            key=lambda x: int(re.search(r"noise_map_(\d+)", x).group(1)),
         )
         noise_maps = []
         for file in noise_list:
             with fits.open(file) as hdul:
-                data = hdul[0].data  
-                noise_maps.append(np.array(data))  
+                data = hdul[0].data
+                noise_maps.append(np.array(data))
         noise_maps = np.array(noise_maps)
-        
+
         return star_data_list, mask_data_list, weight_map_list, noise_maps
 
     def load_saved_psf(self, psf_class):
-        """Load the saved PSF and variance map generated by :class:`~dolphin.preprocessing.psf.PSF`.
-        
+        """Load the saved PSF and variance map generated by
+        :class:`~dolphin.preprocessing.psf.PSF`.
+
         :return: a tuple containing the saved PSF and variance map
         :rtype: `tuple` (`array`, `array`)
         """
 
-        data_dir = Path(self.get_data_directory())         
-        psf_file = data_dir / psf_class.lens_name / f"psf_{psf_class.lens_name}_{psf_class.data_band}.h5"
+        data_dir = Path(self.get_data_directory())
+        psf_file = (
+            data_dir
+            / psf_class.lens_name
+            / f"psf_{psf_class.lens_name}_{psf_class.data_band}.h5"
+        )
         variance_map = None
 
         with h5py.File(psf_file, "r") as file:
             psf_data = file["kernel_point_source"][()]
             if "psf_variance_map" in file:
                 variance_map = file["psf_variance_map"][()]
-        
+
         return psf_data, variance_map

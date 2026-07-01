@@ -11,3 +11,11 @@ h5py
 tqdm
 tensorflow
 gdown
+git+https://github.com/sibirrer/psfr.git
+git+https://github.com/sibirrer/astrofunc.git
+git+https://github.com/sibirrer/pyextractor.git
+git+https://github.com/sibirrer/AstroObjectAnalyser.git
+cosmoHammer
+regions
+starred-astro
+sep

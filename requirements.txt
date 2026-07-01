@@ -16,6 +16,6 @@ git+https://github.com/sibirrer/astrofunc.git
 git+https://github.com/sibirrer/pyextractor.git
 git+https://github.com/sibirrer/AstroObjectAnalyser.git
 cosmoHammer
-pyregion
+regions
 starred-astro
 sep

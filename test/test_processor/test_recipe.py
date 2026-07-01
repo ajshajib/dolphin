@@ -59,11 +59,19 @@ class TestRecipe(object):
 
         config.settings["fitting_kwargs_list"] = [{}, {}]
         recipe = Recipe(config)
-        assert recipe.get_recipe()[:2] == [{}, {}]
+        assert recipe.get_recipe(recipe_name="custom")[:2] == [{}, {}]
 
         config.settings["fitting_kwargs_list"] = None
         recipe = Recipe(config)
-        assert isinstance(recipe.get_recipe(), list)
+        assert isinstance(recipe.get_recipe(recipe_name="custom"), list)
+        assert recipe.get_recipe(recipe_name="custom")[0][0] == "emcee"
+
+        # Check that an error is raised if a custom recipe is demanded
+        # without supplying the fitting_kwargs_list
+        with pytest.raises(KeyError):
+            del config.settings["fitting_kwargs_list"]
+            recipe = Recipe(config)
+            recipe.get_recipe(recipe_name="custom")
 
         # check requirement to pass `kwargs_data_joint`
         with pytest.raises(ValueError):

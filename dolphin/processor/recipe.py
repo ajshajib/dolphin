@@ -79,24 +79,27 @@ class Recipe(object):
 
         :param kwargs_data_joint: `kwargs_data_joint` dictionary for multiple bands
         :type kwargs_data_joint: `dict` or `None`
-        :param recipe_name: recipe name, 'galaxy-quasar', 'galaxy-galaxy', or 'skip'
+        :param recipe_name: recipe name, 'galaxy-quasar', 'galaxy-galaxy', 'custom', or 'skip'
         :type recipe_name: `str`
         :return: fitting kwargs list
         :rtype: `list`
         """
         fitting_kwargs_list = []
 
-        if recipe_name == "galaxy-quasar":
+        if recipe_name == "custom":
             try:
-                # if this key exists then return it
                 self._config.settings["fitting_kwargs_list"]
             except (KeyError, NameError):
-                fitting_kwargs_list += self.get_galaxy_quasar_recipe()
+                raise KeyError(
+                    "custom recipe_name requires fitting_kwargs_list key in yaml settings"
+                )
             else:
                 if self._config.settings["fitting_kwargs_list"] is not None:
                     fitting_kwargs_list += self._config.settings["fitting_kwargs_list"]
                 else:
-                    fitting_kwargs_list += self.get_galaxy_quasar_recipe()
+                    pass
+        elif recipe_name == "galaxy-quasar":
+            fitting_kwargs_list += self.get_galaxy_quasar_recipe()
         elif recipe_name == "galaxy-galaxy":
             if kwargs_data_joint is None:
                 raise ValueError(

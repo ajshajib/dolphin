@@ -8,7 +8,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
-from pathlib import Path
 from astroObjectAnalyser.DataAnalysis.analysis import Analysis
 from astroObjectAnalyser.astro_object_superclass import StrongLensSystem
 from astropy.io import fits

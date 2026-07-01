@@ -8,7 +8,6 @@ from pathlib import Path
 
 from dolphin.preprocessing.psf import PSF
 
-from pathlib import Path
 from astropy.io import fits
 from unittest.mock import patch, MagicMock
 

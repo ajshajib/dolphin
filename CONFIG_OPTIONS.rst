@@ -554,8 +554,8 @@ Guess Parameters
 
     - ``lens``: Guess parameters for lens models.
     - ``lens_light``: Guess parameters for lens light models.
-    - ``source``: Guess parameters for source light models.
-    - ``ps``: Guess parameters for point source models.
+    - ``source_light``: Guess parameters for source light models.
+    - To configure initial parameters for point source models, Point Source Options.
 
     - Example:
 

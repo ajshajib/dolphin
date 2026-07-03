@@ -7,6 +7,7 @@ import numpy as np
 import numpy.testing as npt
 import os
 from pathlib import Path
+import warnings
 
 from dolphin.processor.config import Config
 from dolphin.processor.config import ModelConfig
@@ -1051,6 +1052,38 @@ class TestModelConfig(object):
 
         with pytest.raises(AssertionError):
             self.config_3.fill_in_fixed_from_settings("invalid", fixed)
+
+    def test_update_initial_guesses(self):
+        """Test `update_initial_guesses` method."""
+        init_dict_list = [{"theta_E": 0.1, "e1": 0.1, "e2": 0.1}]
+
+        # Default initial values should be updated to match the ones given in yaml settings
+        updated_init_dict_list = self.config1.update_initial_guesses("lens", init_dict_list)
+        assert updated_init_dict_list == [{"theta_E": 1.2, "e1": 0.05, "e2": -0.05}]
+
+    def test_check_init_params_in_bounds(self):
+        config1 = deepcopy(self.config_1)
+
+        # Check that a warning is raised when initial value is greater than upper bound
+        config1.guess_params["lens"]["0"]["e1"] = 0.6
+        with pytest.warns(UserWarning):
+            config1.get_lens_model_list()
+
+        # Check that a warning is raised when initial value is less than lower bound
+        config1.guess_params["lens"]["0"]["e1"] = -0.6
+        with pytest.warns(UserWarning):
+            config1.get_lens_model_list()
+
+        # Check that a warning is not raised if the parameter is fixed, even out of bounds
+        config3 = deepcopy(self.config_3)
+        config3.settings["lens_options"]["fix"]["0"]["gamma"] = 0.5
+        with warnings.catch_warnings():
+            # Promote warning to error, which should not be raised
+            warnings.simplefilter("error")
+
+            config3.get_lens_model_list()
+
+
 
     def test_get_psf_supersampling_factor(self):
         """Test `get_psf_supersampling_factor` method."""

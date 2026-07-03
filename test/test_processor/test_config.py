@@ -1058,7 +1058,9 @@ class TestModelConfig(object):
         init_dict_list = [{"theta_E": 0.1, "e1": 0.1, "e2": 0.1}]
 
         # Default initial values should be updated to match the ones given in yaml settings
-        updated_init_dict_list = self.config1.update_initial_guesses("lens", init_dict_list)
+        updated_init_dict_list = self.config1.update_initial_guesses(
+            "lens", init_dict_list
+        )
         assert updated_init_dict_list == [{"theta_E": 1.2, "e1": 0.05, "e2": -0.05}]
 
     def test_check_init_params_in_bounds(self):
@@ -1082,8 +1084,6 @@ class TestModelConfig(object):
             warnings.simplefilter("error")
 
             config3.get_lens_model_list()
-
-
 
     def test_get_psf_supersampling_factor(self):
         """Test `get_psf_supersampling_factor` method."""

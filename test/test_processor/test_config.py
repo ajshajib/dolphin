@@ -822,6 +822,8 @@ class TestModelConfig(object):
         }
 
         config1 = deepcopy(self.config_1)
+        for component in ["lens", "source_light", "lens_light", "ps"]:
+            config1.guess_params[component] = None
         config1.settings["model"]["lens"] = ["FLEXION"]
         params1 = config1.get_lens_model_params()
         assert params1[0][0] == {"g1": 0, "g2": 0, "g3": 0, "g4": 0}

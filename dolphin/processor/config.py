@@ -126,7 +126,6 @@ class ModelConfig(Config):
             except (NameError, KeyError):
                 self.guess_params[component] = None
 
-
     @property
     def lens_name(self):
         """The name of the lens system.
@@ -1858,10 +1857,9 @@ class ModelConfig(Config):
 
         return fixed_list
 
-    
     def update_initial_guesses(self, component, init_dict_list):
-        """Update the default initial parameter values with those provided by the user in
-        the config file as guess_params.
+        """Update the default initial parameter values with those provided by the user
+        in the config file as guess_params.
 
         :param component: name of the model component for which the initial parameter values
           will be updated
@@ -1877,7 +1875,9 @@ class ModelConfig(Config):
 
         if self.guess_params[component] is not None:
             for model_index in self.guess_params[component].keys():
-                new_init_dict_list[model_index].update(self.guess_params[component][model_index])
+                new_init_dict_list[model_index].update(
+                    self.guess_params[component][model_index]
+                )
 
         return new_init_dict_list
 
@@ -1919,10 +1919,12 @@ class ModelConfig(Config):
         return new_lower_dict_list, new_upper_dict_list
 
     @staticmethod
-    def check_init_params_in_bounds(component, init_dict_list, fixed_dict_list, lower_dict_list, upper_dict_list):
-        """Checks that initial parameters are within the specified bounds. If not, a warning
-        is raised for each parameter that is not within bounds. This check is only performed on
-        parameters that are not fixed.
+    def check_init_params_in_bounds(
+        component, init_dict_list, fixed_dict_list, lower_dict_list, upper_dict_list
+    ):
+        """Checks that initial parameters are within the specified bounds. If not, a
+        warning is raised for each parameter that is not within bounds. This check is
+        only performed on parameters that are not fixed.
 
         :param component: name of the model component for which the check is done
         :type component: `str`
@@ -1952,12 +1954,18 @@ class ModelConfig(Config):
                 if key in lower_dict_list[model_index].keys():
                     lower_bound = lower_dict_list[model_index][key]
                     if value < lower_bound:
-                        warn(error_string + f" which is less than the lower bound {lower_bound}")
+                        warn(
+                            error_string
+                            + f" which is less than the lower bound {lower_bound}"
+                        )
 
                 if key in upper_dict_list[model_index].keys():
                     upper_bound = upper_dict_list[model_index][key]
                     if value > upper_bound:
-                        warn(error_string + f" which is greater than the upper bound {upper_bound}")
+                        warn(
+                            error_string
+                            + f" which is greater than the upper bound {upper_bound}"
+                        )
 
     def get_kwargs_params(self):
         """Create `kwargs_params`.

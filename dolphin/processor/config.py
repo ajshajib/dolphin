@@ -1875,6 +1875,7 @@ class ModelConfig(Config):
 
         if self.guess_params[component] is not None:
             for model_index in self.guess_params[component].keys():
+                model_index = int(model_index)
                 new_init_dict_list[model_index].update(
                     self.guess_params[component][model_index]
                 )

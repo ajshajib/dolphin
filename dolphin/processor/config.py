@@ -1874,11 +1874,9 @@ class ModelConfig(Config):
         new_init_dict_list = deepcopy(init_dict_list)
 
         if self.guess_params[component] is not None:
-            for model_index in self.guess_params[component].keys():
+            for model_index, init_dict in self.guess_params[component].items():
                 model_index = int(model_index)
-                new_init_dict_list[model_index].update(
-                    self.guess_params[component][model_index]
-                )
+                new_init_dict_list[model_index].update(init_dict)
 
         return new_init_dict_list
 

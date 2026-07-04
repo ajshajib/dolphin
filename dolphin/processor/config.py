@@ -1869,7 +1869,9 @@ class ModelConfig(Config):
             for model_index, init_dict in self.settings[component + "_options"]["initial_guesses"].items():
                 new_init_dict_list[int(model_index)].update(init_dict)
 
-        return new_init_dict_list
+            return new_init_dict_list
+        else:
+            return init_dict_list
 
     def update_uniform_priors(self, component, lower_dict_list, upper_dict_list):
         """Update the default uniform prior bounds with those provided by the user in

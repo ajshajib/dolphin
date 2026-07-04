@@ -1938,6 +1938,8 @@ class ModelConfig(Config):
         :param upper_dict_list: the list of dictionaries which contains the upper bounds
           of the specified model component
         :type upper_dict_list: `list` of `dict`
+        :return: None
+        :rtype: `None`
         """
         assert component in ["lens", "lens_light", "source_light"]
 

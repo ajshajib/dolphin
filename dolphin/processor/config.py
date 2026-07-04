@@ -117,20 +117,6 @@ class ModelConfig(Config):
                 )
                 del self.settings[f"{opt}_option"]
 
-        self.guess_params = {}
-        for component in ["lens", "source_light", "lens_light"]:
-            try:
-                self.guess_params[component] = deepcopy(
-                    self.settings["guess_params"][component]
-                )
-            except (NameError, KeyError):
-                self.guess_params[component] = None
-
-        if (
-            "ps" in self.settings["guess_params"].keys() or
-            "point_source" in self.settings["guess_params"].keys()
-        ):
-            raise ValueError("Initial point source parameter values should be provided in point_source_options instead of guess_params")
 
     @property
     def lens_name(self):
@@ -1219,7 +1205,7 @@ class ModelConfig(Config):
                 center_x = self.deflector_center_ra
                 center_y = self.deflector_center_dec
                 try:
-                    theta_E_init = self.settings["guess_params"]["lens"][i]["theta_E"]
+                    theta_E_init = self.settings["lens_options"]["initial_guesses"][i]["theta_E"]
                 except (NameError, KeyError):
                     theta_E_init = 1.0
 
@@ -1865,7 +1851,7 @@ class ModelConfig(Config):
 
     def update_initial_guesses(self, component, init_dict_list):
         """Update the default initial parameter values with those provided by the user
-        in the config file as guess_params.
+        in the config file.
 
         :param component: name of the model component for which the initial parameter values
           will be updated
@@ -1876,13 +1862,12 @@ class ModelConfig(Config):
         :return: a modified list of dictionaries containing the updated initial parameter values
         :rtype: `list` of `dict`
         """
-        assert component in ["lens", "lens_light", "source_light"]
-        new_init_dict_list = deepcopy(init_dict_list)
+        assert component in ["lens", "lens_light", "source_light", "point_source"]
 
-        if self.guess_params[component] is not None:
-            for model_index, init_dict in self.guess_params[component].items():
-                model_index = int(model_index)
-                new_init_dict_list[model_index].update(init_dict)
+        if "initial_guesses" in self.settings[component + "_options"].keys():
+            new_init_dict_list = deepcopy(init_dict_list)
+            for model_index, init_dict in self.settings[component + "_options"]["initial_guesses"].items():
+                new_init_dict_list[int(model_index)].update(init_dict)
 
         return new_init_dict_list
 

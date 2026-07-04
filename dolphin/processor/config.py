@@ -127,10 +127,12 @@ class ModelConfig(Config):
                 self.guess_params[component] = None
 
         if (
-            "ps" in self.settings["guess_params"].keys() or
-            "point_source" in self.settings["guess_params"].keys()
+            "ps" in self.settings["guess_params"].keys()
+            or "point_source" in self.settings["guess_params"].keys()
         ):
-            raise ValueError("Initial point source parameter values should be provided in point_source_options instead of guess_params")
+            raise ValueError(
+                "Initial point source parameter values should be provided in point_source_options instead of guess_params"
+            )
 
     @property
     def lens_name(self):

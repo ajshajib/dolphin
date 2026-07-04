@@ -117,7 +117,6 @@ class ModelConfig(Config):
                 )
                 del self.settings[f"{opt}_option"]
 
-
     @property
     def lens_name(self):
         """The name of the lens system.
@@ -1205,7 +1204,9 @@ class ModelConfig(Config):
                 center_x = self.deflector_center_ra
                 center_y = self.deflector_center_dec
                 try:
-                    theta_E_init = self.settings["lens_options"]["initial_guesses"][i]["theta_E"]
+                    theta_E_init = self.settings["lens_options"]["initial_guesses"][i][
+                        "theta_E"
+                    ]
                 except (NameError, KeyError):
                     theta_E_init = 1.0
 
@@ -1866,7 +1867,9 @@ class ModelConfig(Config):
 
         if "initial_guesses" in self.settings[component + "_options"].keys():
             new_init_dict_list = deepcopy(init_dict_list)
-            for model_index, init_dict in self.settings[component + "_options"]["initial_guesses"].items():
+            for model_index, init_dict in self.settings[component + "_options"][
+                "initial_guesses"
+            ].items():
                 new_init_dict_list[int(model_index)].update(init_dict)
 
             return new_init_dict_list

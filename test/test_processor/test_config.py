@@ -158,17 +158,6 @@ class TestModelConfig(object):
         settings = deepcopy(self.config_1.settings)
         ModelConfig(self.config_1.lens_name, settings=settings)
 
-        # Point source initial parameters should be passed in through point_source_options
-        # instead of guess_params
-        settings["guess_params"]["ps"] = {}
-        with pytest.raises(ValueError):
-            ModelConfig(self.config_1.lens_name, settings=settings)
-
-        del settings["guess_params"]["ps"]
-        settings["guess_params"]["point_source"] = {}
-        with pytest.raises(ValueError):
-            ModelConfig(self.config_1.lens_name, settings=settings)
-
     def test_pixel_size(self):
         """Test the `pixel_size` property."""
         self.config_3.settings["pixel_size"] = [0.04, 0.08]
@@ -833,8 +822,7 @@ class TestModelConfig(object):
         }
 
         config1 = deepcopy(self.config_1)
-        for component in ["lens", "source_light", "lens_light", "ps"]:
-            config1.guess_params[component] = None
+        del config1.settings["lens_options"]["initial_guesses"]
         config1.settings["model"]["lens"] = ["FLEXION"]
         params1 = config1.get_lens_model_params()
         assert params1[0][0] == {"g1": 0, "g2": 0, "g3": 0, "g4": 0}
@@ -1077,12 +1065,12 @@ class TestModelConfig(object):
         config1 = deepcopy(self.config_1)
 
         # Check that a warning is raised when initial value is greater than upper bound
-        config1.guess_params["lens"][0]["e1"] = 0.6
+        config1.settings["lens_options"]["initial_guesses"][0]["e1"] = 0.6
         with pytest.warns(UserWarning):
             config1.get_lens_model_params()
 
         # Check that a warning is raised when initial value is less than lower bound
-        config1.guess_params["lens"][0]["e1"] = -0.6
+        config1.settings["lens_options"]["initial_guesses"][0]["e1"] = -0.6
         with pytest.warns(UserWarning):
             config1.get_lens_model_params()
 

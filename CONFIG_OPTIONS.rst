@@ -106,7 +106,8 @@ Lens Options
 
   - Suboptions:
 
-    - ``centroid_init``: Initial guess for the lens centroid.
+    - ``centroid_init``: Initial guess for the lens centroid. This will apply to all lens model components.
+    For more fine-tuned control of individual lens model positions, see ``initial_guesses`` below.
 
       - Type: ``list of floats``
       - Example:
@@ -115,7 +116,8 @@ Lens Options
 
            centroid_init: [0.04, -0.04]
     
-    - ``centroid_bound``: Half of the box width to constrain the deflector's centroid.
+    - ``centroid_bound``: Half of the box width to constrain the deflector's centroid. This will apply to all lens model components.
+    For more fine-tuned control of the bounds for individual lens model positions, see ``uniform_prior`` below.
 
       - Type: ``float``
       - Default: ``0.5``
@@ -124,6 +126,21 @@ Lens Options
         .. code-block:: yaml
 
            centroid_bound: 0.5
+
+    - ``initial_guesses``: *(Optional)* Adjust ``dolphin``'s default initial lens parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           initial_guesses:
+             0:
+               theta_E: 1.3
+               gamma: 2.0
+             1:
+               e1: 0.3
+               e2: -0.1
 
     - ``gaussian_prior``: *(Optional)* Gaussian priors for lens parameters.
 
@@ -143,7 +160,7 @@ Lens Options
         .. code-block:: yaml
 
            uniform_prior:
-             0: [[theta_E, 0.2, 1.4]]
+             0: [[theta_E, 0.2, 1.4], [center_x, 0.5, 0.9]]
              1: [[gamma_ext, 0.02, 0.8]]
 
     - ``fix``: *(Optional)* Fix specific parameters for the lens model.
@@ -218,6 +235,21 @@ Lens Light Options
 
   - Suboptions:
 
+    - ``initial_guesses``: *(Optional)* Adjust ``dolphin``'s default initial lens light parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           initial_guesses:
+             0:
+               R_sersic: 2.3
+               n_sersic: 1
+             1:
+               R_sersic: 0.3
+               n_sersic: 4
+
     - ``fix``: Fix specific parameters for the lens light profile.
 
       - Type: ``dictionary``
@@ -265,6 +297,21 @@ Source Light Options
 - ``source_light_options``: *(Optional)* Additional options for the source light model.
 
   - Suboptions:
+
+    - ``initial_guesses``: *(Optional)* Adjust ``dolphin``'s default initial source light parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           initial_guesses:
+             0:
+               R_sersic: 2.3
+               n_sersic: 1
+             1:
+               R_sersic: 0.3
+               n_sersic: 4
 
     - ``gaussian_prior``: Gaussian priors for source light parameters.
 
@@ -543,30 +590,6 @@ Special Options
 
         p \rightarrow p_{\mathrm{scaled}} =
         f_p \, p^{\alpha_p}
-
-Guess Parameters
-----------------
-
-- ``guess_params``: *(Optional)* Initial guess parameter values for component models. This is commonly used to 
-  overwrite default initial configurations and center the bounds of the PSO optimization process.
-
-  - Suboptions:
-
-    - ``lens``: Guess parameters for lens models.
-    - ``lens_light``: Guess parameters for lens light models.
-    - ``source_light``: Guess parameters for source light models.
-    - To configure initial parameters for point source models, see Point Source Options.
-
-    - Example:
-
-      .. code-block:: yaml
-
-         guess_params:
-           lens:
-             0:
-               theta_E: 1.2
-               e1: 0.05
-               e2: -0.05
 
 Numeric Options
 ---------------
@@ -850,6 +873,7 @@ Fitting Options
                block_center_neighbour: 0.0
 
 - ``fitting_kwargs_list``: *(Optional)* User-provided list of fitting sequences to bypass the automated recipes in dolphin.
+In order to use this list, the ``Processor.swim()`` method must be called with ``recipe_name="custom"``.
 
   - Type: ``list``
   - Example:

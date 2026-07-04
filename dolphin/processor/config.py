@@ -118,13 +118,19 @@ class ModelConfig(Config):
                 del self.settings[f"{opt}_option"]
 
         self.guess_params = {}
-        for component in ["lens", "source_light", "lens_light", "ps"]:
+        for component in ["lens", "source_light", "lens_light"]:
             try:
                 self.guess_params[component] = deepcopy(
                     self.settings["guess_params"][component]
                 )
             except (NameError, KeyError):
                 self.guess_params[component] = None
+
+        if (
+            "ps" in self.settings["guess_params"].keys() or
+            "point_source" in self.settings["guess_params"].keys()
+        ):
+            raise ValueError("Initial point source parameter values should be provided in point_source_options instead of guess_params")
 
     @property
     def lens_name(self):

@@ -155,9 +155,19 @@ class TestModelConfig(object):
         pass
 
     def test_init(self):
-        settings = self.config_1.settings
-
+        settings = deepcopy(self.config_1.settings)
         ModelConfig(self.config_1.lens_name, settings=settings)
+
+        # Point source initial parameters should be passed in through point_source_options
+        # instead of guess_params
+        settings["guess_params"]["ps"] = {}
+        with pytest.raises(ValueError):
+            ModelConfig(self.config_1.lens_name, settings=settings)
+
+        del settings["guess_params"]["ps"]
+        settings["guess_params"]["point_source"] = {}
+        with pytest.raises(ValueError):
+            ModelConfig(self.config_1.lens_name, settings=settings)
 
     def test_pixel_size(self):
         """Test the `pixel_size` property."""

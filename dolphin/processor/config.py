@@ -1865,16 +1865,18 @@ class ModelConfig(Config):
         """
         assert component in ["lens", "lens_light", "source_light", "point_source"]
 
-        if "initial_guesses" in self.settings[component + "_options"].keys():
-            new_init_dict_list = deepcopy(init_dict_list)
-            for model_index, init_dict in self.settings[component + "_options"][
-                "initial_guesses"
-            ].items():
-                new_init_dict_list[int(model_index)].update(init_dict)
+        options_string = component + "_options"
+        if options_string in self.settings.keys():
+            if "initial_guesses" in self.settings[options_string].keys():
+                new_init_dict_list = deepcopy(init_dict_list)
+                for model_index, init_dict in self.settings[options_string][
+                    "initial_guesses"
+                ].items():
+                    new_init_dict_list[int(model_index)].update(init_dict)
 
-            return new_init_dict_list
-        else:
-            return init_dict_list
+                return new_init_dict_list
+
+        return init_dict_list
 
     def update_uniform_priors(self, component, lower_dict_list, upper_dict_list):
         """Update the default uniform prior bounds with those provided by the user in

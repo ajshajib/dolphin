@@ -364,7 +364,7 @@ class Recipe(object):
                 # set lens parameter values to guess values, if provided
                 if "initial_guesses" in self._config.settings["lens_options"].keys():
                     param_list = []
-                    for index, params in self._config.settings["lens_options"].items():
+                    for index, params in self._config.settings["lens_options"]["initial_guesses"].items():
                         param_list.append(
                             [index, list(params.keys()), list(params.values())]
                         )

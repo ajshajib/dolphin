@@ -107,7 +107,7 @@ Lens Options
   - Suboptions:
 
     - ``centroid_init``: Initial guess for the lens centroid. This will apply to all lens model components.
-    For more fine-tuned control of individual lens model positions, see ``initial_guesses`` below.
+      For more fine-tuned control of individual lens model positions, see ``initial_guesses`` below.
 
       - Type: ``list of floats``
       - Example:
@@ -117,7 +117,7 @@ Lens Options
            centroid_init: [0.04, -0.04]
     
     - ``centroid_bound``: Half of the box width to constrain the deflector's centroid. This will apply to all lens model components.
-    For more fine-tuned control of the bounds for individual lens model positions, see ``uniform_prior`` below.
+      For more fine-tuned control of the bounds for individual lens model positions, see ``uniform_prior`` below.
 
       - Type: ``float``
       - Default: ``0.5``

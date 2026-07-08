@@ -247,9 +247,10 @@ class PSF:
             err = np.sqrt(variance)
             noise_maps = []
 
-            for x, y in zip(
-                catalog.data["X_IMAGE"][mask], catalog.data["Y_IMAGE"][mask]
-            ):
+            candidate_idx = np.where(mask)[0]
+            for idx in candidate_idx:
+                x = catalog.data["X_IMAGE"][idx]
+                y = catalog.data["Y_IMAGE"][idx]
                 exposure = Cutout2D(image_reduced, (x, y), size=cutout_size).data
                 # remove objects with NaN pixels
                 if not np.all(np.isfinite(exposure)):

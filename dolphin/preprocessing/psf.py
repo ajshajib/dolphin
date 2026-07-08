@@ -12,7 +12,6 @@ from astropy.wcs import WCS
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 from astropy.nddata import Cutout2D
-from astropy.io import fits
 
 from dolphin.processor.files import FileSystem
 from dolphin.preprocessing import preprocessing_util

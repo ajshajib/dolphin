@@ -8,7 +8,6 @@ from pathlib import Path
 
 from dolphin.preprocessing.psf import PSF
 
-from pathlib import Path
 from astropy.io import fits
 from unittest.mock import patch, MagicMock
 
@@ -694,7 +693,7 @@ class TestPSF(object):
             self.psf.file_system,
             "load_catalog_table",
             return_value=catalog,
-        ) as mock_load:
+        ) as _:
 
             result = self.psf.load_catalog_table()
 
@@ -713,7 +712,7 @@ class TestPSF(object):
             self.psf.file_system,
             "load_psf_candidate_attributes",
             return_value=expected,
-        ) as mock_load:
+        ) as _:
 
             result = self.psf.load_psf_candidate_attributes()
 

@@ -6,7 +6,6 @@ from pathlib import Path
 
 import dolphin.preprocessing.preprocessing_util as preprocessing_util
 
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 import numpy.testing as npt
 import pytest

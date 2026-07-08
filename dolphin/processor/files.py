@@ -14,7 +14,6 @@ import shutil
 import glob
 import re
 import os
-from regions import Regions
 from warnings import warn
 
 

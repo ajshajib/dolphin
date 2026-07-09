@@ -605,13 +605,13 @@ class TestModelConfig(object):
             "annulus_regions": [[[20, 10, 5, 6], [10, 20, 5, 6]]],
         }
         supersampled_indices = config.get_supersampled_indices(band_index=0)
-        assert supersampled_indices[20, 10] is False
-        assert supersampled_indices[20, 15] is True
-        assert supersampled_indices[20, 16] is False
+        assert supersampled_indices[20, 10] == False
+        assert supersampled_indices[20, 15] == True
+        assert supersampled_indices[20, 16] == False
 
-        assert supersampled_indices[10, 20] is False
-        assert supersampled_indices[10, 15] is True
-        assert supersampled_indices[10, 14] is False
+        assert supersampled_indices[10, 20] == False
+        assert supersampled_indices[10, 15] == True
+        assert supersampled_indices[10, 14] == False
 
         kwargs_numerics = config.get_kwargs_numerics()
         npt.assert_array_equal(
@@ -623,8 +623,8 @@ class TestModelConfig(object):
         }
         supersampled_indices = config.get_supersampled_indices(band_index=0)
         nrows, ncol = supersampled_indices.shape
-        assert supersampled_indices[int(nrows / 2), int(ncol / 2)] is True
-        assert supersampled_indices[int(nrows / 2), int(ncol / 2) + 5] is False
+        assert supersampled_indices[int(nrows / 2), int(ncol / 2)] == True
+        assert supersampled_indices[int(nrows / 2), int(ncol / 2) + 5] == False
 
         config.settings["supersampled_indices"] = {"annulus_regions": [[]]}
         supersampled_indices = config.get_supersampled_indices(band_index=0)

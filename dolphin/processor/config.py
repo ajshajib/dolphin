@@ -1039,7 +1039,7 @@ class ModelConfig(Config):
                 kwargs_num["compute_mode"] == "adaptive"
                 and kwargs_num["supersampling_factor"] > 1
             ):
-                kwargs_num["flux_evaluate_indexes"] = self.get_supersampled_indices(n)
+                kwargs_num["supersampled_indexes"] = self.get_supersampled_indices(n)
             kwargs_numerics.append(kwargs_num)
 
         return kwargs_numerics

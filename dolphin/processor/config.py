@@ -6,6 +6,7 @@ __author__ = "ajshajib"
 from ruamel.yaml import YAML
 import numpy as np
 from copy import deepcopy
+from warnings import warn
 
 from lenstronomy.Util.param_util import ellipticity2phi_q
 import lenstronomy.Util.util as util
@@ -1203,7 +1204,9 @@ class ModelConfig(Config):
                 center_x = self.deflector_center_ra
                 center_y = self.deflector_center_dec
                 try:
-                    theta_E_init = self.settings["guess_params"]["lens"][0]["theta_E"]
+                    theta_E_init = self.settings["lens_options"]["initial_guesses"][i][
+                        "theta_E"
+                    ]
                 except (NameError, KeyError):
                     theta_E_init = 1.0
 
@@ -1342,9 +1345,10 @@ class ModelConfig(Config):
             else:
                 raise ValueError("{} not implemented as a lens " "model!".format(model))
 
+        init = self.update_initial_guesses("lens", init)
         lower, upper = self.update_uniform_priors("lens", lower, upper)
-
         fixed = self.fill_in_fixed_from_settings("lens", fixed)
+        self.check_init_params_in_bounds("lens", init, fixed, lower, upper)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -1485,9 +1489,10 @@ class ModelConfig(Config):
                     "{} not implemented as a lens light" "model!".format(model)
                 )
 
+        init = self.update_initial_guesses("lens_light", init)
         lower, upper = self.update_uniform_priors("lens_light", lower, upper)
-
         fixed = self.fill_in_fixed_from_settings("lens_light", fixed)
+        self.check_init_params_in_bounds("lens_light", init, fixed, lower, upper)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -1595,9 +1600,10 @@ class ModelConfig(Config):
                     "{} not implemented as a source light" "model!".format(model)
                 )
 
+        init = self.update_initial_guesses("source_light", init)
         lower, upper = self.update_uniform_priors("source_light", lower, upper)
-
         fixed = self.fill_in_fixed_from_settings("source_light", fixed)
+        self.check_init_params_in_bounds("source_light", init, fixed, lower, upper)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -1844,26 +1850,54 @@ class ModelConfig(Config):
 
         return fixed_list
 
-    def update_uniform_priors(self, component, lower_dict, upper_dict):
+    def update_initial_guesses(self, component, init_dict_list):
+        """Update the default initial parameter values with those provided by the user
+        in the config file.
+
+        :param component: name of the model component for which the initial parameter values
+          will be updated
+        :type component: `str`
+        :param init_dict_list: the list of dictionaries containing the default initial parameter values
+          of the specified model component
+        :type init_dict_list: `list` of `dict`
+        :return: a modified list of dictionaries containing the updated initial parameter values
+        :rtype: `list` of `dict`
+        """
+        assert component in ["lens", "lens_light", "source_light", "point_source"]
+
+        options_string = component + "_options"
+        if options_string in self.settings.keys():
+            if "initial_guesses" in self.settings[options_string].keys():
+                new_init_dict_list = deepcopy(init_dict_list)
+                for model_index, init_dict in self.settings[options_string][
+                    "initial_guesses"
+                ].items():
+                    new_init_dict_list[int(model_index)].update(init_dict)
+
+                return new_init_dict_list
+
+        return init_dict_list
+
+    def update_uniform_priors(self, component, lower_dict_list, upper_dict_list):
         """Update the default uniform prior bounds with those provided by the user in
         the config file.
 
         :param component: name of the model component for which the uniform
           bounds will be altered
         :type component: `str`
-        :param lower_dict: the dictionary which contains the default lower bounds
+        :param lower_dict_list: the list of dictionaries which contains the default lower bounds
           of the specified model component
-        :type lower_dict: `dict`
-        :param upper_dict: the dictionary which contains the default upper bounds
+        :type lower_dict_list: `list` of `dict`
+        :param upper_dict_list: the list of dictionaries which contains the default upper bounds
           of the specified model component
-        :type upper_dict: `dict`
-        :return: a tuple containing the modified lower and upper parameter bound dictionaries
-        :rtype: `tuple` (`dict`, `dict`)
+        :type upper_dict_list: `list` of `dict`
+        :return: a tuple containing the modified lower and upper parameter bound dictionary lists
+        :rtype: `tuple` (`list` of `dict`, `list` of `dict`)
         """
         assert component in ["lens", "lens_light", "source_light"]
         option_str = component + "_options"
-        new_lower_dict = deepcopy(lower_dict)
-        new_upper_dict = deepcopy(upper_dict)
+        new_lower_dict_list = deepcopy(lower_dict_list)
+        new_upper_dict_list = deepcopy(upper_dict_list)
 
         try:
             self.settings[option_str]["uniform_prior"]
@@ -1876,10 +1910,61 @@ class ModelConfig(Config):
                 ].items():
                     index = int(index)
                     for key, lower, upper in param_dict:
-                        new_lower_dict[index][key] = lower
-                        new_upper_dict[index][key] = upper
+                        new_lower_dict_list[index][key] = lower
+                        new_upper_dict_list[index][key] = upper
 
-        return new_lower_dict, new_upper_dict
+        return new_lower_dict_list, new_upper_dict_list
+
+    @staticmethod
+    def check_init_params_in_bounds(
+        component, init_dict_list, fixed_dict_list, lower_dict_list, upper_dict_list
+    ):
+        """Checks that initial parameters are within the specified bounds. If not, a
+        warning is raised for each parameter that is not within bounds. This check is
+        only performed on parameters that are not fixed.
+
+        :param component: name of the model component for which the check is done
+        :type component: `str`
+        :param init_dict_list: the list of dictionaries containing the initial parameter values
+          of the specified model component
+        :type init_dict_list: `list` of `dict`
+        :param fixed_list: list of dictionaries containing fixed params
+        :type fixed_list: `list` of `dict`
+        :param lower_dict_list: the list of dictionaries which contains the lower bounds
+          of the specified model component
+        :type lower_dict_list: `list` of `dict`
+        :param upper_dict_list: the list of dictionaries which contains the upper bounds
+          of the specified model component
+        :type upper_dict_list: `list` of `dict`
+        :return: None
+        :rtype: `None`
+        """
+        assert component in ["lens", "lens_light", "source_light"]
+
+        for model_index in range(len(init_dict_list)):
+            for key, value in init_dict_list[model_index].items():
+
+                # Skip the check if the parameter is fixed
+                if key in fixed_dict_list[model_index].keys():
+                    continue
+
+                error_string = f"\n{component} model component at index {model_index} contains parameter {key} with initial value {value}"
+
+                if key in lower_dict_list[model_index].keys():
+                    lower_bound = lower_dict_list[model_index][key]
+                    if value < lower_bound:
+                        warn(
+                            error_string
+                            + f", which is less than the lower bound {lower_bound}!"
+                        )
+
+                if key in upper_dict_list[model_index].keys():
+                    upper_bound = upper_dict_list[model_index][key]
+                    if value > upper_bound:
+                        warn(
+                            error_string
+                            + f", which is greater than the upper bound {upper_bound}!"
+                        )
 
     def get_kwargs_params(self):
         """Create `kwargs_params`.

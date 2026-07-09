@@ -7,6 +7,7 @@ import numpy as np
 import numpy.testing as npt
 import os
 from pathlib import Path
+import warnings
 
 from dolphin.processor.config import Config
 from dolphin.processor.config import ModelConfig
@@ -154,8 +155,7 @@ class TestModelConfig(object):
         pass
 
     def test_init(self):
-        settings = self.config_1.settings
-
+        settings = deepcopy(self.config_1.settings)
         ModelConfig(self.config_1.lens_name, settings=settings)
 
     def test_pixel_size(self):
@@ -822,6 +822,7 @@ class TestModelConfig(object):
         }
 
         config1 = deepcopy(self.config_1)
+        del config1.settings["lens_options"]["initial_guesses"]
         config1.settings["model"]["lens"] = ["FLEXION"]
         params1 = config1.get_lens_model_params()
         assert params1[0][0] == {"g1": 0, "g2": 0, "g3": 0, "g4": 0}
@@ -1049,6 +1050,38 @@ class TestModelConfig(object):
 
         with pytest.raises(AssertionError):
             self.config_3.fill_in_fixed_from_settings("invalid", fixed)
+
+    def test_update_initial_guesses(self):
+        """Test `update_initial_guesses` method."""
+        init_dict_list = [{"theta_E": 0.1, "e1": 0.1, "e2": 0.1}]
+
+        # Default initial values should be updated to match the ones given in yaml settings
+        updated_init_dict_list = self.config_1.update_initial_guesses(
+            "lens", init_dict_list
+        )
+        assert updated_init_dict_list == [{"theta_E": 1.2, "e1": 0.05, "e2": -0.05}]
+
+    def test_check_init_params_in_bounds(self):
+        config1 = deepcopy(self.config_1)
+
+        # Check that a warning is raised when initial value is greater than upper bound
+        config1.settings["lens_options"]["initial_guesses"][0]["e1"] = 0.6
+        with pytest.warns(UserWarning):
+            config1.get_lens_model_params()
+
+        # Check that a warning is raised when initial value is less than lower bound
+        config1.settings["lens_options"]["initial_guesses"][0]["e1"] = -0.6
+        with pytest.warns(UserWarning):
+            config1.get_lens_model_params()
+
+        # Check that a warning is not raised if the parameter is fixed, even if out of bounds
+        config3 = deepcopy(self.config_3)
+        config3.settings["lens_options"]["fix"][0]["gamma"] = -0.5
+        with warnings.catch_warnings():
+            # Promote warning to error, which should not be raised
+            warnings.simplefilter("error")
+
+            config3.get_lens_model_params()
 
     def test_get_psf_supersampling_factor(self):
         """Test `get_psf_supersampling_factor` method."""

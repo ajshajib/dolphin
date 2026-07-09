@@ -65,15 +65,6 @@ class Recipe(object):
 
         self._thread_count = thread_count
 
-        self.guess_params = {}
-        for component in ["lens", "source", "lens_light", "ps"]:
-            try:
-                self.guess_params[component] = deepcopy(
-                    config.settings["guess_params"][component]
-                )
-            except (NameError, KeyError):
-                self.guess_params[component] = None
-
     def get_recipe(self, kwargs_data_joint=None, recipe_name="galaxy-quasar"):
         """Get `fitting_kwargs_list` according to the requested `recipe`.
 
@@ -371,9 +362,11 @@ class Recipe(object):
                 ]
 
                 # set lens parameter values to guess values, if provided
-                if self.guess_params["lens"] is not None:
+                if "initial_guesses" in self._config.settings["lens_options"].keys():
                     param_list = []
-                    for index, params in self.guess_params["lens"].items():
+                    for index, params in self._config.settings["lens_options"][
+                        "initial_guesses"
+                    ].items():
                         param_list.append(
                             [index, list(params.keys()), list(params.values())]
                         )

@@ -602,9 +602,7 @@ class TestModelConfig(object):
         }
         config.settings["supersampled_indices"] = {
             "units": "pixels",
-            "annulus_regions": [
-                [[20, 10, 5, 6], [10, 20, 5, 6]]
-            ]
+            "annulus_regions": [[[20, 10, 5, 6], [10, 20, 5, 6]]],
         }
         supersampled_indices = config.get_supersampled_indices(band_index=0)
         assert supersampled_indices[20, 10] is False
@@ -616,32 +614,25 @@ class TestModelConfig(object):
         assert supersampled_indices[10, 14] is False
 
         kwargs_numerics = config.get_kwargs_numerics()
-        npt.assert_array_equal(kwargs_numerics[0]["supersampled_indexes"], supersampled_indices)
-
+        npt.assert_array_equal(
+            kwargs_numerics[0]["supersampled_indexes"], supersampled_indices
+        )
 
         config.settings["supersampled_indices"] = {
-            "annulus_regions": [
-                [[0, 0, 0, 0.1]]
-            ]
+            "annulus_regions": [[[0, 0, 0, 0.1]]]
         }
         supersampled_indices = config.get_supersampled_indices(band_index=0)
         nrows, ncol = supersampled_indices.shape
-        assert supersampled_indices[int(nrows/2), int(ncol/2)] is True
-        assert supersampled_indices[int(nrows/2), int(ncol/2) + 5] is False
+        assert supersampled_indices[int(nrows / 2), int(ncol / 2)] is True
+        assert supersampled_indices[int(nrows / 2), int(ncol / 2) + 5] is False
 
-        config.settings["supersampled_indices"] = {
-            "annulus_regions": [
-                []
-            ]
-        }
+        config.settings["supersampled_indices"] = {"annulus_regions": [[]]}
         supersampled_indices = config.get_supersampled_indices(band_index=0)
         assert np.all(np.invert(supersampled_indices))
 
         config.settings["supersampled_indices"] = {
             "units": "arcseconds",
-            "annulus_regions": [
-                [0, 0, 0, 999]
-            ]
+            "annulus_regions": [[0, 0, 0, 999]],
         }
         supersampled_indices = config.get_supersampled_indices(band_index=0)
         assert np.all(supersampled_indices)

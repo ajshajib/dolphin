@@ -632,7 +632,7 @@ class TestModelConfig(object):
 
         config.settings["supersampled_indices"] = {
             "units": "arcseconds",
-            "annulus_regions": [[0, 0, 0, 999]],
+            "annulus_regions": [[[0, 0, 0, 999]]],
         }
         supersampled_indices = config.get_supersampled_indices(band_index=0)
         assert np.all(supersampled_indices)
@@ -716,7 +716,7 @@ class TestModelConfig(object):
         }
         kwargs_numerics = config.get_kwargs_numerics()
         assert kwargs_numerics[0]["compute_mode"] == "adaptive"
-        assert "supersampled_indexes" not in kwargs_numerics[0].keys()
+        assert kwargs_numerics[0]["supersampled_indexes"] is None
 
         config.settings["numeric_options"] = {
             "supersampling_factor": [3],
@@ -724,13 +724,6 @@ class TestModelConfig(object):
         }
         kwargs_numerics = config.get_kwargs_numerics()
         assert "supersampled_indexes" not in kwargs_numerics[0].keys()
-
-        config.settings["numeric_options"] = {
-            "supersampling_factor": [3],
-            "compute_mode": "adaptive",
-        }
-        kwargs_numerics = config.get_kwargs_numerics()
-        assert kwargs_numerics[0]["supersampled_indexes"] is None
 
     def test_get_point_source_params(self):
         """Test `get_point_source_params` method."""

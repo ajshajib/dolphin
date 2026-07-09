@@ -944,7 +944,7 @@ Mask Options
 
            mask_edge_pixels: [0, 2]
 
-    - ``radius``: Radius of the mask for each band.
+    - ``radius``: Radius of the mask for each band. Pixels outside of this radius are excluded in the modeling.
 
       - Type: ``list of floats``
       - Example:
@@ -954,6 +954,7 @@ Mask Options
            radius: [20.0, 20.0]
 
     - ``a``, ``b``, ``angle``: Elliptical mask parameters for each band. Used when ``radius`` is not provided.
+      Pixels outside of this ellipse are excluded in the modeling.
     
       - Type: ``list of floats``
       - Example:
@@ -964,12 +965,52 @@ Mask Options
            b: [5.0, 5.0]
            angle: [0.0, 0.0]
 
-    - ``extra_regions``: List of circular regions to mask additionally. Format is ``[ra, dec, radius]``.
+    - ``extra_regions``: List of circular regions to mask additionally. Format is ``[[ra, dec, radius], ...]`` for each band.
+      Pixels inside of these regions are excluded in the modeling.
 
       - Type: ``list of lists of lists of floats``
       - Example:
 
         .. code-block:: yaml
 
-           extra_regions:
-             - [[1.0, -1.0, 0.5]]
+           extra_regions: [
+               [[1.0, -1.0, 0.5], [0.7, 0.3, 0.5]], # two extra regions for band 0
+               [], # zero extra regions for band 1
+               [[1.0, -1.0, 0.5]], # one extra region for band 2
+             ]
+
+Supersampled Indices Options
+----------------------------
+
+- ``supersampled_indices``: *(Optional)* Settings for selecting regions of the image where supersampled
+  ray-shooting and convolution occur. Pixels outside of the indicated regions will not be supersampled.
+  This option is only applied when ``compute_mode="adaptive"`` has been set in the Numeric Options.
+
+  - Suboptions:
+    - ``units``: Units with which the following settings should be interpreted. Can be either
+      "arcseconds" or "pixels". Default is "arcseconds".
+
+      - Type: ``string``
+      - Example:
+
+        .. code-block:: yaml
+
+           units: pixels
+
+    - ``annulus_regions``: List of annulus regions on the grid that should be supersampled. Format is
+      ``[[center0, center1, inner_radius, outer_radius], ...]`` for each band.
+      - If ``units`` is "arcseconds", then ``(center0, center1)`` is interpreted as ``(ra, dec)``.
+      - If ``units`` is "pixels", then ``(center0, center1)`` is interpreted as ``(row index, column index)``.
+      - The region is defined by all pixels such that ``inner_radius <= R < outer_radius`` where ``R`` is the pixel's distance from
+        ``(center0, center1)``.
+
+      - Type: ``list of lists of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           annulus_regions: [
+               [[1.0, -1.0, 0.5, 1.5], [0.7, 0.3, 0, 0.9]], # two regions for band 0
+               [], # zero regions for band 1, no supersampling
+               [[1.0, -1.0, 0.5, 1.5]], # one region for band 2
+             ]

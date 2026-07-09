@@ -592,6 +592,60 @@ class TestModelConfig(object):
         mask = config_extra_regions.get_masks()
         assert np.sum(mask[0]) == 0
 
+    def test_get_supersampled_indices(self):
+        """Test `get_supersampled_indices` method."""
+
+        config = deepcopy(self.config_1)
+        config.settings["numeric_options"] = {
+            "supersampling_factor": [3],
+            "compute_mode": "adaptive",
+        }
+        config.settings["supersampled_indices"] = {
+            "units": "pixels",
+            "annulus_regions": [
+                [[20, 10, 5, 6], [10, 20, 5, 6]]
+            ]
+        }
+        supersampled_indices = config.get_supersampled_indices(band_index=0)
+        assert supersampled_indices[20, 10] is False
+        assert supersampled_indices[20, 15] is True
+        assert supersampled_indices[20, 16] is False
+
+        assert supersampled_indices[10, 20] is False
+        assert supersampled_indices[10, 15] is True
+        assert supersampled_indices[10, 14] is False
+
+        kwargs_numerics = config.get_kwargs_numerics()
+        npt.assert_array_equal(kwargs_numerics[0]["supersampled_indexes"], supersampled_indices)
+
+
+        config.settings["supersampled_indices"] = {
+            "annulus_regions": [
+                [[0, 0, 0, 0.1]]
+            ]
+        }
+        supersampled_indices = config.get_supersampled_indices(band_index=0)
+        nrows, ncol = supersampled_indices.shape
+        assert supersampled_indices[int(nrows/2), int(ncol/2)] is True
+        assert supersampled_indices[int(nrows/2), int(ncol/2) + 5] is False
+
+        config.settings["supersampled_indices"] = {
+            "annulus_regions": [
+                []
+            ]
+        }
+        supersampled_indices = config.get_supersampled_indices(band_index=0)
+        assert np.all(np.invert(supersampled_indices))
+
+        config.settings["supersampled_indices"] = {
+            "units": "arcseconds",
+            "annulus_regions": [
+                [0, 0, 0, 999]
+            ]
+        }
+        supersampled_indices = config.get_supersampled_indices(band_index=0)
+        assert np.all(supersampled_indices)
+
     def test_get_kwargs_psf_iteration(self):
         """Test `get_psf_iteration` method."""
         assert self.config_1.get_kwargs_psf_iteration() == {}
@@ -671,6 +725,21 @@ class TestModelConfig(object):
         }
         kwargs_numerics = config.get_kwargs_numerics()
         assert kwargs_numerics[0]["compute_mode"] == "adaptive"
+        assert "supersampled_indexes" not in kwargs_numerics[0].keys()
+
+        config.settings["numeric_options"] = {
+            "supersampling_factor": [3],
+            "compute_mode": "regular",
+        }
+        kwargs_numerics = config.get_kwargs_numerics()
+        assert "supersampled_indexes" not in kwargs_numerics[0].keys()
+
+        config.settings["numeric_options"] = {
+            "supersampling_factor": [3],
+            "compute_mode": "adaptive",
+        }
+        kwargs_numerics = config.get_kwargs_numerics()
+        assert kwargs_numerics[0]["supersampled_indexes"] is None
 
     def test_get_point_source_params(self):
         """Test `get_point_source_params` method."""

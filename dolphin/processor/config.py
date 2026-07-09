@@ -1948,14 +1948,14 @@ class ModelConfig(Config):
                 if key in fixed_dict_list[model_index].keys():
                     continue
 
-                error_string = f"\n{component} model with index {model_index} contains parameter {key} with initial value {value}"
+                error_string = f"\n{component} model component at index {model_index} contains parameter {key} with initial value {value}"
 
                 if key in lower_dict_list[model_index].keys():
                     lower_bound = lower_dict_list[model_index][key]
                     if value < lower_bound:
                         warn(
                             error_string
-                            + f" which is less than the lower bound {lower_bound}"
+                            + f", which is less than the lower bound {lower_bound}!"
                         )
 
                 if key in upper_dict_list[model_index].keys():
@@ -1963,7 +1963,7 @@ class ModelConfig(Config):
                     if value > upper_bound:
                         warn(
                             error_string
-                            + f" which is greater than the upper bound {upper_bound}"
+                            + f", which is greater than the upper bound {upper_bound}!"
                         )
 
     def get_kwargs_params(self):

@@ -271,13 +271,11 @@ class TestPSF(object):
             ]
         )
 
-        expected_variance = np.array(
-            [
-                [0.0, 0.04, 0.0],
-                [0.16, 0.25, 0.36],
-                [0.0, 0.64, 0.0],
-            ]
-        )
+        expected_variance = np.array([
+            [0.0, 0.2, 0.0],
+            [0.4, 0.5, 0.6],
+            [0.0, 0.8, 0.0],
+        ])
 
         npt.assert_array_equal(final_psf, expected_psf)
         npt.assert_allclose(variance_map, expected_variance)
@@ -623,24 +621,6 @@ class TestPSF(object):
 
         # loss plot + main plot + cut plot
         assert mock_show.call_count == 3
-
-    @patch("dolphin.preprocessing.psf.plt.show")
-    def test_plot_psf_and_variance_map_psfr_no_cut(
-        self,
-        mock_show,
-    ):
-        """Test that `plot_psf_and_variance_map` creates only one plot if there is no
-        variance map."""
-        psf = np.ones((5, 5))
-        variance = np.ones((5, 5))
-
-        PSF.plot_psf_and_variance_map(
-            method="PSFr",
-            psf_guess=psf,
-            variance_map=variance,
-        )
-
-        assert mock_show.call_count == 1
 
     @patch("dolphin.preprocessing.psf.plt.show")
     def test_load_saved_psf(

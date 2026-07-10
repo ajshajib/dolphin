@@ -410,7 +410,7 @@ class PSF:
         for i, _ in enumerate(center_list):
             new_center_list.append([center_list[i][0], center_list[i][1]])
         new_center_list = np.array(new_center_list)
-        error_map = psfr.psf_error_map(
+        variance_map = psfr.psf_error_map(
             star_list=star_data_list,
             psf_kernel=psf_guess,
             center_list=new_center_list,
@@ -422,23 +422,23 @@ class PSF:
         final_psf = np.where(final_psf_mask, psf_guess, 0)
         if oversampling > 1:
             # Downsample mask to variance map resolution
-            native_nx = error_map.shape[0]
-            native_ny = error_map.shape[1]
+            native_nx = variance_map.shape[0]
+            native_ny = variance_map.shape[1]
 
             error_map_mask = final_psf_mask.reshape(
                 native_nx, oversampling, native_ny, oversampling
             ).any(axis=(1, 3))
 
-            final_error_map = np.where(error_map_mask, error_map, 0)
+            final_variance_map = np.where(error_map_mask, variance_map, 0)
         else:
-            final_error_map = np.where(final_psf_mask, error_map, 0)
+            final_variance_map = np.where(final_psf_mask, variance_map, 0)
 
         self.plot_psf_and_variance_map(
             method="PSFr",
             psf_guess=psf_guess,
-            variance_map=error_map**2,
+            variance_map=final_variance_map,
             psf_cut=final_psf,
-            variance_map_cut=final_error_map**2,
+            variance_map_cut=final_variance_map,
         )
 
         if save:
@@ -446,10 +446,10 @@ class PSF:
                 lens_name=self.lens_name,
                 data_band=self.data_band,
                 psf_guess=final_psf,
-                variance_map=final_error_map**2,
+                variance_map=final_variance_map,
             )
 
-        return final_psf, final_error_map**2
+        return final_psf, final_variance_map
 
     def make_psf_starred(
         self,
@@ -956,23 +956,31 @@ class PSF:
         """
 
         if method == "PSFr":
-            _, ax = plt.subplots(1, 2)
-            ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="viridis")
+            fig, ax = plt.subplots(1, 2)
+            im_psf = ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="viridis")
             ax[0].set_title(r"$\log_{10}$(PSF)")
-            ax[1].imshow(np.log10(variance_map), origin="lower")
+            fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
+
+            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower")
             ax[1].set_title(r"$\log_{10}(\sigma^2$)")
+            fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
+
             plt.tight_layout()
             plt.show()
 
             if psf_cut is not None and variance_map_cut is not None:
-                _, ax = plt.subplots(1, 2)
+                fig, ax = plt.subplots(1, 2)
                 ax[0].imshow(np.log10(psf_cut))
                 ax[0].set_title(r"$\log_{10}$(PSF) CUT")
                 cut_fraction = 100 * (1 - np.sum(psf_cut) / np.sum(psf_guess))
                 ax[0].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
+                fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
+
                 ax[1].imshow(np.log10(variance_map_cut))
                 ax[1].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
                 ax[1].set_title(r"$\log_{10}(\sigma^2$) CUT")
+                fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
+
                 plt.tight_layout()
                 plt.show()
         elif method == "STARRED":
@@ -980,11 +988,15 @@ class PSF:
                 _ = pltf.plot_loss(kwargs_starred["extra_fields"]["loss_history"])
                 plt.show()
 
-            _, ax = plt.subplots(1, 2)
-            ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="viridis")
+            fig, ax = plt.subplots(1, 2)
+            im_psf = ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="viridis")
             ax[0].set_title(r"$\log_{10}$(PSF)")
-            ax[1].imshow(np.log10(variance_map), origin="lower")
+            fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
+
+            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower")
             ax[1].set_title(r"$\log_{10}(\sigma^2$)")
+            fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
+
             plt.tight_layout()
             plt.show()
 
@@ -994,9 +1006,13 @@ class PSF:
                 ax[0].set_title(r"$\log_{10}$(PSF) CUT")
                 cut_fraction = 100 * (1 - np.sum(psf_cut) / np.sum(psf_guess))
                 ax[0].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
+                fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
+                
                 ax[1].imshow(np.log10(variance_map_cut))
                 ax[1].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
                 ax[1].set_title(r"$\log_{10}(\sigma^2$) CUT")
+                fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
+
                 plt.tight_layout()
                 plt.show()
 
@@ -1014,16 +1030,14 @@ class PSF:
         psf_data, variance_map = self.file_system.load_saved_psf(self)
 
         if plot:
-            if variance_map is None:
-                _, ax = plt.subplots(1)
-                ax[0].imshow(np.log10(psf_data), origin="lower", cmap="viridis")
-                ax[0].set_title(r"$\log_{10}$(PSF)")
-            else:
-                _, ax = plt.subplots(1, 2)
-                ax[0].imshow(np.log10(psf_data), origin="lower", cmap="viridis")
-                ax[0].set_title(r"$\log_{10}$(PSF)")
-                ax[1].imshow(np.log10(variance_map), origin="lower")
-                ax[1].set_title(r"$\log_{10}(\sigma^2$)")
+            fig, ax = plt.subplots(1, 2)
+            im_psf = ax[0].imshow(np.log10(psf_data), origin="lower", cmap="viridis")
+            ax[0].set_title(r"$\log_{10}$(PSF)")
+            fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
+
+            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower")
+            ax[1].set_title(r"$\log_{10}(\sigma^2$)")
+            fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
 
             plt.tight_layout()
             plt.show()

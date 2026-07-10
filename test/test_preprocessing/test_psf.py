@@ -271,11 +271,13 @@ class TestPSF(object):
             ]
         )
 
-        expected_variance = np.array([
-            [0.0, 0.2, 0.0],
-            [0.4, 0.5, 0.6],
-            [0.0, 0.8, 0.0],
-        ])
+        expected_variance = np.array(
+            [
+                [0.0, 0.2, 0.0],
+                [0.4, 0.5, 0.6],
+                [0.0, 0.8, 0.0],
+            ]
+        )
 
         npt.assert_array_equal(final_psf, expected_psf)
         npt.assert_allclose(variance_map, expected_variance)

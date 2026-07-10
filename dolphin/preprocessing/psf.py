@@ -1007,7 +1007,7 @@ class PSF:
                 cut_fraction = 100 * (1 - np.sum(psf_cut) / np.sum(psf_guess))
                 ax[0].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
                 fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
-                
+
                 ax[1].imshow(np.log10(variance_map_cut))
                 ax[1].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
                 ax[1].set_title(r"$\log_{10}(\sigma^2$) CUT")

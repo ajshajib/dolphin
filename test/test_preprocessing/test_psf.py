@@ -13,13 +13,12 @@ from unittest.mock import patch, MagicMock
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
+
 class TestPSF(object):
     def setup_class(self):
-        self.psf = PSF(_TEST_IO_DIR,
-                       lens_name="MOCK",
-                       data_band="F814W",
-                       instrument="HST"
-                    )
+        self.psf = PSF(
+            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="HST"
+        )
 
     @patch("dolphin.preprocessing.psf.extract_stars")
     @patch("dolphin.preprocessing.psf.find_peaks")
@@ -35,49 +34,49 @@ class TestPSF(object):
         mock_extract_stars,
     ):
         """Test PSF candidate extraction."""
-    
+
         mock_get_background.return_value = (0.0, 1.0)
-    
+
         mock_hdu = MagicMock()
         mock_hdu.header = {
             "RA_TARG": 0.0,
             "DEC_TARG": 0.0,
         }
         mock_hdu.data = np.ones((1000, 1000))
-    
+
         mock_wht_hdu = MagicMock()
         mock_wht_hdu.data = np.ones((1000, 1000))
-    
+
         mock_fits.return_value.__enter__.side_effect = [
-            [mock_hdu],      # header
-            [mock_hdu],      # science image
+            [mock_hdu],  # header
+            [mock_hdu],  # science image
             [mock_wht_hdu],  # weight image
         ]
-    
+
         mock_wcs.return_value.world_to_pixel.return_value = (500, 500)
-    
+
         peaks = Table()
         peaks["x_peak"] = [500]
         peaks["y_peak"] = [500]
         peaks["peak_value"] = [5000]
         mock_find_peaks.return_value = peaks
-    
+
         fake_cutout = MagicMock()
         fake_cutout.data = np.ones((51, 51))
-    
+
         mock_extract_stars.side_effect = [
-            [fake_cutout],   # science
-            [fake_cutout],   # weights
-            [fake_cutout],   # noise
+            [fake_cutout],  # science
+            [fake_cutout],  # weights
+            [fake_cutout],  # noise
         ]
-    
+
         with patch.object(self.psf, "plot_psf_candidates"):
             stars, weights, noise = self.psf.get_psf_candidates()
-    
+
         assert len(stars) == 1
         assert len(weights) == 1
         assert len(noise) == 1
-    
+
         mock_find_peaks.assert_called_once()
         assert mock_extract_stars.call_count == 3
 
@@ -91,26 +90,29 @@ class TestPSF(object):
         mock_tight_layout,
     ):
         """Test that make_candidate_mask constructs and optionally saves a mask."""
-    
+
         star = np.ones((5, 5))
         weight = np.full((5, 5), 2.0)
         noise = np.full((5, 5), 3.0)
-    
+
         expected_mask = np.ones((5, 5), dtype=bool)
         mock_build_mask.return_value = expected_mask
-    
+
         mock_axes = [MagicMock(), MagicMock(), MagicMock()]
         mock_subplots.return_value = (MagicMock(), mock_axes)
-    
-        with patch.object(
-            self.psf,
-            "load_psf_candidate_attributes",
-            return_value=([star], None, [weight], [noise]),
-        ), patch.object(
-            self.psf.file_system,
-            "save_psf_candidate_mask",
-        ) as mock_save:
-    
+
+        with (
+            patch.object(
+                self.psf,
+                "load_psf_candidate_attributes",
+                return_value=([star], None, [weight], [noise]),
+            ),
+            patch.object(
+                self.psf.file_system,
+                "save_psf_candidate_mask",
+            ) as mock_save,
+        ):
+
             kwargs_mask = [
                 {
                     "type": "circle",
@@ -118,33 +120,33 @@ class TestPSF(object):
                     "radius": 1,
                 }
             ]
-    
+
             self.psf.make_candidate_mask(
                 star_num=0,
                 kwargs_mask=kwargs_mask,
                 save=True,
             )
-    
+
         mock_build_mask.assert_called_once_with(star.shape, kwargs_mask)
-    
+
         # verify each panel was displayed
         assert mock_axes[0].imshow.called
         assert mock_axes[1].imshow.called
         assert mock_axes[2].imshow.called
-    
+
         mock_axes[0].set_title.assert_called_once_with("Candidate Cutout")
         mock_axes[1].set_title.assert_called_once_with("Weight Map")
         mock_axes[2].set_title.assert_called_once_with(r"$\sigma$")
-    
+
         mock_tight_layout.assert_called_once()
-    
+
         mock_save.assert_called_once_with(
             self.psf.lens_name,
             self.psf.data_band,
             0,
             expected_mask,
         )
-        
+
     @patch("dolphin.preprocessing.psf.psfr.psf_error_map")
     @patch("dolphin.preprocessing.psf.psfr.stack_psf")
     def test_make_psf_psfr(
@@ -158,70 +160,76 @@ class TestPSF(object):
             np.ones((3, 3)),
             np.ones((3, 3)),
         ]
-    
+
         mask_list = [
             np.ones((3, 3), dtype=bool),
             np.ones((3, 3), dtype=bool),
         ]
-    
+
         with patch.object(
             self.psf,
             "load_psf_candidate_attributes",
             return_value=(star_list, mask_list, None, None),
         ):
             # Mock PSFr outputs
-            psf_guess = np.array([
-                [1e-30, 1.0, 1e-30],
-                [1.0,   2.0, 1.0],
-                [1e-30, 1.0, 1e-30],
-            ])
-    
+            psf_guess = np.array(
+                [
+                    [1e-30, 1.0, 1e-30],
+                    [1.0, 2.0, 1.0],
+                    [1e-30, 1.0, 1e-30],
+                ]
+            )
+
             center_list = [
                 [0.0, 0.0],
                 [0.1, -0.1],
             ]
-    
+
             mock_stack_psf.return_value = (
                 psf_guess,
                 center_list,
             )
-    
-            error_map = np.array([
-                [0.1, 0.2, 0.3],
-                [0.4, 0.5, 0.6],
-                [0.7, 0.8, 0.9],
-            ])
-    
+
+            error_map = np.array(
+                [
+                    [0.1, 0.2, 0.3],
+                    [0.4, 0.5, 0.6],
+                    [0.7, 0.8, 0.9],
+                ]
+            )
+
             mock_psf_error_map.return_value = error_map
-    
+
             with patch.object(
                 self.psf,
                 "plot_psf_and_variance_map",
             ) as mock_plot:
-    
-                final_psf, variance_map = (
-                    self.psf.make_psf_psfr(
-                        cut_threshold=1e-20,
-                        save=False,
-                    )
+
+                final_psf, variance_map = self.psf.make_psf_psfr(
+                    cut_threshold=1e-20,
+                    save=False,
                 )
-    
+
         # Expected masking
-        expected_psf = np.array([
-            [0.0, 1.0, 0.0],
-            [1.0, 2.0, 1.0],
-            [0.0, 1.0, 0.0],
-        ])
-    
-        expected_variance = np.array([
-            [0.0, 0.2, 0.0],
-            [0.4, 0.5, 0.6],
-            [0.0, 0.8, 0.0],
-        ])
-    
+        expected_psf = np.array(
+            [
+                [0.0, 1.0, 0.0],
+                [1.0, 2.0, 1.0],
+                [0.0, 1.0, 0.0],
+            ]
+        )
+
+        expected_variance = np.array(
+            [
+                [0.0, 0.2, 0.0],
+                [0.4, 0.5, 0.6],
+                [0.0, 0.8, 0.0],
+            ]
+        )
+
         npt.assert_array_equal(final_psf, expected_psf)
         npt.assert_allclose(variance_map, expected_variance)
-    
+
         mock_stack_psf.assert_called_once()
         mock_psf_error_map.assert_called_once()
         mock_plot.assert_called_once()
@@ -244,13 +252,13 @@ class TestPSF(object):
         star_data = np.ones((5, 5))
         noise_map = np.ones((5, 5)) * 0.1
         mask = np.ones((5, 5), dtype=bool)
-    
+
         with patch.object(
             self.psf,
             "load_psf_candidate_attributes",
             return_value=(
-                [star_data, star_data],   # star_data_list
-                [mask, mask],             # mask_data_list
+                [star_data, star_data],  # star_data_list
+                [mask, mask],  # mask_data_list
                 None,
                 np.array([noise_map, noise_map]),
             ),
@@ -258,104 +266,112 @@ class TestPSF(object):
             # Mock STARRED model
             model = MagicMock()
             mock_starred_psf.return_value = model
-    
+
             model.smart_guess.return_value = (
                 {"init": 1},
                 {"fixed": 1},
                 {"up": 1},
                 {"down": 1},
             )
-    
-            psf_guess = np.array([
-                [1e-30, 1.0, 1e-30],
-                [1.0,   2.0, 1.0],
-                [1e-30, 1.0, 1e-30],
-            ])
-    
-            error_map = np.array([
-                [0.1, 0.2, 0.3],
-                [0.4, 0.5, 0.6],
-                [0.7, 0.8, 0.9],
-            ])
-    
+
+            psf_guess = np.array(
+                [
+                    [1e-30, 1.0, 1e-30],
+                    [1.0, 2.0, 1.0],
+                    [1e-30, 1.0, 1e-30],
+                ]
+            )
+
+            error_map = np.array(
+                [
+                    [0.1, 0.2, 0.3],
+                    [0.4, 0.5, 0.6],
+                    [0.7, 0.8, 0.9],
+                ]
+            )
+
             model.get_full_psf.return_value = psf_guess
             model.get_psf_error_map.return_value = error_map
-    
+
             # Mock ParametersPSF
             params = MagicMock()
             mock_parameters.return_value = params
-    
+
             kwargs_partial = {
                 "kwargs_moffat": {"C": 1.0},
                 "kwargs_distortion": {},
             }
-    
+
             kwargs_final = {
                 "kwargs_moffat": {"C": 1.0},
                 "kwargs_distortion": {},
             }
-    
+
             params.args2kwargs.side_effect = [
                 kwargs_partial,
                 kwargs_final,
             ]
-    
+
             # Mock propagate_noise
             mock_propagate_noise.return_value = [np.ones((3, 3))]
-    
+
             # Mock optimizers
             optimizer_1 = MagicMock()
             optimizer_2 = MagicMock()
-    
+
             mock_optimizer.side_effect = [
                 optimizer_1,
                 optimizer_2,
             ]
-    
+
             optimizer_1.minimize.return_value = (
                 np.array([1.0]),
                 None,
                 {"loss_history": [1.0, 0.5]},
                 None,
             )
-    
+
             optimizer_2.minimize.return_value = (
                 np.array([2.0]),
                 None,
                 {"loss_history": [0.5, 0.1]},
                 None,
             )
-    
+
             with patch.object(
                 self.psf,
                 "plot_psf_and_variance_map",
             ) as mock_plot:
-    
+
                 final_psf, variance_map = self.psf.make_psf_starred(
                     cut_threshold=1e-20,
                     save=False,
                 )
-    
+
         # Expected outputs
-        expected_psf = np.array([
-            [0.0, 1.0, 0.0],
-            [1.0, 2.0, 1.0],
-            [0.0, 1.0, 0.0],
-        ])
-    
-        expected_variance = np.array([
-            [0.0, 0.04, 0.0],
-            [0.16, 0.25, 0.36],
-            [0.0, 0.64, 0.0],
-        ])
-    
+        expected_psf = np.array(
+            [
+                [0.0, 1.0, 0.0],
+                [1.0, 2.0, 1.0],
+                [0.0, 1.0, 0.0],
+            ]
+        )
+
+        expected_variance = np.array(
+            [
+                [0.0, 0.04, 0.0],
+                [0.16, 0.25, 0.36],
+                [0.0, 0.64, 0.0],
+            ]
+        )
+
         npt.assert_array_equal(final_psf, expected_psf)
         npt.assert_allclose(variance_map, expected_variance)
         assert mock_optimizer.call_count == 2
         assert params.args2kwargs.call_count == 2
         mock_propagate_noise.assert_called_once()
         mock_plot.assert_called_once()
-    
+
     @patch("dolphin.preprocessing.psf.make_axes_locatable")
     @patch("dolphin.preprocessing.psf.plt.show")
     @patch("dolphin.preprocessing.psf.plt.colorbar")
@@ -370,7 +386,7 @@ class TestPSF(object):
         mock_divider,
     ):
         """Test that `plot_psf_candidates` produces all expected plots."""
-    
+
         stars_table = Table(
             {
                 "peak_value": [1000.0, 900.0],
@@ -378,46 +394,46 @@ class TestPSF(object):
                 "y_peak": [150.0, 250.0],
             }
         )
-    
+
         star_exposures = []
         for value in [1, 2]:
             mock = MagicMock()
             mock.data = np.ones((5, 5)) * value
             star_exposures.append(mock)
-        
+
         star_weights = []
         for value in [0.1, 0.2]:
             mock = MagicMock()
             mock.data = np.ones((5, 5)) * value
             star_weights.append(mock)
-            
+
         noise_maps = []
         for value in [0.1, 0.2]:
             mock = MagicMock()
             mock.data = np.ones((5, 5)) * value
             noise_maps.append(mock)
-    
+
         mock_getdata.return_value = (np.ones((1000, 1000)), {})
-    
+
         wcs = MagicMock()
         mock_wcs.return_value = wcs
         wcs.all_pix2world.side_effect = lambda x, y, origin: (x, y)
         wcs.all_world2pix.side_effect = lambda x, y, origin: (x, y)
-    
+
         divider = MagicMock()
         divider.append_axes.return_value = MagicMock()
         mock_divider.return_value = divider
-    
+
         self.psf.plot_psf_candidates(
             star_exposures=star_exposures,
             star_weights=star_weights,
             noise_maps=noise_maps,
             stars_table=stars_table,
         )
-    
+
         # 3 image grids + variance plot + full image plot
         assert mock_show.call_count == 5
-    
+
         mock_getdata.assert_called_once_with(
             self.psf.image_file_name,
             header=True,
@@ -425,7 +441,7 @@ class TestPSF(object):
         mock_wcs.assert_called_once()
         mock_colorbar.assert_called_once()
         mock_divider.assert_called_once()
-    
+
     @patch("dolphin.preprocessing.psf.plt.show")
     @patch("dolphin.preprocessing.psf.plt.tight_layout")
     def test_plot_saved_psf_candidates(
@@ -439,22 +455,22 @@ class TestPSF(object):
             np.ones((5, 5)),
             np.ones((5, 5)),
         ]
-    
+
         mask_data = [
             np.ones((5, 5), dtype=bool),
             np.ones((5, 5), dtype=bool),
         ]
-    
+
         star_weights = [
             np.ones((5, 5)),
             np.ones((5, 5)),
         ]
-    
+
         noise_maps = [
             np.ones((5, 5)) * 0.1,
             np.ones((5, 5)) * 0.1,
         ]
-    
+
         with patch.object(
             self.psf,
             "load_psf_candidate_attributes",
@@ -465,17 +481,17 @@ class TestPSF(object):
                 noise_maps,
             ),
         ) as mock_load:
-    
+
             self.psf.plot_saved_psf_candidates()
-    
+
         mock_load.assert_called_once()
-    
+
         # star cutouts
         # weight maps
         # noise maps
         # counts vs. variance plot
         assert mock_show.call_count == 4
-    
+
     @patch("dolphin.preprocessing.psf.plt.show")
     @patch("dolphin.preprocessing.psf.plt.tight_layout")
     def test_plot_psf_and_variance_map_psfr(
@@ -483,13 +499,14 @@ class TestPSF(object):
         mock_tight_layout,
         mock_show,
     ):
-        """Test that the PSFr branch of `plot_psf_and_variance_map` operates as expected."""
+        """Test that the PSFr branch of `plot_psf_and_variance_map` operates as
+        expected."""
         psf = np.ones((5, 5))
         variance = np.ones((5, 5)) * 0.1
-    
+
         psf_cut = psf.copy()
         variance_cut = variance.copy()
-    
+
         PSF.plot_psf_and_variance_map(
             method="PSFr",
             psf_guess=psf,
@@ -497,7 +514,7 @@ class TestPSF(object):
             psf_cut=psf_cut,
             variance_map_cut=variance_cut,
         )
-    
+
         # original + cut version
         assert mock_show.call_count == 2
 
@@ -510,16 +527,13 @@ class TestPSF(object):
         mock_show,
         mock_plot_loss,
     ):
-        """Test that the STARRED branch of `plot_psf_and_variance_map` operates as expected."""
+        """Test that the STARRED branch of `plot_psf_and_variance_map` operates as
+        expected."""
         psf = np.ones((5, 5))
         variance = np.ones((5, 5)) * 0.1
-    
-        kwargs_starred = {
-            "extra_fields": {
-                "loss_history": [10, 5, 1]
-            }
-        }
-    
+
+        kwargs_starred = {"extra_fields": {"loss_history": [10, 5, 1]}}
+
         PSF.plot_psf_and_variance_map(
             method="STARRED",
             psf_guess=psf,
@@ -528,11 +542,9 @@ class TestPSF(object):
             variance_map_cut=variance,
             kwargs_starred=kwargs_starred,
         )
-    
-        mock_plot_loss.assert_called_once_with(
-            [10, 5, 1]
-        )
-    
+
+        mock_plot_loss.assert_called_once_with([10, 5, 1])
+
         # loss plot + main plot + cut plot
         assert mock_show.call_count == 3
 
@@ -541,17 +553,17 @@ class TestPSF(object):
         self,
         mock_show,
     ):
-        """Test that `plot_psf_and_variance_map` creates only one plot
-        if there is no variance map."""
+        """Test that `plot_psf_and_variance_map` creates only one plot if there is no
+        variance map."""
         psf = np.ones((5, 5))
         variance = np.ones((5, 5))
-    
+
         PSF.plot_psf_and_variance_map(
             method="PSFr",
             psf_guess=psf,
             variance_map=variance,
         )
-    
+
         assert mock_show.call_count == 1
 
     @patch("dolphin.preprocessing.psf.plt.show")
@@ -562,7 +574,7 @@ class TestPSF(object):
         """Test the functionality of `load_saved_psf`."""
         psf_data = np.ones((5, 5))
         variance_map = np.ones((5, 5))
-    
+
         with patch.object(
             self.psf.file_system,
             "load_saved_psf",
@@ -575,7 +587,7 @@ class TestPSF(object):
         
         npt.assert_array_equal(psf, psf_data)
         npt.assert_array_equal(variance, variance_map)
-    
+
         mock_show.assert_called_once()
 
     @patch("dolphin.preprocessing.psf.plt.show")
@@ -586,27 +598,26 @@ class TestPSF(object):
         """Test the functionality of `load_saved_psf` with the `plot` flag to False."""
         psf_data = np.ones((5, 5))
         variance_map = np.ones((5, 5))
-    
+
         with patch.object(
             self.psf.file_system,
             "load_saved_psf",
             return_value=(psf_data, variance_map),
         ):
-    
+
             self.psf.load_saved_psf(plot=False)
-    
+
         mock_show.assert_not_called()
 
     def test_load_psf_candidate_attributes(self):
-        """Test that `load_psf_candidate_attributes` returns
-        expected components."""
+        """Test that `load_psf_candidate_attributes` returns expected components."""
         expected = (
             ["stars"],
             ["masks"],
             ["weights"],
             ["noise"],
         )
-    
+
         with patch.object(
             self.psf.file_system,
             "load_psf_candidate_attributes",
@@ -614,5 +625,5 @@ class TestPSF(object):
         ) as _:
     
             result = self.psf.load_psf_candidate_attributes()
-        
+
         assert result == expected

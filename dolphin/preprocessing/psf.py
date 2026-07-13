@@ -72,10 +72,10 @@ class PSF:
         include_specific=None,
         save=False,
     ):
-        """Obtain PSF candidates using `photutils`. In
-        addition to cutouts of the candidate objects being created, weight cutouts and
-        noise map cutouts are made. To save the cutouts, toggle `save = True`. Can be
-        run again excluding specific objects to narrow down the initial candidates.
+        """Obtain PSF candidates using `photutils`. In addition to cutouts of the
+        candidate objects being created, weight cutouts and noise map cutouts are made.
+        To save the cutouts, toggle `save = True`. Can be run again excluding specific
+        objects to narrow down the initial candidates.
 
         :param threshold_over_background: (optional) threshold over the background for which
           candidate objects will be indentified
@@ -134,7 +134,7 @@ class PSF:
             & (y > half_size)
             & (y < (image_reduced.shape[0] - 1 - half_size))
         )
-        
+
         stars_table = Table()
         stars_table["x"] = x[mask]
         stars_table["y"] = y[mask]
@@ -149,9 +149,7 @@ class PSF:
                 data=np.sqrt(np.abs(image_reduced / wht) + sigma_bkd**2)
             )
         else:
-            noise_nddata_obj = NDData(
-                data=err
-            )  
+            noise_nddata_obj = NDData(data=err)
 
         keep = np.ones(len(stars_table), dtype=bool)
         # remove specific star numbers
@@ -164,7 +162,7 @@ class PSF:
             keep = np.isin(np.arange(len(stars_table)), include_specific)
 
         stars_table = stars_table[keep]
-        
+
         star_cutouts = extract_stars(data_nddata_obj, stars_table, size=cutout_size)
         weight_cutouts = extract_stars(weight_nddata_obj, stars_table, size=cutout_size)
         noise_cutouts = extract_stars(noise_nddata_obj, stars_table, size=cutout_size)
@@ -175,7 +173,7 @@ class PSF:
             star_exposures=star_cutouts,
             star_weights=weight_cutouts,
             noise_maps=noise_cutouts,
-            stars_table=stars_table
+            stars_table=stars_table,
         )
 
         if save:
@@ -554,7 +552,7 @@ class PSF:
           peak flux values, as determined by `photutils.find_peaks`
         :type stars_table: `Table`
 
-        :return: figures of candidate star cutouts, weight maps, error maps, 
+        :return: figures of candidate star cutouts, weight maps, error maps,
           and locations in the full science image
         :rtype: 4 `fig`
         """
@@ -624,9 +622,7 @@ class PSF:
             # variance = sigma^2
             variance = noise_maps[i].data ** 2
 
-            ax.scatter(
-                counts, variance, alpha=0.2, label=f"Star {i}"
-            )
+            ax.scatter(counts, variance, alpha=0.2, label=f"Star {i}")
 
         ax.set_xscale("log")
         ax.set_yscale("log")
@@ -637,12 +633,7 @@ class PSF:
 
         plt.show()
 
-        star_coords_list = [
-            (int(i), int(j))
-            for i, j in zip(
-                x_peaks, y_peaks
-            )
-        ]
+        star_coords_list = [(int(i), int(j)) for i, j in zip(x_peaks, y_peaks)]
 
         data_full, header = fits.getdata(self.image_file_name, header=True)
         wcs = WCS(header)
@@ -893,7 +884,9 @@ class PSF:
         :rtype: `tuple` (`array`, `array`)
         """
 
-        psf_data, variance_map = self.file_system.load_saved_psf(self.lens_name, self.data_band)
+        psf_data, variance_map = self.file_system.load_saved_psf(
+            self.lens_name, self.data_band
+        )
 
         if plot:
             fig, ax = plt.subplots(1, 2)

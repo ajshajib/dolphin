@@ -94,20 +94,6 @@ class PSF:
         :return: tuple containing the cutout, weight map, and noise map for each star
         :rtype: `tuple` (`EPSFStar`, `EPSFStar`, `EPSFStar`)
         """
-        with fits.open(self.image_file_name) as hdul:
-            header = hdul[0].header
-
-            if self.instrument == "JWST":
-                ra_targ = header["TARG_RA"] * u.deg
-                dec_targ = header["TARG_DEC"] * u.deg
-                wcs = WCS(hdul["SCI"])
-                ny, nx = hdul["SCI"].data.shape
-            else:
-                ra_targ = header["RA_TARG"] * u.deg
-                dec_targ = header["DEC_TARG"] * u.deg
-                wcs = WCS(header)
-                ny, nx = hdul[0].data.shape
-
         mean_bkd, sigma_bkd = preprocessing_util.get_background(
             self.io_directory, self.lens_name, self.data_band
         )
@@ -137,7 +123,6 @@ class PSF:
             threshold=threshold_over_background * sigma_bkd,
         )
         peaks_table.sort("peak_value", reverse=True)
-        size = 51
         half_size = (cutout_size - 1) / 2
         x = peaks_table["x_peak"]
         y = peaks_table["y_peak"]

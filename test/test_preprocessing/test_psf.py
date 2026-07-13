@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """Tests for config module."""
 
-import pytest
 import numpy as np
 import numpy.testing as npt
 from pathlib import Path
 
 from dolphin.preprocessing.psf import PSF
 
-from pathlib import Path
 from astropy.table import Table
 from unittest.mock import patch, MagicMock
 
@@ -569,7 +567,7 @@ class TestPSF(object):
             self.psf.file_system,
             "load_saved_psf",
             return_value=(psf_data, variance_map),
-        ) as mock_load:
+        ) as _:
     
             psf, variance = self.psf.load_saved_psf(
                 plot=True
@@ -613,7 +611,7 @@ class TestPSF(object):
             self.psf.file_system,
             "load_psf_candidate_attributes",
             return_value=expected,
-        ) as mock_load:
+        ) as _:
     
             result = self.psf.load_psf_candidate_attributes()
         

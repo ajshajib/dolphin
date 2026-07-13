@@ -9,7 +9,6 @@ import numpy as np
 
 from astropy.io import fits
 from astropy.wcs import WCS
-import astropy.units as u
 from astropy.nddata import NDData
 from astropy.table import Table
 

@@ -14,4 +14,4 @@ gdown
 git+https://github.com/sibirrer/psfr.git
 cosmoHammer
 starred-astro
-sep
+photutils

@@ -9,9 +9,12 @@ import numpy as np
 
 from astropy.io import fits
 from astropy.wcs import WCS
-from astropy.coordinates import SkyCoord
 import astropy.units as u
-from astropy.nddata import Cutout2D
+from astropy.nddata import NDData
+from astropy.table import Table
+
+from photutils.psf import extract_stars
+from photutils.detection import find_peaks
 
 from dolphin.processor.files import FileSystem
 from dolphin.preprocessing import preprocessing_util
@@ -61,99 +64,36 @@ class PSF:
         )
         self.weight_file_name = f"{self.full_image_path}/weight_image_{self.lens_name}_{self.data_band}.fits"
 
-    def get_kwargs_cut(self):
-        """Estimate the cuts in the different Source Extractor quantities for masking,
-        and get the Source Extractor catalog.
-
-        :return: a tuple containing a dictionary of Source Extractor quantities and
-          the catalog of objects obtained by Source Extractor
-        :rtype: `tuple` (`dict`, `BinTableHDU`)
-        """
-        catalog = preprocessing_util.make_image_catalog(
-            self.io_directory, self.lens_name, self.data_band
-        )
-        mag = np.array(catalog.data["MAG_BEST"], dtype=float)
-        size = np.array(catalog.data["FLUX_RADIUS"], dtype=float)
-        # ellipticity = catalog.data['ELLIPTICITY']
-
-        kwargs_cut = {}
-        mag_max = min(np.max(mag), 34)
-        mag_min = np.min(mag)
-        delta_mag = mag_max - mag_min
-        kwargs_cut["MagMaxThresh"] = mag_max - 0.7 * delta_mag
-        kwargs_cut["MagMinThresh"] = mag_min  # + 0.01*delta_mag
-
-        mask = mag < mag_max - 0.5 * delta_mag
-        kwargs_cut["SizeMinThresh"] = max(0, np.min(size[mask]))
-        kwargs_cut["SizeMaxThresh"] = max(0, np.min(size[mask]) + 4)
-        kwargs_cut["EllipticityThresh"] = 0.1
-        kwargs_cut["ClassStarMax"] = 1.0
-        kwargs_cut["ClassStarMin"] = 0.5
-
-        return kwargs_cut, catalog
-
     def get_psf_candidates(
         self,
-        catalog,
-        kwargs_cut,
-        cutout_size=100,
-        radius_pix=100,
-        exclude_flags=True,
-        exclude_boundary_objects=True,
+        threshold_over_background=1000,
+        cutout_size=51,
         exclude_specific=None,
+        include_specific=None,
         save=False,
     ):
-        """Obtain PSF candidates based upon the catalog and cutting dictionary. In
+        """Obtain PSF candidates using `photutils`. In
         addition to cutouts of the candidate objects being created, weight cutouts and
         noise map cutouts are made. To save the cutouts, toggle `save = True`. Can be
         run again excluding specific objects to narrow down the initial candidates.
 
-        :param catalog: fits table Source Extractor catalog as determined by
-          :meth:`~get_kwargs_cut`
-        :type catalog: `table`
-        :param kwargs_cut: cutting dictionary as determined by :meth:`~get_kwargs_cut`
-        :type kwargs_cut: `dict`
-        :param cutout_size: size (in pixels) of one side of the square cutout
+        :param threshold_over_background: (optional) threshold over the background for which
+          candidate objects will be indentified
+        :type threshold_over_background: `int`
+        :param cutout_size: (optional) size (in pixels) of one side of the square cutout
         :type cutout_size: `int`
-        :param radius_pix: (optional) Exclusion radius around RA/DEC of target object in pixels.
-          This is so that the lens/quasar images are not included in the PSF making.
-        :type radius_pix: `int`
-        :param exclude_flags: (optional) remove all objects with non-zero Source Extractor flags
-        :type exclude_flags: `bool`
-        :param exclude_boundary_objects: (optional) remove all objects at the edge of the field of view
-        :type exclude_boundary_objects: `bool`
-        :param exclude_specific: (optional) list of Source Extractor object numbers to exclude
-        :type exclude_specific: `list`
+        :param exclude_specific: (optional) list of specific star numbers to exclude
+        :type exclude_specific: `list` of `int`
+        :param include_specific: (optional) list of specific star numbers to include. Will take
+          priority over `exclude_specific`.
+        :type include_specific: `list` of `int`
         :param save: (optional) boolean dictating whether or not to save the star cutouts
-          and corresponding noise maps
+          and corresponding weight maps and noise maps
         :type plot: `bool`
 
         :return: tuple containing the cutout, weight map, and noise map for each star
-        :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`)
+        :rtype: `tuple` (`EPSFStar`, `EPSFStar`, `EPSFStar`)
         """
-
-        mag = np.array(catalog.data["MAG_BEST"], dtype=float)
-        size = np.array(catalog.data["FLUX_RADIUS"], dtype=float)
-        ellipticity = catalog.data["ELLIPTICITY"]
-        classStar = catalog.data["CLASS_STAR"]
-        SizeMaxThresh = kwargs_cut["SizeMaxThresh"]
-        SizeMinThresh = kwargs_cut["SizeMinThresh"]
-        EllipticityThresh = kwargs_cut["EllipticityThresh"]
-        MagMaxThresh = kwargs_cut["MagMaxThresh"]
-        MagMinThresh = kwargs_cut["MagMinThresh"]
-        ClassStarMax = kwargs_cut["ClassStarMax"]
-        ClassStarMin = kwargs_cut["ClassStarMin"]
-
-        mask = (
-            (size < SizeMaxThresh)
-            & (ellipticity < EllipticityThresh)
-            & (size > SizeMinThresh)
-            & (mag < MagMaxThresh)
-            & (mag > MagMinThresh)
-            & (classStar < ClassStarMax)
-            & (classStar > ClassStarMin)
-        )
-
         with fits.open(self.image_file_name) as hdul:
             header = hdul[0].header
 
@@ -168,43 +108,6 @@ class PSF:
                 wcs = WCS(header)
                 ny, nx = hdul[0].data.shape
 
-        coord = SkyCoord(ra=ra_targ, dec=dec_targ, unit="deg")
-
-        x_targ, y_targ = wcs.world_to_pixel(coord)
-        x = catalog.data["X_IMAGE"]
-        y = catalog.data["Y_IMAGE"]
-        dist = np.sqrt((x - x_targ) ** 2 + (y - y_targ) ** 2)
-
-        mask &= dist > radius_pix
-        mask_mask = mask[mask].copy()
-
-        flags = catalog.data["FLAGS"][mask]
-        obj_num = catalog.data["NUMBER"][mask]
-
-        if exclude_flags:
-            mask_mask &= flags == 0
-            print("Objects with non-zero flags excluded.")
-
-        if exclude_boundary_objects:
-            image_boundary = (
-                (x[mask] > cutout_size)
-                & (x[mask] < nx - cutout_size)
-                & (y[mask] > cutout_size)
-                & (y[mask] < ny - cutout_size)
-            )
-            mask_mask &= image_boundary
-            print("Objects along image boundary excluded.")
-
-        if exclude_specific is not None:
-            mask_mask &= ~np.isin(obj_num, exclude_specific)
-            print(f"Excluded {len(exclude_specific)} specified objects.")
-
-        mask[mask] = mask_mask
-
-        star_exposures = []
-        star_weights = []
-        noise_maps = []
-
         mean_bkd, sigma_bkd = preprocessing_util.get_background(
             self.io_directory, self.lens_name, self.data_band
         )
@@ -214,25 +117,8 @@ class PSF:
             image_reduced = sci - mean_bkd
 
             with fits.open(self.weight_file_name) as hdul:
-                wht_full = hdul[0].data
-            wht_full[wht_full <= 0] = 10 ** (-10)
-
-            candidate_idx = np.where(mask)[0]
-            for idx in candidate_idx:
-                x = catalog.data["X_IMAGE"][idx]
-                y = catalog.data["Y_IMAGE"][idx]
-
-                exposure = Cutout2D(image_reduced, (x, y), size=cutout_size).data
-                # remove objects with NaN pixels
-                if not np.all(np.isfinite(exposure)):
-                    mask[idx] = False
-                    continue
-
-                weight = Cutout2D(wht_full, (x, y), size=cutout_size).data
-
-                star_exposures.append(exposure)
-                star_weights.append(weight)
-                noise_maps.append(np.abs(exposure) / weight + sigma_bkd**2)
+                wht = hdul[0].data
+            wht[wht <= 0] = 10 ** (-10)
         elif self.instrument == "JWST":
             with fits.open(self.image_file_name) as hdul:
                 sci = hdul["SCI"].data
@@ -245,51 +131,78 @@ class PSF:
                 )
             image_reduced = sci - mean_bkd
             err = np.sqrt(variance)
-            noise_maps = []
 
-            candidate_idx = np.where(mask)[0]
-            for idx in candidate_idx:
-                x = catalog.data["X_IMAGE"][idx]
-                y = catalog.data["Y_IMAGE"][idx]
-                exposure = Cutout2D(image_reduced, (x, y), size=cutout_size).data
-                # remove objects with NaN pixels
-                if not np.all(np.isfinite(exposure)):
-                    mask[idx] = False
-                    continue
+        peaks_table = find_peaks(
+            image_reduced,
+            threshold=threshold_over_background * sigma_bkd,
+        )
+        peaks_table.sort("peak_value", reverse=True)
+        size = 51
+        half_size = (cutout_size - 1) / 2
+        x = peaks_table["x_peak"]
+        y = peaks_table["y_peak"]
 
-                weight = Cutout2D(wht, (x, y), size=cutout_size).data
+        # mask out sources near the edges
+        mask = (
+            (x > half_size)
+            & (x < (image_reduced.shape[1] - 1 - half_size))
+            & (y > half_size)
+            & (y < (image_reduced.shape[0] - 1 - half_size))
+        )
+        
+        stars_table = Table()
+        stars_table["x"] = x[mask]
+        stars_table["y"] = y[mask]
+        stars_table["x_peak"] = peaks_table["x_peak"][mask]
+        stars_table["y_peak"] = peaks_table["y_peak"][mask]
+        stars_table["peak_value"] = peaks_table["peak_value"][mask]
 
-                star_exposures.append(exposure)
-                star_weights.append(weight)
-                noise_maps.append(Cutout2D(err, (x, y), size=cutout_size).data)
+        data_nddata_obj = NDData(data=image_reduced)
+        weight_nddata_obj = NDData(data=wht)
+        if self.instrument == "HST":
+            noise_nddata_obj = NDData(
+                data=np.sqrt(np.abs(image_reduced / wht) + sigma_bkd**2)
+            )
         else:
-            print(f"{self.instrument} not yet supported!")
+            noise_nddata_obj = NDData(
+                data=err
+            )  
 
-        # sort data by object magnitude
-        star_magnitudes = np.array(catalog.data["MAG_BEST"][mask])
-        mag_sort_idx = np.argsort(star_magnitudes)
-        star_exposures = [star_exposures[i] for i in mag_sort_idx]
-        star_weights = [star_weights[i] for i in mag_sort_idx]
-        noise_maps = [noise_maps[i] for i in mag_sort_idx]
-        print(f"Found {len(mag[mask > 0])} candidate objects!")
+        keep = np.ones(len(stars_table), dtype=bool)
+        # remove specific star numbers
+        if exclude_specific is not None:
+            keep = ~np.isin(np.arange(len(stars_table)), exclude_specific)
+
+        # keep specific star numbers if there are too many candidates
+        if include_specific is not None:
+            keep = np.zeros(len(stars_table), dtype=bool)
+            keep = np.isin(np.arange(len(stars_table)), include_specific)
+
+        stars_table = stars_table[keep]
+        
+        star_cutouts = extract_stars(data_nddata_obj, stars_table, size=cutout_size)
+        weight_cutouts = extract_stars(weight_nddata_obj, stars_table, size=cutout_size)
+        noise_cutouts = extract_stars(noise_nddata_obj, stars_table, size=cutout_size)
+
+        print(f"Found {len(star_cutouts)} candidate objects!")
 
         self.plot_psf_candidates(
-            mask=mask,
-            star_exposures=star_exposures,
-            star_weights=star_weights,
-            noise_maps=noise_maps,
-            catalog=catalog,
+            star_exposures=star_cutouts,
+            star_weights=weight_cutouts,
+            noise_maps=noise_cutouts,
+            stars_table=stars_table
         )
 
         if save:
             self.file_system.save_star_cutouts(
-                psf_class=self,
-                star_exposures=star_exposures,
-                star_weights=star_weights,
-                noise_maps=noise_maps,
+                lens_name=self.lens_name,
+                data_band=self.data_band,
+                star_exposures=star_cutouts,
+                star_weights=weight_cutouts,
+                noise_maps=noise_cutouts,
             )
 
-        return star_exposures, star_weights, noise_maps
+        return star_cutouts, weight_cutouts, noise_cutouts
 
     def make_candidate_mask(self, star_num, kwargs_mask, save=False):
         """Create a mask for a PSF candidate object and save it in the expected
@@ -642,58 +555,39 @@ class PSF:
         return final_psf, final_error_map**2
 
     def plot_psf_candidates(
-        self, mask, star_exposures, star_weights, noise_maps, catalog
+        self, star_exposures, star_weights, noise_maps, stars_table
     ):
         """Plot some diagnostics on the PSF candidate stars.
 
-        :param mask: mask corresponding to candidate stars from the catalog
-        :type mask: `bool`
         :param star_exposures: candidate star cutouts
-        :type star_exposures: `np.ndarray`
+        :type star_exposures: `EPSFStar`
         :param star_weights: candidate star weight cutouts
-        :type star_weights: `np.ndarray`
+        :type star_weights: `EPSFStar`
         :param noise_maps: candidate star noise maps
-        :type noise_maps: `np.ndarray`
-        :param catalog: fits table Source Extractor catalog as determined by
-        :meth:`~get_kwargs_cut`
-        :type catalog: `Table`
+        :type noise_maps: `EPSFStar`
+        :param stars_table: table of cutout objects, their coordinates, and their
+          peak flux values, as determined by `photutils.find_peaks`
+        :type stars_table: `Table`
 
-        :return: figures of candidate star Flux Radius vs. Magnitude, cutouts,
-            weight maps, error maps, and locations in the full science image
+        :return: figures of candidate star cutouts, weight maps, error maps, 
+          and locations in the full science image
         :rtype: 4 `fig`
         """
 
-        mag = np.array(catalog.data["MAG_BEST"], dtype=float)
-        size = np.array(catalog.data["FLUX_RADIUS"], dtype=float)
+        peak_values = stars_table["peak_value"]
+        x_peaks = stars_table["x_peak"]
+        y_peaks = stars_table["y_peak"]
 
-        with fits.open(self.image_file_name) as hdul:
-            header = hdul[0].header
-            wcs = WCS(header)
-
-        plt.plot(mag[mask == 0], size[mask == 0], "og")
-        plt.plot(mag[mask > 0], size[mask > 0], "or")
-        plt.xlim([0, np.max(mag)])
-        plt.ylim([0, np.max(size)])
-        plt.xlabel("Magnitude")
-        plt.ylabel("Flux Radius")
-        plt.show()
-
-        # sort by object magnitude
-        star_magnitudes = np.array(catalog.data["MAG_BEST"][mask], dtype=float)
-        mag_sort_idx = np.argsort(star_magnitudes)
-        star_magnitudes = star_magnitudes[mag_sort_idx]
-        star_ids = np.array(catalog.data["NUMBER"][mask])[mag_sort_idx]
-
-        num_stars = len(mask.nonzero()[0])
+        num_stars = len(star_exposures)
         ncols = 4
         nrows = (num_stars + ncols - 1) // ncols  # calculate number of rows needed
 
-        # PLOT STAR CUTOUTS
+        # plot star cutouts
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            ax[i].imshow(np.log10(star_exposures[i]), cmap="viridis")
-            ax[i].set_title(f"Star {i}: ID {star_ids[i]} Mag {star_magnitudes[i]:.2f}")
+            ax[i].imshow(np.log10(star_exposures[i].data), cmap="viridis")
+            ax[i].set_title(f"Star {i}: Flux {peak_values[i]:.2f}")
             ax[i].axis("off")
         fig.suptitle("STAR CUTOUTS", fontsize=15)
 
@@ -704,12 +598,12 @@ class PSF:
         plt.tight_layout()
         plt.show()
 
-        # PLOT WEIGHT MAPS
+        # plot weight maps
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            ax[i].imshow(np.log10(star_weights[i]), cmap="viridis")
-            ax[i].set_title(f"Star {i}: ID {star_ids[i]} Mag {star_magnitudes[i]:.2f}")
+            ax[i].imshow(np.log10(star_weights[i].data), cmap="viridis")
+            ax[i].set_title(f"Star {i}: Flux {peak_values[i]:.2f}")
             ax[i].axis("off")
         fig.suptitle("WEIGHT CUTOUTS", fontsize=15)
 
@@ -720,12 +614,12 @@ class PSF:
         plt.tight_layout()
         plt.show()
 
-        # PLOT NOISE MAPS
+        # plot noise maps
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            ax[i].imshow(np.log10(noise_maps[i]), cmap="viridis")
-            ax[i].set_title(f"Star {i}: ID {star_ids[i]} Mag {star_magnitudes[i]:.2f}")
+            ax[i].imshow(np.log10(noise_maps[i].data), cmap="viridis")
+            ax[i].set_title(f"Star {i}: Flux {peak_values[i]:.2f}")
             ax[i].axis("off")
         fig.suptitle(r"$\sigma$", fontsize=15)
 
@@ -736,33 +630,24 @@ class PSF:
         plt.tight_layout()
         plt.show()
 
-        # PLOT COUNTS VS VARIANCE
+        # plot variance vs. counts
         fig, ax = plt.subplots(figsize=(8, 6))
 
         for i in range(num_stars):
-            counts = star_exposures[i].flatten()
+            counts = star_exposures[i].data
 
             # variance = sigma^2
-            variance = noise_maps[i] ** 2
-            variance = variance.flatten()
-
-            # remove bad pixels
-            mask_good = (
-                np.isfinite(counts)
-                & np.isfinite(variance)
-                & (counts > 0)
-                & (variance > 0)
-            )
+            variance = noise_maps[i].data ** 2
 
             ax.scatter(
-                counts[mask_good], variance[mask_good], alpha=0.2, label=f"Star {i}"
+                counts, variance, alpha=0.2, label=f"Star {i}"
             )
 
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_xlabel("Counts")
         ax.set_ylabel(r"$\sigma^2$")
-        ax.set_title("Counts vs Variance of Stars")
+        ax.set_title("Variance vs. Counts of Stars")
         ax.legend()
 
         plt.show()
@@ -770,22 +655,18 @@ class PSF:
         star_coords_list = [
             (int(i), int(j))
             for i, j in zip(
-                catalog.data[mask]["X_IMAGE"], catalog.data[mask]["Y_IMAGE"]
+                x_peaks, y_peaks
             )
         ]
 
-        # Turn the pixel coordinates in pixels to WCS coordinates
+        data_full, header = fits.getdata(self.image_file_name, header=True)
+        wcs = WCS(header)
+        # turn the pixel coordinates in pixels to WCS coordinates
         star_ang = [wcs.all_pix2world(i[0], i[1], 0) for i in star_coords_list]
         star_coords = {}
         star_coords = np.round(  # Convert WCS coordinates to a pixel center
             [wcs.all_world2pix(i[0], i[1], 0) for i in star_ang]
         ).astype(int)
-
-        with fits.open(self.image_file_name) as hdul:
-            if self.instrument == "JWST":
-                data_full = hdul[1].data
-            else:
-                data_full = hdul[0].data
 
         _, ax = plt.subplots(figsize=(10, 10))
         plt_data = np.log10(data_full + 0.1)
@@ -805,7 +686,7 @@ class PSF:
 
     def plot_saved_psf_candidates(self):
         """Plot the saved star cutouts, weight cutouts, and noise map cutouts with their
-        correspdoning masks to probe appropriate mask configurations.
+        correspdoning masks. Also, make a plot of variance vs. counts.
 
         :return: figures of candidate star cutouts, weight maps, and error maps
           with masks applied
@@ -820,7 +701,7 @@ class PSF:
         ncols = 4
         nrows = (num_stars + ncols - 1) // ncols  # calculate number of rows needed
 
-        # PLOT STAR CUTOUTS
+        # plot star cutouts
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
@@ -847,7 +728,7 @@ class PSF:
         plt.tight_layout()
         plt.show()
 
-        # PLOT WEIGHT MAPS
+        # plot weight cutouts
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
@@ -870,7 +751,7 @@ class PSF:
         plt.tight_layout()
         plt.show()
 
-        # PLOT NOISE MAPS
+        # plot noise maps
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
@@ -893,7 +774,7 @@ class PSF:
         plt.tight_layout()
         plt.show()
 
-        # PLOT COUNTS VS VARIANCE
+        # plot variance vs. counts
         fig, ax = plt.subplots(figsize=(8, 6))
 
         for i in range(num_stars):
@@ -919,7 +800,7 @@ class PSF:
         ax.set_yscale("log")
         ax.set_xlabel("Counts")
         ax.set_ylabel(r"$\sigma^2$")
-        ax.set_title("Counts vs Variance of Stars")
+        ax.set_title("Variance vs. Counts of Stars")
         ax.legend()
 
         plt.show()
@@ -1027,7 +908,7 @@ class PSF:
         :rtype: `tuple` (`array`, `array`)
         """
 
-        psf_data, variance_map = self.file_system.load_saved_psf(self)
+        psf_data, variance_map = self.file_system.load_saved_psf(self.lens_name, self.data_band)
 
         if plot:
             fig, ax = plt.subplots(1, 2)
@@ -1043,17 +924,6 @@ class PSF:
             plt.show()
 
         return psf_data, variance_map
-
-    def load_catalog_table(self):
-        """Get the Source Extractor catalog if already made.
-
-        :return: fits table Source Extractor catalog as determined by
-            :meth:`~dolphin.preprocessing.psf.PSF.get_kwargs_cut`
-        :rtype: `table`
-        """
-
-        catalog = self.file_system.load_catalog_table(self.lens_name, self.data_band)
-        return catalog
 
     def load_psf_candidate_attributes(self):
         """Reload the saved star cutouts, corresponding masks, weight maps, and noise

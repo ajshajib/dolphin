@@ -1,55 +1,15 @@
 import os
 import numpy as np
 from astropy.io import fits
+from astropy.stats import SigmaClip
+from photutils.background import Background2D, MedianBackground
+
 from dolphin.processor.files import FileSystem
 from pathlib import Path
-import subprocess
-
-
-def make_image_catalog(io_directory, lens_name, data_band):
-    """Run Source Extractor to obtain the full Source Extractor catalog.
-
-    :param io_directory: path to the input/output directory. Should not end with slash.
-    :type io_directory: `str`
-    :param lens_name: name of the system to create a cutout of
-    :type lens_name: `str`
-    :param data_band: data band to analze
-    :type data_band: `str`
-
-    :return: full Source Extractor catalog
-    :rtype: `BinTableHDU`
-    """
-    file_system = FileSystem(io_directory)
-    full_image_file_name = (
-        Path(file_system.get_data_directory())
-        / lens_name
-        / f"full_image_{lens_name}_{data_band}.fits"
-    )
-    subprocess.run(
-        f"sex {full_image_file_name} -c default.sex "
-        f"-CATALOG_NAME {lens_name}_{data_band}.cat "
-        "-PARAMETERS_NAME default.param "
-        "-FILTER_NAME default.conv "
-        "-STARNNW_NAME default.nnw",
-        shell=True,
-        check=True,
-    )
-
-    catalog_str = f"{lens_name}_{data_band}.cat"
-    catalog = fits.open(catalog_str)[2]
-
-    # move catalog from working directory to respective data directory
-    preprocessing_str = Path(file_system.get_preprocessing_path(lens_name))
-    output_dir = f"{preprocessing_str}/{data_band}"
-    os.makedirs(output_dir, exist_ok=True)
-    catalog_destination = os.path.join(output_dir, catalog_str)
-    os.replace(catalog_str, catalog_destination)
-
-    return catalog
 
 
 def get_background(io_directory, lens_name, data_band):
-    """Estime the background mean and RMS from the Source Extractor catalog.
+    """Estimate the background mean and RMS using `photutils`.
 
     :param io_directory: path to the input/output directory. Should not end with slash.
     :type io_directory: `str`
@@ -58,40 +18,27 @@ def get_background(io_directory, lens_name, data_band):
     :param data_band: data band to analze
     :type data_band: `str`
 
-    :return: tuple of background mean and RMS as determined by Source Extractor
+    :return: tuple of background mean and RMS as determined by `photutils`
     :rtype: `tuple` (`float`, `float`)
     """
     file_system = FileSystem(io_directory)
-    preprocessing_str = Path(file_system.get_preprocessing_path(lens_name))
-    catalog_str = preprocessing_str / f"{data_band}" / f"{lens_name}_{data_band}.cat"
+    data_dir = Path(file_system.get_data_directory())
+    full_image = data_dir / f"{lens_name}" / f"full_image_{lens_name}_{data_band}.fits"
+    full_data = fits.getdata(full_image)
 
-    mean, rms = None, None
-    if os.path.exists(catalog_str):
-        with fits.open(catalog_str) as hdul:
-            header_text = hdul[1].data[0][0]
-            for line in header_text:
-                line = line.strip().split()
-                if not line:
-                    continue
-                elif line[0] == "SEXBKGND" or line[0] == "SEXBKGND=":
-                    mean = float(line[1])
-                elif line[0] == "SEXBKDEV" or line[0] == "SEXBKDEV=":
-                    rms = float(line[1])
-    else:
-        _ = make_image_catalog(io_directory, lens_name, data_band)
-        with fits.open(catalog_str) as hdul:
-            header_text = hdul[1].data[0][0]
-            for line in header_text:
-                line = line.strip().split()
-                if not line:
-                    continue
-                elif line[0] == "SEXBKGND" or line[0] == "SEXBKGND=":
-                    mean = float(line[1])
-                elif line[0] == "SEXBKDEV" or line[0] == "SEXBKDEV=":
-                    rms = float(line[1])
+    sigma_clip = SigmaClip(sigma=3.0)
+    background_estimator = MedianBackground()
+    background_class = Background2D(
+        np.copy(full_data),
+        (50, 50),
+        filter_size=(3, 3),
+        sigma_clip=sigma_clip,
+        bkg_estimator=background_estimator,
+    )
+    background = background_class.background_median
+    background_rms = background_class.background_rms_median
 
-    return mean, rms
-
+    return background, background_rms
 
 def build_mask(shape, kwargs_mask=None):
     """Build a combined boolean mask from multiple geometric definitions. Options are

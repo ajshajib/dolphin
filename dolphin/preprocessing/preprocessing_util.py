@@ -40,6 +40,7 @@ def get_background(io_directory, lens_name, data_band):
 
     return background, background_rms
 
+
 def build_mask(shape, kwargs_mask=None):
     """Build a combined boolean mask from multiple geometric definitions. Options are
     "circle", "square", and "ellipse.".

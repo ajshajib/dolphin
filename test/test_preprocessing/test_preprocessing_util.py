@@ -14,6 +14,7 @@ import pytest
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
+
 class TestPreprocessingUtil(object):
 
     @patch("dolphin.preprocessing.preprocessing_util.Background2D")
@@ -23,26 +24,26 @@ class TestPreprocessingUtil(object):
         mock_getdata,
         mock_background2d,
     ):
-        """Test that `get_background` correctly returns the background
-        median and RMS from `Background2D`."""
-    
+        """Test that `get_background` correctly returns the background median and RMS
+        from `Background2D`."""
+
         image = np.ones((100, 100))
         mock_getdata.return_value = image
-    
+
         mock_background = MagicMock()
         mock_background.background_median = 100.5
         mock_background.background_rms_median = 2.3
         mock_background2d.return_value = mock_background
-    
+
         mean, rms = preprocessing_util.get_background(
             _TEST_IO_DIR,
             lens_name="MOCK",
             data_band="F814W",
         )
-    
+
         assert mean == 100.5
         assert rms == 2.3
-    
+
         mock_getdata.assert_called_once()
         mock_background2d.assert_called_once()
 
@@ -108,14 +109,7 @@ class TestPreprocessingUtil(object):
         """Test construction of an elliptical mask."""
         mask = preprocessing_util.build_mask(
             (5, 5),
-            kwargs_mask=[
-                {
-                    "type": "ellipse",
-                    "center": (2, 2),
-                    "a": 2,
-                    "b": 1
-                }
-            ],
+            kwargs_mask=[{"type": "ellipse", "center": (2, 2), "a": 2, "b": 1}],
         )
 
         expected = np.array(

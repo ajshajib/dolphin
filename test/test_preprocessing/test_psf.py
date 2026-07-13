@@ -580,11 +580,9 @@ class TestPSF(object):
             "load_saved_psf",
             return_value=(psf_data, variance_map),
         ) as _:
-    
-            psf, variance = self.psf.load_saved_psf(
-                plot=True
-            )
-        
+
+            psf, variance = self.psf.load_saved_psf(plot=True)
+
         npt.assert_array_equal(psf, psf_data)
         npt.assert_array_equal(variance, variance_map)
 
@@ -623,7 +621,7 @@ class TestPSF(object):
             "load_psf_candidate_attributes",
             return_value=expected,
         ) as _:
-    
+
             result = self.psf.load_psf_candidate_attributes()
 
         assert result == expected

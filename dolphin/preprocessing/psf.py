@@ -569,7 +569,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             ax[i].imshow(np.log10(star_exposures[i].data), cmap="viridis")
-            ax[i].set_title(f"Star {i}: Flux {peak_values[i]:.2f}")
+            ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
             ax[i].axis("off")
         fig.suptitle("STAR CUTOUTS", fontsize=15)
 
@@ -585,7 +585,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             ax[i].imshow(np.log10(star_weights[i].data), cmap="viridis")
-            ax[i].set_title(f"Star {i}: Flux {peak_values[i]:.2f}")
+            ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
             ax[i].axis("off")
         fig.suptitle("WEIGHT CUTOUTS", fontsize=15)
 
@@ -601,7 +601,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             ax[i].imshow(np.log10(noise_maps[i].data), cmap="viridis")
-            ax[i].set_title(f"Star {i}: Flux {peak_values[i]:.2f}")
+            ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
             ax[i].axis("off")
         fig.suptitle(r"$\sigma$", fontsize=15)
 

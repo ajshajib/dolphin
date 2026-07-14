@@ -556,7 +556,6 @@ class PSF:
         :rtype: 4 `fig`
         """
 
-        peak_values = stars_table["peak_value"]
         x_peaks = stars_table["x_peak"]
         y_peaks = stars_table["y_peak"]
 

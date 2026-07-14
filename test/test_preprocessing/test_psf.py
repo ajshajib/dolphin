@@ -397,9 +397,10 @@ class TestPSF(object):
 
         star_exposures = []
         for value in [1, 2]:
-            mock = MagicMock()
-            mock.data = np.ones((5, 5)) * value
-            star_exposures.append(mock)
+            star = MagicMock()
+            star.data = np.ones((5, 5)) * value
+            star.flux = float(value)
+            star_exposures.append(star)
 
         star_weights = []
         for value in [0.1, 0.2]:

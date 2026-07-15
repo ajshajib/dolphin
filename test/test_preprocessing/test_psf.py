@@ -379,10 +379,12 @@ class TestPSF(object):
             np.ones((3, 3), dtype=bool),
         ]
 
-        error_list = np.array([
-            np.ones((3, 3)),
-            np.ones((3, 3)),
-        ])
+        error_list = np.array(
+            [
+                np.ones((3, 3)),
+                np.ones((3, 3)),
+            ]
+        )
 
         with patch.object(
             self.psf,
@@ -480,10 +482,12 @@ class TestPSF(object):
             np.ones((2, 2), dtype=bool),
         ]
 
-        error_list = np.array([
-            np.ones((3, 3)),
-            np.ones((3, 3)),
-        ])
+        error_list = np.array(
+            [
+                np.ones((3, 3)),
+                np.ones((3, 3)),
+            ]
+        )
 
         with patch.object(
             self.psf,

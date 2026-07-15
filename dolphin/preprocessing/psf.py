@@ -283,7 +283,9 @@ class PSF:
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`)
         """
 
-        star_data_list, mask_data_list, _, noise_map_list = self.load_psf_candidate_attributes()
+        star_data_list, mask_data_list, _, noise_map_list = (
+            self.load_psf_candidate_attributes()
+        )
 
         psf_returns = psfr.stack_psf(
             star_list=star_data_list,

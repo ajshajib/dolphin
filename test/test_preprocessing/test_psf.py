@@ -930,7 +930,9 @@ class TestPSF(object):
         psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
 
         # redirect preprocessing path to temporary directory
-        preprocessing_path = Path(psf_temp.file_system.get_preprocessing_path(lens_name))
+        preprocessing_path = Path(
+            psf_temp.file_system.get_preprocessing_path(lens_name)
+        )
 
         star_exposures = [
             MagicMock(data=np.ones((5, 5))),
@@ -987,6 +989,7 @@ class TestPSF(object):
                 hdul[0].data,
                 np.ones((5, 5)) * 5,
             )
+
     def test_save_psf_candidate_mask(self):
         """Test saving PSF candidate masks."""
 
@@ -1098,14 +1101,8 @@ class TestPSF(object):
         star_0 = np.ones((5, 5))
         star_1 = np.full((5, 5), 2.0)
 
-        fits.PrimaryHDU(star_0).writeto(
-            star_dir / "star_0.fits",
-            overwrite=True
-        )
-        fits.PrimaryHDU(star_1).writeto(
-            star_dir / "star_1.fits",
-            overwrite=True
-        )
+        fits.PrimaryHDU(star_0).writeto(star_dir / "star_0.fits", overwrite=True)
+        fits.PrimaryHDU(star_1).writeto(star_dir / "star_1.fits", overwrite=True)
 
         # create masks
         mask_0 = np.array(
@@ -1130,27 +1127,15 @@ class TestPSF(object):
         weight_0 = np.full((5, 5), 3.0)
         weight_1 = np.full((5, 5), 4.0)
 
-        fits.PrimaryHDU(weight_0).writeto(
-            weight_dir / "weight_0.fits",
-            overwrite=True
-        )
-        fits.PrimaryHDU(weight_1).writeto(
-            weight_dir / "weight_1.fits",
-            overwrite=True
-        )
+        fits.PrimaryHDU(weight_0).writeto(weight_dir / "weight_0.fits", overwrite=True)
+        fits.PrimaryHDU(weight_1).writeto(weight_dir / "weight_1.fits", overwrite=True)
 
         # create noise maps
         noise_0 = np.full((5, 5), 5.0)
         noise_1 = np.full((5, 5), 6.0)
 
-        fits.PrimaryHDU(noise_0).writeto(
-            noise_dir / "noise_map_0.fits",
-            overwrite=True
-        )
-        fits.PrimaryHDU(noise_1).writeto(
-            noise_dir / "noise_map_1.fits",
-            overwrite=True
-        )
+        fits.PrimaryHDU(noise_0).writeto(noise_dir / "noise_map_0.fits", overwrite=True)
+        fits.PrimaryHDU(noise_1).writeto(noise_dir / "noise_map_1.fits", overwrite=True)
 
         (
             stars,

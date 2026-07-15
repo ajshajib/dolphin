@@ -290,4 +290,7 @@ class TestFileSystem(object):
         """Test `get_preprocessing_path` method."""
         preprocessing_path = _TEST_IO_DIR / "data" / "lens_system1" / "preprocessing"
 
-        assert Path(self.file_system.get_preprocessing_path(lens_name="lens_system1")) == preprocessing_path
+        assert (
+            Path(self.file_system.get_preprocessing_path(lens_name="lens_system1"))
+            == preprocessing_path
+        )

@@ -882,7 +882,7 @@ class TestPSF(object):
         assert mock_show.call_count == 1
 
     @patch("dolphin.preprocessing.psf.plt.show")
-    def test_load_saved_psf_plot_true(
+    def test_load_saved_psf_with_plot(
         self,
         mock_show,
     ):
@@ -922,6 +922,28 @@ class TestPSF(object):
 
         mock_show.assert_not_called()
 
+    def test_load_psf_candidate_attributes_in_class(self):
+        """Test that `load_psf_candidate_attributes` returns expected components.
+        This version of the test function is the for the loading of the attributes
+        within the PSF class, not the loading of the attributes from the 
+        FileSystem class."""
+        expected = (
+            ["stars"],
+            ["masks"],
+            ["weights"],
+            ["noise"],
+        )
+
+        with patch.object(
+            self.psf.file_system,
+            "load_psf_candidate_attributes",
+            return_value=expected,
+        ) as _:
+
+            result = self.psf.load_psf_candidate_attributes()
+
+        assert result == expected
+
     def test_save_star_cutouts(self):
         """Test saving star cutouts, weights, and noise maps."""
 
@@ -930,9 +952,7 @@ class TestPSF(object):
         psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
 
         # redirect preprocessing path to temporary directory
-        preprocessing_path = Path(
-            psf_temp.file_system.get_preprocessing_path(lens_name)
-        )
+        preprocessing_path = Path(psf_temp.file_system.get_preprocessing_path(lens_name))
 
         star_exposures = [
             MagicMock(data=np.ones((5, 5))),
@@ -949,6 +969,19 @@ class TestPSF(object):
             MagicMock(data=np.ones((5, 5)) * 6),
         ]
 
+        star_dir = preprocessing_path / data_band / "stars"
+        weight_dir = preprocessing_path / data_band / "weights"
+        noise_dir = preprocessing_path / data_band / "noise_maps"
+
+        # create existing directories with dummy files
+        for directory in [star_dir, weight_dir, noise_dir]:
+            directory.mkdir(parents=True, exist_ok=True)
+            (directory / "old_file.txt").write_text("old data")
+
+        assert (star_dir / "old_file.txt").exists()
+        assert (weight_dir / "old_file.txt").exists()
+        assert (noise_dir / "old_file.txt").exists()
+
         psf_temp.file_system.save_star_cutouts(
             lens_name=lens_name,
             data_band=data_band,
@@ -956,10 +989,6 @@ class TestPSF(object):
             star_weights=star_weights,
             noise_maps=noise_maps,
         )
-
-        star_dir = preprocessing_path / data_band / "stars"
-        weight_dir = preprocessing_path / data_band / "weights"
-        noise_dir = preprocessing_path / data_band / "noise_maps"
 
         # check directories exist
         assert star_dir.exists()
@@ -970,6 +999,11 @@ class TestPSF(object):
         assert len(list(star_dir.glob("*.fits"))) == 2
         assert len(list(weight_dir.glob("*.fits"))) == 2
         assert len(list(noise_dir.glob("*.fits"))) == 2
+
+        # check old directories were cleared
+        assert not (star_dir / "old_file.txt").exists()
+        assert not (weight_dir / "old_file.txt").exists()
+        assert not (noise_dir / "old_file.txt").exists()
 
         # check FITS contents
         with fits.open(star_dir / "star_0.fits") as hdul:
@@ -1101,8 +1135,14 @@ class TestPSF(object):
         star_0 = np.ones((5, 5))
         star_1 = np.full((5, 5), 2.0)
 
-        fits.PrimaryHDU(star_0).writeto(star_dir / "star_0.fits", overwrite=True)
-        fits.PrimaryHDU(star_1).writeto(star_dir / "star_1.fits", overwrite=True)
+        fits.PrimaryHDU(star_0).writeto(
+            star_dir / "star_0.fits",
+            overwrite=True
+        )
+        fits.PrimaryHDU(star_1).writeto(
+            star_dir / "star_1.fits",
+            overwrite=True
+        )
 
         # create masks
         mask_0 = np.array(
@@ -1127,15 +1167,27 @@ class TestPSF(object):
         weight_0 = np.full((5, 5), 3.0)
         weight_1 = np.full((5, 5), 4.0)
 
-        fits.PrimaryHDU(weight_0).writeto(weight_dir / "weight_0.fits", overwrite=True)
-        fits.PrimaryHDU(weight_1).writeto(weight_dir / "weight_1.fits", overwrite=True)
+        fits.PrimaryHDU(weight_0).writeto(
+            weight_dir / "weight_0.fits",
+            overwrite=True
+        )
+        fits.PrimaryHDU(weight_1).writeto(
+            weight_dir / "weight_1.fits",
+            overwrite=True
+        )
 
         # create noise maps
         noise_0 = np.full((5, 5), 5.0)
         noise_1 = np.full((5, 5), 6.0)
 
-        fits.PrimaryHDU(noise_0).writeto(noise_dir / "noise_map_0.fits", overwrite=True)
-        fits.PrimaryHDU(noise_1).writeto(noise_dir / "noise_map_1.fits", overwrite=True)
+        fits.PrimaryHDU(noise_0).writeto(
+            noise_dir / "noise_map_0.fits",
+            overwrite=True
+        )
+        fits.PrimaryHDU(noise_1).writeto(
+            noise_dir / "noise_map_1.fits",
+            overwrite=True
+        )
 
         (
             stars,

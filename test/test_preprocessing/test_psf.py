@@ -379,10 +379,15 @@ class TestPSF(object):
             np.ones((3, 3), dtype=bool),
         ]
 
+        error_list = np.array([
+            np.ones((3, 3)),
+            np.ones((3, 3)),
+        ])
+
         with patch.object(
             self.psf,
             "load_psf_candidate_attributes",
-            return_value=(star_list, mask_list, None, None),
+            return_value=(star_list, mask_list, None, error_list),
         ):
             # mock PSFr outputs
             psf_guess = np.array(
@@ -475,10 +480,15 @@ class TestPSF(object):
             np.ones((2, 2), dtype=bool),
         ]
 
+        error_list = np.array([
+            np.ones((3, 3)),
+            np.ones((3, 3)),
+        ])
+
         with patch.object(
             self.psf,
             "load_psf_candidate_attributes",
-            return_value=(star_list, mask_list, None, None),
+            return_value=(star_list, mask_list, None, error_list),
         ):
             # 4x4 oversampled PSF (oversampling=2)
             psf_guess = np.array(

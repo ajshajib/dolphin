@@ -213,13 +213,18 @@ class PSF:
 
         mask = preprocessing_util.build_mask(star_exposure.shape, kwargs_mask)
 
-        _, ax = plt.subplots(1, 3, figsize=(10, 6))
-        ax[0].imshow(np.log10(star_exposure * mask))
+        fig, ax = plt.subplots(1, 3, figsize=(10, 6))
+        im_star = ax[0].imshow(np.log10(star_exposure * mask))
         ax[0].set_title("Candidate Cutout")
-        ax[1].imshow(np.log10(weight_map * mask))
+        fig.colorbar(im_star, ax=ax[0], fraction=0.05)
+
+        im_weight = ax[1].imshow(np.log10(weight_map * mask))
         ax[1].set_title("Weight Map")
-        ax[2].imshow(np.log10(noise_map * mask))
+        fig.colorbar(im_weight, ax=ax[1], fraction=0.05)
+
+        im_noise = ax[2].imshow(np.log10(noise_map * mask))
         ax[2].set_title(r"$\sigma$")
+        fig.colorbar(im_noise, ax=ax[2], fraction=0.05)
 
         plt.tight_layout()
         if save:
@@ -230,7 +235,6 @@ class PSF:
     def make_psf_psfr(
         self,
         oversampling=1,
-        error_map_list=None,
         saturation_limit=None,
         num_iteration=20,
         n_recenter=5,
@@ -246,9 +250,6 @@ class PSF:
 
         :param oversampling: (optional) higher-resolution PSF reconstruction and return
         :type oversampling: `int`
-        :param error_map_list: (optional) Variance in the uncorrelated uncertainties in the data for individual pixels.
-          If not set, assumes equal variances for all pixels.
-        :type error_map_list: `list of np.ndarray`
         :param saturation_limit: (optional) float or list of floats of length of star_list
           pixel values above this threshold will not be considered in the reconstruction.
         :type saturation_limit: `float` or `list of floats` of length of star_list
@@ -282,13 +283,13 @@ class PSF:
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`)
         """
 
-        star_data_list, mask_data_list, _, _ = self.load_psf_candidate_attributes()
+        star_data_list, mask_data_list, _, noise_map_list = self.load_psf_candidate_attributes()
 
         psf_returns = psfr.stack_psf(
             star_list=star_data_list,
             oversampling=oversampling,
             mask_list=mask_data_list,
-            error_map_list=error_map_list,
+            error_map_list=noise_map_list**2,
             saturation_limit=saturation_limit,
             num_iteration=num_iteration,
             n_recenter=n_recenter,
@@ -309,6 +310,7 @@ class PSF:
         new_center_list = np.array(new_center_list)
         variance_map = psfr.psf_error_map(
             star_list=star_data_list,
+            error_map_list=noise_map_list**2,
             psf_kernel=psf_guess,
             center_list=new_center_list,
             mask_list=mask_data_list,
@@ -570,9 +572,10 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            ax[i].imshow(np.log10(star_exposures[i].data), cmap="viridis")
+            im_star = ax[i].imshow(np.log10(star_exposures[i].data), cmap="viridis")
             ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
             ax[i].axis("off")
+            fig.colorbar(im_star, ax=ax[i], fraction=0.05)
         fig.suptitle("STAR CUTOUTS", fontsize=15)
 
         # hide any remaining unused subplots
@@ -586,9 +589,10 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            ax[i].imshow(np.log10(star_weights[i].data), cmap="viridis")
+            im_weight = ax[i].imshow(np.log10(star_weights[i].data), cmap="viridis")
             ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
             ax[i].axis("off")
+            fig.colorbar(im_weight, ax=ax[i], fraction=0.05)
         fig.suptitle("WEIGHT CUTOUTS", fontsize=15)
 
         # hide any remaining unused subplots
@@ -602,9 +606,10 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            ax[i].imshow(np.log10(noise_maps[i].data), cmap="viridis")
+            im_noise = ax[i].imshow(np.log10(noise_maps[i].data), cmap="viridis")
             ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
             ax[i].axis("off")
+            fig.colorbar(im_noise, ax=ax[i], fraction=0.05)
         fig.suptitle(r"$\sigma$", fontsize=15)
 
         # hide any remaining unused subplots
@@ -708,9 +713,7 @@ class PSF:
         for i in range(num_stars):
             image = np.log10(star_exposures[i])
             mask = mask_data_list[i]
-
-            ax[i].imshow(image, cmap="viridis", origin="lower")
-
+            im_star = ax[i].imshow(image, cmap="viridis", origin="lower")
             # show masked pixels in red
             ax[i].imshow(
                 np.ma.masked_where(mask, ~mask),  # only display masked pixels
@@ -720,6 +723,7 @@ class PSF:
 
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
+            fig.colorbar(im_star, ax=ax[i], fraction=0.05)
         fig.suptitle("STAR CUTOUTS", fontsize=15)
 
         # hide any remaining unused subplots
@@ -734,7 +738,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             mask = mask_data_list[i]
-            ax[i].imshow(np.log10(star_weights[i]), cmap="viridis")
+            im_weight = ax[i].imshow(np.log10(star_weights[i]), cmap="viridis")
             # show masked pixels in red
             ax[i].imshow(
                 np.ma.masked_where(mask, ~mask),  # only display masked pixels
@@ -743,6 +747,7 @@ class PSF:
             )
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
+            fig.colorbar(im_weight, ax=ax[i], fraction=0.05)
         fig.suptitle("WEIGHT CUTOUTS", fontsize=15)
 
         # hide any remaining unused subplots
@@ -757,7 +762,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             mask = mask_data_list[i]
-            ax[i].imshow(np.log10(noise_maps[i]), cmap="viridis")
+            im_noise = ax[i].imshow(np.log10(noise_maps[i]), cmap="viridis")
             # show masked pixels in red
             ax[i].imshow(
                 np.ma.masked_where(mask, ~mask),  # only display masked pixels
@@ -766,6 +771,7 @@ class PSF:
             )
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
+            fig.colorbar(im_noise, ax=ax[i], fraction=0.05)
         fig.suptitle(r"$\sigma$", fontsize=15)
 
         # hide any remaining unused subplots

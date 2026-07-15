@@ -963,4 +963,3 @@ class FileSystem(object):
             variance_map = file["psf_variance_map"][()]
 
         return psf_data, variance_map
-    

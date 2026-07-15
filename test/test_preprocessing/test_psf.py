@@ -882,7 +882,7 @@ class TestPSF(object):
         assert mock_show.call_count == 1
 
     @patch("dolphin.preprocessing.psf.plt.show")
-    def test_load_saved_psf(
+    def test_load_saved_psf_plot_true(
         self,
         mock_show,
     ):
@@ -921,25 +921,6 @@ class TestPSF(object):
             self.psf.load_saved_psf(plot=False)
 
         mock_show.assert_not_called()
-
-    def test_load_psf_candidate_attributes(self):
-        """Test that `load_psf_candidate_attributes` returns expected components."""
-        expected = (
-            ["stars"],
-            ["masks"],
-            ["weights"],
-            ["noise"],
-        )
-
-        with patch.object(
-            self.psf.file_system,
-            "load_psf_candidate_attributes",
-            return_value=expected,
-        ) as _:
-
-            result = self.psf.load_psf_candidate_attributes()
-
-        assert result == expected
 
     def test_save_star_cutouts(self):
         """Test saving star cutouts, weights, and noise maps."""

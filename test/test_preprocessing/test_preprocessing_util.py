@@ -169,7 +169,7 @@ class TestPreprocessingUtil(object):
                 },
             ],
         )
-    
+
         expected = np.array(
             [
                 [1, 1, 1, 1, 1],
@@ -180,9 +180,9 @@ class TestPreprocessingUtil(object):
             ],
             dtype=float,
         )
-    
+
         npt.assert_array_equal(mask, expected)
-    
+
     def test_build_mask_invalid_type(self):
         """Test that an invalid mask type raises an error."""
         with pytest.raises(ValueError):

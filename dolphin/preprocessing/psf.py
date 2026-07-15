@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This class contains helper functions to create a 
-PSF using the PSFr and STARRED methodologies."""
+"""This class contains helper functions to create a PSF using the PSFr and STARRED
+methodologies."""
 
 __author__ = "brady-ryan"
 
@@ -30,8 +30,8 @@ from starred.plots import plot_function as pltf
 
 
 class PSF:
-    """This class contains helper functions to create a 
-    PSF using the PSFr and STARRED methodologies."""
+    """This class contains helper functions to create a PSF using the PSFr and STARRED
+    methodologies."""
 
     def __init__(self, io_directory, lens_name, data_band, instrument):
         """Initiate the class from the following inputs:
@@ -75,7 +75,7 @@ class PSF:
     ):
         """Obtain PSF candidates using `photutils`. In addition to cutouts of the
         candidate objects being created, weight cutouts and noise map cutouts are made.
-        To save the cutouts, toggle `save = True`. Can be run again excluding or 
+        To save the cutouts, toggle `save = True`. Can be run again excluding or
         including specific objects to narrow down the initial candidates.
 
         :param threshold_over_background: (optional) threshold over the background for which
@@ -553,7 +553,7 @@ class PSF:
           peak flux values, as determined by `photutils.find_peaks`
         :type stars_table: `Table`
 
-        :return: figures of candidate star cutouts, weight maps, error maps, 
+        :return: figures of candidate star cutouts, weight maps, error maps,
           variance vs. counts, and locations in the full science image
         :rtype: 5 `fig`
         """
@@ -617,7 +617,7 @@ class PSF:
         # plot variance vs. counts
         fig, ax = plt.subplots(figsize=(8, 6))
         colors = []
-        
+
         for i in range(num_stars):
             counts = star_exposures[i].data
 
@@ -626,18 +626,18 @@ class PSF:
 
             sc = ax.scatter(counts, variance, alpha=0.8)
             colors.append(sc.get_facecolor()[0])  # save the scatter color
-        
+
         # create color-coded text in columns of 10
         n_per_col = 10
         x0 = 0.02
         dx = 0.18
         y0 = 0.98
         dy = 0.04
-        
+
         for i in range(num_stars):
             col = i // n_per_col
             row = i % n_per_col
-        
+
             ax.text(
                 x0 + col * dx,
                 y0 - row * dy,
@@ -647,7 +647,7 @@ class PSF:
                 va="top",
                 ha="left",
                 color=colors[i],
-                bbox=dict(facecolor="white", alpha=1., edgecolor="none", pad=0.2),
+                bbox=dict(facecolor="white", alpha=1.0, edgecolor="none", pad=0.2),
             )
 
         ax.set_xscale("log")
@@ -658,12 +658,7 @@ class PSF:
 
         plt.show()
 
-        star_coords_list = [
-            (int(i), int(j))
-            for i, j in zip(
-                x_peaks, y_peaks
-            )
-        ]
+        star_coords_list = [(int(i), int(j)) for i, j in zip(x_peaks, y_peaks)]
 
         data_full, header = fits.getdata(self.image_file_name, header=True)
         wcs = WCS(header)
@@ -783,7 +778,7 @@ class PSF:
         # plot variance vs. counts
         fig, ax = plt.subplots(figsize=(8, 6))
         colors = []
-        
+
         for i in range(num_stars):
             counts = star_exposures[i].flatten()
 
@@ -793,18 +788,18 @@ class PSF:
 
             sc = ax.scatter(counts, variance, alpha=0.8)
             colors.append(sc.get_facecolor()[0])  # save the scatter color
-        
+
         # create color-coded text in columns of 10
         n_per_col = 10
         x0 = 0.02
         dx = 0.18
         y0 = 0.98
         dy = 0.04
-        
+
         for i in range(num_stars):
             col = i // n_per_col
             row = i % n_per_col
-        
+
             ax.text(
                 x0 + col * dx,
                 y0 - row * dy,
@@ -814,9 +809,9 @@ class PSF:
                 va="top",
                 ha="left",
                 color=colors[i],
-                bbox=dict(facecolor="white", alpha=1., edgecolor="none", pad=0.2),
+                bbox=dict(facecolor="white", alpha=1.0, edgecolor="none", pad=0.2),
             )
-        
+
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_xlabel("Counts")

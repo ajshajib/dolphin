@@ -156,6 +156,33 @@ class TestPreprocessingUtil(object):
 
         npt.assert_array_equal(mask, expected)
 
+    def test_build_mask_only_inverted_masks(self):
+        """Test that only inverted masks remove pixels from a full image."""
+        mask = preprocessing_util.build_mask(
+            (5, 5),
+            kwargs_mask=[
+                {
+                    "type": "circle",
+                    "center": (2, 2),
+                    "radius": 1,
+                    "invert": True,
+                },
+            ],
+        )
+    
+        expected = np.array(
+            [
+                [1, 1, 1, 1, 1],
+                [1, 1, 0, 1, 1],
+                [1, 0, 0, 0, 1],
+                [1, 1, 0, 1, 1],
+                [1, 1, 1, 1, 1],
+            ],
+            dtype=float,
+        )
+    
+        npt.assert_array_equal(mask, expected)
+    
     def test_build_mask_invalid_type(self):
         """Test that an invalid mask type raises an error."""
         with pytest.raises(ValueError):

@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+"""This module contains helper functions to aid in
+data preprocessing."""
+
+__author__ = "brady-ryan"
+
 import numpy as np
 from astropy.io import fits
 from astropy.stats import SigmaClip

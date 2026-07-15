@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This class contains helper functions to create a PSF using either PSFr or STARRED."""
+"""This class contains helper functions to create a 
+PSF using the PSFr and STARRED methodologies."""
 
 __author__ = "brady-ryan"
 
@@ -29,8 +30,8 @@ from starred.plots import plot_function as pltf
 
 
 class PSF:
-    """This class contains helper functions to create a PSF estimate from observational
-    data."""
+    """This class contains helper functions to create a 
+    PSF using the PSFr and STARRED methodologies."""
 
     def __init__(self, io_directory, lens_name, data_band, instrument):
         """Initiate the class from the following inputs:
@@ -41,7 +42,8 @@ class PSF:
         :type lens_name: `str`
         :param data_band: data band of desired PSF
         :type data_band: `str`
-        :param instrument: instrument which took the data
+        :param instrument: instrument which took the data. Current options are
+          "HST" and "JWST"
         :type intrument: `str`
         """
         self.io_directory = io_directory
@@ -73,8 +75,8 @@ class PSF:
     ):
         """Obtain PSF candidates using `photutils`. In addition to cutouts of the
         candidate objects being created, weight cutouts and noise map cutouts are made.
-        To save the cutouts, toggle `save = True`. Can be run again excluding specific
-        objects to narrow down the initial candidates.
+        To save the cutouts, toggle `save = True`. Can be run again excluding or 
+        including specific objects to narrow down the initial candidates.
 
         :param threshold_over_background: (optional) threshold over the background for which
           candidate objects will be indentified
@@ -300,7 +302,7 @@ class PSF:
         psf_guess = psf_returns[0]
         center_list = np.array(psf_returns[1])
 
-        # Process the center list for the error map
+        # process the center list for the error map
         new_center_list = []
         for i, _ in enumerate(center_list):
             new_center_list.append([center_list[i][0], center_list[i][1]])
@@ -316,7 +318,7 @@ class PSF:
         final_psf_mask = psf_guess > cut_threshold
         final_psf = np.where(final_psf_mask, psf_guess, 0)
         if oversampling > 1:
-            # Downsample mask to variance map resolution
+            # downsample mask to variance map resolution
             native_nx = variance_map.shape[0]
             native_ny = variance_map.shape[1]
 
@@ -551,11 +553,12 @@ class PSF:
           peak flux values, as determined by `photutils.find_peaks`
         :type stars_table: `Table`
 
-        :return: figures of candidate star cutouts, weight maps, error maps,
-          and locations in the full science image
-        :rtype: 4 `fig`
+        :return: figures of candidate star cutouts, weight maps, error maps, 
+          variance vs. counts, and locations in the full science image
+        :rtype: 5 `fig`
         """
 
+        _ = stars_table["peak_value"]
         x_peaks = stars_table["x_peak"]
         y_peaks = stars_table["y_peak"]
 
@@ -576,7 +579,7 @@ class PSF:
         for j in range(num_stars, nrows * ncols):
             ax[j].axis("off")
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.985])
         plt.show()
 
         # plot weight maps
@@ -592,7 +595,7 @@ class PSF:
         for j in range(num_stars, nrows * ncols):
             ax[j].axis("off")
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.985])
         plt.show()
 
         # plot noise maps
@@ -608,30 +611,59 @@ class PSF:
         for j in range(num_stars, nrows * ncols):
             ax[j].axis("off")
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.985])
         plt.show()
 
         # plot variance vs. counts
         fig, ax = plt.subplots(figsize=(8, 6))
-
+        colors = []
+        
         for i in range(num_stars):
             counts = star_exposures[i].data
 
             # variance = sigma^2
             variance = noise_maps[i].data ** 2
 
-            ax.scatter(counts, variance, alpha=0.2, label=f"Star {i}")
+            sc = ax.scatter(counts, variance, alpha=0.8)
+            colors.append(sc.get_facecolor()[0])  # save the scatter color
+        
+        # create color-coded text in columns of 10
+        n_per_col = 10
+        x0 = 0.02
+        dx = 0.18
+        y0 = 0.98
+        dy = 0.04
+        
+        for i in range(num_stars):
+            col = i // n_per_col
+            row = i % n_per_col
+        
+            ax.text(
+                x0 + col * dx,
+                y0 - row * dy,
+                f"Star {i}",
+                transform=ax.transAxes,
+                fontsize=10,
+                va="top",
+                ha="left",
+                color=colors[i],
+                bbox=dict(facecolor="white", alpha=1., edgecolor="none", pad=0.2),
+            )
 
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_xlabel("Counts")
         ax.set_ylabel(r"$\sigma^2$")
         ax.set_title("Variance vs. Counts of Stars")
-        ax.legend()
 
         plt.show()
 
-        star_coords_list = [(int(i), int(j)) for i, j in zip(x_peaks, y_peaks)]
+        star_coords_list = [
+            (int(i), int(j))
+            for i, j in zip(
+                x_peaks, y_peaks
+            )
+        ]
 
         data_full, header = fits.getdata(self.image_file_name, header=True)
         wcs = WCS(header)
@@ -663,7 +695,7 @@ class PSF:
         correspdoning masks. Also, make a plot of variance vs. counts.
 
         :return: figures of candidate star cutouts, weight maps, and error maps
-          with masks applied
+          with masks applied, plot of variance vs. counts of stars.
         :rtype: `fig`
         """
 
@@ -699,7 +731,7 @@ class PSF:
         for j in range(num_stars, nrows * ncols):
             ax[j].axis("off")
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.985])
         plt.show()
 
         # plot weight cutouts
@@ -722,7 +754,7 @@ class PSF:
         for j in range(num_stars, nrows * ncols):
             ax[j].axis("off")
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.985])
         plt.show()
 
         # plot noise maps
@@ -745,12 +777,13 @@ class PSF:
         for j in range(num_stars, nrows * ncols):
             ax[j].axis("off")
 
-        plt.tight_layout()
+        plt.tight_layout(rect=[0, 0, 1, 0.985])
         plt.show()
 
         # plot variance vs. counts
         fig, ax = plt.subplots(figsize=(8, 6))
-
+        colors = []
+        
         for i in range(num_stars):
             counts = star_exposures[i].flatten()
 
@@ -758,24 +791,37 @@ class PSF:
             variance = noise_maps[i] ** 2
             variance = variance.flatten()
 
-            # remove bad pixels
-            mask_good = (
-                np.isfinite(counts)
-                & np.isfinite(variance)
-                & (counts > 0)
-                & (variance > 0)
+            sc = ax.scatter(counts, variance, alpha=0.8)
+            colors.append(sc.get_facecolor()[0])  # save the scatter color
+        
+        # create color-coded text in columns of 10
+        n_per_col = 10
+        x0 = 0.02
+        dx = 0.18
+        y0 = 0.98
+        dy = 0.04
+        
+        for i in range(num_stars):
+            col = i // n_per_col
+            row = i % n_per_col
+        
+            ax.text(
+                x0 + col * dx,
+                y0 - row * dy,
+                f"Star {i}",
+                transform=ax.transAxes,
+                fontsize=10,
+                va="top",
+                ha="left",
+                color=colors[i],
+                bbox=dict(facecolor="white", alpha=1., edgecolor="none", pad=0.2),
             )
-
-            ax.scatter(
-                counts[mask_good], variance[mask_good], alpha=0.2, label=f"Star {i}"
-            )
-
+        
         ax.set_xscale("log")
         ax.set_yscale("log")
         ax.set_xlabel("Counts")
         ax.set_ylabel(r"$\sigma^2$")
         ax.set_title("Variance vs. Counts of Stars")
-        ax.legend()
 
         plt.show()
 
@@ -793,10 +839,10 @@ class PSF:
         :param method: fitting method used to option the PSF. Options are "PSFr" and "STARRED"
         :type method: `str`
         :param psf_guess: initial PSF as determined by either :meth:`~dolphin.preprocessing.PSF.make_psf_psfr`
-        or `~dolphin.preprocessing.PSF.make_psf_starred`
+        or :meth:`~dolphin.preprocessing.PSF.make_psf_starred`
         :type psf_guess: `array`
         :param variance_map: initial PSF variance map as determined by either :meth:`~dolphin.preprocessing.PSF.make_psf_psfr`
-        or `~dolphin.preprocessing.PSF.make_psf_starred`
+        or :meth:`~dolphin.preprocessing.PSF.make_psf_starred`
         :type variance_map: `array`
         :param psf_cut: (optional) cut PSF
         :type psf_cut: `array`
@@ -905,7 +951,7 @@ class PSF:
         """Reload the saved star cutouts, corresponding masks, weight maps, and noise
         maps needed by :class:`~dolphin.preprocessing.psf.PSF`.
 
-        return: A tuple containing the saved star cutouts, matched masks, weight maps, and saved noise maps.
+        :return: A tuple containing the saved star cutouts, matched masks, weight maps, and saved noise maps.
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`, `np.ndarray`)
         """
 

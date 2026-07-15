@@ -957,11 +957,10 @@ class FileSystem(object):
         """
 
         psf_file = Path(self.get_psf_file_path(lens_name, data_band))
-        variance_map = None
 
         with h5py.File(psf_file, "r") as file:
             psf_data = file["kernel_point_source"][()]
-            if "psf_variance_map" in file:
-                variance_map = file["psf_variance_map"][()]
+            variance_map = file["psf_variance_map"][()]
 
         return psf_data, variance_map
+    

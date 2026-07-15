@@ -4,10 +4,13 @@
 import numpy as np
 import numpy.testing as npt
 from pathlib import Path
+import h5py
 
 from dolphin.preprocessing.psf import PSF
 
 from astropy.table import Table
+from astropy.io import fits
+
 from unittest.mock import patch, MagicMock
 import pytest
 
@@ -937,3 +940,339 @@ class TestPSF(object):
             result = self.psf.load_psf_candidate_attributes()
 
         assert result == expected
+
+    def test_save_star_cutouts(self):
+        """Test saving star cutouts, weights, and noise maps."""
+
+        lens_name = "lens_system1"
+        data_band = "F390W"
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+
+        # redirect preprocessing path to temporary directory
+        preprocessing_path = Path(psf_temp.file_system.get_preprocessing_path(lens_name))
+
+        star_exposures = [
+            MagicMock(data=np.ones((5, 5))),
+            MagicMock(data=np.full((5, 5), 2.0)),
+        ]
+
+        star_weights = [
+            MagicMock(data=np.ones((5, 5)) * 3),
+            MagicMock(data=np.ones((5, 5)) * 4),
+        ]
+
+        noise_maps = [
+            MagicMock(data=np.ones((5, 5)) * 5),
+            MagicMock(data=np.ones((5, 5)) * 6),
+        ]
+
+        psf_temp.file_system.save_star_cutouts(
+            lens_name=lens_name,
+            data_band=data_band,
+            star_exposures=star_exposures,
+            star_weights=star_weights,
+            noise_maps=noise_maps,
+        )
+
+        star_dir = preprocessing_path / data_band / "stars"
+        weight_dir = preprocessing_path / data_band / "weights"
+        noise_dir = preprocessing_path / data_band / "noise_maps"
+
+        # check directories exist
+        assert star_dir.exists()
+        assert weight_dir.exists()
+        assert noise_dir.exists()
+
+        # check files exist
+        assert len(list(star_dir.glob("*.fits"))) == 2
+        assert len(list(weight_dir.glob("*.fits"))) == 2
+        assert len(list(noise_dir.glob("*.fits"))) == 2
+
+        # check FITS contents
+        with fits.open(star_dir / "star_0.fits") as hdul:
+            np.testing.assert_array_equal(
+                hdul[0].data,
+                np.ones((5, 5)),
+            )
+
+        with fits.open(weight_dir / "weight_1.fits") as hdul:
+            np.testing.assert_array_equal(
+                hdul[0].data,
+                np.ones((5, 5)) * 4,
+            )
+
+        with fits.open(noise_dir / "noise_map_0.fits") as hdul:
+            np.testing.assert_array_equal(
+                hdul[0].data,
+                np.ones((5, 5)) * 5,
+            )
+    def test_save_psf_candidate_mask(self):
+        """Test saving PSF candidate masks."""
+
+        lens_name = "lens_system1"
+        data_band = "F390W"
+        star_num = 2
+
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+
+        preprocessing_path = Path(
+            psf_temp.file_system.get_preprocessing_path(lens_name)
+        )
+
+        mask = np.array(
+            [
+                [True, False, True],
+                [False, True, False],
+                [True, True, False],
+            ]
+        )
+
+        psf_temp.file_system.save_psf_candidate_mask(
+            lens_name=lens_name,
+            data_band=data_band,
+            star_num=star_num,
+            mask=mask,
+        )
+
+        mask_dir = preprocessing_path / data_band / "masks"
+        mask_file = mask_dir / f"mask_{star_num}.npy"
+
+        # check directory exists
+        assert mask_dir.exists()
+
+        # check file exists
+        assert mask_file.exists()
+
+        # check saved mask contents
+        saved_mask = np.load(mask_file)
+
+        np.testing.assert_array_equal(
+            saved_mask,
+            mask,
+        )
+
+    def test_save_psf_and_variance_map(self):
+        """Test saving PSF and variance map to HDF5 format."""
+
+        lens_name = "lens_system1"
+        data_band = "F390W"
+
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+
+        data_directory = Path(psf_temp.file_system.get_data_directory())
+        psf_guess = np.ones((21, 21))
+        variance_map = np.full((21, 21), 0.5)
+
+        psf_temp.file_system.save_psf_and_variance_map(
+            lens_name=lens_name,
+            data_band=data_band,
+            psf_guess=psf_guess,
+            variance_map=variance_map,
+        )
+
+        filename = data_directory / lens_name / f"psf_{lens_name}_{data_band}.h5"
+
+        # check file exists
+        assert filename.exists()
+
+        # check HDF5 contents
+        with h5py.File(filename, "r") as f:
+            assert "kernel_point_source" in f
+            assert "psf_variance_map" in f
+
+            np.testing.assert_array_equal(
+                f["kernel_point_source"][:],
+                psf_guess,
+            )
+
+            np.testing.assert_array_equal(
+                f["psf_variance_map"][:],
+                variance_map,
+            )
+
+    def test_load_psf_candidate_attributes(self):
+        """Test loading PSF candidate stars, masks, weights, and noise maps."""
+
+        lens_name = "lens_system1"
+        data_band = "F390W"
+
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+
+        preprocessing_path = Path(
+            psf_temp.file_system.get_preprocessing_path(lens_name)
+        )
+
+        star_dir = preprocessing_path / data_band / "stars"
+        weight_dir = preprocessing_path / data_band / "weights"
+        noise_dir = preprocessing_path / data_band / "noise_maps"
+        mask_dir = preprocessing_path / data_band / "masks"
+
+        # create directories
+        star_dir.mkdir(parents=True, exist_ok=True)
+        weight_dir.mkdir(parents=True, exist_ok=True)
+        noise_dir.mkdir(parents=True, exist_ok=True)
+        mask_dir.mkdir(parents=True, exist_ok=True)
+
+        # create star cutouts
+        star_0 = np.ones((5, 5))
+        star_1 = np.full((5, 5), 2.0)
+
+        fits.PrimaryHDU(star_0).writeto(
+            star_dir / "star_0.fits",
+            overwrite=True
+        )
+        fits.PrimaryHDU(star_1).writeto(
+            star_dir / "star_1.fits",
+            overwrite=True
+        )
+
+        # create masks
+        mask_0 = np.array(
+            [
+                [True, False, True, True, False],
+                [True, True, False, True, True],
+                [False, True, True, True, True],
+                [True, True, True, False, True],
+                [True, False, True, True, True],
+            ]
+        )
+
+        np.save(
+            mask_dir / "mask_0.npy",
+            mask_0,
+        )
+
+        # intentionally do not create mask_1.npy
+        # to test the default all True behavior
+
+        # create weights
+        weight_0 = np.full((5, 5), 3.0)
+        weight_1 = np.full((5, 5), 4.0)
+
+        fits.PrimaryHDU(weight_0).writeto(
+            weight_dir / "weight_0.fits",
+            overwrite=True
+        )
+        fits.PrimaryHDU(weight_1).writeto(
+            weight_dir / "weight_1.fits",
+            overwrite=True
+        )
+
+        # create noise maps
+        noise_0 = np.full((5, 5), 5.0)
+        noise_1 = np.full((5, 5), 6.0)
+
+        fits.PrimaryHDU(noise_0).writeto(
+            noise_dir / "noise_map_0.fits",
+            overwrite=True
+        )
+        fits.PrimaryHDU(noise_1).writeto(
+            noise_dir / "noise_map_1.fits",
+            overwrite=True
+        )
+
+        (
+            stars,
+            masks,
+            weights,
+            noise_maps,
+        ) = psf_temp.file_system.load_psf_candidate_attributes(
+            lens_name=lens_name,
+            data_band=data_band,
+        )
+
+        # check shapes
+        assert stars.shape == (2, 5, 5)
+        assert masks.shape == (2, 5, 5)
+        assert weights.shape == (2, 5, 5)
+        assert noise_maps.shape == (2, 5, 5)
+
+        # check star values
+        np.testing.assert_array_equal(
+            stars[0],
+            star_0,
+        )
+
+        np.testing.assert_array_equal(
+            stars[1],
+            star_1,
+        )
+
+        # check mask matching
+        np.testing.assert_array_equal(
+            masks[0],
+            mask_0,
+        )
+
+        # missing mask should default to all True
+        np.testing.assert_array_equal(
+            masks[1],
+            np.ones((5, 5), dtype=bool),
+        )
+
+        # check weights
+        np.testing.assert_array_equal(
+            weights[0],
+            weight_0,
+        )
+
+        np.testing.assert_array_equal(
+            weights[1],
+            weight_1,
+        )
+
+        # check noise maps
+        np.testing.assert_array_equal(
+            noise_maps[0],
+            noise_0,
+        )
+
+        np.testing.assert_array_equal(
+            noise_maps[1],
+            noise_1,
+        )
+
+    def test_load_saved_psf(self):
+        """Test loading saved PSF and variance map."""
+
+        lens_name = "lens_system1"
+        data_band = "F390W"
+
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+
+        psf_file = Path(
+            psf_temp.file_system.get_psf_file_path(
+                lens_name,
+                data_band,
+            )
+        )
+
+        psf_file.parent.mkdir(parents=True, exist_ok=True)
+
+        psf_data = np.ones((21, 21))
+        variance_map = np.full((21, 21), 0.25)
+
+        with h5py.File(psf_file, "w") as file:
+            file.create_dataset(
+                "kernel_point_source",
+                data=psf_data,
+            )
+            file.create_dataset(
+                "psf_variance_map",
+                data=variance_map,
+            )
+
+        loaded_psf, loaded_variance = psf_temp.file_system.load_saved_psf(
+            lens_name=lens_name,
+            data_band=data_band,
+        )
+
+        np.testing.assert_array_equal(
+            loaded_psf,
+            psf_data,
+        )
+
+        np.testing.assert_array_equal(
+            loaded_variance,
+            variance_map,
+        )

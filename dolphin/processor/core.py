@@ -223,10 +223,11 @@ class Processor(object):
         band_index = config.settings["band"].index(band)
 
         image = self.get_image_data(lens_name, band).get_image()
-        mask = config.get_masks()[band_index]
+        masks = config.get_masks()
         supersampled_indices = config.get_supersampled_indices(band_index)
 
-        if mask is not None:
+        if masks is not None:
+            mask = masks[band_index]
             fig, ax = plt.subplots(1, 2, figsize=(10, 4))
             fig.suptitle("Image Likelihood Mask")
             im0 = ax[0].imshow(mask, origin="lower")

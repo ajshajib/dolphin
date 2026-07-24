@@ -209,10 +209,9 @@ class Processor(object):
         return PSFData(self.file_system.get_psf_file_path(lens_name, band))
 
     def preview_masks(self, lens_name, band):
-        """Preview the mask used in the image modeling. Also preview
-        the supersampled indices used in compute_mode="adaptive" if
-        provided.
-        
+        """Preview the mask used in the image modeling. Also preview the supersampled
+        indices used in compute_mode="adaptive" if provided.
+
         :param lens_name: name of the lens system
         :type lens_name: `str`
         :param band: observing band or filter name
@@ -242,7 +241,9 @@ class Processor(object):
             fig.suptitle("Supersampled Indices")
             im0 = ax[0].imshow(supersampled_indices, origin="lower")
             fig.colorbar(im0, ax=ax[0])
-            im1 = ax[1].imshow(np.log10(image * supersampled_indices), cmap="cubehelix", origin="lower")
+            im1 = ax[1].imshow(
+                np.log10(image * supersampled_indices), cmap="cubehelix", origin="lower"
+            )
             fig.colorbar(im1, ax=ax[1])
             plt.tight_layout()
             plt.show()

@@ -988,6 +988,7 @@ Supersampled Indices Options
   If using jaxtronomy, then this setting only affects ray-shooting.
 
   - Suboptions:
+  
     - ``units``: Units with which the following settings should be interpreted. Can be either "arcseconds" or "pixels". Default is "arcseconds".
 
       - Type: ``string``

@@ -57,3 +57,7 @@ class TestProcessor(object):
         """Test `get_image_data` method."""
         psf_data = self.processor.get_psf_data("lens_system1", "F390W")
         assert psf_data is not None
+
+    def test_preview_masks(self):
+        """Test `preview_masks` method."""
+        self.processor.preview_masks("lens_system4", "F390W")

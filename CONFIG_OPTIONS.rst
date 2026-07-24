@@ -1000,11 +1000,11 @@ Supersampled Indices Options
 
     - ``annulus_regions``: List of annulus regions on the grid that should be supersampled. Format is
       ``[[center0, center1, inner_radius, outer_radius], ...]`` for each band.
-      - If ``units`` is "arcseconds", then ``(center0, center1)`` is interpreted as ``(ra, dec)``.
-      - If ``units`` is "pixels", then ``(center0, center1)`` is interpreted as ``(row index, column index)``.
-      - The region is defined by all pixels such that ``inner_radius <= R < outer_radius`` where ``R`` is the pixel's distance from
-        ``(center0, center1)``.
 
+      - If ``units`` is "arcseconds", then ``(center0, center1)`` is interpreted as ``(ra, dec)``
+      - If ``units`` is "pixels", then ``(center0, center1)`` is interpreted as ``(row index, column index)``
+      - The region is defined by all pixels such that ``inner_radius <= R < outer_radius`` where ``R`` is the pixel's distance from
+        ``(center0, center1)``
       - Type: ``list of lists of lists of floats``
       - Example:
 

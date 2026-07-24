@@ -60,4 +60,4 @@ class TestProcessor(object):
 
     def test_preview_masks(self):
         """Test `preview_masks` method."""
-        self.processor.preview_masks("lens_system4", "F390W")
+        self.processor.preview_masks("lensed_quasar", "F814W")

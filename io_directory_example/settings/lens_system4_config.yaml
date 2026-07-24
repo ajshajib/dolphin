@@ -58,7 +58,16 @@ fitting:
 
 numeric_options:
   supersampling_factor: [3] # list specifying for each band
+  compute_mode: adaptive
 
+# determines which pixels on the grid to supersample during ray-tracing
+# only active when compute_mode is set to adaptive in the numeric options
+supersampled_indices:
+  units: arcseconds
+  annulus_regions: [
+    [[0, 0, 0.8, 1.2]] # ra, dec, inner radius, outer radius
+  ]
+  
 mask:
   centroid_offset: [[0., 0]]
   # 2d array, [ra_at_xy_0, dec_at_xy_0] to add to deflector centroid

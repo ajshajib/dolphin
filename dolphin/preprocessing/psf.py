@@ -550,7 +550,7 @@ class PSF:
             "return_param_history": True,
         }
 
-        best_fit, _, extra_fields, _ = optimizer.minimize(**kwargs_optim)
+        best_fit, _, extra_fields, _ = optimizer.minimize(**kwargs_optimizer)
         kwargs_final = parameters.args2kwargs(best_fit)
         psf_guess = model.get_full_psf(**kwargs_final)
 

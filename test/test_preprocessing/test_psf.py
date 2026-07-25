@@ -1195,11 +1195,8 @@ class TestPSF(object):
 
         assert (psf_workspace_dir / "dummy_file.txt").exists()
 
-        psf_temp.file_system.clean_psf_workspace(
-            lens_name=lens_name,
-            data_band=data_band,
-        )
-
+        psf_temp.clean_psf_workspace()
+        
         # check that the PSF workspace is deleted
         assert not psf_workspace_dir.exists()
 

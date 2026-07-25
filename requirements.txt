@@ -11,5 +11,6 @@ h5py
 tqdm
 tensorflow
 gdown
+git+https://github.com/sibirrer/psfr.git
 starred-astro
 photutils

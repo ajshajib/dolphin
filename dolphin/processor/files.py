@@ -13,7 +13,6 @@ from astropy.io import fits
 import shutil
 import glob
 import re
-import os
 from warnings import warn
 
 

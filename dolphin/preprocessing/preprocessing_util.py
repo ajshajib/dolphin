@@ -8,9 +8,6 @@ from astropy.io import fits
 from astropy.stats import SigmaClip
 from photutils.background import Background2D, MedianBackground
 
-from dolphin.processor.files import FileSystem
-from pathlib import Path
-
 
 def get_background(image_file_name):
     """Estimate the background mean and RMS using `photutils`.

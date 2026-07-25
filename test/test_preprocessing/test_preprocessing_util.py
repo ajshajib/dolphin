@@ -2,7 +2,6 @@
 """Tests for preprocessing_util module."""
 
 import numpy as np
-from pathlib import Path
 
 import dolphin.preprocessing.preprocessing_util as preprocessing_util
 

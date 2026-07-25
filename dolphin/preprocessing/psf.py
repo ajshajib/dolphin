@@ -33,7 +33,15 @@ class PSF:
     """This class contains helper functions to create a PSF using the STARRED and PSFr
     methodologies."""
 
-    def __init__(self, io_directory, lens_name, data_band, instrument, full_image_file, weight_image_file=None):
+    def __init__(
+        self,
+        io_directory,
+        lens_name,
+        data_band,
+        instrument,
+        full_image_file,
+        weight_image_file=None,
+    ):
         """Initiate the class from the following inputs:
 
         :param io_directory: path to the input/output directory. Should not end with slash.
@@ -95,9 +103,7 @@ class PSF:
         :return: tuple containing the cutout, weight, and noise map data for each star
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`)
         """
-        mean_bkd, sigma_bkd = preprocessing_util.get_background(
-            self.image_file_name
-        )
+        mean_bkd, sigma_bkd = preprocessing_util.get_background(self.image_file_name)
         if self.instrument == "HST":
             with fits.open(self.image_file_name) as hdul:
                 sci = hdul[0].data
@@ -191,8 +197,9 @@ class PSF:
 
         return star_data_list, weight_data_list, noise_data_list
 
-    def make_candidate_mask(self, star_data_list, weight_data_list, noise_map_list,
-                            star_num, kwargs_mask):
+    def make_candidate_mask(
+        self, star_data_list, weight_data_list, noise_map_list, star_num, kwargs_mask
+    ):
         """Create a mask for a PSF candidate object.
 
         :param star_data_list: list of arrays corresponding to the cutout star data
@@ -235,7 +242,7 @@ class PSF:
         fig.colorbar(im_noise, ax=ax[2], fraction=0.05)
 
         plt.tight_layout()
-        
+
         return mask
 
     def make_psf_psfr(
@@ -306,7 +313,7 @@ class PSF:
             star_shape = star_data_list[0].shape
             for _ in range(num_stars):
                 mask_list.append(np.ones(star_shape))
-        
+
         variance = [noise_map**2 for noise_map in noise_map_list]
 
         psf_returns = psfr.stack_psf(
@@ -406,17 +413,17 @@ class PSF:
         :type max_iterations: `int`
         :param subsampling_factor: (optional) higher-resolution PSF reconstruction and return
         :type subsampling_factor: `int`
-        :param convolution_method: (optional) method to use to calculate the convolution, 
+        :param convolution_method: (optional) method to use to calculate the convolution,
           choose between 'fft', 'scipy', and 'lax`. Recommended if jax>=0.4.9 - 'scipy'
         :type convolution_method: `str`
-        :param include_moffat: (optional) True for the PSF to be expressed as the sum of a 
+        :param include_moffat: (optional) True for the PSF to be expressed as the sum of a
           Moffat and a grid of pixels. False to not include the Moffat. Default: True
         :type include_moffat: bool
         :param elliptical_moffat: (optional) Allow elliptical Moffat.
         :type elliptical_moffat: bool
         :param regularization_terms: (optional) information about the regularization terms
         :type regularization_terms: `str`
-        :param regularization_strength_scales: (optional) Lagrange parameter that weights 
+        :param regularization_strength_scales: (optional) Lagrange parameter that weights
           intermediate scales in the transformed domain.
         :type regularization_strength_scales: `float`
         :param regularization_strength_hf: (optional) Lagrange parameter weighting the highest frequency scale
@@ -474,7 +481,9 @@ class PSF:
             masks=mask_list,
         )
 
-        optimizer = Optimizer(loss_class=loss, param_class=parameters, method="Newton-CG")
+        optimizer = Optimizer(
+            loss_class=loss, param_class=parameters, method="Newton-CG"
+        )
         optimizer_options = {"maxiter": 1000, "restart_from_init": True}
 
         best_fit, _, extra_fields, _ = optimizer.minimize(**optimizer_options)
@@ -526,7 +535,9 @@ class PSF:
             masks=mask_list,
         )
 
-        optimizer = Optimizer(loss_class=loss, param_class=parameters, method="adabelief")
+        optimizer = Optimizer(
+            loss_class=loss, param_class=parameters, method="adabelief"
+        )
 
         kwargs_optim = {
             "max_iterations": max_iterations,
@@ -596,7 +607,7 @@ class PSF:
         :type star_weights: `EPSFStar`
         :param noise_maps: candidate star noise maps
         :type noise_maps: `EPSFStar`
-        :param stars_table: table of cutout objects and their coordinates, 
+        :param stars_table: table of cutout objects and their coordinates,
           as determined by `photutils.find_peaks`
         :type stars_table: `Table`
         :return: figures of candidate star cutouts, weight maps, error maps,
@@ -742,9 +753,7 @@ class PSF:
         :rtype: `fig`
         """
 
-        star_exposures, star_weights, noise_maps = (
-            self.load_psf_candidate_attributes()
-        )
+        star_exposures, star_weights, noise_maps = self.load_psf_candidate_attributes()
 
         num_stars = len(star_exposures)
         ncols = 4

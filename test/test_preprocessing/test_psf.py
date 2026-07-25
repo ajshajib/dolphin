@@ -21,21 +21,30 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 class TestPSF(object):
     def setup_class(self):
         self.psf = PSF(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="HST",
-            full_image_file="TEST"
+            _TEST_IO_DIR,
+            lens_name="MOCK",
+            data_band="F814W",
+            instrument="HST",
+            full_image_file="TEST",
         )
 
         self.psf2 = PSF(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="JWST",
-            full_image_file="TEST"
+            _TEST_IO_DIR,
+            lens_name="MOCK",
+            data_band="F814W",
+            instrument="JWST",
+            full_image_file="TEST",
         )
 
     def test_invalid_instrument(self):
         """Test that an invalid instrument raises an error."""
         with pytest.raises(ValueError):
             _ = PSF(
-                _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="INVALID",
-                full_image_file="TEST"
+                _TEST_IO_DIR,
+                lens_name="MOCK",
+                data_band="F814W",
+                instrument="INVALID",
+                full_image_file="TEST",
             )
 
     @patch("dolphin.preprocessing.psf.extract_stars")
@@ -339,7 +348,7 @@ class TestPSF(object):
             weight_data_list=[weight],
             noise_map_list=[noise],
             star_num=0,
-            kwargs_mask=kwargs_mask
+            kwargs_mask=kwargs_mask,
         )
 
         mock_build_mask.assert_called_once_with(star.shape, kwargs_mask)
@@ -957,7 +966,9 @@ class TestPSF(object):
 
         lens_name = "lens_system1"
         data_band = "F390W"
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
+        psf_temp = PSF(
+            _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
+        )
 
         # redirect preprocessing path to temporary directory
         preprocessing_path = Path(
@@ -1039,7 +1050,9 @@ class TestPSF(object):
 
         lens_name = "lens_system1"
         data_band = "F390W"
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
+        psf_temp = PSF(
+            _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
+        )
 
         data_directory = Path(psf_temp.file_system.get_data_directory())
         psf_guess = np.ones((21, 21))
@@ -1077,7 +1090,9 @@ class TestPSF(object):
 
         lens_name = "lens_system1"
         data_band = "F390W"
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
+        psf_temp = PSF(
+            _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
+        )
 
         preprocessing_path = Path(
             psf_temp.file_system.get_preprocessing_path(lens_name)
@@ -1164,7 +1179,9 @@ class TestPSF(object):
         """Test cleaning the PSF workspace directory."""
         lens_name = "lens_system1"
         data_band = "F390W"
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
+        psf_temp = PSF(
+            _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
+        )
 
         preprocessing_path = Path(
             psf_temp.file_system.get_preprocessing_path(lens_name)
@@ -1191,7 +1208,9 @@ class TestPSF(object):
 
         lens_name = "lens_system1"
         data_band = "F390W"
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
+        psf_temp = PSF(
+            _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
+        )
 
         psf_file = Path(
             psf_temp.file_system.get_psf_file_path(

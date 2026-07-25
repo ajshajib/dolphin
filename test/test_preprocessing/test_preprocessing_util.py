@@ -31,9 +31,7 @@ class TestPreprocessingUtil(object):
         mock_background.background_rms_median = 2.3
         mock_background2d.return_value = mock_background
 
-        mean, rms = preprocessing_util.get_background(
-            image_file_name="fake_image.fits"
-        )
+        mean, rms = preprocessing_util.get_background(image_file_name="fake_image.fits")
 
         assert mean == 100.5
         assert rms == 2.3

@@ -12,23 +12,15 @@ from dolphin.processor.files import FileSystem
 from pathlib import Path
 
 
-def get_background(io_directory, lens_name, data_band):
+def get_background(image_file_name):
     """Estimate the background mean and RMS using `photutils`.
 
-    :param io_directory: path to the input/output directory. Should not end with slash.
-    :type io_directory: `str`
-    :param lens_name: name of the system to create a cutout of
-    :type lens_name: `str`
-    :param data_band: data band to analze
-    :type data_band: `str`
-
+    :param image_file_name: path to the full science image FITS file
+    :type image_file_name: `str`
     :return: tuple of background mean and RMS as determined by `photutils`
     :rtype: `tuple` (`float`, `float`)
     """
-    file_system = FileSystem(io_directory)
-    data_dir = Path(file_system.get_data_directory())
-    full_image = data_dir / f"{lens_name}" / f"full_image_{lens_name}_{data_band}.fits"
-    full_data = fits.getdata(full_image)
+    full_data = fits.getdata(image_file_name)
 
     sigma_clip = SigmaClip(sigma=3.0)
     background_estimator = MedianBackground()
@@ -57,6 +49,8 @@ def build_mask(shape, kwargs_mask=None):
         {"type": "ellipse", "center": `tuple` (`int`, `int`), "a": `int`, "b": `int`}]. To invert the boolean
         logic of a specific mask index, one must place "invert": True in that dictionary.
     :type kwargs_mask: `list` of `dict`
+    :return: boolean array of pixels to mask
+    :rtype: `np.ndarray`
     """
     if kwargs_mask is None:
         return np.ones(shape)

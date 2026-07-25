@@ -10,9 +10,6 @@ from unittest.mock import patch, MagicMock
 import numpy.testing as npt
 import pytest
 
-_ROOT_DIR = Path(__file__).resolve().parents[2]
-_TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
-
 
 class TestPreprocessingUtil(object):
 
@@ -35,9 +32,7 @@ class TestPreprocessingUtil(object):
         mock_background2d.return_value = mock_background
 
         mean, rms = preprocessing_util.get_background(
-            _TEST_IO_DIR,
-            lens_name="MOCK",
-            data_band="F814W",
+            image_file_name="fake_image.fits"
         )
 
         assert mean == 100.5

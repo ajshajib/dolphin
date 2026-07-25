@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This class contains helper functions to create a PSF using the PSFr and STARRED
+"""This class contains helper functions to create a PSF using the STARRED and PSFr
 methodologies."""
 
 __author__ = "brady-ryan"
@@ -30,10 +30,10 @@ from starred.plots import plot_function as pltf
 
 
 class PSF:
-    """This class contains helper functions to create a PSF using the PSFr and STARRED
+    """This class contains helper functions to create a PSF using the STARRED and PSFr
     methodologies."""
 
-    def __init__(self, io_directory, lens_name, data_band, instrument):
+    def __init__(self, io_directory, lens_name, data_band, instrument, full_image_file, weight_image_file=None):
         """Initiate the class from the following inputs:
 
         :param io_directory: path to the input/output directory. Should not end with slash.
@@ -44,7 +44,12 @@ class PSF:
         :type data_band: `str`
         :param instrument: instrument which took the data. Current options are
           "HST" and "JWST"
-        :type intrument: `str`
+        :type instrument: `str`
+        :param full_image_file: path to the full science image FITS file
+        :type full_image_file: `str`
+        :param weight_image_file: (optional) if analyzing HST data,
+          the path to the full weight image FITS file
+        :type weight_image_file: `str`
         """
         self.io_directory = io_directory
         self.file_system = FileSystem(io_directory)
@@ -58,12 +63,8 @@ class PSF:
                 f"{instrument} is not supported! Options are: {supported_instruments}"
             )
 
-        self.data_dir = self.file_system.get_data_directory()
-        self.full_image_path = f"{self.data_dir}/{self.lens_name}"
-        self.image_file_name = (
-            f"{self.full_image_path}/full_image_{self.lens_name}_{self.data_band}.fits"
-        )
-        self.weight_file_name = f"{self.full_image_path}/weight_image_{self.lens_name}_{self.data_band}.fits"
+        self.image_file_name = full_image_file
+        self.weight_file_name = weight_image_file
 
     def get_psf_candidates(
         self,
@@ -91,12 +92,11 @@ class PSF:
         :param save: (optional) boolean dictating whether or not to save the star cutouts
           and corresponding weight maps and noise maps
         :type plot: `bool`
-
-        :return: tuple containing the cutout, weight map, and noise map for each star
-        :rtype: `tuple` (`EPSFStar`, `EPSFStar`, `EPSFStar`)
+        :return: tuple containing the cutout, weight, and noise map data for each star
+        :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`)
         """
         mean_bkd, sigma_bkd = preprocessing_util.get_background(
-            self.io_directory, self.lens_name, self.data_band
+            self.image_file_name
         )
         if self.instrument == "HST":
             with fits.open(self.image_file_name) as hdul:
@@ -141,7 +141,6 @@ class PSF:
         stars_table["y"] = y[mask]
         stars_table["x_peak"] = peaks_table["x_peak"][mask]
         stars_table["y_peak"] = peaks_table["y_peak"][mask]
-        stars_table["peak_value"] = peaks_table["peak_value"][mask]
 
         data_nddata_obj = NDData(data=image_reduced)
         weight_nddata_obj = NDData(data=wht)
@@ -186,14 +185,26 @@ class PSF:
                 noise_maps=noise_cutouts,
             )
 
-        return star_cutouts, weight_cutouts, noise_cutouts
+        star_data_list = star_cutouts.data
+        weight_data_list = weight_cutouts.data
+        noise_data_list = noise_cutouts.data
 
-    def make_candidate_mask(self, star_num, kwargs_mask, save=False):
-        """Create a mask for a PSF candidate object and save it in the expected
-        :meth:`~dolphin.preprocessing.psf.PSF` format.
+        return star_data_list, weight_data_list, noise_data_list
 
-        :param star_num: the number of the saved star cutout to apply the mask to, corresponding
-          to `star_{#}.fits`.
+    def make_candidate_mask(self, star_data_list, weight_data_list, noise_map_list,
+                            star_num, kwargs_mask):
+        """Create a mask for a PSF candidate object.
+
+        :param star_data_list: list of arrays corresponding to the cutout star data
+          as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type star_data_list: `list` of `np.ndarray`
+        :param weight_data_list: list of arrays corresponding to the cutout weight data
+          as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type weight_data_list: `list` of `np.ndarray`
+        :param noise_map_list: list of arrays corresponding to the cutout noise map data
+            as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type noise_map_list: `list` of `np.ndarray`
+        :param star_num: the number of the saved star cutout to apply the mask to
         :type star_num: `int`
         :param kwargs_mask: list of dictionaries corresponding to masking keywork arguments. Supported types,
             with all required keywords, are as follows: [{"type": "circle", "center": `tuple` (`int`, `int`),
@@ -201,15 +212,12 @@ class PSF:
             {"type": "ellipse", "center": `tuple` (`int`, `int`), "a": `int`, "b": `int`}]. To invert the boolean
             logic of a specific mask index, one must place "invert": True in that dictionary.
         :type kwargs_mask: `list` of `dict`
-        :param save: whether or not to save the final result in the expected PSF format
-        :type save: `bool`
+        :return: a boolean mask corresponding to the specified configuration
+        :rtype: `bool`
         """
-        star_data_list, _, weight_maps, noise_maps = (
-            self.load_psf_candidate_attributes()
-        )
         star_exposure = star_data_list[star_num]
-        weight_map = weight_maps[star_num]
-        noise_map = noise_maps[star_num]
+        weight_map = weight_data_list[star_num]
+        noise_map = noise_map_list[star_num]
 
         mask = preprocessing_util.build_mask(star_exposure.shape, kwargs_mask)
 
@@ -227,13 +235,14 @@ class PSF:
         fig.colorbar(im_noise, ax=ax[2], fraction=0.05)
 
         plt.tight_layout()
-        if save:
-            self.file_system.save_psf_candidate_mask(
-                self.lens_name, self.data_band, star_num, mask
-            )
+        
+        return mask
 
     def make_psf_psfr(
         self,
+        star_data_list,
+        noise_map_list,
+        mask_list=None,
         oversampling=1,
         saturation_limit=None,
         num_iteration=20,
@@ -248,11 +257,21 @@ class PSF:
     ):
         """Create a PSF using the `PSFr` methodology.
 
+        :param star_data_list: list of arrays corresponding to the cutout star data
+          as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type star_data_list: `list` of `np.ndarray`
+        :param noise_map_list: list of arrays corresponding to the cutout noise map data
+            as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type noise_map_list: `list` of `np.ndarray`
+        :param mask_list: (optional) list of boolean arrays corresponding to pixels to be masked
+          for individual stars across the candidate cutouts. If not provided, all pixels will
+          be assumed `True`.
+        :type mask_list: `list` of `np.ndarray` of `bool`
         :param oversampling: (optional) higher-resolution PSF reconstruction and return
         :type oversampling: `int`
         :param saturation_limit: (optional) float or list of floats of length of star_list
           pixel values above this threshold will not be considered in the reconstruction.
-        :type saturation_limit: `float` or `list of floats` of length of star_list
+        :type saturation_limit: `float` or `list of floats` of length of star_data_list
         :param num_iteration: (optional)  number of iterative corrections applied on the PSF based on previous guess
         :type num_iteration: `int`
         :param n_recenter: (optional) every n_recenter iterations of the updated PSF, a re-centering of
@@ -276,22 +295,25 @@ class PSF:
           saved in the final PSF
         :type cut_threshold: `float`
         :param save: (optional) whether or not to save the output PSF and variance map in the expected
-          `Dolphin` format
+          `dolphin` format
         :type save: `bool`
-
         :return: a tuple containing the PSF array and PSF variance map array
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`)
         """
-
-        star_data_list, mask_data_list, _, noise_map_list = (
-            self.load_psf_candidate_attributes()
-        )
+        if mask_list is None:
+            mask_list = []
+            num_stars = len(star_data_list)
+            star_shape = star_data_list[0].shape
+            for _ in range(num_stars):
+                mask_list.append(np.ones(star_shape))
+        
+        variance = [noise_map**2 for noise_map in noise_map_list]
 
         psf_returns = psfr.stack_psf(
             star_list=star_data_list,
             oversampling=oversampling,
-            mask_list=mask_data_list,
-            error_map_list=noise_map_list**2,
+            mask_list=mask_list,
+            error_map_list=variance,
             saturation_limit=saturation_limit,
             num_iteration=num_iteration,
             n_recenter=n_recenter,
@@ -312,10 +334,10 @@ class PSF:
         new_center_list = np.array(new_center_list)
         variance_map = psfr.psf_error_map(
             star_list=star_data_list,
-            error_map_list=noise_map_list**2,
+            error_map_list=variance,
             psf_kernel=psf_guess,
             center_list=new_center_list,
-            mask_list=mask_data_list,
+            mask_list=mask_list,
             oversampling=oversampling,
         )
 
@@ -354,6 +376,9 @@ class PSF:
 
     def make_psf_starred(
         self,
+        star_data_list,
+        noise_map_list,
+        mask_list=None,
         max_iterations=1500,
         subsampling_factor=1,
         convolution_method="scipy",
@@ -367,19 +392,32 @@ class PSF:
     ):
         """Create a PSF using the `STARRED` methodology.
 
+        :param star_data_list: list of arrays corresponding to the cutout star data
+          as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type star_data_list: `list` of `np.ndarray`
+        :param noise_map_list: list of arrays corresponding to the cutout noise map data
+            as returned by :meth:`~dolphin.preprocessing.psf.get_psf_candidates`
+        :type noise_map_list: `list` of `np.ndarray`
+        :param mask_list: (optional) list of boolean arrays corresponding to pixels to be masked
+          for individual stars across the candidate cutouts. If not provided, all pixels will
+          be assumed `True`.
+        :type mask_list: `list` of `np.ndarray` of `bool`
         :param max_iterations: (optional) maximum number of iterations to use in the final minimization
         :type max_iterations: `int`
         :param subsampling_factor: (optional) higher-resolution PSF reconstruction and return
         :type subsampling_factor: `int`
-        :param convolution_method: (optional) method to use to calculate the convolution, choose between 'fft', 'scipy', and 'lax. Recommended if jax>=0.4.9 - 'scipy'
+        :param convolution_method: (optional) method to use to calculate the convolution, 
+          choose between 'fft', 'scipy', and 'lax`. Recommended if jax>=0.4.9 - 'scipy'
         :type convolution_method: `str`
-        :param include_moffat: (optional) True for the PSF to be expressed as the sum of a Moffat and a grid of pixels. False to not include the Moffat. Default: True
+        :param include_moffat: (optional) True for the PSF to be expressed as the sum of a 
+          Moffat and a grid of pixels. False to not include the Moffat. Default: True
         :type include_moffat: bool
         :param elliptical_moffat: (optional) Allow elliptical Moffat.
         :type elliptical_moffat: bool
         :param regularization_terms: (optional) information about the regularization terms
         :type regularization_terms: `str`
-        :param regularization_strength_scales: (optional) Lagrange parameter that weights intermediate scales in the transformed domain.
+        :param regularization_strength_scales: (optional) Lagrange parameter that weights 
+          intermediate scales in the transformed domain.
         :type regularization_strength_scales: `float`
         :param regularization_strength_hf: (optional) Lagrange parameter weighting the highest frequency scale
         :type regularization_strength_hf: `float`
@@ -387,17 +425,22 @@ class PSF:
           saved in the final PSF
         :type cut_threshold: `float`
         :param save: (optional) whether or not to save the output PSF and variance map in the expected
-          `Dolphin` format
+          `dolphin` format
         :type save: `bool`
-
         :return: a tuple containing the PSF array and PSF variance map array
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`)
         """
+        star_data_list = np.asarray(star_data_list)
+        noise_map_list = np.asarray(noise_map_list)
+        variance = noise_map_list**2
 
-        star_data_list, mask_data_list, _, noise_maps = (
-            self.load_psf_candidate_attributes()
-        )
-        variance = noise_maps**2
+        if mask_list is None:
+            mask_list = []
+            num_stars = len(star_data_list)
+            star_shape = star_data_list[0].shape
+            for _ in range(num_stars):
+                mask_list.append(np.ones(star_shape))
+        mask_list = np.asarray(mask_list)
 
         model = STARRED_PSF(
             image_size=star_data_list[0].shape[1],
@@ -428,21 +471,21 @@ class PSF:
             regularization_terms=regularization_terms,
             regularization_strength_scales=0,
             regularization_strength_hf=0,
-            masks=mask_data_list,
+            masks=mask_list,
         )
 
-        optim = Optimizer(loss_class=loss, param_class=parameters, method="Newton-CG")
+        optimizer = Optimizer(loss_class=loss, param_class=parameters, method="Newton-CG")
         optimizer_options = {"maxiter": 1000, "restart_from_init": True}
 
-        best_fit, _, extra_fields, _ = optim.minimize(**optimizer_options)
+        best_fit, _, extra_fields, _ = optimizer.minimize(**optimizer_options)
         kwargs_partial = parameters.args2kwargs(best_fit)
 
         # compute noise level in starlet space and propagate Poisson noise
         W = propagate_noise(
             model=model,
-            noise_maps=noise_maps,
+            noise_maps=noise_map_list,
             kwargs=kwargs_partial,
-            masks=mask_data_list,
+            masks=mask_list,
             wavelet_type_list=["starlet"],
             method="MC",
             num_samples=500,
@@ -480,10 +523,10 @@ class PSF:
             regularization_strength_positivity=0,
             W=W,
             regularize_full_psf=False,
-            masks=mask_data_list,
+            masks=mask_list,
         )
 
-        optim = Optimizer(loss_class=loss, param_class=parameters, method="adabelief")
+        optimizer = Optimizer(loss_class=loss, param_class=parameters, method="adabelief")
 
         kwargs_optim = {
             "max_iterations": max_iterations,
@@ -496,7 +539,7 @@ class PSF:
             "return_param_history": True,
         }
 
-        best_fit, _, extra_fields, _ = optim.minimize(**kwargs_optim)
+        best_fit, _, extra_fields, _ = optimizer.minimize(**kwargs_optim)
         kwargs_final = parameters.args2kwargs(best_fit)
         psf_guess = model.get_full_psf(**kwargs_final)
 
@@ -504,7 +547,7 @@ class PSF:
             kwargs=kwargs_final,
             data=star_data_list,
             sigma_2=variance,
-            masks=mask_data_list,
+            masks=mask_list,
             error_method="std_residuals",
             high_res=True,
         )
@@ -520,7 +563,7 @@ class PSF:
             "data": star_data_list,
             "sigma_2": variance,
             "kwargs_final": kwargs_final,
-            "masks": mask_data_list,
+            "masks": mask_list,
         }
 
         self.plot_psf_and_variance_map(
@@ -553,16 +596,13 @@ class PSF:
         :type star_weights: `EPSFStar`
         :param noise_maps: candidate star noise maps
         :type noise_maps: `EPSFStar`
-        :param stars_table: table of cutout objects, their coordinates, and their
-          peak flux values, as determined by `photutils.find_peaks`
+        :param stars_table: table of cutout objects and their coordinates, 
+          as determined by `photutils.find_peaks`
         :type stars_table: `Table`
-
         :return: figures of candidate star cutouts, weight maps, error maps,
           variance vs. counts, and locations in the full science image
         :rtype: 5 `fig`
         """
-
-        _ = stars_table["peak_value"]
         x_peaks = stars_table["x_peak"]
         y_peaks = stars_table["y_peak"]
 
@@ -575,7 +615,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             im_star = ax[i].imshow(np.log10(star_exposures[i].data), cmap="viridis")
-            ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
+            ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_star, ax=ax[i], fraction=0.05)
         fig.suptitle("STAR CUTOUTS", fontsize=15)
@@ -592,7 +632,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             im_weight = ax[i].imshow(np.log10(star_weights[i].data), cmap="viridis")
-            ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
+            ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_weight, ax=ax[i], fraction=0.05)
         fig.suptitle("WEIGHT CUTOUTS", fontsize=15)
@@ -609,7 +649,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             im_noise = ax[i].imshow(np.log10(noise_maps[i].data), cmap="viridis")
-            ax[i].set_title(f"Star {i}: Flux {star_exposures[i].flux:.2f}")
+            ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_noise, ax=ax[i], fraction=0.05)
         fig.suptitle(r"$\sigma$", fontsize=15)
@@ -687,10 +727,11 @@ class PSF:
         for ix, i in enumerate(star_coords):
             plt.scatter(i[0], i[1], 10)
             plt.text(i[0] + 50, i[1] + 50, f"{ix}", color="white")
-
         cax = divider.append_axes("right", size="5%", pad=0.05)
+
         plt.colorbar(im, cax=cax)
         plt.show()
+        return fig
 
     def plot_saved_psf_candidates(self):
         """Plot the saved star cutouts, weight cutouts, and noise map cutouts with their
@@ -701,7 +742,7 @@ class PSF:
         :rtype: `fig`
         """
 
-        star_exposures, mask_data_list, star_weights, noise_maps = (
+        star_exposures, star_weights, noise_maps = (
             self.load_psf_candidate_attributes()
         )
 
@@ -714,15 +755,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             image = np.log10(star_exposures[i])
-            mask = mask_data_list[i]
             im_star = ax[i].imshow(image, cmap="viridis", origin="lower")
-            # show masked pixels in red
-            ax[i].imshow(
-                np.ma.masked_where(mask, ~mask),  # only display masked pixels
-                cmap="Reds",
-                alpha=1,
-            )
-
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_star, ax=ax[i], fraction=0.05)
@@ -739,14 +772,7 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            mask = mask_data_list[i]
             im_weight = ax[i].imshow(np.log10(star_weights[i]), cmap="viridis")
-            # show masked pixels in red
-            ax[i].imshow(
-                np.ma.masked_where(mask, ~mask),  # only display masked pixels
-                cmap="Reds",
-                alpha=1,
-            )
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_weight, ax=ax[i], fraction=0.05)
@@ -763,14 +789,7 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            mask = mask_data_list[i]
             im_noise = ax[i].imshow(np.log10(noise_maps[i]), cmap="viridis")
-            # show masked pixels in red
-            ax[i].imshow(
-                np.ma.masked_where(mask, ~mask),  # only display masked pixels
-                cmap="Reds",
-                alpha=1,
-            )
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_noise, ax=ax[i], fraction=0.05)
@@ -827,6 +846,7 @@ class PSF:
         ax.set_title("Variance vs. Counts of Stars")
 
         plt.show()
+        return fig
 
     @staticmethod
     def plot_psf_and_variance_map(
@@ -853,7 +873,6 @@ class PSF:
         :type variance_map_cut: `array`
         :param kwargs_starred: (optional) STARRED arguments corresponding to their helper functions
         :type kwargs_starred: `dict`
-
         :return: plot of the PSF guess from the respective fitting method, alongisde the error
             map and cut PSF/variance map if applicable
         :rtype: `fig`
@@ -920,13 +939,14 @@ class PSF:
                 plt.tight_layout()
                 plt.show()
 
+        return fig
+
     def load_saved_psf(self, plot=True):
         """Load the saved PSF and variance map generated by
         :class:`~dolphin.preprocessing.psf.PSF`.
 
         :param plot: whether or not to plot the saved PSF and variance map
         :type plot: `bool`
-
         :return: a tuple containing the saved PSF and variance map
         :rtype: `tuple` (`array`, `array`)
         """
@@ -958,9 +978,17 @@ class PSF:
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`, `np.ndarray`)
         """
 
-        star_data_list, mask_data_list, weight_maps, noise_maps = (
+        star_data_list, weight_maps, noise_maps = (
             self.file_system.load_psf_candidate_attributes(
                 self.lens_name, self.data_band
             )
         )
-        return star_data_list, mask_data_list, weight_maps, noise_maps
+        return star_data_list, weight_maps, noise_maps
+
+    def clean_psf_workspace(self):
+        """Remove the saved PSF candidate cutouts, weight maps, and noise maps from the
+        :class:`~dolphin.preprocessing.psf.PSF` workspace.
+
+        :return: None
+        """
+        self.file_system.clean_psf_workspace(self.lens_name, self.data_band)

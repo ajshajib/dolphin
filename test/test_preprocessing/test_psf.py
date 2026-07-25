@@ -21,18 +21,21 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 class TestPSF(object):
     def setup_class(self):
         self.psf = PSF(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="HST"
+            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="HST",
+            full_image_file="TEST"
         )
 
         self.psf2 = PSF(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="JWST"
+            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="JWST",
+            full_image_file="TEST"
         )
 
     def test_invalid_instrument(self):
         """Test that an invalid instrument raises an error."""
         with pytest.raises(ValueError):
             _ = PSF(
-                _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="INVALID"
+                _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="INVALID",
+                full_image_file="TEST"
             )
 
     @patch("dolphin.preprocessing.psf.extract_stars")
@@ -79,10 +82,13 @@ class TestPSF(object):
         fake_cutout = MagicMock()
         fake_cutout.data = np.ones((51, 51))
 
+        fake_star_list = MagicMock()
+        fake_star_list.data = [fake_cutout.data]
+
         mock_extract_stars.side_effect = [
-            [fake_cutout],  # science
-            [fake_cutout],  # weights
-            [fake_cutout],  # noise
+            fake_star_list,
+            fake_star_list,
+            fake_star_list,
         ]
 
         with patch.object(self.psf, "plot_psf_candidates"):
@@ -159,16 +165,22 @@ class TestPSF(object):
         peaks["peak_value"] = [5000]
         mock_find_peaks.return_value = peaks
 
-        fake_cutout = MagicMock()
-        fake_cutout.data = np.ones((51, 51))
+        fake_stars = MagicMock()
+        fake_stars.data = [np.ones((51, 51))]
+
+        fake_weights = MagicMock()
+        fake_weights.data = [np.ones((51, 51))]
+
+        fake_noise = MagicMock()
+        fake_noise.data = [np.ones((51, 51))]
 
         mock_extract_stars.side_effect = [
-            [fake_cutout],  # science
-            [fake_cutout],  # weights
-            [fake_cutout],  # noise
-            [fake_cutout],  # repeat entries for saving test
-            [fake_cutout],
-            [fake_cutout],
+            fake_stars,
+            fake_weights,
+            fake_noise,
+            fake_stars,
+            fake_weights,
+            fake_noise,
         ]
 
         with patch.object(self.psf2, "plot_psf_candidates"):
@@ -189,9 +201,9 @@ class TestPSF(object):
         mock_save.assert_called_once_with(
             lens_name=self.psf2.lens_name,
             data_band=self.psf2.data_band,
-            star_exposures=stars,
-            star_weights=weights,
-            noise_maps=noise,
+            star_exposures=fake_stars,
+            star_weights=fake_weights,
+            noise_maps=fake_noise,
         )
 
     @patch("dolphin.preprocessing.psf.extract_stars")
@@ -261,9 +273,9 @@ class TestPSF(object):
         mock_find_peaks.return_value = peaks
 
         def fake_extract(data, stars_table, size):
-            _ = data  # placeholder to prevent crashing
-            _ = size  # placeholder to prevent crashing
-            return [MagicMock() for _ in range(len(stars_table))]
+            fake = MagicMock()
+            fake.data = [np.ones((51, 51)) for _ in range(len(stars_table))]
+            return fake
 
         mock_extract_stars.side_effect = fake_extract
 
@@ -314,31 +326,21 @@ class TestPSF(object):
         mock_axes = [MagicMock(), MagicMock(), MagicMock()]
         mock_subplots.return_value = (MagicMock(), mock_axes)
 
-        with (
-            patch.object(
-                self.psf,
-                "load_psf_candidate_attributes",
-                return_value=([star], None, [weight], [noise]),
-            ),
-            patch.object(
-                self.psf.file_system,
-                "save_psf_candidate_mask",
-            ) as mock_save,
-        ):
+        kwargs_mask = [
+            {
+                "type": "circle",
+                "center": (2, 2),
+                "radius": 1,
+            }
+        ]
 
-            kwargs_mask = [
-                {
-                    "type": "circle",
-                    "center": (2, 2),
-                    "radius": 1,
-                }
-            ]
-
-            self.psf.make_candidate_mask(
-                star_num=0,
-                kwargs_mask=kwargs_mask,
-                save=True,
-            )
+        self.psf.make_candidate_mask(
+            star_data_list=[star],
+            weight_data_list=[weight],
+            noise_map_list=[noise],
+            star_num=0,
+            kwargs_mask=kwargs_mask
+        )
 
         mock_build_mask.assert_called_once_with(star.shape, kwargs_mask)
 
@@ -350,15 +352,6 @@ class TestPSF(object):
         mock_axes[0].set_title.assert_called_once_with("Candidate Cutout")
         mock_axes[1].set_title.assert_called_once_with("Weight Map")
         mock_axes[2].set_title.assert_called_once_with(r"$\sigma$")
-
-        mock_tight_layout.assert_called_once()
-
-        mock_save.assert_called_once_with(
-            self.psf.lens_name,
-            self.psf.data_band,
-            0,
-            expected_mask,
-        )
 
     @patch("dolphin.preprocessing.psf.psfr.psf_error_map")
     @patch("dolphin.preprocessing.psf.psfr.stack_psf")
@@ -429,6 +422,8 @@ class TestPSF(object):
                     self.psf.file_system, "save_psf_and_variance_map"
                 ) as mock_save:
                     final_psf, variance_map = self.psf.make_psf_psfr(
+                        star_data_list=star_list,
+                        noise_map_list=error_list,
                         cut_threshold=1e-20,
                         save=True,
                     )
@@ -529,6 +524,8 @@ class TestPSF(object):
                 "plot_psf_and_variance_map",
             ) as mock_plot:
                 final_psf, final_variance = self.psf.make_psf_psfr(
+                    star_data_list=star_list,
+                    noise_map_list=error_list,
                     oversampling=2,
                     cut_threshold=0.5,
                 )
@@ -672,6 +669,8 @@ class TestPSF(object):
                     self.psf.file_system, "save_psf_and_variance_map"
                 ) as _:
                     final_psf, variance_map = self.psf.make_psf_starred(
+                        star_data_list=[star_data],
+                        noise_map_list=[noise_map],
                         cut_threshold=1e-20,
                         save=True,
                     )
@@ -775,7 +774,7 @@ class TestPSF(object):
     @patch("dolphin.preprocessing.psf.plt.tight_layout")
     def test_plot_saved_psf_candidates(
         self,
-        mock_tight_layout,
+        _,
         mock_show,
     ):
         """Test that `plot_saved_psf_candidates` returns the expected plots."""
@@ -783,11 +782,6 @@ class TestPSF(object):
         star_exposures = [
             np.ones((5, 5)),
             np.ones((5, 5)),
-        ]
-
-        mask_data = [
-            np.ones((5, 5), dtype=bool),
-            np.ones((5, 5), dtype=bool),
         ]
 
         star_weights = [
@@ -805,7 +799,6 @@ class TestPSF(object):
             "load_psf_candidate_attributes",
             return_value=(
                 star_exposures,
-                mask_data,
                 star_weights,
                 noise_maps,
             ),
@@ -825,7 +818,7 @@ class TestPSF(object):
     @patch("dolphin.preprocessing.psf.plt.tight_layout")
     def test_plot_psf_and_variance_map_psfr(
         self,
-        mock_tight_layout,
+        _,
         mock_show,
     ):
         """Test that the PSFr branch of `plot_psf_and_variance_map` operates as
@@ -852,7 +845,7 @@ class TestPSF(object):
     @patch("dolphin.preprocessing.psf.plt.tight_layout")
     def test_plot_psf_and_variance_map_starred(
         self,
-        mock_tight_layout,
+        _,
         mock_show,
         mock_plot_loss,
     ):
@@ -945,7 +938,6 @@ class TestPSF(object):
         """
         expected = (
             ["stars"],
-            ["masks"],
             ["weights"],
             ["noise"],
         )
@@ -965,7 +957,7 @@ class TestPSF(object):
 
         lens_name = "lens_system1"
         data_band = "F390W"
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
 
         # redirect preprocessing path to temporary directory
         preprocessing_path = Path(
@@ -987,9 +979,9 @@ class TestPSF(object):
             MagicMock(data=np.ones((5, 5)) * 6),
         ]
 
-        star_dir = preprocessing_path / data_band / "stars"
-        weight_dir = preprocessing_path / data_band / "weights"
-        noise_dir = preprocessing_path / data_band / "noise_maps"
+        star_dir = preprocessing_path / data_band / "psf_workspace" / "stars"
+        weight_dir = preprocessing_path / data_band / "psf_workspace" / "weights"
+        noise_dir = preprocessing_path / data_band / "psf_workspace" / "noise_maps"
 
         # create existing directories with dummy files
         for directory in [star_dir, weight_dir, noise_dir]:
@@ -1042,58 +1034,12 @@ class TestPSF(object):
                 np.ones((5, 5)) * 5,
             )
 
-    def test_save_psf_candidate_mask(self):
-        """Test saving PSF candidate masks."""
-
-        lens_name = "lens_system1"
-        data_band = "F390W"
-        star_num = 2
-
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
-
-        preprocessing_path = Path(
-            psf_temp.file_system.get_preprocessing_path(lens_name)
-        )
-
-        mask = np.array(
-            [
-                [True, False, True],
-                [False, True, False],
-                [True, True, False],
-            ]
-        )
-
-        psf_temp.file_system.save_psf_candidate_mask(
-            lens_name=lens_name,
-            data_band=data_band,
-            star_num=star_num,
-            mask=mask,
-        )
-
-        mask_dir = preprocessing_path / data_band / "masks"
-        mask_file = mask_dir / f"mask_{star_num}.npy"
-
-        # check directory exists
-        assert mask_dir.exists()
-
-        # check file exists
-        assert mask_file.exists()
-
-        # check saved mask contents
-        saved_mask = np.load(mask_file)
-
-        np.testing.assert_array_equal(
-            saved_mask,
-            mask,
-        )
-
     def test_save_psf_and_variance_map(self):
         """Test saving PSF and variance map to HDF5 format."""
 
         lens_name = "lens_system1"
         data_band = "F390W"
-
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
 
         data_directory = Path(psf_temp.file_system.get_data_directory())
         psf_guess = np.ones((21, 21))
@@ -1131,23 +1077,20 @@ class TestPSF(object):
 
         lens_name = "lens_system1"
         data_band = "F390W"
-
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
 
         preprocessing_path = Path(
             psf_temp.file_system.get_preprocessing_path(lens_name)
         )
 
-        star_dir = preprocessing_path / data_band / "stars"
-        weight_dir = preprocessing_path / data_band / "weights"
-        noise_dir = preprocessing_path / data_band / "noise_maps"
-        mask_dir = preprocessing_path / data_band / "masks"
+        star_dir = preprocessing_path / data_band / "psf_workspace" / "stars"
+        weight_dir = preprocessing_path / data_band / "psf_workspace" / "weights"
+        noise_dir = preprocessing_path / data_band / "psf_workspace" / "noise_maps"
 
         # create directories
         star_dir.mkdir(parents=True, exist_ok=True)
         weight_dir.mkdir(parents=True, exist_ok=True)
         noise_dir.mkdir(parents=True, exist_ok=True)
-        mask_dir.mkdir(parents=True, exist_ok=True)
 
         # create star cutouts
         star_0 = np.ones((5, 5))
@@ -1155,25 +1098,6 @@ class TestPSF(object):
 
         fits.PrimaryHDU(star_0).writeto(star_dir / "star_0.fits", overwrite=True)
         fits.PrimaryHDU(star_1).writeto(star_dir / "star_1.fits", overwrite=True)
-
-        # create masks
-        mask_0 = np.array(
-            [
-                [True, False, True, True, False],
-                [True, True, False, True, True],
-                [False, True, True, True, True],
-                [True, True, True, False, True],
-                [True, False, True, True, True],
-            ]
-        )
-
-        np.save(
-            mask_dir / "mask_0.npy",
-            mask_0,
-        )
-
-        # intentionally do not create mask_1.npy
-        # to test the default all True behavior
 
         # create weights
         weight_0 = np.full((5, 5), 3.0)
@@ -1191,7 +1115,6 @@ class TestPSF(object):
 
         (
             stars,
-            masks,
             weights,
             noise_maps,
         ) = psf_temp.file_system.load_psf_candidate_attributes(
@@ -1201,7 +1124,6 @@ class TestPSF(object):
 
         # check shapes
         assert stars.shape == (2, 5, 5)
-        assert masks.shape == (2, 5, 5)
         assert weights.shape == (2, 5, 5)
         assert noise_maps.shape == (2, 5, 5)
 
@@ -1214,18 +1136,6 @@ class TestPSF(object):
         np.testing.assert_array_equal(
             stars[1],
             star_1,
-        )
-
-        # check mask matching
-        np.testing.assert_array_equal(
-            masks[0],
-            mask_0,
-        )
-
-        # missing mask should default to all True
-        np.testing.assert_array_equal(
-            masks[1],
-            np.ones((5, 5), dtype=bool),
         )
 
         # check weights
@@ -1250,13 +1160,38 @@ class TestPSF(object):
             noise_1,
         )
 
+    def test_clean_psf_workspace(self):
+        """Test cleaning the PSF workspace directory."""
+        lens_name = "lens_system1"
+        data_band = "F390W"
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
+
+        preprocessing_path = Path(
+            psf_temp.file_system.get_preprocessing_path(lens_name)
+        )
+
+        psf_workspace_dir = preprocessing_path / data_band / "psf_workspace"
+
+        # create dummy files in the PSF workspace
+        psf_workspace_dir.mkdir(parents=True, exist_ok=True)
+        (psf_workspace_dir / "dummy_file.txt").write_text("dummy data")
+
+        assert (psf_workspace_dir / "dummy_file.txt").exists()
+
+        psf_temp.file_system.clean_psf_workspace(
+            lens_name=lens_name,
+            data_band=data_band,
+        )
+
+        # check that the PSF workspace is deleted
+        assert not psf_workspace_dir.exists()
+
     def test_load_saved_psf(self):
         """Test loading saved PSF and variance map."""
 
         lens_name = "lens_system1"
         data_band = "F390W"
-
-        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST")
+        psf_temp = PSF(_TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST")
 
         psf_file = Path(
             psf_temp.file_system.get_psf_file_path(

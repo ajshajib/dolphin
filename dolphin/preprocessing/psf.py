@@ -539,7 +539,7 @@ class PSF:
             loss_class=loss, param_class=parameters, method="adabelief"
         )
 
-        kwargs_optim = {
+        kwargs_optimizer = {
             "max_iterations": max_iterations,
             "min_iterations": None,
             "init_learning_rate": 1.0e-2,

@@ -594,12 +594,16 @@ class TestModelConfig(object):
         assert np.sum(mask[0]) == 0
 
         # elliptical region
-        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.0, 3.0, 1.57]]]
+        config_extra_regions.settings["mask"]["extra_regions"] = [
+            [[0, 0, 2.0, 3.0, 1.57]]
+        ]
         mask = config_extra_regions.get_masks()
         assert np.sum(mask[0]) == 0
 
         # unrecognized region
-        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.0, 3.0, 1.57, 1]]]
+        config_extra_regions.settings["mask"]["extra_regions"] = [
+            [[0, 0, 2.0, 3.0, 1.57, 1]]
+        ]
         with pytest.raises(ValueError):
             config_extra_regions.get_masks()
 

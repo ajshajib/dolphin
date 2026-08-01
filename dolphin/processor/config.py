@@ -898,7 +898,9 @@ class ModelConfig(Config):
                                         )
                                     )
                                 else:
-                                    raise ValueError("Unrecognized extra region in mask settings")
+                                    raise ValueError(
+                                        "Unrecognized extra region in mask settings"
+                                    )
 
                     for extra_region in extra_masked_regions:
                         mask *= extra_region

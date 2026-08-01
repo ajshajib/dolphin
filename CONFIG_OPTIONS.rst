@@ -965,8 +965,8 @@ Mask Options
            b: [5.0, 5.0]
            angle: [0.0, 0.0]
 
-    - ``extra_regions``: List of circular regions to mask additionally. Format is ``[[ra, dec, radius], ...]`` for each band.
-      Pixels inside of these regions are excluded in the modeling.
+    - ``extra_regions``: List of additional regions to mask. Pixels inside of these regions are excluded in the modeling.
+      Format for each band is a list of ``[ra, dec, radius]`` circular regions or ``[ra, dec, a, b, angle]`` elliptical regions.
 
       - Type: ``list of lists of lists of floats``
       - Example:
@@ -974,9 +974,9 @@ Mask Options
         .. code-block:: yaml
 
            extra_regions: [
-               [[1.0, -1.0, 0.5], [0.7, 0.3, 0.5]], # two extra regions for band 0
-               [], # zero extra regions for band 1
-               [[1.0, -1.0, 0.5]], # one extra region for band 2
+               [], # Band 0: zero extra regions
+               [[1.0, -1.0, 0.5]], # Band 1: one extra circular region
+               [[1.0, -1.0, 0.5], [0.7, 0.3, 0.5, 0.4, 1.57]], # Band 2: one circular and one elliptical region
              ]
 
 Supersampled Indices Options

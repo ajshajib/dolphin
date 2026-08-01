@@ -588,9 +588,20 @@ class TestModelConfig(object):
 
         # test extra regions
         config_extra_regions = deepcopy(self.config_1)
+        # circular region
         config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.0]]]
         mask = config_extra_regions.get_masks()
         assert np.sum(mask[0]) == 0
+
+        # elliptical region
+        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.0, 3.0, 1.57]]]
+        mask = config_extra_regions.get_masks()
+        assert np.sum(mask[0]) == 0
+
+        # unrecognized region
+        config_extra_regions.settings["mask"]["extra_regions"] = [[[0, 0, 2.0, 3.0, 1.57, 1]]]
+        with pytest.raises(ValueError):
+            config_extra_regions.get_masks()
 
     def test_get_supersampled_indices(self):
         """Test `get_supersampled_indices` method."""

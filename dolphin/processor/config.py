@@ -873,16 +873,32 @@ class ModelConfig(Config):
                     else:
                         if self.settings["mask"]["extra_regions"] is not None:
                             for reg in self.settings["mask"]["extra_regions"][n]:
-                                extra_masked_regions.append(
-                                    1
-                                    - mask_util.mask_azimuthal(
-                                        util.image2array(x_coords),
-                                        util.image2array(y_coords),
-                                        self.deflector_center_ra + reg[0],
-                                        self.deflector_center_dec + reg[1],
-                                        reg[2],
+                                if len(reg) == 3:
+                                    extra_masked_regions.append(
+                                        1
+                                        - mask_util.mask_azimuthal(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                        )
                                     )
-                                )
+                                elif len(reg) == 5:
+                                    extra_masked_regions.append(
+                                        1
+                                        - mask_util.mask_ellipse(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                            reg[3],
+                                            reg[4],
+                                        )
+                                    )
+                                else:
+                                    raise ValueError("Unrecognized extra region in mask settings")
 
                     for extra_region in extra_masked_regions:
                         mask *= extra_region

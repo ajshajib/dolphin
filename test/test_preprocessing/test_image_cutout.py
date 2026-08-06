@@ -323,7 +323,7 @@ class TestImageCutout(object):
     def test_save_image_cutout(self):
         """Test :meth:`~dolphin.processor.files.FileSystem.save_cutout_image`."""
 
-        lens_name = "lens_system1"
+        lens_name = "lens_system3"
         data_band = "F390W"
         image_cutout_temp = ImageCutout(
             _TEST_IO_DIR,

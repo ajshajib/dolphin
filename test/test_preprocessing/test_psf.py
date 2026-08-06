@@ -964,7 +964,7 @@ class TestPSF(object):
     def test_save_star_cutouts(self):
         """Test saving star cutouts, weights, and noise maps."""
 
-        lens_name = "lens_system1"
+        lens_name = "lens_system3"
         data_band = "F390W"
         psf_temp = PSF(
             _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
@@ -1048,7 +1048,7 @@ class TestPSF(object):
     def test_save_psf_and_variance_map(self):
         """Test saving PSF and variance map to HDF5 format."""
 
-        lens_name = "lens_system1"
+        lens_name = "lens_system3"
         data_band = "F390W"
         psf_temp = PSF(
             _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
@@ -1088,7 +1088,7 @@ class TestPSF(object):
     def test_load_psf_candidate_attributes(self):
         """Test loading PSF candidate stars, masks, weights, and noise maps."""
 
-        lens_name = "lens_system1"
+        lens_name = "lens_system3"
         data_band = "F390W"
         psf_temp = PSF(
             _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
@@ -1177,7 +1177,7 @@ class TestPSF(object):
 
     def test_clean_psf_workspace(self):
         """Test cleaning the PSF workspace directory."""
-        lens_name = "lens_system1"
+        lens_name = "lens_system3"
         data_band = "F390W"
         psf_temp = PSF(
             _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"
@@ -1203,7 +1203,7 @@ class TestPSF(object):
     def test_load_saved_psf(self):
         """Test loading saved PSF and variance map."""
 
-        lens_name = "lens_system1"
+        lens_name = "lens_system3"
         data_band = "F390W"
         psf_temp = PSF(
             _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST"

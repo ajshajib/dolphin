@@ -18,19 +18,32 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 class TestImageCutout(object):
     def setup_class(self):
         self.imagecutout = ImageCutout(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="HST", full_image_file="TEST", weight_image_file="TEST"
+            _TEST_IO_DIR,
+            lens_name="MOCK",
+            data_band="F814W",
+            instrument="HST",
+            full_image_file="TEST",
+            weight_image_file="TEST",
         )
 
         self.imagecutout2 = ImageCutout(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="JWST", full_image_file="TEST"
+            _TEST_IO_DIR,
+            lens_name="MOCK",
+            data_band="F814W",
+            instrument="JWST",
+            full_image_file="TEST",
         )
 
     def test_invalid_instrument(self):
         """Test that an invalid instrument raises an error."""
         with pytest.raises(ValueError):
             test_cutout = ImageCutout(
-            _TEST_IO_DIR, lens_name="MOCK", data_band="F814W", instrument="INVALID", full_image_file="TEST"
-        )
+                _TEST_IO_DIR,
+                lens_name="MOCK",
+                data_band="F814W",
+                instrument="INVALID",
+                full_image_file="TEST",
+            )
 
     @patch("dolphin.preprocessing.image_cutout.make_axes_locatable")
     @patch("dolphin.preprocessing.image_cutout.plt.show")
@@ -47,25 +60,25 @@ class TestImageCutout(object):
     ):
         """Test :meth:`~dolphin.preprocessing.image_cutout.plot_mosaic`"""
         data = np.ones((5, 5))
-    
+
         hdul = MagicMock()
         hdul.__enter__.return_value = hdul
         hdul.__exit__.return_value = None
         hdul.__getitem__.return_value.data = data
         mock_fits_open.return_value = hdul
-    
+
         mock_ax = MagicMock()
         mock_fig = MagicMock()
         mock_subplots.return_value = (mock_fig, mock_ax)
         mock_divider = MagicMock()
         mock_divider.append_axes.return_value = MagicMock()
         mock_make_axes.return_value = mock_divider
-    
+
         self.imagecutout.plot_mosaic()
-    
+
         mock_fits_open.assert_called_once_with(self.imagecutout.image_file_name)
         hdul.__getitem__.assert_called_once_with(0)
-    
+
         mock_ax.matshow.assert_called_once()
         plotted = mock_ax.matshow.call_args.args[0]
         mock_colorbar.assert_called_once()
@@ -86,23 +99,23 @@ class TestImageCutout(object):
     ):
         """Test :meth:`~dolphin.preprocessing.image_cutout.plot_mosaic`"""
         data = np.ones((5, 5))
-    
+
         hdul = MagicMock()
         hdul.__enter__.return_value = hdul
         hdul.__exit__.return_value = None
         hdul.__getitem__.return_value.data = data
         mock_fits_open.return_value = hdul
-    
+
         mock_ax = MagicMock()
         mock_fig = MagicMock()
         mock_subplots.return_value = (mock_fig, mock_ax)
-    
+
         mock_divider = MagicMock()
         mock_divider.append_axes.return_value = MagicMock()
         mock_make_axes.return_value = mock_divider
-    
+
         self.imagecutout2.plot_mosaic()
-    
+
         hdul.__getitem__.assert_called_once_with("SCI")
         mock_show.assert_called_once()
 
@@ -160,9 +173,7 @@ class TestImageCutout(object):
 
         self.imagecutout.file_system.save_cutout_image.assert_called_once()
 
-        kwargs = (
-            self.imagecutout.file_system.save_cutout_image.call_args.args[2]
-        )
+        kwargs = self.imagecutout.file_system.save_cutout_image.call_args.args[2]
 
         assert "image_data" in kwargs
         assert "background_rms" in kwargs
@@ -235,9 +246,7 @@ class TestImageCutout(object):
 
         self.imagecutout2.file_system.save_cutout_image.assert_called_once()
 
-        kwargs = (
-            self.imagecutout2.file_system.save_cutout_image.call_args.args[2]
-        )
+        kwargs = self.imagecutout2.file_system.save_cutout_image.call_args.args[2]
 
         assert "image_data" in kwargs
         assert "noise_map" in kwargs
@@ -258,19 +267,17 @@ class TestImageCutout(object):
         mock_display,
     ):
         """Test :meth:`~dolphin.preprocessing.image_cutout.get_angular_coordinates`"""
-    
+
         lens_name = "MOCK"
         data_band = "F814W"
-    
+
         data_directory = Path(self.imagecutout.file_system.get_data_directory())
         (data_directory / lens_name).mkdir(exist_ok=True)
-    
+
         image_file = Path(
-            self.imagecutout.file_system.get_image_file_path(
-                lens_name, data_band
-            )
+            self.imagecutout.file_system.get_image_file_path(lens_name, data_band)
         )
-    
+
         with h5py.File(image_file, "w") as f:
             f.create_dataset("image_data", data=np.ones((25, 25)))
             f.create_dataset("ra_at_xy_0", data=-1.23)
@@ -279,17 +286,17 @@ class TestImageCutout(object):
                 "transform_pix2angle",
                 data=np.array([[0.04, 0.0], [0.0, 0.04]]),
             )
-    
+
         mock_fig = MagicMock()
         mock_ax = MagicMock()
         mock_subplots.return_value = (mock_fig, mock_ax)
-    
+
         pixel_grid = MagicMock()
         pixel_grid.map_pix2coord.return_value = (0.0, 0.0)
         mock_pixel_grid.return_value = pixel_grid
-    
+
         fig = self.imagecutout.get_angular_coordinates()
-    
+
         mock_pixel_grid.assert_called_once()
         kwargs = mock_pixel_grid.call_args.kwargs
         assert kwargs["nx"] == 25
@@ -300,17 +307,17 @@ class TestImageCutout(object):
             kwargs["transform_pix2angle"],
             np.array([[0.04, 0.0], [0.0, 0.04]]),
         )
-        
+
         mock_ax.imshow.assert_called_once()
         plotted_image = mock_ax.imshow.call_args.args[0]
         npt.assert_allclose(plotted_image, np.log10(np.ones((25, 25))))
         mock_display.assert_called_once()
         mock_fig.canvas.mpl_connect.assert_called_once()
-    
+
         event_name, callback = mock_fig.canvas.mpl_connect.call_args.args
         assert event_name == "button_press_event"
         assert callable(callback)
-    
+
         assert fig == mock_fig
 
     def test_save_image_cutout(self):
@@ -319,13 +326,18 @@ class TestImageCutout(object):
         lens_name = "lens_system1"
         data_band = "F390W"
         image_cutout_temp = ImageCutout(
-            _TEST_IO_DIR, lens_name, data_band, "HST", full_image_file="TEST", weight_image_file="TEST"
+            _TEST_IO_DIR,
+            lens_name,
+            data_band,
+            "HST",
+            full_image_file="TEST",
+            weight_image_file="TEST",
         )
 
         data_directory = Path(image_cutout_temp.file_system.get_data_directory())
         image_data = np.ones((21, 21))
-        ra_at_xy_0 = 10.
-        dec_at_xy_0 = 20.
+        ra_at_xy_0 = 10.0
+        dec_at_xy_0 = 20.0
         transform_pix2angle = np.array([[0.04, 0.0], [0.0, 0.04]])
         exposure_time = 1200.0
         background_rms = 0.5
@@ -339,8 +351,8 @@ class TestImageCutout(object):
                 "dec_at_xy_0": dec_at_xy_0,
                 "transform_pix2angle": transform_pix2angle,
                 "exposure_time": exposure_time,
-                "background_rms": background_rms
-            }
+                "background_rms": background_rms,
+            },
         )
 
         filename = data_directory / lens_name / f"image_{lens_name}_{data_band}.h5"
@@ -384,8 +396,8 @@ class TestImageCutout(object):
                 "dec_at_xy_0": dec_at_xy_0,
                 "transform_pix2angle": transform_pix2angle,
                 "exposure_time": exposure_time,
-                "noise_map": noise_map
-            }
+                "noise_map": noise_map,
+            },
         )
 
         # check HDF5 contents for noise map

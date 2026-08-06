@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""This class contains helper functions to create a cutout image
-from the full science mosaic."""
+"""This class contains helper functions to create a cutout image from the full science
+mosaic."""
 
 __author__ = "brady-ryan"
 
@@ -25,11 +25,20 @@ from astropy.nddata import Cutout2D
 import ipywidgets as widgets
 from IPython.display import display
 
-class ImageCutout:
-    """This class contains helper functions to create a cutout image
-    from the full science mosaic."""
 
-    def __init__(self, io_directory, lens_name, data_band, instrument, full_image_file, weight_image_file=None):
+class ImageCutout:
+    """This class contains helper functions to create a cutout image from the full
+    science mosaic."""
+
+    def __init__(
+        self,
+        io_directory,
+        lens_name,
+        data_band,
+        instrument,
+        full_image_file,
+        weight_image_file=None,
+    ):
         """Initiate the class from the following inputs:
 
         :param io_directory: path to the input/output directory. Should not end with slash.
@@ -50,23 +59,25 @@ class ImageCutout:
         self.file_system = FileSystem(io_directory)
         self.lens_name = lens_name
         self.data_band = data_band
-        
+
         supported_instruments = ["HST", "JWST"]
         if instrument not in supported_instruments:
-            raise ValueError(f"{instrument} is not supported! Options are: {supported_instruments}")
-        
+            raise ValueError(
+                f"{instrument} is not supported! Options are: {supported_instruments}"
+            )
+
         self.instrument = instrument
         self.image_file_name = full_image_file
         self.weight_file_name = weight_image_file
 
     def plot_mosaic(self, vmin=-1, vmax=1.5):
         """Plot the full science mosaic.
-        
+
         :param vmin: lower limit of color map scale
         :type vmin: `float`
         :param vmax: upper limit of color map scale
         :type vmax: `float`
-        
+
         :return: None
         """
         if self.instrument == "JWST":
@@ -75,10 +86,10 @@ class ImageCutout:
         else:
             with fits.open(self.image_file_name) as hdul:
                 data_full = hdul[0].data
-        
+
         _, ax = plt.subplots(figsize=(10, 10))
         plt_data = np.log10(data_full)
-    
+
         im = ax.matshow(plt_data, origin="lower", vmin=vmin, vmax=vmax)
         ax.autoscale(False)
         divider = make_axes_locatable(ax)
@@ -86,18 +97,20 @@ class ImageCutout:
         plt.colorbar(im, cax=cax)
         plt.show()
 
-    def make_image_cutout(self, 
-                          cutout_scale=100,
-                          cutout_center=None,
-                          save=False, 
-                          use_noise_map=False, 
-                          kwargs_mask=None,
-                          vmin=-0.75, 
-                          vmax=1.5):
-        """Create the science image cutout in the expected `dolphin` format. This includes
-        generating `image_data`, `ra_at_xy_0`, `dec_at_xy_0`, `transform_pix2angle`, 
-        `exposure_time`, and either `background_rms` or `noise_map`, depending on the
-        specified type with `use_noise_map`.
+    def make_image_cutout(
+        self,
+        cutout_scale=100,
+        cutout_center=None,
+        save=False,
+        use_noise_map=False,
+        kwargs_mask=None,
+        vmin=-0.75,
+        vmax=1.5,
+    ):
+        """Create the science image cutout in the expected `dolphin` format. This
+        includes generating `image_data`, `ra_at_xy_0`, `dec_at_xy_0`,
+        `transform_pix2angle`, `exposure_time`, and either `background_rms` or
+        `noise_map`, depending on the specified type with `use_noise_map`.
 
         :param cutout_scale: pixel length of one side of the cutout image
         :type cutout_scale: `int`
@@ -112,7 +125,7 @@ class ImageCutout:
           is used.
         :type use_noise_map: `bool`
         :param kwargs_mask: list of dictionaries corresponding to masking keywork arguments. Supported types,
-          with all required keywords, are as follows: [{"type": "circle", "center": `tuple` (`int`, `int`), 
+          with all required keywords, are as follows: [{"type": "circle", "center": `tuple` (`int`, `int`),
           "radius": `int`}, {"type": "square", "center": `tuple` (`int`, `int`), "size": `int`},
           {"type": "ellipse", "center": `tuple` (`int`, `int`), "a": `int`, "b": `int`}]. To invert the boolean
           logic of a specific mask index, one must place `"invert": True` in that dictionary.
@@ -133,43 +146,34 @@ class ImageCutout:
                 dec = header["TARG_DEC"] * u.deg
             else:
                 ra = header["RA_TARG"] * u.deg
-                dec = header["DEC_TARG"] * u.deg 
+                dec = header["DEC_TARG"] * u.deg
             print(f"RA = {ra:.6f}")
             print(f"DEC = {dec:.6f}")
         else:
             ra = cutout_center[0] * u.deg
             dec = cutout_center[1] * u.deg
-            
-        center = SkyCoord(
-            ra,
-            dec
-        )
-        
+
+        center = SkyCoord(ra, dec)
+
         mean_bkd, sigma_bkd = preprocessing_util.get_background(self.image_file_name)
 
         if self.instrument == "JWST":
             with fits.open(self.image_file_name) as hdul:
                 header = hdul["SCI"].header
                 data_full = hdul["SCI"].data
-                err_map = hdul["ERR"].data 
+                err_map = hdul["ERR"].data
                 exposure_time = header.get("XPOSURE")
-            
+
             wcs = WCS(header)
             image_data = Cutout2D(
-                        data_full,
-                        position=center,
-                        size=cutout_scale,
-                        wcs=wcs
-                    ).data   
+                data_full, position=center, size=cutout_scale, wcs=wcs
+            ).data
             image_reduced = image_data - mean_bkd
             if use_noise_map:
                 noise_map = Cutout2D(
-                    err_map,
-                    position=center,
-                    size=image_reduced.shape,
-                    wcs=wcs
+                    err_map, position=center, size=image_reduced.shape, wcs=wcs
                 ).data
-    
+
                 kwargs_data["noise_map"] = noise_map
             else:
                 kwargs_data["background_rms"] = sigma_bkd
@@ -181,35 +185,29 @@ class ImageCutout:
 
             wcs = WCS(header)
             image_data = Cutout2D(
-                        data_full,
-                        position=center,
-                        size=cutout_scale,
-                        wcs=wcs
-                    ).data   
+                data_full, position=center, size=cutout_scale, wcs=wcs
+            ).data
             image_reduced = image_data - mean_bkd
             if use_noise_map:
                 with fits.open(self.weight_file_name) as hdul:
-                    wht_full = hdul[0].data                
-                wht_full[wht_full <= 0] = 10**(-10)
+                    wht_full = hdul[0].data
+                wht_full[wht_full <= 0] = 10 ** (-10)
                 full_noise_map = np.abs(data_full) / wht_full + sigma_bkd**2
-                
+
                 noise_map = Cutout2D(
-                    full_noise_map,
-                    position=center,
-                    size=image_reduced.shape,
-                    wcs=wcs
+                    full_noise_map, position=center, size=image_reduced.shape, wcs=wcs
                 ).data
-    
+
                 kwargs_data["noise_map"] = noise_map
             else:
                 kwargs_data["background_rms"] = sigma_bkd
-        
+
         transform_pix2angle = wcs.pixel_scale_matrix * 3600.0
-        
+
         ny, nx = image_reduced.shape
         x_c = nx // 2
         y_c = ny // 2
-        
+
         dra, ddec = transform_pix2angle.dot([x_c, y_c])
         ra_at_xy_0 = -dra
         dec_at_xy_0 = -ddec
@@ -221,7 +219,7 @@ class ImageCutout:
         kwargs_data["exposure_time"] = exposure_time
 
         mask = preprocessing_util.build_mask(image_reduced.shape, kwargs_mask)
-        
+
         if use_noise_map:
             fig, ax = plt.subplots(1, 2, figsize=(8, 8))
             im_data = ax[0].matshow(
@@ -262,17 +260,20 @@ class ImageCutout:
 
         plt.tight_layout()
         plt.show()
-        
+
         if save:
-            self.file_system.save_cutout_image(self.lens_name, self.data_band, kwargs_data)
+            self.file_system.save_cutout_image(
+                self.lens_name, self.data_band, kwargs_data
+            )
             if kwargs_mask is not None:
                 self.file_system.save_mask(self.lens_name, self.data_band, mask)
 
     def get_angular_coordinates(self, vmin=-1, vmax=1.5):
-        """Helper function to obtain the intial position guesses of different model components.
-        Interactively click on the image to obtain angular coordinates. The printed RA and DEC are in 
-        angular coordinates relative to the (0, 0) arcsecond pixel, as expected by `dolphin`.
-    
+        """Helper function to obtain the intial position guesses of different model
+        components. Interactively click on the image to obtain angular coordinates. The
+        printed RA and DEC are in angular coordinates relative to the (0, 0) arcsecond
+        pixel, as expected by `dolphin`.
+
         :param vmin: lower limit of color map scale
         :type vmin: float
         :param vmax: upper limit of color map scale
@@ -281,16 +282,18 @@ class ImageCutout:
         :return: clickable figure to print coordinates relative to (0,0) (RA, DEC)
         :rtype: `fig`
         """
-        image_file = Path(self.file_system.get_image_file_path(self.lens_name, self.data_band))
-    
+        image_file = Path(
+            self.file_system.get_image_file_path(self.lens_name, self.data_band)
+        )
+
         with h5py.File(image_file, "r") as kwargs_data:
             image_data = kwargs_data["image_data"][:]
             ra_at_xy_0 = kwargs_data["ra_at_xy_0"][()]
             dec_at_xy_0 = kwargs_data["dec_at_xy_0"][()]
             transform_pix2angle = kwargs_data["transform_pix2angle"][:]
-    
+
         ny, nx = image_data.shape
-    
+
         kwargs_pixel = {
             "nx": nx,
             "ny": ny,
@@ -299,9 +302,9 @@ class ImageCutout:
             "transform_pix2angle": transform_pix2angle,
         }
         pixel_grid = PixelGrid(**kwargs_pixel)
-    
-        fig, ax = plt.subplots(dpi=100)   
-        
+
+        fig, ax = plt.subplots(dpi=100)
+
         ax.imshow(
             np.log10(image_data),
             origin="lower",
@@ -313,34 +316,34 @@ class ImageCutout:
         ax.set_title("Click on the image to display RA/DEC")
         out = widgets.Output()
         display(out)
-        
+
         # compute the RA/DEC of the center pixel once, outside onclick
         center_x = nx // 2
         center_y = ny // 2
         ra_center, dec_center = pixel_grid.map_pix2coord(center_x, center_y)
-        
+
         def onclick(event):
             if event.inaxes != ax or event.xdata is None or event.ydata is None:
                 return
-        
+
             x = event.xdata
             y = event.ydata
-        
+
             # get RA/DEC at the clicked pixel in the original frame
             ra, dec = pixel_grid.map_pix2coord(x, y)
-        
+
             # re-reference to the center pixel
             ra_rel = ra - ra_center
             dec_rel = dec - dec_center
-        
+
             ax.plot(x, y, "ro", ms=5, mew=2)
             fig.canvas.draw_idle()
-        
+
             with out:
                 print(f"Pixel: ({x:.2f}, {y:.2f})")
                 print(f"RA  = {ra_rel:.4f} arcsec (from center)")
                 print(f"DEC = {dec_rel:.4f} arcsec (from center)\n")
             fig.canvas.draw_idle()
-    
+
         fig.canvas.mpl_connect("button_press_event", onclick)
         return fig

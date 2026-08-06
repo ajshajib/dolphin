@@ -936,12 +936,12 @@ class FileSystem(object):
 
         return psf_data, variance_map
 
-    def save_cutout_image(self, lens_name, data_band, kwargs_data
-                         ):
-        """Save a cutout image from the full science mosaic with the expected `dolphin` attributes.
+    def save_cutout_image(self, lens_name, data_band, kwargs_data):
+        """Save a cutout image from the full science mosaic with the expected `dolphin`
+        attributes.
 
         :param lens_name: name of the system being analyzed
-        :type lens_name: `str` 
+        :type lens_name: `str`
         :param data_band: band of the data being analyzed
         :type data_band: `str`
         :param kwargs_data: dictionary containing the imaging data, pixel to coordinate transformations,
@@ -950,38 +950,22 @@ class FileSystem(object):
         """
 
         data_dir = Path(self.get_data_directory())
-        cutout_file = (
-                data_dir /
-                lens_name /
-                f"image_{lens_name}_{data_band}.h5"
-        )
+        cutout_file = data_dir / lens_name / f"image_{lens_name}_{data_band}.h5"
 
         with h5py.File(cutout_file, "w") as f:
-            f.create_dataset(
-                "image_data", data=kwargs_data["image_data"]
-            )
+            f.create_dataset("image_data", data=kwargs_data["image_data"])
 
-            f.create_dataset(
-                "ra_at_xy_0", data=kwargs_data["ra_at_xy_0"]
-            )
+            f.create_dataset("ra_at_xy_0", data=kwargs_data["ra_at_xy_0"])
 
-            f.create_dataset(
-                "dec_at_xy_0", data=kwargs_data["dec_at_xy_0"]
-            )
+            f.create_dataset("dec_at_xy_0", data=kwargs_data["dec_at_xy_0"])
 
             f.create_dataset(
                 "transform_pix2angle", data=kwargs_data["transform_pix2angle"]
             )
 
-            f.create_dataset(
-                "exposure_time", data=kwargs_data["exposure_time"]
-            )
+            f.create_dataset("exposure_time", data=kwargs_data["exposure_time"])
 
             if "noise_map" in kwargs_data:
-                f.create_dataset(
-                    "noise_map", data=kwargs_data["noise_map"]
-                )
+                f.create_dataset("noise_map", data=kwargs_data["noise_map"])
             else:
-                f.create_dataset(
-                    "background_rms", data=kwargs_data["background_rms"]
-                )
+                f.create_dataset("background_rms", data=kwargs_data["background_rms"])

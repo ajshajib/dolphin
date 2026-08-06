@@ -12,9 +12,7 @@ from astropy.io import fits
 from astropy.wcs import WCS
 from astropy.coordinates import SkyCoord
 import astropy.units as u
-from pathlib import Path
 from lenstronomy.Data.pixel_grid import PixelGrid
-import h5py
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from dolphin.processor.files import FileSystem

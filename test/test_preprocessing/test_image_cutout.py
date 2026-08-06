@@ -37,7 +37,7 @@ class TestImageCutout(object):
     def test_invalid_instrument(self):
         """Test that an invalid instrument raises an error."""
         with pytest.raises(ValueError):
-            test_cutout = ImageCutout(
+            _ = ImageCutout(
                 _TEST_IO_DIR,
                 lens_name="MOCK",
                 data_band="F814W",
@@ -80,7 +80,7 @@ class TestImageCutout(object):
         hdul.__getitem__.assert_called_once_with(0)
 
         mock_ax.matshow.assert_called_once()
-        plotted = mock_ax.matshow.call_args.args[0]
+        _ = mock_ax.matshow.call_args.args[0]
         mock_colorbar.assert_called_once()
         mock_show.assert_called_once()
 

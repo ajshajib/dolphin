@@ -170,8 +170,7 @@ class TestImageCutout(object):
 
         self.imagecutout_hst.file_system.save_cutout_image = MagicMock()
 
-        self.imagecutout_hst.make_image_cutout(save=True,
-                                               kwargs_mask=kwargs_mask)
+        self.imagecutout_hst.make_image_cutout(save=True, kwargs_mask=kwargs_mask)
         mock_save_mask.assert_called_once()
 
         hdul.__getitem__.assert_called_with(0)
@@ -284,7 +283,7 @@ class TestImageCutout(object):
 
         mock_show.assert_called_once()
 
-        # Test that when use_noise_map=False, the noise_map is not saved, 
+        # Test that when use_noise_map=False, the noise_map is not saved,
         # and background_rms is saved instead
         mock_ax = MagicMock()
         mock_fig = MagicMock()
@@ -343,8 +342,8 @@ class TestImageCutout(object):
 
         pixel_grid = MagicMock()
         pixel_grid.map_pix2coord.side_effect = [
-            (0.0, 0.0),    # center coordinates
-            (1.2, -0.7),   # clicked coordinates
+            (0.0, 0.0),  # center coordinates
+            (1.2, -0.7),  # clicked coordinates
         ]
         mock_pixel_grid.return_value = pixel_grid
 

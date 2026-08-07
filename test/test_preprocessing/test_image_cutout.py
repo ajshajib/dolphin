@@ -187,7 +187,7 @@ class TestImageCutout(object):
 
         mock_show.assert_called_once()
 
-        # Test that when use_noise_map=True, the noise_map is saved, 
+        # test that when use_noise_map=True, the noise_map is saved, 
         # and background_rms is not saved
         mock_ax = MagicMock()
         mock_fig = MagicMock()
@@ -201,6 +201,17 @@ class TestImageCutout(object):
         kwargs = self.imagecutout_hst.file_system.save_cutout_image.call_args.args[2]
         assert "noise_map" in kwargs
 
+        # test that when cutout_center is provided, the position is set correctly
+        self.imagecutout_hst.make_image_cutout(
+            save=True,
+            cutout_center=(10, 10),
+        )
+
+        kwargs = mock_cutout.call_args.kwargs
+        position = kwargs["position"]
+        assert np.isclose(position.ra.deg, 10.0)
+        assert np.isclose(position.dec.deg, 10.0)
+        
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.build_mask")
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.get_background")
     @patch("dolphin.preprocessing.image_cutout.Cutout2D")

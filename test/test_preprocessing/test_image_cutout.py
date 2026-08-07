@@ -17,7 +17,7 @@ _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 class TestImageCutout(object):
     def setup_class(self):
-        self.imagecutout = ImageCutout(
+        self.imagecutout_hst = ImageCutout(
             _TEST_IO_DIR,
             lens_name="MOCK",
             data_band="F814W",
@@ -26,7 +26,7 @@ class TestImageCutout(object):
             weight_image_file="TEST",
         )
 
-        self.imagecutout2 = ImageCutout(
+        self.imagecutout_jwst = ImageCutout(
             _TEST_IO_DIR,
             lens_name="MOCK",
             data_band="F814W",
@@ -74,9 +74,9 @@ class TestImageCutout(object):
         mock_divider.append_axes.return_value = MagicMock()
         mock_make_axes.return_value = mock_divider
 
-        self.imagecutout.plot_mosaic()
+        self.imagecutout_hst.plot_mosaic()
 
-        mock_fits_open.assert_called_once_with(self.imagecutout.image_file_name)
+        mock_fits_open.assert_called_once_with(self.imagecutout_hst.image_file_name)
         hdul.__getitem__.assert_called_once_with(0)
 
         mock_ax.matshow.assert_called_once()
@@ -114,7 +114,7 @@ class TestImageCutout(object):
         mock_divider.append_axes.return_value = MagicMock()
         mock_make_axes.return_value = mock_divider
 
-        self.imagecutout2.plot_mosaic()
+        self.imagecutout_jwst.plot_mosaic()
 
         hdul.__getitem__.assert_called_once_with("SCI")
         mock_show.assert_called_once()
@@ -127,8 +127,10 @@ class TestImageCutout(object):
     @patch("dolphin.preprocessing.image_cutout.plt.show")
     @patch("dolphin.preprocessing.image_cutout.plt.subplots")
     @patch("dolphin.preprocessing.image_cutout.fits.open")
+    @patch("dolphin.processor.files.FileSystem.save_mask")
     def test_make_image_cutout_hst(
         self,
+        mock_save_mask,
         mock_fits_open,
         mock_subplots,
         mock_show,
@@ -160,28 +162,44 @@ class TestImageCutout(object):
         )
 
         mock_build_mask.return_value = np.ones((10, 10))
+        kwargs_mask = [{"type": "circle", "center": (5, 5), "radius": 3}]
 
         mock_ax = MagicMock()
         mock_fig = MagicMock()
         mock_subplots.return_value = (mock_fig, mock_ax)
 
-        self.imagecutout.file_system.save_cutout_image = MagicMock()
+        self.imagecutout_hst.file_system.save_cutout_image = MagicMock()
 
-        self.imagecutout.make_image_cutout(save=True)
+        self.imagecutout_hst.make_image_cutout(save=True,
+                                               kwargs_mask=kwargs_mask)
+        mock_save_mask.assert_called_once()
 
         hdul.__getitem__.assert_called_with(0)
 
-        self.imagecutout.file_system.save_cutout_image.assert_called_once()
+        self.imagecutout_hst.file_system.save_cutout_image.assert_called_once()
 
-        kwargs = self.imagecutout.file_system.save_cutout_image.call_args.args[2]
+        kwargs = self.imagecutout_hst.file_system.save_cutout_image.call_args.args[2]
 
         assert "image_data" in kwargs
         assert "background_rms" in kwargs
         assert kwargs["background_rms"] == 0.5
         assert kwargs["exposure_time"] == 1200.0
-        assert "noise_map" not in kwargs
 
         mock_show.assert_called_once()
+
+        # Test that when use_noise_map=True, the noise_map is saved, 
+        # and background_rms is not saved
+        mock_ax = MagicMock()
+        mock_fig = MagicMock()
+        mock_subplots.return_value = (mock_fig, mock_ax)
+
+        self.imagecutout_hst.make_image_cutout(
+            save=True,
+            use_noise_map=True,
+        )
+
+        kwargs = self.imagecutout_hst.file_system.save_cutout_image.call_args.args[2]
+        assert "noise_map" in kwargs
 
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.build_mask")
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.get_background")
@@ -237,16 +255,16 @@ class TestImageCutout(object):
         mock_fig = MagicMock()
         mock_subplots.return_value = (mock_fig, mock_axes)
 
-        self.imagecutout2.file_system.save_cutout_image = MagicMock()
+        self.imagecutout_jwst.file_system.save_cutout_image = MagicMock()
 
-        self.imagecutout2.make_image_cutout(
+        self.imagecutout_jwst.make_image_cutout(
             save=True,
             use_noise_map=True,
         )
 
-        self.imagecutout2.file_system.save_cutout_image.assert_called_once()
+        self.imagecutout_jwst.file_system.save_cutout_image.assert_called_once()
 
-        kwargs = self.imagecutout2.file_system.save_cutout_image.call_args.args[2]
+        kwargs = self.imagecutout_jwst.file_system.save_cutout_image.call_args.args[2]
 
         assert "image_data" in kwargs
         assert "noise_map" in kwargs
@@ -255,6 +273,21 @@ class TestImageCutout(object):
 
         mock_show.assert_called_once()
 
+        # Test that when use_noise_map=False, the noise_map is not saved, 
+        # and background_rms is saved instead
+        mock_ax = MagicMock()
+        mock_fig = MagicMock()
+        mock_subplots.return_value = (mock_fig, mock_ax)
+
+        self.imagecutout_jwst.make_image_cutout(
+            save=True,
+            use_noise_map=False,
+        )
+
+        kwargs = self.imagecutout_jwst.file_system.save_cutout_image.call_args.args[2]
+        assert "background_rms" in kwargs
+
+    @patch("builtins.print")
     @patch("dolphin.preprocessing.image_cutout.display")
     @patch("dolphin.preprocessing.image_cutout.widgets.Output")
     @patch("dolphin.preprocessing.image_cutout.PixelGrid")
@@ -265,17 +298,18 @@ class TestImageCutout(object):
         mock_pixel_grid,
         mock_output,
         mock_display,
+        mock_print,
     ):
         """Test :meth:`~dolphin.preprocessing.image_cutout.get_angular_coordinates`"""
 
         lens_name = "MOCK"
         data_band = "F814W"
 
-        data_directory = Path(self.imagecutout.file_system.get_data_directory())
+        data_directory = Path(self.imagecutout_hst.file_system.get_data_directory())
         (data_directory / lens_name).mkdir(exist_ok=True)
 
         image_file = Path(
-            self.imagecutout.file_system.get_image_file_path(lens_name, data_band)
+            self.imagecutout_hst.file_system.get_image_file_path(lens_name, data_band)
         )
 
         with h5py.File(image_file, "w") as f:
@@ -291,12 +325,21 @@ class TestImageCutout(object):
         mock_ax = MagicMock()
         mock_subplots.return_value = (mock_fig, mock_ax)
 
+        mock_out = MagicMock()
+        mock_out.__enter__.return_value = None
+        mock_out.__exit__.return_value = None
+        mock_output.return_value = mock_out
+
         pixel_grid = MagicMock()
-        pixel_grid.map_pix2coord.return_value = (0.0, 0.0)
+        pixel_grid.map_pix2coord.side_effect = [
+            (0.0, 0.0),    # center coordinates
+            (1.2, -0.7),   # clicked coordinates
+        ]
         mock_pixel_grid.return_value = pixel_grid
 
-        fig = self.imagecutout.get_angular_coordinates()
+        fig = self.imagecutout_hst.get_angular_coordinates()
 
+        # PixelGrid initialization
         mock_pixel_grid.assert_called_once()
         kwargs = mock_pixel_grid.call_args.kwargs
         assert kwargs["nx"] == 25
@@ -311,12 +354,43 @@ class TestImageCutout(object):
         mock_ax.imshow.assert_called_once()
         plotted_image = mock_ax.imshow.call_args.args[0]
         npt.assert_allclose(plotted_image, np.log10(np.ones((25, 25))))
+
         mock_display.assert_called_once()
         mock_fig.canvas.mpl_connect.assert_called_once()
 
         event_name, callback = mock_fig.canvas.mpl_connect.call_args.args
         assert event_name == "button_press_event"
         assert callable(callback)
+
+        # test valid click
+        event = MagicMock()
+        event.inaxes = mock_ax
+        event.xdata = 10.0
+        event.ydata = 12.0
+
+        callback(event)
+
+        pixel_grid.map_pix2coord.assert_any_call(10.0, 12.0)
+        mock_ax.plot.assert_called_once_with(10.0, 12.0, "ro", ms=5, mew=2)
+        assert mock_fig.canvas.draw_idle.call_count == 2
+
+        mock_print.assert_any_call("Pixel: (10.00, 12.00)")
+        mock_print.assert_any_call("RA  = 1.2000 arcsec (from center)")
+        mock_print.assert_any_call("DEC = -0.7000 arcsec (from center)\n")
+
+        # test early-return branch
+        mock_ax.plot.reset_mock()
+        mock_fig.canvas.draw_idle.reset_mock()
+
+        event = MagicMock()
+        event.inaxes = None
+        event.xdata = 5.0
+        event.ydata = 5.0
+
+        callback(event)
+
+        mock_ax.plot.assert_not_called()
+        mock_fig.canvas.draw_idle.assert_not_called()
 
         assert fig == mock_fig
 

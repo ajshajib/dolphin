@@ -524,10 +524,22 @@ class Recipe(object):
         a3 = np.rot90(a2)  # 1's at upper than the diagonal
         a1 = np.flip(a3)  # 1's at lower than the diagonal
 
-        dilated[:50, :50] = ndimage.binary_dilation(filtered_map[:50, :50], a4)
-        dilated[:50, 50:] = ndimage.binary_dilation(filtered_map[:50, 50:], a3)
-        dilated[50:, :50] = ndimage.binary_dilation(filtered_map[50:, :50], a1)
-        dilated[50:, 50:] = ndimage.binary_dilation(filtered_map[50:, 50:], a2)
+        # the quadrants are taken about the deflector, which sits at the center
+        split_x = int(np.searchsorted(x[0], 0, side="right"))
+        split_y = int(np.searchsorted(y[:, 0], 0, side="right"))
+
+        dilated[:split_y, :split_x] = ndimage.binary_dilation(
+            filtered_map[:split_y, :split_x], a4
+        )
+        dilated[:split_y, split_x:] = ndimage.binary_dilation(
+            filtered_map[:split_y, split_x:], a3
+        )
+        dilated[split_y:, :split_x] = ndimage.binary_dilation(
+            filtered_map[split_y:, :split_x], a1
+        )
+        dilated[split_y:, split_x:] = ndimage.binary_dilation(
+            filtered_map[split_y:, split_x:], a2
+        )
 
         # increase the size by 1 along both axes to match the image size
         # the mask is the negative of the marked pixel-map

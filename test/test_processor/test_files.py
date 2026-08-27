@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 """Tests for files module."""
 
-import pytest
-from pathlib import Path
 import os
+from pathlib import Path
+
 import numpy as np
+import pytest
 
 from dolphin.processor.files import FileSystem
 
@@ -12,7 +12,7 @@ _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 
-class TestFileSystem(object):
+class TestFileSystem:
     def setup_class(self):
         self.file_system = FileSystem(_TEST_IO_DIR)
 
@@ -137,18 +137,18 @@ class TestFileSystem(object):
                 [
                     "PSO",
                     [np.ones((1, 50)), np.ones((4, 50)), np.ones((1, 50))],
-                    np.array(["{}".format(i) for i in range(4)]),
+                    np.array([f"{i}" for i in range(4)]),
                 ],
                 [
                     "emcee",
                     np.ones((50, 4)),
-                    ["{}".format(i) for i in range(4)],
+                    [f"{i}" for i in range(4)],
                     np.ones(50),
                 ],
                 [
                     "Nautilus",
                     np.ones((50, 4)),
-                    np.array(["{}".format(i) for i in range(4)]),
+                    np.array([f"{i}" for i in range(4)]),
                     np.ones(50),
                     np.ones(50),
                     np.ones(50),
@@ -191,14 +191,14 @@ class TestFileSystem(object):
         for key in save_nautilus[6]:
             assert np.all(out_nautilus[6][key] == save_nautilus[6][key])
 
+        save_dict["fit_output"].append(
+            [
+                "INVALID",
+                np.ones((4, 50)),
+                np.array([f"{i}" for i in range(4)]),
+            ]
+        )
         with pytest.warns(UserWarning):
-            save_dict["fit_output"].append(
-                [
-                    "INVALID",
-                    np.ones((4, 50)),
-                    np.array(["{}".format(i) for i in range(4)]),
-                ]
-            )
             self.file_system.save_output("test", "save_test", save_dict, file_type="h5")
 
     def test_numpy_to_json_encoding(self):

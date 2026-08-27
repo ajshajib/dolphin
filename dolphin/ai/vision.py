@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 """This module provides capabilities to create semantic segmentation for image data
 using trained neural networks."""
 
 __author__ = "ajshajib"
 
 import numpy as np
+from scipy.ndimage import center_of_mass, label, zoom
 from tensorflow.keras.models import load_model
-from scipy.ndimage import zoom
-from scipy.ndimage import label, center_of_mass
+
 from .ai import AI
 
 

@@ -1,38 +1,35 @@
-# -*- coding: utf-8 -*-
 """This module loads settings from a configuration file."""
 
 __author__ = "ajshajib"
 
-from ruamel.yaml import YAML
-import numpy as np
+import os
 from copy import deepcopy
 from warnings import warn
 
-from lenstronomy.Util.param_util import ellipticity2phi_q
-import lenstronomy.Util.util as util
-import lenstronomy.Util.mask_util as mask_util
-import os
-
+import numpy as np
 from astropy import units as u
 from astropy.cosmology import (
     FlatLambdaCDM,
-    LambdaCDM,
-    FlatwCDM,
-    wCDM,
     Flatw0waCDM,
+    Flatw0wzCDM,
+    FlatwCDM,
+    FlatwpwaCDM,
+    LambdaCDM,
     w0waCDM,
     w0wzCDM,
-    Flatw0wzCDM,
+    wCDM,
     wpwaCDM,
-    FlatwpwaCDM,
 )
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
+from lenstronomy.Util import mask_util, util
+from lenstronomy.Util.param_util import ellipticity2phi_q
+from ruamel.yaml import YAML
 
 from .data import ImageData
 from .files import FileSystem
 
 
-class Config(object):
+class Config:
     """This class contains the methods to load and read YAML configuration files.
 
     This is a parent class for other classes that needs to load a configuration file. If
@@ -198,11 +195,13 @@ class ModelConfig(Config):
         :return: the centroid bound in arcseconds
         :rtype: `float`
         """
-        if "lens_options" in self.settings:
-            if "centroid_bound" in self.settings["lens_options"]:
-                bound = self.settings["lens_options"]["centroid_bound"]
-                if bound is not None:
-                    return bound
+        if (
+            "lens_options" in self.settings
+            and "centroid_bound" in self.settings["lens_options"]
+        ):
+            bound = self.settings["lens_options"]["centroid_bound"]
+            if bound is not None:
+                return bound
 
         return 0.5
 
@@ -598,28 +597,27 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood["prior_ps"].append(prior_param)
 
-        if "point_source_options" in self.settings:
-            if (
-                "time_delays_measured" in self.settings["point_source_options"]
-                and "time_delays_covariance" in self.settings["point_source_options"]
-            ):
-                kwargs_likelihood.update({"time_delay_likelihood": True})
+        if (
+            "point_source_options" in self.settings
+            and "time_delays_measured" in self.settings["point_source_options"]
+            and "time_delays_covariance" in self.settings["point_source_options"]
+        ):
+            kwargs_likelihood.update({"time_delay_likelihood": True})
 
         use_default_logL_addition = False
 
-        if "lens_options" in self.settings:
-            if any(
-                key in self.settings["lens_options"]
-                for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
-            ):
-                use_default_logL_addition = True
+        if "lens_options" in self.settings and any(
+            key in self.settings["lens_options"]
+            for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
+        ):
+            use_default_logL_addition = True
 
-        if "source_light_options" in self.settings:
-            if (
-                "shapelet_scale_logarithmic_prior"
-                in self.settings["source_light_options"]
-            ):
-                use_default_logL_addition = True
+        if (
+            "source_light_options" in self.settings
+            and "shapelet_scale_logarithmic_prior"
+            in self.settings["source_light_options"]
+        ):
+            use_default_logL_addition = True
 
         if "special" in self.settings["model"]:
             special_list = self.get_special_list()
@@ -631,6 +629,7 @@ class ModelConfig(Config):
         if use_default_logL_addition:
             if use_jax:
                 from functools import partial
+
                 from ..util.jax_util import custom_logL_addition_jax
 
                 default_logL_addition = partial(
@@ -769,14 +768,14 @@ class ModelConfig(Config):
             "source_light_options" in self.settings
             and "shapelet_scale_logarithmic_prior"
             in self.settings["source_light_options"]
-        ):
-            if self.settings["source_light_options"][
+            and self.settings["source_light_options"][
                 "shapelet_scale_logarithmic_prior"
-            ]:
-                for i, model in enumerate(self.get_source_light_model_list()):
-                    if model == "SHAPELETS":
-                        beta = kwargs_source[i]["beta"]
-                        prior += -np.log(beta)
+            ]
+        ):
+            for i, model in enumerate(self.get_source_light_model_list()):
+                if model == "SHAPELETS":
+                    beta = kwargs_source[i]["beta"]
+                    prior += -np.log(beta)
 
         return prior
 
@@ -1005,7 +1004,7 @@ class ModelConfig(Config):
             }
 
             if "psf_iteration_settings" in self.settings["fitting"]:
-                for key in self.settings["fitting"]["psf_iteration_settings"].keys():
+                for key in self.settings["fitting"]["psf_iteration_settings"]:
                     kwargs_psf_iteration[key] = self.settings["fitting"][
                         "psf_iteration_settings"
                     ][key]
@@ -1188,16 +1187,18 @@ class ModelConfig(Config):
                 else:
                     raise ValueError(f"{model} not supported")
 
-        if "special_options" in self.settings:
-            if "general_scaling" in self.settings["special_options"]:
-                special_list.append("general_scaling")
+        if (
+            "special_options" in self.settings
+            and "general_scaling" in self.settings["special_options"]
+        ):
+            special_list.append("general_scaling")
 
-        if "point_source_options" in self.settings:
-            if (
-                "time_delays_measured" in self.settings["point_source_options"]
-                and "time_delays_covariance" in self.settings["point_source_options"]
-            ):
-                special_list.append("time_delay_likelihood")
+        if (
+            "point_source_options" in self.settings
+            and "time_delays_measured" in self.settings["point_source_options"]
+            and "time_delays_covariance" in self.settings["point_source_options"]
+        ):
+            special_list.append("time_delay_likelihood")
 
         return special_list
 
@@ -1419,7 +1420,7 @@ class ModelConfig(Config):
                     }
                 )
             else:
-                raise ValueError("{} not implemented as a lens " "model!".format(model))
+                raise ValueError(f"{model} not implemented as a lens " "model!")
 
         init = self.update_initial_guesses("lens", init)
         lower, upper = self.update_uniform_priors("lens", lower, upper)
@@ -1561,9 +1562,7 @@ class ModelConfig(Config):
                 lower.append(_lower)
                 upper.append(_upper)
             else:
-                raise ValueError(
-                    "{} not implemented as a lens light" "model!".format(model)
-                )
+                raise ValueError(f"{model} not implemented as a lens light" "model!")
 
         init = self.update_initial_guesses("lens_light", init)
         lower, upper = self.update_uniform_priors("lens_light", lower, upper)
@@ -1672,9 +1671,7 @@ class ModelConfig(Config):
                 )
                 shapelets_index += 1
             else:
-                raise ValueError(
-                    "{} not implemented as a source light" "model!".format(model)
-                )
+                raise ValueError(f"{model} not implemented as a source light" "model!")
 
         init = self.update_initial_guesses("source_light", init)
         lower, upper = self.update_uniform_priors("source_light", lower, upper)
@@ -1813,7 +1810,7 @@ class ModelConfig(Config):
             elif item == "general_scaling":
                 general_scaling = self.settings["special_options"]["general_scaling"]
 
-                for param_name, values in general_scaling.items():
+                for param_name in general_scaling:
                     if f"{param_name}_scale_factor" in self.settings["special_options"]:
                         init.update(
                             {
@@ -1942,15 +1939,17 @@ class ModelConfig(Config):
         assert component in ["lens", "lens_light", "source_light", "point_source"]
 
         options_string = component + "_options"
-        if options_string in self.settings.keys():
-            if "initial_guesses" in self.settings[options_string].keys():
-                new_init_dict_list = deepcopy(init_dict_list)
-                for model_index, init_dict in self.settings[options_string][
-                    "initial_guesses"
-                ].items():
-                    new_init_dict_list[int(model_index)].update(init_dict)
+        if (
+            options_string in self.settings
+            and "initial_guesses" in self.settings[options_string]
+        ):
+            new_init_dict_list = deepcopy(init_dict_list)
+            for model_index, init_dict in self.settings[options_string][
+                "initial_guesses"
+            ].items():
+                new_init_dict_list[int(model_index)].update(init_dict)
 
-                return new_init_dict_list
+            return new_init_dict_list
 
         return init_dict_list
 
@@ -2021,12 +2020,12 @@ class ModelConfig(Config):
             for key, value in init_dict_list[model_index].items():
 
                 # Skip the check if the parameter is fixed
-                if key in fixed_dict_list[model_index].keys():
+                if key in fixed_dict_list[model_index]:
                     continue
 
                 error_string = f"\n{component} model component at index {model_index} contains parameter {key} with initial value {value}"
 
-                if key in lower_dict_list[model_index].keys():
+                if key in lower_dict_list[model_index]:
                     lower_bound = lower_dict_list[model_index][key]
                     if value < lower_bound:
                         warn(
@@ -2034,7 +2033,7 @@ class ModelConfig(Config):
                             + f", which is less than the lower bound {lower_bound}!"
                         )
 
-                if key in upper_dict_list[model_index].keys():
+                if key in upper_dict_list[model_index]:
                     upper_bound = upper_dict_list[model_index][key]
                     if value > upper_bound:
                         warn(

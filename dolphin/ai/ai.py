@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This module provides the base AI class for handling common AI-related operations."""
 
 __author__ = "ajshajib"
@@ -7,7 +6,7 @@ from ..processor.data import ImageData
 from ..processor.files import FileSystem
 
 
-class AI(object):
+class AI:
     """This parent class holds common methods for AI-related operations and
     initialization."""
 

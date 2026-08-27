@@ -1,22 +1,22 @@
-# -*- coding: utf-8 -*-
 """Tests for output module."""
 
 from pathlib import Path
-import pytest
-import h5py
-import numpy as np
-import matplotlib.pyplot as plt
-import dolphin
-import lenstronomy
 
-from dolphin.processor import Processor
+import h5py
+import lenstronomy
+import matplotlib.pyplot as plt
+import numpy as np
+import pytest
+
+import dolphin
 from dolphin.analysis.output import Output
+from dolphin.processor import Processor
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 
-class TestOutput(object):
+class TestOutput:
     def setup_class(self):
         self.output = Output(_TEST_IO_DIR)
         self.processor = Processor(_TEST_IO_DIR)
@@ -180,9 +180,12 @@ class TestOutput(object):
 
         def mock_get(self_obj, name, default=None):
             val = original_get(self_obj, name, default)
-            if name in ["dolphin_version", "lenstronomy_version", "jaxtronomy_version"]:
-                if isinstance(val, str):
-                    return val.encode("utf-8")
+            if name in [
+                "dolphin_version",
+                "lenstronomy_version",
+                "jaxtronomy_version",
+            ] and isinstance(val, str):
+                return val.encode("utf-8")
             return val
 
         monkeypatch.setattr(h5py.AttributeManager, "get", mock_get)
@@ -294,7 +297,7 @@ class TestOutput(object):
         """
         param_class = self.output.get_param_class("lens_system2", "example")
 
-        n, _ = param_class.num_param()
+        _n, _ = param_class.num_param()
 
         self.output.get_kwargs_from_args(
             "lens_system2",

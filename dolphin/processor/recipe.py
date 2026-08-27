@@ -524,7 +524,7 @@ class Recipe(object):
         a3 = np.rot90(a2)  # 1's at upper than the diagonal
         a1 = np.flip(a3)  # 1's at lower than the diagonal
 
-        # the quadrants are taken about the deflector, which sits at the center
+        # the quadrants are taken about the center of the image
         split_x = int(np.searchsorted(x[0], 0, side="right"))
         split_y = int(np.searchsorted(y[:, 0], 0, side="right"))
 

@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
 """Tests for config module."""
 
-import pytest
+import os
+import warnings
 from copy import deepcopy
+from pathlib import Path
+
 import numpy as np
 import numpy.testing as npt
-import os
-from pathlib import Path
-import warnings
+import pytest
 
-from dolphin.processor.config import Config
-from dolphin.processor.config import ModelConfig
-from dolphin.processor.config import _build_cosmology
+from dolphin.processor.config import Config, ModelConfig, _build_cosmology
 from dolphin.processor.files import FileSystem
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
-class TestConfig(object):
+class TestConfig:
     @classmethod
     def setup_class(cls):
         pass
@@ -137,8 +135,8 @@ class TestConfig(object):
         assert type(cosmo).__name__ == "wpwaCDM"
 
 
-class TestModelConfig(object):
-    """"""
+class TestModelConfig:
+    """Test the `ModelConfig` class."""
 
     def setup_method(self):
         self.io_directory = str((_ROOT_DIR / "io_directory_example").resolve())

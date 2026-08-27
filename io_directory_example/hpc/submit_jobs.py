@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This script submits an array of jobs to a HPC cluster. Run using the command ::
 
@@ -21,8 +20,8 @@ tags in the `create_job_{}.sh` files.
 
 __author__ = "ajshajib"
 
-import sys
 import os
+import sys
 import time
 
 from dolphin.processor.files import FileSystem
@@ -44,8 +43,8 @@ else:
     lens_list = file_system.get_lens_list()
 
     for lens_name in lens_list:
-        os.system("./create_job_{}.sh {} {}".format(job_system, run_id, lens_name))
-        print("./create_job_{}.sh {} {}".format(job_system, run_id, lens_name))
+        os.system(f"./create_job_{job_system}.sh {run_id} {lens_name}")
+        print(f"./create_job_{job_system}.sh {run_id} {lens_name}")
         time.sleep(1)
 
-    print("{} jobs submitted!".format(len(lens_list)))
+    print(f"{len(lens_list)} jobs submitted!")

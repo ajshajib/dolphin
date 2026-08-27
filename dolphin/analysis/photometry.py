@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This class contains the methods to perform a linear inversion on the model outputs in
 order to obtain lens, image, and source fluxes/magnitudes, as well as morphological
 properties of the lens light for multi-component models."""
@@ -6,19 +5,18 @@ properties of the lens light for multi-component models."""
 __author__ = "brady-ryan"
 
 import numpy as np
-
+from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.Data.imaging_data import ImageData
+from lenstronomy.Data.psf import PSF
 from lenstronomy.ImSim.image_linear_solve import ImageLinearFit
 from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.LightModel.light_model import LightModel
-from lenstronomy.Analysis.light_profile import LightProfileAnalysis
-from lenstronomy.Util import param_util
 from lenstronomy.PointSource.point_source import PointSource
-from lenstronomy.Data.psf import PSF
+from lenstronomy.Util import param_util
 
 from ..analysis.output import Output
-from ..processor.files import FileSystem
 from ..processor.config import ModelConfig
+from ..processor.files import FileSystem
 
 
 class Photometry:

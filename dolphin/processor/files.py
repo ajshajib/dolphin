@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
 """This module provides a class for maintaining the file system and directory
 architecture."""
 
 __author__ = "ajshajib"
 
-from pathlib import Path
 import json
-import numpy as np
-import h5py
-import gdown
+from pathlib import Path
 from warnings import warn
 
+import gdown
+import h5py
+import numpy as np
 
-class FileSystem(object):
+
+class FileSystem:
     """This class contains methods to handle the file system, directory paths, and
     standard IO operations."""
 
@@ -54,9 +54,10 @@ class FileSystem(object):
         """
         lens_list = []
 
-        for line in open(self.get_lens_list_file_path(), "r"):
-            if not line.startswith("#"):
-                lens_list.append(line.rstrip("\n").rstrip("\r"))
+        with open(self.get_lens_list_file_path(), "r") as f:
+            for line in f:
+                if not line.startswith("#"):
+                    lens_list.append(line.rstrip("\n").rstrip("\r"))
 
         return lens_list
 
@@ -369,9 +370,8 @@ class FileSystem(object):
                 lenstronomy_version = lenstronomy_version.decode("utf-8")
 
             jaxtronomy_version = f.attrs.get("jaxtronomy_version", None)
-            if jaxtronomy_version is not None:
-                if isinstance(jaxtronomy_version, bytes):
-                    jaxtronomy_version = jaxtronomy_version.decode("utf-8")
+            if jaxtronomy_version is not None and isinstance(jaxtronomy_version, bytes):
+                jaxtronomy_version = jaxtronomy_version.decode("utf-8")
 
             fit_output = []
             group = f["fit_output"]
@@ -444,9 +444,12 @@ class FileSystem(object):
         :return: the encoded object with `numpy.ndarray`s replaced by dictionaries
         :rtype: `object`
         """
-        if isinstance(obj, np.ndarray):
-            return {"__ndarray__": obj.tolist(), "shape": obj.shape}
-        elif hasattr(obj, "tolist") and callable(obj.tolist) and hasattr(obj, "shape"):
+        if (
+            isinstance(obj, np.ndarray)
+            or hasattr(obj, "tolist")
+            and callable(obj.tolist)
+            and hasattr(obj, "shape")
+        ):
             return {"__ndarray__": obj.tolist(), "shape": obj.shape}
         elif isinstance(obj, list):
             encoded = []
@@ -706,7 +709,7 @@ class FileSystem(object):
                 group = f[data_band]
                 flux_chain[data_band] = {}
 
-                for component in group.keys():
+                for component in group:
                     flux_chain[data_band][component] = group[component]["flux"][:]
 
         return flux_chain
@@ -734,7 +737,7 @@ class FileSystem(object):
                 group = f[data_band]
                 magnitude_chain[data_band] = {}
 
-                for component in group.keys():
+                for component in group:
                     magnitude_chain[data_band][component] = group[component][
                         "magnitude"
                     ][:]

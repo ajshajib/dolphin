@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
 """This module provides classes to post process a model run output."""
 
 __author__ = "ajshajib"
 
-import numpy as np
 import matplotlib.pyplot as plt
-
+import numpy as np
+from lenstronomy import __version__ as _lenstronomy_version
+from lenstronomy.Data.coord_transforms import Coordinates
+from lenstronomy.LensModel.lens_model import LensModel
+from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
+from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
 from lenstronomy.Plots.model_plot import ModelPlot
 from lenstronomy.Sampling.parameters import Param
 from lenstronomy.Util.class_creator import create_im_sim
-from lenstronomy.LensModel.lens_model import LensModel
-from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
-from lenstronomy.Data.coord_transforms import Coordinates
-from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
 
+from .. import __version__
 from ..processor import Processor
 from ..processor.config import ModelConfig
-from .. import __version__
-from lenstronomy import __version__ as _lenstronomy_version
 
 
 class Output(Processor):
@@ -632,7 +630,7 @@ class Output(Processor):
         burn_in=-100,
         verbose=True,
         fig_width=16,
-        parameters_to_plot=[],
+        parameters_to_plot=None,
     ):
         """Plot the trace of MCMC walkers.
 
@@ -654,6 +652,9 @@ class Output(Processor):
         :return: `matplotlib.figure.Figure` instance with the plots
         :rtype: `matplotlib.figure.Figure`
         """
+        if parameters_to_plot is None:
+            parameters_to_plot = []
+
         self.load_output(lens_name, model_id)
         sampler_type = self.fit_output[-1][0]
 
@@ -708,10 +709,7 @@ class Output(Processor):
             if verbose:
                 print(
                     self.params_sampled[i],
-                    "{:.4f} ± {:.4f}".format(
-                        median_pos[i][last - 1],
-                        (q84_pos[i][last - 1] - q16_pos[i][last - 1]) / 2,
-                    ),
+                    f"{median_pos[i][last - 1]:.4f} ± {(q84_pos[i][last - 1] - q16_pos[i][last - 1]) / 2:.4f}",
                 )
             if len(parameter_list) != 1:
                 # ax[i].plot(mean_pos[i][:3000], c='b')
@@ -1133,7 +1131,7 @@ class Output(Processor):
                 ax.text(
                     x_pix[i] + 3,
                     y_pix[i],
-                    str(round(magnifications[i], 1)),
+                    str(round(ma, 1)),
                     color="#ffff33",
                     ha="left",
                     va="center",

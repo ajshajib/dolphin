@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 """Tests for data module."""
 
 from pathlib import Path
+
 import numpy.testing as npt
-from dolphin.processor.data import Data
-from dolphin.processor.data import ImageData
-from dolphin.processor.data import PSFData
+
+from dolphin.processor.data import Data, ImageData, PSFData
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
-class TestData(object):
+class TestData:
     @classmethod
     def setup_class(cls):
         pass
@@ -33,7 +32,7 @@ class TestData(object):
         data.load_from_file(data_file)
 
 
-class TestImageData(object):
+class TestImageData:
     def setup_class(self):
         data_file = (
             _ROOT_DIR
@@ -86,7 +85,7 @@ class TestImageData(object):
         )
 
 
-class TestPSFData(object):
+class TestPSFData:
     @classmethod
     def setup_class(cls):
         pass

@@ -1,19 +1,18 @@
-import numpy as np
-import scipy.stats as stats
-import os
 import copy
-import yaml
-from tqdm import trange
+import os
 
-import lenstronomy.Util.util as util
-import lenstronomy.Util.param_util as param_util
-from lenstronomy.SimulationAPI.sim_api import SimAPI
-from lenstronomy.LightModel.light_model import LightModel
+import numpy as np
+import yaml
 from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.LensModel.Solver.lens_equation_solver import LensEquationSolver
+from lenstronomy.LightModel.light_model import LightModel
+from lenstronomy.SimulationAPI.sim_api import SimAPI
+from lenstronomy.Util import param_util, util
+from scipy import stats
+from tqdm import trange
 
 
-class TrainingData(object):
+class TrainingData:
     """Contains all the methods to simulate the training set."""
 
     def __init__(
@@ -86,7 +85,21 @@ class TrainingData(object):
         no_lens_light_fracion=0.5,
         random_seed=None,
     ):
-        """"""
+        """
+        Create a dataset of simulated lensing systems.
+
+        :param num_system: number of lensing systems to simulate
+        :type num_system: `int`
+        :param max_satellite_num: maximum number of satellites to simulate, defaults to 2
+        :type max_satellite_num: `int`, optional
+        :param no_lens_light_fracion: fraction of systems without lens light added in the
+            dataset, defaults to 0.5 
+        :type no_lens_light_fracion: `float`, optional
+        :param random_seed: random seed for reproducibility, defaults to None
+        :type random_seed: `int`, optional
+        :return: dataset and masks
+        :rtype: `tuple` of `numpy.ndarray`
+        """
         if random_seed is not None:
             np.random.seed(random_seed)
 
@@ -433,8 +446,7 @@ class TrainingData(object):
                     (x_image[p] - x_lens) ** 2 + (y_image[p] - y_lens) ** 2
                 )
 
-                if r_image < r_min:
-                    r_min = r_image
+                r_min = min(r_min, r_image)
 
             rs = np.sqrt((xs - center_x_pixel) ** 2 + (ys - center_y_pixel) ** 2)
 

@@ -2,13 +2,11 @@
 
 __author__ = "ajshajib"
 
-from lenstronomy.Workflow.fitting_sequence import FittingSequence
-import matplotlib.pyplot as plt
-import numpy as np
-from schwimmbad import choose_pool
 import sys
 from contextlib import ExitStack
 
+import matplotlib.pyplot as plt
+import numpy as np
 from lenstronomy import __version__ as _lenstronomy_version
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 from schwimmbad import choose_pool

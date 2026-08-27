@@ -736,7 +736,7 @@ class TestModelConfig:
             "compute_mode": "regular",
         }
         kwargs_numerics = config.get_kwargs_numerics()
-        assert "supersampled_indexes" not in kwargs_numerics[0].keys()
+        assert "supersampled_indexes" not in kwargs_numerics[0]
 
     def test_get_point_source_params(self):
         """Test `get_point_source_params` method."""

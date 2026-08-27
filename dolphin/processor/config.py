@@ -872,16 +872,34 @@ class ModelConfig(Config):
                     else:
                         if self.settings["mask"]["extra_regions"] is not None:
                             for reg in self.settings["mask"]["extra_regions"][n]:
-                                extra_masked_regions.append(
-                                    1
-                                    - mask_util.mask_azimuthal(
-                                        util.image2array(x_coords),
-                                        util.image2array(y_coords),
-                                        self.deflector_center_ra + reg[0],
-                                        self.deflector_center_dec + reg[1],
-                                        reg[2],
+                                if len(reg) == 3:
+                                    extra_masked_regions.append(
+                                        1
+                                        - mask_util.mask_azimuthal(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                        )
                                     )
-                                )
+                                elif len(reg) == 5:
+                                    extra_masked_regions.append(
+                                        1
+                                        - mask_util.mask_ellipse(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                            reg[3],
+                                            reg[4],
+                                        )
+                                    )
+                                else:
+                                    raise ValueError(
+                                        "Unrecognized extra region in mask settings"
+                                    )
 
                     for extra_region in extra_masked_regions:
                         mask *= extra_region
@@ -912,6 +930,59 @@ class ModelConfig(Config):
             return masks
         else:
             return None
+
+    def get_supersampled_indices(self, band_index):
+        """Creates array of booleans based on settings, indicating which pixels on the
+        grid to be supersampled during ray-shooting and convolution.
+
+        :param band_index: index of the band
+        :type band_index: `int`
+        :return: bool array corresponding to band index indicating which pixels to be supersampled
+        :rtype: `numpy.ndarray` of `bool`
+        """
+
+        try:
+            settings = self.settings["supersampled_indices"]
+        except (NameError, KeyError):
+            return None
+
+        band_name = self.settings["band"][band_index]
+        image_data = self.get_image_data(band_name)
+        num_pixel = image_data.get_image_size()
+        units = self.settings["supersampled_indices"].get("units", "arcseconds")
+
+        if units == "pixels":
+            coords0 = np.repeat(np.arange(0, num_pixel), num_pixel)  # row index
+            coords1 = np.tile(np.arange(0, num_pixel), num_pixel)  # column index
+
+        elif units == "arcseconds":
+            coordinate_system = image_data.get_image_coordinate_system()
+            coords0, coords1 = coordinate_system.coordinate_grid(num_pixel, num_pixel)
+            coords0 = util.image2array(coords0)  # ra
+            coords1 = util.image2array(coords1)  # dec
+
+        overall_mask = np.zeros(num_pixel * num_pixel, dtype=bool)
+
+        for center0, center1, inner_radius, outer_radius in settings["annulus_regions"][
+            band_index
+        ]:
+            # If units are pixels, (center0, center1) is interpreted as (row index, column index)
+            # If units are arcseconds, (center0, center1) is interpreted as (ra, dec)
+            mask_i = mask_util.mask_shell(
+                coords0,
+                coords1,
+                center0,
+                center1,
+                inner_radius,
+                outer_radius,
+            )
+            mask_i = np.asarray(mask_i, dtype=bool)
+
+            overall_mask |= mask_i
+
+        overall_mask = util.array2image(overall_mask)
+
+        return overall_mask
 
     def get_kwargs_psf_iteration(self):
         """Create `kwargs_psf_iteration` dictionary for lenstronomy.
@@ -981,6 +1052,11 @@ class ModelConfig(Config):
                 else:
                     kwargs_num[key] = deepcopy(value)
 
+            if (
+                kwargs_num["compute_mode"] == "adaptive"
+                and kwargs_num["supersampling_factor"] > 1
+            ):
+                kwargs_num["supersampled_indexes"] = self.get_supersampled_indices(n)
             kwargs_numerics.append(kwargs_num)
 
         return kwargs_numerics

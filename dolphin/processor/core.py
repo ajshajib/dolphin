@@ -5,6 +5,8 @@ __author__ = "ajshajib"
 import sys
 from contextlib import ExitStack
 
+import matplotlib.pyplot as plt
+import numpy as np
 from lenstronomy import __version__ as _lenstronomy_version
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 from schwimmbad import choose_pool
@@ -202,3 +204,44 @@ class Processor:
         :rtype: `PSFData`
         """
         return PSFData(self.file_system.get_psf_file_path(lens_name, band))
+
+    def preview_masks(self, lens_name, band):
+        """Preview the mask used in the image modeling. Also preview the supersampled
+        indices used in compute_mode="adaptive" if provided.
+
+        :param lens_name: name of the lens system
+        :type lens_name: `str`
+        :param band: observing band or filter name
+        :type band: `str`
+        :return: None
+        """
+
+        config = self.get_lens_config(lens_name)
+        band_index = config.settings["band"].index(band)
+
+        image = self.get_image_data(lens_name, band).get_image()
+        masks = config.get_masks()
+        supersampled_indices = config.get_supersampled_indices(band_index)
+
+        if masks is not None:
+            mask = masks[band_index]
+            fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+            fig.suptitle("Image Likelihood Mask")
+            im0 = ax[0].imshow(mask, origin="lower")
+            fig.colorbar(im0, ax=ax[0])
+            im1 = ax[1].imshow(np.log10(image * mask), cmap="cubehelix", origin="lower")
+            fig.colorbar(im1, ax=ax[1])
+            plt.tight_layout()
+            plt.show()
+
+        if supersampled_indices is not None:
+            fig, ax = plt.subplots(1, 2, figsize=(10, 4))
+            fig.suptitle("Supersampled Indices")
+            im0 = ax[0].imshow(supersampled_indices, origin="lower")
+            fig.colorbar(im0, ax=ax[0])
+            im1 = ax[1].imshow(
+                np.log10(image * supersampled_indices), cmap="cubehelix", origin="lower"
+            )
+            fig.colorbar(im1, ax=ax[1])
+            plt.tight_layout()
+            plt.show()

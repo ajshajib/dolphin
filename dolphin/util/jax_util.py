@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
 """This module handles JAX related imports and functions separately from the main
 dolphin modules."""
 
 __author__ = "ahuang"
 
-from jax import config, numpy as jnp
+from jax import config
+from jax import numpy as jnp
 from jaxtronomy.Util.param_util import ellipticity2phi_q
 
 config.update("jax_enable_x64", True)
@@ -116,13 +116,13 @@ def custom_logL_addition_jax(
         "source_light_options" in model_config.settings
         and "shapelet_scale_logarithmic_prior"
         in model_config.settings["source_light_options"]
-    ):
-        if model_config.settings["source_light_options"][
+        and model_config.settings["source_light_options"][
             "shapelet_scale_logarithmic_prior"
-        ]:
-            for i, model in enumerate(model_config.get_source_light_model_list()):
-                if model == "SHAPELETS":
-                    beta = kwargs_source[i]["beta"]
-                    prior += -jnp.log(beta)
+        ]
+    ):
+        for i, model in enumerate(model_config.get_source_light_model_list()):
+            if model == "SHAPELETS":
+                beta = kwargs_source[i]["beta"]
+                prior += -jnp.log(beta)
 
     return prior

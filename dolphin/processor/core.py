@@ -1,23 +1,22 @@
-# -*- coding: utf-8 -*-
 """This module handles the execution of modeling sequences for lens systems."""
 
 __author__ = "ajshajib"
 
 import sys
-from lenstronomy import __version__ as _lenstronomy_version
-from .. import __version__
+from contextlib import ExitStack
 
+from lenstronomy import __version__ as _lenstronomy_version
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 from schwimmbad import choose_pool
 
-from .files import FileSystem
+from .. import __version__
 from .config import ModelConfig
-from .data import ImageData
-from .data import PSFData
+from .data import ImageData, PSFData
+from .files import FileSystem
 from .recipe import Recipe
 
 
-class Processor(object):
+class Processor:
     """This class contains methods to model a single lens system or a batch of systems
     using settings loaded from configuration files."""
 
@@ -69,68 +68,66 @@ class Processor(object):
         """
         pool = choose_pool(mpi=mpi)
 
-        if log and pool.is_master():
-            log_file = open(
-                self.file_system.get_log_file_path(lens_name, model_id), "wt"
-            )
-            sys.stdout = log_file
+        with ExitStack() as stack:
+            if log and pool.is_master():
+                log_file = stack.enter_context(
+                    open(self.file_system.get_log_file_path(lens_name, model_id), "wt")
+                )
+                sys.stdout = log_file
 
-        config = self.get_lens_config(lens_name)
-        recipe = Recipe(config, thread_count=thread_count)
+            config = self.get_lens_config(lens_name)
+            recipe = Recipe(config, thread_count=thread_count)
 
-        psf_supersampling_factor = config.get_psf_supersampled_factor()
-        kwargs_data_joint = self.get_kwargs_data_joint(
-            lens_name, psf_supersampled_factor=psf_supersampling_factor
-        )
-
-        if use_jax:
-            from jaxtronomy.Workflow.fitting_sequence import (
-                FittingSequence as FittingSequenceJAX,
+            psf_supersampling_factor = config.get_psf_supersampled_factor()
+            kwargs_data_joint = self.get_kwargs_data_joint(
+                lens_name, psf_supersampled_factor=psf_supersampling_factor
             )
 
-            FittingSequenceClass = FittingSequenceJAX
-        else:
-            FittingSequenceClass = FittingSequence
+            if use_jax:
+                from jaxtronomy.Workflow.fitting_sequence import (
+                    FittingSequence as FittingSequenceJAX,
+                )
 
-        fitting_sequence = FittingSequenceClass(
-            kwargs_data_joint,
-            config.get_kwargs_model(),
-            config.get_kwargs_constraints(use_jax=use_jax),
-            config.get_kwargs_likelihood(
-                custom_logL_addition=custom_logL_addition, use_jax=use_jax
-            ),
-            config.get_kwargs_params(),
-            mpi=mpi,
-        )
+                FittingSequenceClass = FittingSequenceJAX
+            else:
+                FittingSequenceClass = FittingSequence
 
-        fitting_kwargs_list = recipe.get_recipe(
-            kwargs_data_joint=kwargs_data_joint, recipe_name=recipe_name
-        )
-        print(f"Optimizing model for {lens_name} with recipe: {recipe_name}.")
+            fitting_sequence = FittingSequenceClass(
+                kwargs_data_joint,
+                config.get_kwargs_model(),
+                config.get_kwargs_constraints(use_jax=use_jax),
+                config.get_kwargs_likelihood(
+                    custom_logL_addition=custom_logL_addition, use_jax=use_jax
+                ),
+                config.get_kwargs_params(),
+                mpi=mpi,
+            )
 
-        fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
-        kwargs_result = fitting_sequence.best_fit(bijective=False)
-        multi_band_list_out = fitting_sequence.multi_band_list
+            fitting_kwargs_list = recipe.get_recipe(
+                kwargs_data_joint=kwargs_data_joint, recipe_name=recipe_name
+            )
+            print(f"Optimizing model for {lens_name} with recipe: {recipe_name}.")
 
-        output = {
-            "settings": config.settings,
-            "kwargs_result": kwargs_result,
-            "fit_output": fit_output,
-            "multi_band_list_out": multi_band_list_out,
-            "dolphin_version": __version__,
-            "lenstronomy_version": _lenstronomy_version,
-        }
+            fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
+            kwargs_result = fitting_sequence.best_fit(bijective=False)
+            multi_band_list_out = fitting_sequence.multi_band_list
 
-        if use_jax:
-            import jaxtronomy
+            output = {
+                "settings": config.settings,
+                "kwargs_result": kwargs_result,
+                "fit_output": fit_output,
+                "multi_band_list_out": multi_band_list_out,
+                "dolphin_version": __version__,
+                "lenstronomy_version": _lenstronomy_version,
+            }
 
-            output["jaxtronomy_version"] = jaxtronomy.__version__
+            if use_jax:
+                import jaxtronomy
 
-        if pool.is_master():
-            self.file_system.save_output(lens_name, model_id, output)
+                output["jaxtronomy_version"] = jaxtronomy.__version__
 
-        if log and pool.is_master():
-            log_file.close()
+            if pool.is_master():
+                self.file_system.save_output(lens_name, model_id, output)
 
     def get_lens_config(self, lens_name):
         """Get the `ModelConfig` object populated with settings for a specific lens.

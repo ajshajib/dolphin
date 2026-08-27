@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-
 """The setup script."""
 
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
 
 this_directory = Path(__file__).parent
 readme = (this_directory / "README.rst").read_text()

@@ -1,20 +1,19 @@
-# -*- coding: utf-8 -*-
 """This module loads data and PSFs from HDF5 data files."""
 
 __author__ = "ajshajib"
 
+from copy import deepcopy
+
 import h5py
 import numpy as np
-from copy import deepcopy
 from lenstronomy.Data.coord_transforms import Coordinates
 
 
-class Data(object):
+class Data:
     """This is a superclass to load data files securely and consistently."""
 
     def __init__(self):
         """Initialize the base Data object."""
-        pass
 
     @staticmethod
     def load_from_file(file_path):

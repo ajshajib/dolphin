@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This module creates a configuration file from the output of the visual recognition
 model."""
 
@@ -93,11 +92,11 @@ class Modeler(AI):
         self,
         lens_name,
         band_name,
-        pso_settings={"num_particle": 50, "num_iteration": 50},
+        pso_settings=None,
         psf_iteration_settings=None,
         sampler_name="emcee",
         sampler_settings=None,
-        supersampling_factor=[3],
+        supersampling_factor=None,
         max_satellite_number=2,
         minimum_satellite_area=15,
         satellite_bound=0.25,
@@ -156,6 +155,11 @@ class Modeler(AI):
         :return: configuration
         :rtype: `dict`
         """
+        if pso_settings is None:
+            pso_settings = {"num_particle": 50, "num_iteration": 50}
+        if supersampling_factor is None:
+            supersampling_factor = [3]
+
         # Get image data and coordinate system
         image_data = self.get_image_data(lens_name, band_name)
         coordinate_system = image_data.get_image_coordinate_system()
@@ -228,10 +232,8 @@ class Modeler(AI):
             "pso_settings": pso_settings,
         }
 
-        config["fitting"]["psf_iteration"] = (
-            True
-            if psf_iteration_settings is not None and self._source_type == "quasar"
-            else False
+        config["fitting"]["psf_iteration"] = bool(
+            psf_iteration_settings is not None and self._source_type == "quasar"
         )
         config["fitting"]["psf_iteration_settings"] = psf_iteration_settings
 

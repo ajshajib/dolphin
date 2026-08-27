@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
 """Tests for Recipe module."""
 
-import pytest
+from copy import deepcopy
 from pathlib import Path
+
 import numpy as np
 import numpy.testing as npt
-from copy import deepcopy
+import pytest
 from lenstronomy.Workflow.fitting_sequence import FittingSequence
 
 from dolphin.processor.config import ModelConfig
@@ -14,7 +14,7 @@ from dolphin.processor.recipe import Recipe
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
-class TestRecipe(object):
+class TestRecipe:
     """Test the `Recipe` module."""
 
     def setup_class(self):

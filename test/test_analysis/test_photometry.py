@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
 """Tests for photometry module."""
 
+import os
 from copy import deepcopy
+from pathlib import Path
+
 import h5py
 import numpy as np
-from pathlib import Path
 import pytest
-import os
 
 from dolphin.analysis.output import Output
 from dolphin.analysis.photometry import Photometry
@@ -17,7 +17,7 @@ _TEST_MODEL_ID_F814W = "example"
 _TEST_MODEL_SYSTEM_NAME = "lensed_quasar"
 
 
-class TestPhotometry(object):
+class TestPhotometry:
     def setup_class(self):
         self.output = Output(_TEST_IO_DIR)
 
@@ -109,7 +109,7 @@ class TestPhotometry(object):
         """Test :meth:`~_aperature_mask` shapes and behavior."""
 
         data_class = self.photometry1.band_models["F814W"]["data_class"]
-        x_grid, y_grid = data_class.pixel_coordinates
+        x_grid, _y_grid = data_class.pixel_coordinates
         expected_shape = x_grid.shape
         center_x = 0.0
         center_y = 0.0

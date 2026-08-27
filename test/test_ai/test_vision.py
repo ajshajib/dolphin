@@ -1,6 +1,8 @@
 from pathlib import Path
+
 import numpy as np
 import pytest
+
 from dolphin.ai.vision import Vision
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -17,7 +19,6 @@ class TestVision:
     @classmethod
     def teardown_method(cls):
         """Clean up resources after tests are completed."""
-        pass
 
     def test_init(self):
         """Test the __init__ method."""

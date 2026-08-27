@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 """This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()` with
 pre-defined recipes."""
 
 __author__ = "ajshajib"
 
 from copy import deepcopy
+
 import numpy as np
 from scipy import ndimage
 
 
-class Recipe(object):
+class Recipe:
     """This class contains methods to create fitting recipes.
 
     It builds an optimization workflow (currently using particle-swarm optimization) to
@@ -101,7 +101,7 @@ class Recipe(object):
         elif recipe_name == "skip":
             pass
         else:
-            raise ValueError("Recipe name '{}' not recognized!!".format(recipe_name))
+            raise ValueError(f"Recipe name '{recipe_name}' not recognized!!")
 
         fitting_kwargs_list += self.get_sampling_sequence()
 
@@ -244,7 +244,7 @@ class Recipe(object):
                     "Sampler '{}' not supported! ".format(
                         self._config.settings["fitting"]["sampler"]
                     )
-                    + "Supported ones are: {}".format(supported_samplers)
+                    + f"Supported ones are: {supported_samplers}"
                 )
 
             sampling_kwargs = self._config.settings["fitting"]["sampler_settings"]
@@ -362,7 +362,7 @@ class Recipe(object):
                 ]
 
                 # set lens parameter values to guess values, if provided
-                if "initial_guesses" in self._config.settings["lens_options"].keys():
+                if "initial_guesses" in self._config.settings["lens_options"]:
                     param_list = []
                     for index, params in self._config.settings["lens_options"][
                         "initial_guesses"
@@ -571,8 +571,8 @@ class Recipe(object):
             kwargs_params = self._config.get_source_light_model_params()
         else:
             raise ValueError(
-                "{} not recognized! Must be lens or "
-                "lens_light or source.".format(model_component)
+                f"{model_component} not recognized! Must be lens or "
+                "lens_light or source."
             )
 
         lower_list = kwargs_params[3]
@@ -589,13 +589,13 @@ class Recipe(object):
         for i, (sigma, fixed) in enumerate(zip(lower_list, fixed_list)):
             if i in index:
                 param_list = []
-                for key, value in sigma.items():
+                for key in sigma:
                     if key not in fixed:
                         param_list.append(key)
 
                 param_list_with_index.append([i, param_list])
 
-        key = "{}_add_fixed".format(model_component)
+        key = f"{model_component}_add_fixed"
 
         return ["update_settings", {key: param_list_with_index}]
 
@@ -611,8 +611,8 @@ class Recipe(object):
         """
         code = self.fix_params(model_component, index=index)
 
-        old_key = "{}_add_fixed".format(model_component)
-        key = "{}_remove_fixed".format(model_component)
+        old_key = f"{model_component}_add_fixed"
+        key = f"{model_component}_remove_fixed"
 
         code[1][key] = deepcopy(code[1][old_key])
         del code[1][old_key]

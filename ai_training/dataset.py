@@ -85,15 +85,14 @@ class TrainingData:
         no_lens_light_fracion=0.5,
         random_seed=None,
     ):
-        """
-        Create a dataset of simulated lensing systems.
+        """Create a dataset of simulated lensing systems.
 
         :param num_system: number of lensing systems to simulate
         :type num_system: `int`
         :param max_satellite_num: maximum number of satellites to simulate, defaults to 2
         :type max_satellite_num: `int`, optional
         :param no_lens_light_fracion: fraction of systems without lens light added in the
-            dataset, defaults to 0.5 
+            dataset, defaults to 0.5
         :type no_lens_light_fracion: `float`, optional
         :param random_seed: random seed for reproducibility, defaults to None
         :type random_seed: `int`, optional

@@ -89,6 +89,7 @@ class TestOutput:
         save_dict = {
             "settings": {"some": "settings"},
             "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "bic": 5000,
             "fit_output": [
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
@@ -110,6 +111,7 @@ class TestOutput:
         assert self.output.dolphin_version == dolphin.__version__
         assert self.output.lenstronomy_version == lenstronomy.__version__
         assert self.output.jaxtronomy_version == "0.1.0"
+        assert self.output.bayesian_information_criterion == 5000
 
     def test_load_output_version_warnings(self, capsys):
         """Test that correct warnings are printed when versions mismatch.
@@ -120,6 +122,7 @@ class TestOutput:
         save_dict = {
             "settings": {"some": "settings"},
             "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "bic": 5000,
             "fit_output": [
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
@@ -165,6 +168,7 @@ class TestOutput:
         save_dict = {
             "settings": {"some": "settings"},
             "kwargs_result": {"0": None, "1": "str", "2": [3, 4]},
+            "bic": 5000,
             "fit_output": [
                 ["emcee", [[2, 2], [3, 3]], ["param1", "param2"], [0.5, 0.2]]
             ],
@@ -396,6 +400,7 @@ class TestOutput:
         save_dict = {
             "settings": {"some": "settings"},
             "kwargs_result": {"0": None},
+            "bic": 5000,
             "fit_output": [
                 [
                     "Nautilus",

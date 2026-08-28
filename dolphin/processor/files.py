@@ -225,6 +225,9 @@ class FileSystem:
             f.attrs["settings"] = json.dumps(
                 self.encode_numpy_arrays(output["settings"]), ensure_ascii=False
             )
+            f.attrs["bic"] = json.dumps(
+                self.encode_numpy_arrays(output["bic"]), ensure_ascii=False
+            )
             f.attrs["kwargs_result"] = json.dumps(
                 self.encode_numpy_arrays(output["kwargs_result"]), ensure_ascii=False
             )
@@ -353,6 +356,13 @@ class FileSystem:
         with h5py.File(load_file, "r") as f:
             settings = self.decode_numpy_arrays(json.loads(str(f.attrs["settings"])))
 
+            # Maintain backwards compatibility by setting bic=nan if loading an output
+            # that was saved before bic was implemented
+            try:
+                bic = self.decode_numpy_arrays(json.loads(str(f.attrs["bic"])))
+            except KeyError:
+                bic = "not_available"
+
             kwargs_result = self.decode_numpy_arrays(
                 json.loads(str(f.attrs["kwargs_result"]))
             )
@@ -421,6 +431,7 @@ class FileSystem:
 
             output = {
                 "settings": settings,
+                "bic": bic,
                 "kwargs_result": kwargs_result,
                 "fit_output": fit_output,
                 "multi_band_list_out": multi_band_list_out,

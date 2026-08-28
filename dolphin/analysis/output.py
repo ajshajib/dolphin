@@ -4,6 +4,7 @@ __author__ = "ajshajib"
 
 import matplotlib.pyplot as plt
 import numpy as np
+import warnings
 from lenstronomy import __version__ as _lenstronomy_version
 from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.LensModel.lens_model import LensModel
@@ -32,6 +33,7 @@ class Output(Processor):
 
         self._fit_output = None
         self._kwargs_result = None
+        self._bic = None
         self._model_settings = None
         self._posterior_samples = None
         self._params_sampled = None
@@ -72,6 +74,27 @@ class Output(Processor):
             )
         else:
             return self._kwargs_result
+
+    @property
+    def bayesian_information_criterion(self):
+        """The `bic` after running a model by calling
+        `lenstronomy.Workflow.fitting_sequence.FittingSequence.bic`.
+
+        :return: `bic` value
+        :rtype: `dict`
+        """
+        if self._bic is None:
+            raise ValueError(
+                "Model output not specified!"
+                "Load an output using the `load_output()`"
+                "method!"
+            )
+        elif self._bic == "not_available":
+            warnings.warn(
+                "Loading an outdated save file; Bayesian information criterion not available."
+            )
+
+        return self._bic
 
     @property
     def model_settings(self):
@@ -185,6 +208,7 @@ class Output(Processor):
         output = self.file_system.load_output(lens_name, model_id)
 
         self._model_settings = output["settings"]
+        self._bic = output["bic"]
         self._kwargs_result = output["kwargs_result"]
         self._fit_output = output["fit_output"]
         self._multi_band_list_out = output["multi_band_list_out"]
@@ -334,7 +358,7 @@ class Output(Processor):
         :type source_vmax: `float` or `int` or `None`
         :param print_results: if `True`, prints the `kwargs_result` dictionary
         :type print_results: `bool`
-        :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the source-light subtracted data plot
+        :param show_source_light: if `True`, replaces convergence plot with source light convolved lens decomposition plot and also replaces the magnification plot with the lens-light subtracted data plot
         :type show_source_light: `bool`
         :param kwargs_data_plot: kwargs for the data plot, see :func: `lenstronomy.Plots.model_plot.ModelPlot.data_plot()` for available keywords.
         :type kwargs_data_plot: `dict`
@@ -433,7 +457,7 @@ class Output(Processor):
         else:
             kwargs_subtract_lens_light_plot.setdefault("kwargs_title", {})
             kwargs_subtract_lens_light_plot["kwargs_title"].setdefault(
-                "title", "Data - Lens Light"
+                "text", "Data - Lens Light"
             )
             model_plot.subtract_from_data_plot(
                 ax=axes[1, 1],
@@ -446,7 +470,7 @@ class Output(Processor):
 
             kwargs_reconstructed_source_plot.setdefault("kwargs_title", {})
             kwargs_reconstructed_source_plot["kwargs_title"].setdefault(
-                "title", "Reconstructed Source"
+                "text", "Reconstructed Lensed Source"
             )
             model_plot.decomposition_plot(
                 ax=axes[1, 2],
@@ -818,7 +842,7 @@ class Output(Processor):
         :return: `ImSim` instance
         :rtype: `lenstronomy.ImSim.im_sim.ImSim`
         """
-        config = ModelConfig(lens_name=lens_name, settings=self._model_settings)
+        config = ModelConfig(lens_name=lens_name, file_system=self.file_system, settings=self._model_settings)
 
         # kwargs_numerics = config.get_kwargs_numerics()
         kwargs_model = config.get_kwargs_model()

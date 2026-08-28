@@ -2,9 +2,10 @@
 
 __author__ = "ajshajib"
 
+import warnings
+
 import matplotlib.pyplot as plt
 import numpy as np
-import warnings
 from lenstronomy import __version__ as _lenstronomy_version
 from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.LensModel.lens_model import LensModel

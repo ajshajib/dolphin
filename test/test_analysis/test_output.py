@@ -47,6 +47,9 @@ class TestOutput:
             _ = self.output.kwargs_result
 
         with pytest.raises(ValueError):
+            _ = self.output.bayesian_information_criterion
+
+        with pytest.raises(ValueError):
             _ = self.output.model_settings
 
         assert self.output.posterior_samples == []
@@ -112,6 +115,9 @@ class TestOutput:
         assert self.output.lenstronomy_version == lenstronomy.__version__
         assert self.output.jaxtronomy_version == "0.1.0"
         assert self.output.bayesian_information_criterion == 5000
+
+        self.output.load_output("lens_system2", "example")
+        assert np.isnan(self.output.bayesian_information_criterion)
 
     def test_load_output_version_warnings(self, capsys):
         """Test that correct warnings are printed when versions mismatch.

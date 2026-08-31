@@ -133,6 +133,7 @@ class TestFileSystem:
         save_dict = {
             "settings": {"some": ["settings"]},
             "kwargs_result": {"0": 1, "1": "str", "2": [3, 4]},
+            "bic": 5000,
             "fit_output": [
                 [
                     "PSO",

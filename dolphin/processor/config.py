@@ -63,7 +63,7 @@ class ModelConfig(Config):
     def __init__(self, lens_name, file_system=None, io_directory=None, settings=None):
         """Initiate a Model Config object. If the file path is given, `settings` will be
         loaded from it. Otherwise, the `settings` can be loaded/reloaded later with the
-        `load_settings_from_file` method.
+        `load_settings_from_yaml` method.
 
         :param lens_name: name of the lens system
         :type lens_name: `str`
@@ -72,7 +72,7 @@ class ModelConfig(Config):
         :param io_directory: path to the input-output directory
         :type io_directory: `str` or `None`
         :param settings: a dictionary containing settings. If both `file`
-            and `settings` are provided, `file` will be prioritized.
+            and `settings` are provided, `settings` will be prioritized.
         :type settings: `dict` or `None`
         """
         super().__init__()

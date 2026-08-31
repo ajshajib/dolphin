@@ -117,7 +117,7 @@ class TestOutput:
         assert self.output.bayesian_information_criterion == 5000
 
         self.output.load_output("lens_system2", "example")
-        assert np.isnan(self.output.bayesian_information_criterion)
+        assert self.output.bayesian_information_criterion == "not_available"
 
     def test_load_output_version_warnings(self, capsys):
         """Test that correct warnings are printed when versions mismatch.

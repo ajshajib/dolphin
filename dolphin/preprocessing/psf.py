@@ -1,32 +1,27 @@
-# -*- coding: utf-8 -*-
 """This class contains helper functions to create a PSF using the STARRED and PSFr
 methodologies."""
 
 __author__ = "brady-ryan"
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
-
 from astropy.io import fits
-from astropy.wcs import WCS
 from astropy.nddata import NDData
 from astropy.table import Table
-
-from photutils.psf import extract_stars
+from astropy.wcs import WCS
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from photutils.detection import find_peaks
-
-from dolphin.processor.files import FileSystem
-from dolphin.preprocessing import preprocessing_util
-
+from photutils.psf import extract_stars
 from psfr import psfr
-
-from starred.psf.psf import PSF as STARRED_PSF
-from starred.psf.loss import Loss
 from starred.optim.optimization import Optimizer
-from starred.psf.parameters import ParametersPSF
-from starred.utils.noise_utils import propagate_noise
 from starred.plots import plot_function as pltf
+from starred.psf.loss import Loss
+from starred.psf.parameters import ParametersPSF
+from starred.psf.psf import PSF as STARRED_PSF
+from starred.utils.noise_utils import propagate_noise
+
+from dolphin.preprocessing import preprocessing_util
+from dolphin.processor.files import FileSystem
 
 
 class PSF:
@@ -242,6 +237,7 @@ class PSF:
         fig.colorbar(im_noise, ax=ax[2], fraction=0.05)
 
         plt.tight_layout()
+        plt.show()
 
         return mask
 
@@ -705,7 +701,12 @@ class PSF:
                 va="top",
                 ha="left",
                 color=colors[i],
-                bbox=dict(facecolor="white", alpha=1.0, edgecolor="none", pad=0.2),
+                bbox={
+                    "facecolor": "white",
+                    "alpha": 1.0,
+                    "edgecolor": "none",
+                    "pad": 0.2,
+                },
             )
 
         ax.set_xscale("log")
@@ -845,7 +846,12 @@ class PSF:
                 va="top",
                 ha="left",
                 color=colors[i],
-                bbox=dict(facecolor="white", alpha=1.0, edgecolor="none", pad=0.2),
+                bbox={
+                    "facecolor": "white",
+                    "alpha": 1.0,
+                    "edgecolor": "none",
+                    "pad": 0.2,
+                },
             )
 
         ax.set_xscale("log")

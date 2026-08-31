@@ -1,16 +1,15 @@
-# -*- coding: utf-8 -*-
 """Tests for preprocessing_util module."""
 
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-
-import dolphin.preprocessing.preprocessing_util as preprocessing_util
-
-from unittest.mock import patch, MagicMock
 import numpy.testing as npt
 import pytest
 
+from dolphin.preprocessing import preprocessing_util
 
-class TestPreprocessingUtil(object):
+
+class TestPreprocessingUtil:
 
     @patch("dolphin.preprocessing.preprocessing_util.Background2D")
     @patch("dolphin.preprocessing.preprocessing_util.fits.getdata")

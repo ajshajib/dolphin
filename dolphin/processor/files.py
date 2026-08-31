@@ -3,16 +3,17 @@ architecture."""
 
 __author__ = "ajshajib"
 
-import json
-import numpy as np
-import h5py
-import gdown
-from astropy.io import fits
-import shutil
 import glob
+import json
 import re
+import shutil
 from pathlib import Path
 from warnings import warn
+
+import gdown
+import h5py
+import numpy as np
+from astropy.io import fits
 
 
 class FileSystem:
@@ -956,15 +957,11 @@ class FileSystem:
 
         with h5py.File(cutout_file, "w") as f:
             f.create_dataset("image_data", data=kwargs_data["image_data"])
-
             f.create_dataset("ra_at_xy_0", data=kwargs_data["ra_at_xy_0"])
-
             f.create_dataset("dec_at_xy_0", data=kwargs_data["dec_at_xy_0"])
-
             f.create_dataset(
                 "transform_pix2angle", data=kwargs_data["transform_pix2angle"]
             )
-
             f.create_dataset("exposure_time", data=kwargs_data["exposure_time"])
 
             if "noise_map" in kwargs_data:

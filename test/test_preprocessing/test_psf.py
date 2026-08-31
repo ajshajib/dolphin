@@ -1,24 +1,22 @@
-# -*- coding: utf-8 -*-
 """Tests for PSF module."""
 
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import h5py
 import numpy as np
 import numpy.testing as npt
-from pathlib import Path
-import h5py
+import pytest
+from astropy.io import fits
+from astropy.table import Table
 
 from dolphin.preprocessing.psf import PSF
-
-from astropy.table import Table
-from astropy.io import fits
-
-from unittest.mock import patch, MagicMock
-import pytest
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 
-class TestPSF(object):
+class TestPSF:
     def setup_class(self):
         self.psf = PSF(
             _TEST_IO_DIR,
@@ -203,9 +201,14 @@ class TestPSF(object):
         assert mock_extract_stars.call_count == 3
 
         # test saving
-        with patch.object(self.psf2.file_system, "save_star_cutouts") as mock_save:
-            with patch.object(self.psf2, "plot_psf_candidates"):
-                stars, weights, noise = self.psf2.get_psf_candidates(save=True)
+        with (
+            patch.object(
+                self.psf2.file_system,
+                "save_star_cutouts",
+            ) as mock_save,
+            patch.object(self.psf2, "plot_psf_candidates"),
+        ):
+            stars, weights, noise = self.psf2.get_psf_candidates(save=True)
 
         mock_save.assert_called_once_with(
             lens_name=self.psf2.lens_name,
@@ -422,20 +425,22 @@ class TestPSF(object):
 
             mock_psf_error_map.return_value = error_map
 
-            with patch.object(
-                self.psf,
-                "plot_psf_and_variance_map",
-            ) as mock_plot:
-                # test saving
-                with patch.object(
+            # test saving
+            with (
+                patch.object(
+                    self.psf,
+                    "plot_psf_and_variance_map",
+                ) as mock_plot,
+                patch.object(
                     self.psf.file_system, "save_psf_and_variance_map"
-                ) as mock_save:
-                    final_psf, variance_map = self.psf.make_psf_psfr(
-                        star_data_list=star_list,
-                        noise_map_list=error_list,
-                        cut_threshold=1e-20,
-                        save=True,
-                    )
+                ) as mock_save,
+            ):
+                final_psf, variance_map = self.psf.make_psf_psfr(
+                    star_data_list=star_list,
+                    noise_map_list=error_list,
+                    cut_threshold=1e-20,
+                    save=True,
+                )
 
         mock_save.assert_called_once_with(
             lens_name=self.psf.lens_name,
@@ -624,7 +629,7 @@ class TestPSF(object):
             model.get_full_psf.return_value = psf_guess
             model.get_psf_error_map.return_value = error_map
 
-            # Mock ParametersPSF
+            # mock ParametersPSF
             params = MagicMock()
             mock_parameters.return_value = params
 
@@ -643,10 +648,10 @@ class TestPSF(object):
                 kwargs_final,
             ]
 
-            # Mock propagate_noise
+            # mock propagate_noise
             mock_propagate_noise.return_value = [np.ones((3, 3))]
 
-            # Mock optimizers
+            # mock optimizers
             optimizer_1 = MagicMock()
             optimizer_2 = MagicMock()
 
@@ -669,22 +674,22 @@ class TestPSF(object):
                 None,
             )
 
-            with patch.object(
-                self.psf,
-                "plot_psf_and_variance_map",
-            ) as mock_plot:
-                # test saving
-                with patch.object(
-                    self.psf.file_system, "save_psf_and_variance_map"
-                ) as _:
-                    final_psf, variance_map = self.psf.make_psf_starred(
-                        star_data_list=[star_data],
-                        noise_map_list=[noise_map],
-                        cut_threshold=1e-20,
-                        save=True,
-                    )
+            # test saving
+            with (
+                patch.object(
+                    self.psf,
+                    "plot_psf_and_variance_map",
+                ) as mock_plot,
+                patch.object(self.psf.file_system, "save_psf_and_variance_map") as _,
+            ):
+                final_psf, variance_map = self.psf.make_psf_starred(
+                    star_data_list=[star_data],
+                    noise_map_list=[noise_map],
+                    cut_threshold=1e-20,
+                    save=True,
+                )
 
-        # Expected outputs
+        # expected outputs
         expected_psf = np.array(
             [
                 [0.0, 1.0, 0.0],

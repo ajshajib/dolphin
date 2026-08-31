@@ -1,27 +1,25 @@
-# -*- coding: utf-8 -*-
 """This class contains helper functions to create a cutout image from the full science
 mosaic."""
 
 __author__ = "brady-ryan"
 
+from pathlib import Path
+
+import astropy.units as u
+import h5py
+import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
-import h5py
-from astropy.io import fits
-from astropy.wcs import WCS
 from astropy.coordinates import SkyCoord
-import astropy.units as u
-from lenstronomy.Data.pixel_grid import PixelGrid
-
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from dolphin.processor.files import FileSystem
-from dolphin.preprocessing import preprocessing_util
-
+from astropy.io import fits
 from astropy.nddata import Cutout2D
-
-import ipywidgets as widgets
+from astropy.wcs import WCS
 from IPython.display import display
+from lenstronomy.Data.pixel_grid import PixelGrid
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+from dolphin.preprocessing import preprocessing_util
+from dolphin.processor.files import FileSystem
 
 
 class ImageCutout:
@@ -45,8 +43,9 @@ class ImageCutout:
         :type lens_name: `str`
         :param data_band: data band of desired PSF
         :type data_band: `str`
-        :param instrument: instrument which took the data
-        :type intrument: `str`
+        :param instrument: instrument which took the data, options are
+          "HST" and "JWST"
+        :type instrument: `str`
         :param full_image_file: path to the full science image FITS file
         :type full_image_file: `str`
         :param weight_image_file: (optional) if analyzing HST data,
@@ -68,8 +67,8 @@ class ImageCutout:
         self.image_file_name = full_image_file
         self.weight_file_name = weight_image_file
 
-    def plot_mosaic(self, vmin=-1, vmax=1.5):
-        """Plot the full science mosaic.
+    def plot_full_image(self, vmin=-1, vmax=1.5):
+        """Plot the full raw image.
 
         :param vmin: lower limit of color map scale
         :type vmin: `float`
@@ -98,35 +97,34 @@ class ImageCutout:
     def make_image_cutout(
         self,
         cutout_scale=100,
-        cutout_center=None,
+        center_shift_arcsec=None,
         save=False,
         use_noise_map=False,
         kwargs_mask=None,
         vmin=-0.75,
         vmax=1.5,
     ):
-        """Create the science image cutout in the expected `dolphin` format. This
-        includes generating `image_data`, `ra_at_xy_0`, `dec_at_xy_0`,
-        `transform_pix2angle`, `exposure_time`, and either `background_rms` or
-        `noise_map`, depending on the specified type with `use_noise_map`.
+        """Create the science image cutout in the expected `lenstronomy` format for
+        `kwargs_data`. This includes generating `image_data`, `ra_at_xy_0`,
+        `dec_at_xy_0`, `transform_pix2angle`, `exposure_time`, and either
+        `background_rms` or `noise_map`, depending on the specified type with
+        `use_noise_map`.
 
         :param cutout_scale: pixel length of one side of the cutout image
         :type cutout_scale: `int`
-        :param cutout_center: specified coordinates (in degrees) of the cutout center. If `None`,
+        :param center_shift_arcsec: angular offset of the cutout center from the
+          target position, given as (RA/east, Dec/north) in arcseconds. If `None`,
           then the target RA and DEC will be used as the cutout center.
-        :type cutout_center: `tuple` (`float`, `float`)
-        :param save: if `True`, creates the full HDF5 file in the proper location expected
-          by `Dolphin`.
+        :type center_shift_arcsec: `tuple` (`float`, `float`)
+        :param save: if `True`, creates the full HDF5 file in the proper location
+        expected by `dolphin`.
         :type save: `bool`
-        :param use_noise_map: if `True`, uses a cutout of the noise map to estimate background
-          quantities in the modeling. Otherwise, the scalar background RMS determined by `photutils`
-          is used.
+        :param use_noise_map: if `True`, uses a cutout of the noise map to estimate
+          background quantities in the modeling. Otherwise, the scalar background
+        RMS determined by `photutils` is used.
         :type use_noise_map: `bool`
-        :param kwargs_mask: list of dictionaries corresponding to masking keywork arguments. Supported types,
-          with all required keywords, are as follows: [{"type": "circle", "center": `tuple` (`int`, `int`),
-          "radius": `int`}, {"type": "square", "center": `tuple` (`int`, `int`), "size": `int`},
-          {"type": "ellipse", "center": `tuple` (`int`, `int`), "a": `int`, "b": `int`}]. To invert the boolean
-          logic of a specific mask index, one must place `"invert": True` in that dictionary.
+        :param kwargs_mask: list of dictionaries corresponding to masking keyword
+        arguments.
         :type kwargs_mask: `list` of `dict`
         :param vmin: lower limit of color map scale
         :type vmin: `float`
@@ -136,22 +134,30 @@ class ImageCutout:
         :return: None
         """
         kwargs_data = {}
-        if cutout_center is None:
-            with fits.open(self.image_file_name) as hdul:
-                header = hdul[0].header
-            if self.instrument == "JWST":
-                ra = header["TARG_RA"] * u.deg
-                dec = header["TARG_DEC"] * u.deg
-            else:
-                ra = header["RA_TARG"] * u.deg
-                dec = header["DEC_TARG"] * u.deg
-            print(f"RA = {ra:.6f}")
-            print(f"DEC = {dec:.6f}")
+
+        # get target position
+        with fits.open(self.image_file_name) as hdul:
+            header = hdul[0].header
+        if self.instrument == "JWST":
+            ra = header["TARG_RA"] * u.deg
+            dec = header["TARG_DEC"] * u.deg
         else:
-            ra = cutout_center[0] * u.deg
-            dec = cutout_center[1] * u.deg
+            ra = header["RA_TARG"] * u.deg
+            dec = header["DEC_TARG"] * u.deg
 
         center = SkyCoord(ra, dec)
+        print(f"Target RA = {ra:.6f}")
+        print(f"Target DEC = {dec:.6f}")
+
+        # apply angular offset to target position
+        if center_shift_arcsec is not None:
+            dra, ddec = center_shift_arcsec
+            center = center.spherical_offsets_by(
+                dra * u.arcsec,
+                ddec * u.arcsec,
+            )
+            print(f"Cutout RA = {center.ra:.6f}")
+            print(f"Cutout DEC = {center.dec:.6f}")
 
         mean_bkd, sigma_bkd = preprocessing_util.get_background(self.image_file_name)
 
@@ -161,17 +167,21 @@ class ImageCutout:
                 data_full = hdul["SCI"].data
                 err_map = hdul["ERR"].data
                 exposure_time = header.get("XPOSURE")
-
             wcs = WCS(header)
             image_data = Cutout2D(
-                data_full, position=center, size=cutout_scale, wcs=wcs
+                data_full,
+                position=center,
+                size=cutout_scale,
+                wcs=wcs,
             ).data
             image_reduced = image_data - mean_bkd
             if use_noise_map:
                 noise_map = Cutout2D(
-                    err_map, position=center, size=image_reduced.shape, wcs=wcs
+                    err_map,
+                    position=center,
+                    size=image_reduced.shape,
+                    wcs=wcs,
                 ).data
-
                 kwargs_data["noise_map"] = noise_map
             else:
                 kwargs_data["background_rms"] = sigma_bkd
@@ -180,22 +190,25 @@ class ImageCutout:
                 header = hdul[0].header
                 data_full = hdul[0].data
                 exposure_time = header.get("EXPTIME")
-
             wcs = WCS(header)
             image_data = Cutout2D(
-                data_full, position=center, size=cutout_scale, wcs=wcs
+                data_full,
+                position=center,
+                size=cutout_scale,
+                wcs=wcs,
             ).data
             image_reduced = image_data - mean_bkd
             if use_noise_map:
                 with fits.open(self.weight_file_name) as hdul:
                     wht_full = hdul[0].data
                 wht_full[wht_full <= 0] = 10 ** (-10)
-                full_noise_map = np.abs(data_full) / wht_full + sigma_bkd**2
-
+                full_noise_map = np.sqrt(np.abs(data_full / wht_full) + sigma_bkd**2)
                 noise_map = Cutout2D(
-                    full_noise_map, position=center, size=image_reduced.shape, wcs=wcs
+                    full_noise_map,
+                    position=center,
+                    size=image_reduced.shape,
+                    wcs=wcs,
                 ).data
-
                 kwargs_data["noise_map"] = noise_map
             else:
                 kwargs_data["background_rms"] = sigma_bkd

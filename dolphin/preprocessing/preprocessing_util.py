@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """This module contains helper functions to aid in data preprocessing."""
 
 __author__ = "brady-ryan"

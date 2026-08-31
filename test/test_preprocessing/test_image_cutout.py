@@ -1,21 +1,20 @@
-# -*- coding: utf-8 -*-
 """Tests for ImageCutout module."""
 
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import h5py
 import numpy as np
 import numpy.testing as npt
-from pathlib import Path
+import pytest
 
 from dolphin.preprocessing.image_cutout import ImageCutout
-
-from unittest.mock import patch, MagicMock
-import pytest
-import h5py
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 _TEST_IO_DIR = _ROOT_DIR / "io_directory_example"
 
 
-class TestImageCutout(object):
+class TestImageCutout:
     def setup_class(self):
         self.imagecutout_hst = ImageCutout(
             _TEST_IO_DIR,
@@ -50,7 +49,7 @@ class TestImageCutout(object):
     @patch("dolphin.preprocessing.image_cutout.plt.colorbar")
     @patch("dolphin.preprocessing.image_cutout.plt.subplots")
     @patch("dolphin.preprocessing.image_cutout.fits.open")
-    def test_plot_mosaic_hst(
+    def test_plot_full_image_hst(
         self,
         mock_fits_open,
         mock_subplots,
@@ -58,7 +57,7 @@ class TestImageCutout(object):
         mock_show,
         mock_make_axes,
     ):
-        """Test :meth:`~dolphin.preprocessing.image_cutout.plot_mosaic`"""
+        """Test :meth:`~dolphin.preprocessing.image_cutout.plot_full_image`"""
         data = np.ones((5, 5))
 
         hdul = MagicMock()
@@ -74,7 +73,7 @@ class TestImageCutout(object):
         mock_divider.append_axes.return_value = MagicMock()
         mock_make_axes.return_value = mock_divider
 
-        self.imagecutout_hst.plot_mosaic()
+        self.imagecutout_hst.plot_full_image()
 
         mock_fits_open.assert_called_once_with(self.imagecutout_hst.image_file_name)
         hdul.__getitem__.assert_called_once_with(0)
@@ -89,7 +88,7 @@ class TestImageCutout(object):
     @patch("dolphin.preprocessing.image_cutout.plt.colorbar")
     @patch("dolphin.preprocessing.image_cutout.plt.subplots")
     @patch("dolphin.preprocessing.image_cutout.fits.open")
-    def test_plot_mosaic_jwst(
+    def test_plot_full_image_jwst(
         self,
         mock_fits_open,
         mock_subplots,
@@ -114,7 +113,7 @@ class TestImageCutout(object):
         mock_divider.append_axes.return_value = MagicMock()
         mock_make_axes.return_value = mock_divider
 
-        self.imagecutout_jwst.plot_mosaic()
+        self.imagecutout_jwst.plot_full_image()
 
         hdul.__getitem__.assert_called_once_with("SCI")
         mock_show.assert_called_once()
@@ -203,13 +202,13 @@ class TestImageCutout(object):
         # test that when cutout_center is provided, the position is set correctly
         self.imagecutout_hst.make_image_cutout(
             save=True,
-            cutout_center=(10, 10),
+            center_shift_arcsec=(10, 10),
         )
 
         kwargs = mock_cutout.call_args.kwargs
         position = kwargs["position"]
-        assert np.isclose(position.ra.deg, 10.0)
-        assert np.isclose(position.dec.deg, 10.0)
+        assert np.isclose(position.ra.deg, 10.002956)
+        assert np.isclose(position.dec.deg, 20.002778)
 
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.build_mask")
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.get_background")

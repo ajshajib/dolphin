@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Analysis module for Dolphin, providing tools for processing and formatting output
 data."""
 

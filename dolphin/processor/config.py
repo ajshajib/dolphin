@@ -1,37 +1,35 @@
-# -*- coding: utf-8 -*-
 """This module loads settings from a configuration file."""
 
 __author__ = "ajshajib"
 
-from ruamel.yaml import YAML
-import numpy as np
-from copy import deepcopy
-
-from lenstronomy.Util.param_util import ellipticity2phi_q
-import lenstronomy.Util.util as util
-import lenstronomy.Util.mask_util as mask_util
 import os
+from copy import deepcopy
+from warnings import warn
 
+import numpy as np
 from astropy import units as u
 from astropy.cosmology import (
     FlatLambdaCDM,
-    LambdaCDM,
-    FlatwCDM,
-    wCDM,
     Flatw0waCDM,
+    Flatw0wzCDM,
+    FlatwCDM,
+    FlatwpwaCDM,
+    LambdaCDM,
     w0waCDM,
     w0wzCDM,
-    Flatw0wzCDM,
+    wCDM,
     wpwaCDM,
-    FlatwpwaCDM,
 )
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
+from lenstronomy.Util import mask_util, util
+from lenstronomy.Util.param_util import ellipticity2phi_q
+from ruamel.yaml import YAML
 
 from .data import ImageData
 from .files import FileSystem
 
 
-class Config(object):
+class Config:
     """This class contains the methods to load and read YAML configuration files.
 
     This is a parent class for other classes that needs to load a configuration file. If
@@ -197,11 +195,13 @@ class ModelConfig(Config):
         :return: the centroid bound in arcseconds
         :rtype: `float`
         """
-        if "lens_options" in self.settings:
-            if "centroid_bound" in self.settings["lens_options"]:
-                bound = self.settings["lens_options"]["centroid_bound"]
-                if bound is not None:
-                    return bound
+        if (
+            "lens_options" in self.settings
+            and "centroid_bound" in self.settings["lens_options"]
+        ):
+            bound = self.settings["lens_options"]["centroid_bound"]
+            if bound is not None:
+                return bound
 
         return 0.5
 
@@ -597,28 +597,27 @@ class ModelConfig(Config):
                     prior_param.extend(i)
                     kwargs_likelihood["prior_ps"].append(prior_param)
 
-        if "point_source_options" in self.settings:
-            if (
-                "time_delays_measured" in self.settings["point_source_options"]
-                and "time_delays_covariance" in self.settings["point_source_options"]
-            ):
-                kwargs_likelihood.update({"time_delay_likelihood": True})
+        if (
+            "point_source_options" in self.settings
+            and "time_delays_measured" in self.settings["point_source_options"]
+            and "time_delays_covariance" in self.settings["point_source_options"]
+        ):
+            kwargs_likelihood.update({"time_delay_likelihood": True})
 
         use_default_logL_addition = False
 
-        if "lens_options" in self.settings:
-            if any(
-                key in self.settings["lens_options"]
-                for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
-            ):
-                use_default_logL_addition = True
+        if "lens_options" in self.settings and any(
+            key in self.settings["lens_options"]
+            for key in ["limit_mass_pa_from_light", "limit_mass_q_from_light"]
+        ):
+            use_default_logL_addition = True
 
-        if "source_light_options" in self.settings:
-            if (
-                "shapelet_scale_logarithmic_prior"
-                in self.settings["source_light_options"]
-            ):
-                use_default_logL_addition = True
+        if (
+            "source_light_options" in self.settings
+            and "shapelet_scale_logarithmic_prior"
+            in self.settings["source_light_options"]
+        ):
+            use_default_logL_addition = True
 
         if "special" in self.settings["model"]:
             special_list = self.get_special_list()
@@ -630,6 +629,7 @@ class ModelConfig(Config):
         if use_default_logL_addition:
             if use_jax:
                 from functools import partial
+
                 from ..util.jax_util import custom_logL_addition_jax
 
                 default_logL_addition = partial(
@@ -768,14 +768,14 @@ class ModelConfig(Config):
             "source_light_options" in self.settings
             and "shapelet_scale_logarithmic_prior"
             in self.settings["source_light_options"]
-        ):
-            if self.settings["source_light_options"][
+            and self.settings["source_light_options"][
                 "shapelet_scale_logarithmic_prior"
-            ]:
-                for i, model in enumerate(self.get_source_light_model_list()):
-                    if model == "SHAPELETS":
-                        beta = kwargs_source[i]["beta"]
-                        prior += -np.log(beta)
+            ]
+        ):
+            for i, model in enumerate(self.get_source_light_model_list()):
+                if model == "SHAPELETS":
+                    beta = kwargs_source[i]["beta"]
+                    prior += -np.log(beta)
 
         return prior
 
@@ -872,16 +872,34 @@ class ModelConfig(Config):
                     else:
                         if self.settings["mask"]["extra_regions"] is not None:
                             for reg in self.settings["mask"]["extra_regions"][n]:
-                                extra_masked_regions.append(
-                                    1
-                                    - mask_util.mask_azimuthal(
-                                        util.image2array(x_coords),
-                                        util.image2array(y_coords),
-                                        self.deflector_center_ra + reg[0],
-                                        self.deflector_center_dec + reg[1],
-                                        reg[2],
+                                if len(reg) == 3:
+                                    extra_masked_regions.append(
+                                        1
+                                        - mask_util.mask_azimuthal(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                        )
                                     )
-                                )
+                                elif len(reg) == 5:
+                                    extra_masked_regions.append(
+                                        1
+                                        - mask_util.mask_ellipse(
+                                            util.image2array(x_coords),
+                                            util.image2array(y_coords),
+                                            self.deflector_center_ra + reg[0],
+                                            self.deflector_center_dec + reg[1],
+                                            reg[2],
+                                            reg[3],
+                                            reg[4],
+                                        )
+                                    )
+                                else:
+                                    raise ValueError(
+                                        "Unrecognized extra region in mask settings"
+                                    )
 
                     for extra_region in extra_masked_regions:
                         mask *= extra_region
@@ -913,6 +931,59 @@ class ModelConfig(Config):
         else:
             return None
 
+    def get_supersampled_indices(self, band_index):
+        """Creates array of booleans based on settings, indicating which pixels on the
+        grid to be supersampled during ray-shooting and convolution.
+
+        :param band_index: index of the band
+        :type band_index: `int`
+        :return: bool array corresponding to band index indicating which pixels to be supersampled
+        :rtype: `numpy.ndarray` of `bool`
+        """
+
+        try:
+            settings = self.settings["supersampled_indices"]
+        except (NameError, KeyError):
+            return None
+
+        band_name = self.settings["band"][band_index]
+        image_data = self.get_image_data(band_name)
+        num_pixel = image_data.get_image_size()
+        units = self.settings["supersampled_indices"].get("units", "arcseconds")
+
+        if units == "pixels":
+            coords0 = np.repeat(np.arange(0, num_pixel), num_pixel)  # row index
+            coords1 = np.tile(np.arange(0, num_pixel), num_pixel)  # column index
+
+        elif units == "arcseconds":
+            coordinate_system = image_data.get_image_coordinate_system()
+            coords0, coords1 = coordinate_system.coordinate_grid(num_pixel, num_pixel)
+            coords0 = util.image2array(coords0)  # ra
+            coords1 = util.image2array(coords1)  # dec
+
+        overall_mask = np.zeros(num_pixel * num_pixel, dtype=bool)
+
+        for center0, center1, inner_radius, outer_radius in settings["annulus_regions"][
+            band_index
+        ]:
+            # If units are pixels, (center0, center1) is interpreted as (row index, column index)
+            # If units are arcseconds, (center0, center1) is interpreted as (ra, dec)
+            mask_i = mask_util.mask_shell(
+                coords0,
+                coords1,
+                center0,
+                center1,
+                inner_radius,
+                outer_radius,
+            )
+            mask_i = np.asarray(mask_i, dtype=bool)
+
+            overall_mask |= mask_i
+
+        overall_mask = util.array2image(overall_mask)
+
+        return overall_mask
+
     def get_kwargs_psf_iteration(self):
         """Create `kwargs_psf_iteration` dictionary for lenstronomy.
 
@@ -933,7 +1004,7 @@ class ModelConfig(Config):
             }
 
             if "psf_iteration_settings" in self.settings["fitting"]:
-                for key in self.settings["fitting"]["psf_iteration_settings"].keys():
+                for key in self.settings["fitting"]["psf_iteration_settings"]:
                     kwargs_psf_iteration[key] = self.settings["fitting"][
                         "psf_iteration_settings"
                     ][key]
@@ -981,6 +1052,11 @@ class ModelConfig(Config):
                 else:
                     kwargs_num[key] = deepcopy(value)
 
+            if (
+                kwargs_num["compute_mode"] == "adaptive"
+                and kwargs_num["supersampling_factor"] > 1
+            ):
+                kwargs_num["supersampled_indexes"] = self.get_supersampled_indices(n)
             kwargs_numerics.append(kwargs_num)
 
         return kwargs_numerics
@@ -1111,16 +1187,18 @@ class ModelConfig(Config):
                 else:
                     raise ValueError(f"{model} not supported")
 
-        if "special_options" in self.settings:
-            if "general_scaling" in self.settings["special_options"]:
-                special_list.append("general_scaling")
+        if (
+            "special_options" in self.settings
+            and "general_scaling" in self.settings["special_options"]
+        ):
+            special_list.append("general_scaling")
 
-        if "point_source_options" in self.settings:
-            if (
-                "time_delays_measured" in self.settings["point_source_options"]
-                and "time_delays_covariance" in self.settings["point_source_options"]
-            ):
-                special_list.append("time_delay_likelihood")
+        if (
+            "point_source_options" in self.settings
+            and "time_delays_measured" in self.settings["point_source_options"]
+            and "time_delays_covariance" in self.settings["point_source_options"]
+        ):
+            special_list.append("time_delay_likelihood")
 
         return special_list
 
@@ -1203,7 +1281,9 @@ class ModelConfig(Config):
                 center_x = self.deflector_center_ra
                 center_y = self.deflector_center_dec
                 try:
-                    theta_E_init = self.settings["guess_params"]["lens"][0]["theta_E"]
+                    theta_E_init = self.settings["lens_options"]["initial_guesses"][i][
+                        "theta_E"
+                    ]
                 except (NameError, KeyError):
                     theta_E_init = 1.0
 
@@ -1340,11 +1420,12 @@ class ModelConfig(Config):
                     }
                 )
             else:
-                raise ValueError("{} not implemented as a lens " "model!".format(model))
+                raise ValueError(f"{model} not implemented as a lens " "model!")
 
+        init = self.update_initial_guesses("lens", init)
         lower, upper = self.update_uniform_priors("lens", lower, upper)
-
         fixed = self.fill_in_fixed_from_settings("lens", fixed)
+        self.check_init_params_in_bounds("lens", init, fixed, lower, upper)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -1481,13 +1562,12 @@ class ModelConfig(Config):
                 lower.append(_lower)
                 upper.append(_upper)
             else:
-                raise ValueError(
-                    "{} not implemented as a lens light" "model!".format(model)
-                )
+                raise ValueError(f"{model} not implemented as a lens light" "model!")
 
+        init = self.update_initial_guesses("lens_light", init)
         lower, upper = self.update_uniform_priors("lens_light", lower, upper)
-
         fixed = self.fill_in_fixed_from_settings("lens_light", fixed)
+        self.check_init_params_in_bounds("lens_light", init, fixed, lower, upper)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -1591,13 +1671,12 @@ class ModelConfig(Config):
                 )
                 shapelets_index += 1
             else:
-                raise ValueError(
-                    "{} not implemented as a source light" "model!".format(model)
-                )
+                raise ValueError(f"{model} not implemented as a source light" "model!")
 
+        init = self.update_initial_guesses("source_light", init)
         lower, upper = self.update_uniform_priors("source_light", lower, upper)
-
         fixed = self.fill_in_fixed_from_settings("source_light", fixed)
+        self.check_init_params_in_bounds("source_light", init, fixed, lower, upper)
 
         params = [init, sigma, fixed, lower, upper]
         return params
@@ -1731,7 +1810,7 @@ class ModelConfig(Config):
             elif item == "general_scaling":
                 general_scaling = self.settings["special_options"]["general_scaling"]
 
-                for param_name, values in general_scaling.items():
+                for param_name in general_scaling:
                     if f"{param_name}_scale_factor" in self.settings["special_options"]:
                         init.update(
                             {
@@ -1844,26 +1923,56 @@ class ModelConfig(Config):
 
         return fixed_list
 
-    def update_uniform_priors(self, component, lower_dict, upper_dict):
+    def update_initial_guesses(self, component, init_dict_list):
+        """Update the default initial parameter values with those provided by the user
+        in the config file.
+
+        :param component: name of the model component for which the initial parameter values
+          will be updated
+        :type component: `str`
+        :param init_dict_list: the list of dictionaries containing the default initial parameter values
+          of the specified model component
+        :type init_dict_list: `list` of `dict`
+        :return: a modified list of dictionaries containing the updated initial parameter values
+        :rtype: `list` of `dict`
+        """
+        assert component in ["lens", "lens_light", "source_light", "point_source"]
+
+        options_string = component + "_options"
+        if (
+            options_string in self.settings
+            and "initial_guesses" in self.settings[options_string]
+        ):
+            new_init_dict_list = deepcopy(init_dict_list)
+            for model_index, init_dict in self.settings[options_string][
+                "initial_guesses"
+            ].items():
+                new_init_dict_list[int(model_index)].update(init_dict)
+
+            return new_init_dict_list
+
+        return init_dict_list
+
+    def update_uniform_priors(self, component, lower_dict_list, upper_dict_list):
         """Update the default uniform prior bounds with those provided by the user in
         the config file.
 
         :param component: name of the model component for which the uniform
           bounds will be altered
         :type component: `str`
-        :param lower_dict: the dictionary which contains the default lower bounds
+        :param lower_dict_list: the list of dictionaries which contains the default lower bounds
           of the specified model component
-        :type lower_dict: `dict`
-        :param upper_dict: the dictionary which contains the default upper bounds
+        :type lower_dict_list: `list` of `dict`
+        :param upper_dict_list: the list of dictionaries which contains the default upper bounds
           of the specified model component
-        :type upper_dict: `dict`
-        :return: a tuple containing the modified lower and upper parameter bound dictionaries
-        :rtype: `tuple` (`dict`, `dict`)
+        :type upper_dict_list: `list` of `dict`
+        :return: a tuple containing the modified lower and upper parameter bound dictionary lists
+        :rtype: `tuple` (`list` of `dict`, `list` of `dict`)
         """
         assert component in ["lens", "lens_light", "source_light"]
         option_str = component + "_options"
-        new_lower_dict = deepcopy(lower_dict)
-        new_upper_dict = deepcopy(upper_dict)
+        new_lower_dict_list = deepcopy(lower_dict_list)
+        new_upper_dict_list = deepcopy(upper_dict_list)
 
         try:
             self.settings[option_str]["uniform_prior"]
@@ -1876,10 +1985,61 @@ class ModelConfig(Config):
                 ].items():
                     index = int(index)
                     for key, lower, upper in param_dict:
-                        new_lower_dict[index][key] = lower
-                        new_upper_dict[index][key] = upper
+                        new_lower_dict_list[index][key] = lower
+                        new_upper_dict_list[index][key] = upper
 
-        return new_lower_dict, new_upper_dict
+        return new_lower_dict_list, new_upper_dict_list
+
+    @staticmethod
+    def check_init_params_in_bounds(
+        component, init_dict_list, fixed_dict_list, lower_dict_list, upper_dict_list
+    ):
+        """Checks that initial parameters are within the specified bounds. If not, a
+        warning is raised for each parameter that is not within bounds. This check is
+        only performed on parameters that are not fixed.
+
+        :param component: name of the model component for which the check is done
+        :type component: `str`
+        :param init_dict_list: the list of dictionaries containing the initial parameter values
+          of the specified model component
+        :type init_dict_list: `list` of `dict`
+        :param fixed_list: list of dictionaries containing fixed params
+        :type fixed_list: `list` of `dict`
+        :param lower_dict_list: the list of dictionaries which contains the lower bounds
+          of the specified model component
+        :type lower_dict_list: `list` of `dict`
+        :param upper_dict_list: the list of dictionaries which contains the upper bounds
+          of the specified model component
+        :type upper_dict_list: `list` of `dict`
+        :return: None
+        :rtype: `None`
+        """
+        assert component in ["lens", "lens_light", "source_light"]
+
+        for model_index in range(len(init_dict_list)):
+            for key, value in init_dict_list[model_index].items():
+
+                # Skip the check if the parameter is fixed
+                if key in fixed_dict_list[model_index]:
+                    continue
+
+                error_string = f"\n{component} model component at index {model_index} contains parameter {key} with initial value {value}"
+
+                if key in lower_dict_list[model_index]:
+                    lower_bound = lower_dict_list[model_index][key]
+                    if value < lower_bound:
+                        warn(
+                            error_string
+                            + f", which is less than the lower bound {lower_bound}!"
+                        )
+
+                if key in upper_dict_list[model_index]:
+                    upper_bound = upper_dict_list[model_index][key]
+                    if value > upper_bound:
+                        warn(
+                            error_string
+                            + f", which is greater than the upper bound {upper_bound}!"
+                        )
 
     def get_kwargs_params(self):
         """Create `kwargs_params`.

@@ -106,7 +106,8 @@ Lens Options
 
   - Suboptions:
 
-    - ``centroid_init``: Initial guess for the lens centroid.
+    - ``centroid_init``: Initial guess for the lens centroid. This will apply to all lens model components.
+      For more fine-tuned control of individual lens model positions, see ``initial_guesses`` below.
 
       - Type: ``list of floats``
       - Example:
@@ -115,7 +116,8 @@ Lens Options
 
            centroid_init: [0.04, -0.04]
     
-    - ``centroid_bound``: Half of the box width to constrain the deflector's centroid.
+    - ``centroid_bound``: Half of the box width to constrain the deflector's centroid. This will apply to all lens model components.
+      For more fine-tuned control of the bounds for individual lens model positions, see ``uniform_prior`` below.
 
       - Type: ``float``
       - Default: ``0.5``
@@ -124,6 +126,21 @@ Lens Options
         .. code-block:: yaml
 
            centroid_bound: 0.5
+
+    - ``initial_guesses``: *(Optional)* Adjust ``dolphin``'s default initial lens parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           initial_guesses:
+             0:
+               theta_E: 1.3
+               gamma: 2.0
+             1:
+               e1: 0.3
+               e2: -0.1
 
     - ``gaussian_prior``: *(Optional)* Gaussian priors for lens parameters.
 
@@ -143,7 +160,7 @@ Lens Options
         .. code-block:: yaml
 
            uniform_prior:
-             0: [[theta_E, 0.2, 1.4]]
+             0: [[theta_E, 0.2, 1.4], [center_x, 0.5, 0.9]]
              1: [[gamma_ext, 0.02, 0.8]]
 
     - ``fix``: *(Optional)* Fix specific parameters for the lens model.
@@ -218,6 +235,21 @@ Lens Light Options
 
   - Suboptions:
 
+    - ``initial_guesses``: *(Optional)* Adjust ``dolphin``'s default initial lens light parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           initial_guesses:
+             0:
+               R_sersic: 2.3
+               n_sersic: 1
+             1:
+               R_sersic: 0.3
+               n_sersic: 4
+
     - ``fix``: Fix specific parameters for the lens light profile.
 
       - Type: ``dictionary``
@@ -265,6 +297,21 @@ Source Light Options
 - ``source_light_options``: *(Optional)* Additional options for the source light model.
 
   - Suboptions:
+
+    - ``initial_guesses``: *(Optional)* Adjust ``dolphin``'s default initial source light parameters.
+
+      - Type: ``dictionary``
+      - Example:
+
+        .. code-block:: yaml
+
+           initial_guesses:
+             0:
+               R_sersic: 2.3
+               n_sersic: 1
+             1:
+               R_sersic: 0.3
+               n_sersic: 4
 
     - ``gaussian_prior``: Gaussian priors for source light parameters.
 
@@ -543,30 +590,6 @@ Special Options
 
         p \rightarrow p_{\mathrm{scaled}} =
         f_p \, p^{\alpha_p}
-
-Guess Parameters
-----------------
-
-- ``guess_params``: *(Optional)* Initial guess parameter values for component models. This is commonly used to 
-  overwrite default initial configurations and center the bounds of the PSO optimization process.
-
-  - Suboptions:
-
-    - ``lens``: Guess parameters for lens models.
-    - ``lens_light``: Guess parameters for lens light models.
-    - ``source``: Guess parameters for source light models.
-    - ``ps``: Guess parameters for point source models.
-
-    - Example:
-
-      .. code-block:: yaml
-
-         guess_params:
-           lens:
-             0:
-               theta_E: 1.2
-               e1: 0.05
-               e2: -0.05
 
 Numeric Options
 ---------------
@@ -850,6 +873,7 @@ Fitting Options
                block_center_neighbour: 0.0
 
 - ``fitting_kwargs_list``: *(Optional)* User-provided list of fitting sequences to bypass the automated recipes in dolphin.
+In order to use this list, the ``Processor.swim()`` method must be called with ``recipe_name="custom"``.
 
   - Type: ``list``
   - Example:
@@ -920,7 +944,7 @@ Mask Options
 
            mask_edge_pixels: [0, 2]
 
-    - ``radius``: Radius of the mask for each band.
+    - ``radius``: Radius of the mask for each band. Pixels outside of this radius are excluded in the modeling.
 
       - Type: ``list of floats``
       - Example:
@@ -930,6 +954,7 @@ Mask Options
            radius: [20.0, 20.0]
 
     - ``a``, ``b``, ``angle``: Elliptical mask parameters for each band. Used when ``radius`` is not provided.
+      Pixels outside of this ellipse are excluded in the modeling.
     
       - Type: ``list of floats``
       - Example:
@@ -940,12 +965,53 @@ Mask Options
            b: [5.0, 5.0]
            angle: [0.0, 0.0]
 
-    - ``extra_regions``: List of circular regions to mask additionally. Format is ``[ra, dec, radius]``.
+    - ``extra_regions``: List of additional regions to mask. Pixels inside of these regions are excluded in the modeling.
+      Format for each band is a list of ``[ra, dec, radius]`` circular regions or ``[ra, dec, a, b, angle]`` elliptical regions.
 
       - Type: ``list of lists of lists of floats``
       - Example:
 
         .. code-block:: yaml
 
-           extra_regions:
-             - [[1.0, -1.0, 0.5]]
+           extra_regions: [
+               [], # Band 0: zero extra regions
+               [[1.0, -1.0, 0.5]], # Band 1: one extra circular region
+               [[1.0, -1.0, 0.5], [0.7, 0.3, 0.5, 0.4, 1.57]], # Band 2: one circular and one elliptical region
+             ]
+
+Supersampled Indices Options
+----------------------------
+
+- ``supersampled_indices``: *(Optional)* Settings for selecting regions of the image where supersampled
+  ray-shooting and convolution occur. Pixels outside of the indicated regions will not be supersampled.
+  This option is only applied when ``compute_mode="adaptive"`` has been set in the Numeric Options.
+  If using ``jaxtronomy``, then this setting only affects ray-shooting.
+
+  - Suboptions:
+  
+    - ``units``: Units with which the following settings should be interpreted. Can be either ``"arcseconds"`` or ``"pixels"``. Default is ``"arcseconds"``.
+
+      - Type: ``string``
+      - Example:
+
+        .. code-block:: yaml
+
+           units: pixels
+
+    - ``annulus_regions``: List of annulus regions on the grid that should be supersampled. Format is
+      ``[[center0, center1, inner_radius, outer_radius], ...]`` for each band.
+
+      - If ``units`` is ``"arcseconds"``, then ``(center0, center1)`` is interpreted as ``(ra, dec)``
+      - If ``units`` is ``"pixels"``, then ``(center0, center1)`` is interpreted as ``(row index, column index)``
+      - The region is defined by all pixels such that ``inner_radius <= R < outer_radius`` where ``R`` is the pixel's distance from
+        ``(center0, center1)``
+      - Type: ``list of lists of lists of floats``
+      - Example:
+
+        .. code-block:: yaml
+
+           annulus_regions: [
+               [[1.0, -1.0, 0.5, 1.5], [0.7, 0.3, 0, 0.9]], # two regions for band 0
+               [], # zero regions for band 1, no supersampling
+               [[1.0, -1.0, 0.5, 1.5]], # one region for band 2
+             ]

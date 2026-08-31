@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
 """Tests for config module."""
 
 from pathlib import Path
+
+from dolphin.ai import Modeler, Vision
 from dolphin.processor import Processor
-from dolphin.ai import Vision
-from dolphin.ai import Modeler
 
 
-class TestPipeline(object):
+class TestPipeline:
     """Test pipeline for the AI module."""
 
     def setup_method(self):

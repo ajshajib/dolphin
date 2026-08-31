@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 """This module creates `fitting_kwargs_list` for `FittingSequence.fit_sequence()` with
 pre-defined recipes."""
 
 __author__ = "ajshajib"
 
 from copy import deepcopy
+
 import numpy as np
 from scipy import ndimage
 
 
-class Recipe(object):
+class Recipe:
     """This class contains methods to create fitting recipes.
 
     It builds an optimization workflow (currently using particle-swarm optimization) to
@@ -65,15 +65,6 @@ class Recipe(object):
 
         self._thread_count = thread_count
 
-        self.guess_params = {}
-        for component in ["lens", "source", "lens_light", "ps"]:
-            try:
-                self.guess_params[component] = deepcopy(
-                    config.settings["guess_params"][component]
-                )
-            except (NameError, KeyError):
-                self.guess_params[component] = None
-
     def get_recipe(self, kwargs_data_joint=None, recipe_name="galaxy-quasar"):
         """Get `fitting_kwargs_list` according to the requested `recipe`.
 
@@ -110,7 +101,7 @@ class Recipe(object):
         elif recipe_name == "skip":
             pass
         else:
-            raise ValueError("Recipe name '{}' not recognized!!".format(recipe_name))
+            raise ValueError(f"Recipe name '{recipe_name}' not recognized!!")
 
         fitting_kwargs_list += self.get_sampling_sequence()
 
@@ -253,7 +244,7 @@ class Recipe(object):
                     "Sampler '{}' not supported! ".format(
                         self._config.settings["fitting"]["sampler"]
                     )
-                    + "Supported ones are: {}".format(supported_samplers)
+                    + f"Supported ones are: {supported_samplers}"
                 )
 
             sampling_kwargs = self._config.settings["fitting"]["sampler_settings"]
@@ -371,9 +362,11 @@ class Recipe(object):
                 ]
 
                 # set lens parameter values to guess values, if provided
-                if self.guess_params["lens"] is not None:
+                if "initial_guesses" in self._config.settings["lens_options"]:
                     param_list = []
-                    for index, params in self.guess_params["lens"].items():
+                    for index, params in self._config.settings["lens_options"][
+                        "initial_guesses"
+                    ].items():
                         param_list.append(
                             [index, list(params.keys()), list(params.values())]
                         )
@@ -531,10 +524,22 @@ class Recipe(object):
         a3 = np.rot90(a2)  # 1's at upper than the diagonal
         a1 = np.flip(a3)  # 1's at lower than the diagonal
 
-        dilated[:50, :50] = ndimage.binary_dilation(filtered_map[:50, :50], a4)
-        dilated[:50, 50:] = ndimage.binary_dilation(filtered_map[:50, 50:], a3)
-        dilated[50:, :50] = ndimage.binary_dilation(filtered_map[50:, :50], a1)
-        dilated[50:, 50:] = ndimage.binary_dilation(filtered_map[50:, 50:], a2)
+        # the quadrants are taken about the center of the image
+        split_x = int(np.searchsorted(x[0], 0, side="right"))
+        split_y = int(np.searchsorted(y[:, 0], 0, side="right"))
+
+        dilated[:split_y, :split_x] = ndimage.binary_dilation(
+            filtered_map[:split_y, :split_x], a4
+        )
+        dilated[:split_y, split_x:] = ndimage.binary_dilation(
+            filtered_map[:split_y, split_x:], a3
+        )
+        dilated[split_y:, :split_x] = ndimage.binary_dilation(
+            filtered_map[split_y:, :split_x], a1
+        )
+        dilated[split_y:, split_x:] = ndimage.binary_dilation(
+            filtered_map[split_y:, split_x:], a2
+        )
 
         # increase the size by 1 along both axes to match the image size
         # the mask is the negative of the marked pixel-map
@@ -578,8 +583,8 @@ class Recipe(object):
             kwargs_params = self._config.get_source_light_model_params()
         else:
             raise ValueError(
-                "{} not recognized! Must be lens or "
-                "lens_light or source.".format(model_component)
+                f"{model_component} not recognized! Must be lens or "
+                "lens_light or source."
             )
 
         lower_list = kwargs_params[3]
@@ -596,13 +601,13 @@ class Recipe(object):
         for i, (sigma, fixed) in enumerate(zip(lower_list, fixed_list)):
             if i in index:
                 param_list = []
-                for key, value in sigma.items():
+                for key in sigma:
                     if key not in fixed:
                         param_list.append(key)
 
                 param_list_with_index.append([i, param_list])
 
-        key = "{}_add_fixed".format(model_component)
+        key = f"{model_component}_add_fixed"
 
         return ["update_settings", {key: param_list_with_index}]
 
@@ -618,8 +623,8 @@ class Recipe(object):
         """
         code = self.fix_params(model_component, index=index)
 
-        old_key = "{}_add_fixed".format(model_component)
-        key = "{}_remove_fixed".format(model_component)
+        old_key = f"{model_component}_add_fixed"
+        key = f"{model_component}_remove_fixed"
 
         code[1][key] = deepcopy(code[1][old_key])
         del code[1][old_key]

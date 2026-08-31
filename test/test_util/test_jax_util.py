@@ -1,14 +1,15 @@
-# -*- coding: utf-8 -*-
 """Tests for config module."""
 
-import pytest
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
+
 import numpy as np
 import numpy.testing as npt
+import pytest
+
 from dolphin.processor.config import ModelConfig
-from dolphin.util.jax_util import custom_logL_addition_jax
 from dolphin.processor.files import FileSystem
+from dolphin.util.jax_util import custom_logL_addition_jax
 
 _ROOT_DIR = Path(__file__).resolve().parents[2]
 IO_DIRECTORY = str((_ROOT_DIR / "io_directory_example").resolve())

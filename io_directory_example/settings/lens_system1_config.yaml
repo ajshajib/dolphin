@@ -19,6 +19,11 @@ lens_options:
   limit_mass_q_from_light: 0
   # optional constraint on the light axis ratio to be smaller
   # than that of the mass, i.e., imposes q_M > q_L - limit_mass_q_from_light.
+  initial_guesses:
+    0:
+      theta_E: 1.2
+      e1: 0.05
+      e2: -0.05
 
 lens_light_options:
   fix: {0: {n_sersic: 4.}}   # fix n_sersic to 4, for 0-th light profile
@@ -58,13 +63,6 @@ kwargs_model:
 
 numeric_options:
   supersampling_factor: [3] # list specifying for each band
-
-guess_params:
-  lens:
-    0:
-      theta_E: 1.2
-      e1: 0.05
-      e2: -0.05
 
 mask:
   centroid_offset: [[0., 0]]

@@ -3,13 +3,17 @@ architecture."""
 
 __author__ = "ajshajib"
 
+import glob
 import json
+import re
+import shutil
 from pathlib import Path
 from warnings import warn
 
 import gdown
 import h5py
 import numpy as np
+from astropy.io import fits
 
 
 class FileSystem:
@@ -773,3 +777,189 @@ class FileSystem:
                 }
 
         return morphology_chain
+
+    def get_preprocessing_path(self, lens_name):
+        """Get the file path for preprocessing outputs.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :return: path to the preprocessing directory
+        :rtype: `str`
+        """
+        return self.path2str(
+            Path(self.get_data_directory()) / f"{lens_name}" / "preprocessing"
+        )
+
+    def save_star_cutouts(
+        self, lens_name, data_band, star_exposures, star_weights, noise_maps
+    ):
+        """Save the star cutouts, star weight maps, and star noise maps determined by
+        :meth:`~dolphin.preprocessing.psf.PSF.get_psf_candidates`.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :param data_band: band of the data being analyzed
+        :type data_band: `str`
+        :param star_exposures: array containing the data for each star cutout
+        :type star_exposures: `np.ndarray`
+        :param star_weights: array containing the weight data for each star cutout
+        :type star_weights: `np.ndarray`
+        :param noise_maps: array containing star cutouts weighted by the weight files and
+          background noise
+        :type noise_maps: `np.ndarray`
+        """
+        preprocessing_str = Path(self.get_preprocessing_path(lens_name))
+        psf_workspace_str = preprocessing_str / data_band / "psf_workspace"
+        star_dir = psf_workspace_str / "stars"
+        weight_dir = psf_workspace_str / "weights"
+        noise_dir = psf_workspace_str / "noise_maps"
+
+        # Delete the old directory if one already exists
+        for directory in [star_dir, weight_dir, noise_dir]:
+            if directory.exists():
+                shutil.rmtree(directory)
+            directory.mkdir(parents=True)
+
+        for i in range(len(star_exposures)):
+            fits.PrimaryHDU(star_exposures[i].data).writeto(
+                star_dir / f"star_{i}.fits", overwrite=True
+            )
+
+            fits.PrimaryHDU(star_weights[i].data).writeto(
+                weight_dir / f"weight_{i}.fits", overwrite=True
+            )
+
+            fits.PrimaryHDU(noise_maps[i].data).writeto(
+                noise_dir / f"noise_map_{i}.fits", overwrite=True
+            )
+
+    def save_psf_and_variance_map(self, lens_name, data_band, psf_guess, variance_map):
+        """Save the PSF and variance map in the appropriate Dolphin workflow format.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :param data_band: band of the data being analyzed
+        :type data_band: `str`
+        :param psf_guess: PSF guess determined by either
+          :meth:`~dolphin.preprocessing.psf.PSF.make_psf_psfr` or...
+        :type psf_guess: `np.ndarray`
+        :param psf_error_map: PSF error map determined by either
+            :meth:`~dolphin.preprocessing.psf.PSF.make_psf_psfr` or...
+        :type psf_error_map: `np.ndarray`
+        """
+        data_dir = Path(self.get_data_directory()) / f"{lens_name}"
+        filename = data_dir / f"psf_{lens_name}_{data_band}.h5"
+
+        with h5py.File(filename, "w") as f:
+            f.create_dataset("kernel_point_source", data=psf_guess)
+            f.create_dataset("psf_variance_map", data=variance_map)
+
+    def load_psf_candidate_attributes(self, lens_name, data_band):
+        """Reload the saved star cutouts, corresponding masks, weight maps, and noise
+        maps needed by :class:`~dolphin.preprocessing.psf.PSF`.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :param data_band: band of the data being analyzed
+        :type data_band: `str`
+        return: A tuple containing the saved star cutouts, weight maps, and saved noise maps.
+        :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`)
+        """
+        preprocessing_str = Path(self.get_preprocessing_path(lens_name))
+        psf_workspace_str = preprocessing_str / data_band / "psf_workspace"
+        star_path_str = f"{psf_workspace_str}/stars/star_*.fits"
+        star_list = sorted(
+            glob.glob(star_path_str),
+            key=lambda x: int(re.search(r"star_(\d+)", x).group(1)),
+        )
+        star_data_list = []
+        for file in star_list:
+            with fits.open(file) as hdul:
+                data = hdul[0].data
+                star_data_list.append(np.array(data))
+        star_data_list = np.array(star_data_list)
+
+        weight_path_str = f"{psf_workspace_str}/weights/weight_*.fits"
+        weight_list = sorted(
+            glob.glob(weight_path_str),
+            key=lambda x: int(re.search(r"weight_(\d+)", x).group(1)),
+        )
+        weight_map_list = []
+        for file in weight_list:
+            with fits.open(file) as hdul:
+                data = hdul[0].data
+                weight_map_list.append(np.array(data))
+        weight_map_list = np.array(weight_map_list)
+
+        noise_path_str = f"{psf_workspace_str}/noise_maps/noise_map_*.fits"
+        noise_list = sorted(
+            glob.glob(noise_path_str),
+            key=lambda x: int(re.search(r"noise_map_(\d+)", x).group(1)),
+        )
+        noise_maps = []
+        for file in noise_list:
+            with fits.open(file) as hdul:
+                data = hdul[0].data
+                noise_maps.append(np.array(data))
+        noise_maps = np.array(noise_maps)
+
+        return star_data_list, weight_map_list, noise_maps
+
+    def clean_psf_workspace(self, lens_name, data_band):
+        """Clean the PSF workspace directory by removing all files and subdirectories.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :param data_band: band of the data being analyzed
+        :type data_band: `str`
+        """
+        preprocessing_str = Path(self.get_preprocessing_path(lens_name))
+        psf_workspace_str = preprocessing_str / data_band / "psf_workspace"
+
+        if psf_workspace_str.exists():
+            shutil.rmtree(psf_workspace_str)
+
+    def load_saved_psf(self, lens_name, data_band):
+        """Load the saved PSF and variance map generated by
+        :class:`~dolphin.preprocessing.psf.PSF`.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :param data_band: band of the data being analyzed
+        :type data_band: `str`
+        :return: a tuple containing the saved PSF and variance map
+        :rtype: `tuple` (`array`, `array`)
+        """
+
+        psf_file = Path(self.get_psf_file_path(lens_name, data_band))
+
+        with h5py.File(psf_file, "r") as file:
+            psf_data = file["kernel_point_source"][()]
+            variance_map = file["psf_variance_map"][()]
+
+        return psf_data, variance_map
+
+    def save_cutout_image(self, lens_name, data_band, kwargs_data):
+        """Save a cutout image from the full science mosaic with the expected `dolphin`
+        attributes.
+
+        :param lens_name: name of the system being analyzed
+        :type lens_name: `str`
+        :param data_band: band of the data being analyzed
+        :type data_band: `str`
+        :param kwargs_data: dictionary containing the imaging data, pixel to coordinate transformations,
+          exposure time, and either background RMS or noise map, depending on the specified option.
+        :type kwargs_data: `dict`
+        """
+
+        data_dir = Path(self.get_data_directory())
+        cutout_file = data_dir / lens_name / f"image_{lens_name}_{data_band}.h5"
+
+        with h5py.File(cutout_file, "w") as f:
+            f.create_dataset("image_data", data=kwargs_data["image_data"])
+            f.create_dataset("ra_at_xy_0", data=kwargs_data["ra_at_xy_0"])
+            f.create_dataset("dec_at_xy_0", data=kwargs_data["dec_at_xy_0"])
+            f.create_dataset(
+                "transform_pix2angle", data=kwargs_data["transform_pix2angle"]
+            )
+            f.create_dataset("noise_map", data=kwargs_data["noise_map"])

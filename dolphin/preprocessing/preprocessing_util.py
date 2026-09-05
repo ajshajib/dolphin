@@ -1,0 +1,117 @@
+"""This module contains helper functions to aid in data preprocessing."""
+
+__author__ = "brady-ryan"
+
+import numpy as np
+from astropy.io import fits
+from astropy.stats import SigmaClip
+from photutils.background import Background2D, MedianBackground
+
+
+def get_background(image_file_name):
+    """Estimate the background mean and RMS using `photutils`.
+
+    :param image_file_name: path to the full science image FITS file
+    :type image_file_name: `str`
+    :return: tuple of background mean and RMS as determined by `photutils`
+    :rtype: `tuple` (`float`, `float`)
+    """
+    full_data = fits.getdata(image_file_name)
+
+    sigma_clip = SigmaClip(sigma=3.0)
+    background_estimator = MedianBackground()
+    background_class = Background2D(
+        np.copy(full_data),
+        (50, 50),
+        filter_size=(3, 3),
+        sigma_clip=sigma_clip,
+        bkg_estimator=background_estimator,
+    )
+    background = background_class.background_median
+    background_rms = background_class.background_rms_median
+
+    return background, background_rms
+
+
+def compute_noise_map(instrument, image_file_name, weight_file_name=None):
+    """Compute the per-pixel noise map for a given dataset.
+
+    :param instrument: instrument which took the data. Current
+      options are "JWST" and "HST"
+    :type instrument: `str`
+    :param image_file_name: path to the full science image FITS file
+    :type image_file_name: `str`
+    :param weight_file_name: (optional - required for HST data) path
+      to the weight data after drizzling, which should contain the
+      inverse variance per-pixel
+    :type weight_file_name: `str`
+
+    :return: array corresponding to the noise per-pixel across the entire
+      dataset
+    :rtype: `np.ndarray`
+    """
+
+    if instrument == "JWST":
+        with fits.open(image_file_name) as hdul:
+            full_noise_map = hdul["ERR"].data
+    elif instrument == "HST":
+        _, sigma_bkd = get_background(image_file_name)
+        with fits.open(image_file_name) as hdul:
+            data_full = hdul[0].data
+        with fits.open(weight_file_name) as hdul:
+            wht_full = hdul[0].data
+        wht_full[wht_full <= 0] = 10 ** (-10)
+        full_noise_map = np.sqrt(np.abs(data_full / wht_full) + sigma_bkd**2)
+
+    return full_noise_map
+
+
+def build_mask(shape, kwargs_mask=None):
+    """Build a combined boolean mask from multiple geometric definitions. Options are
+    "circle", "square", and "ellipse.".
+
+    :param shape: tuple describing the shape of the image to mask
+    :type shape: `tuple` (`int`, `int`)
+    :param kwargs_mask: list of dictionaries corresponding to masking keywork arguments. Supported types,
+        with all required keywords, are as follows: [{"type": "circle", "center": `tuple` (`int`, `int`),
+        "radius": `int`}, {"type": "square", "center": `tuple` (`int`, `int`), "size": `int`},
+        {"type": "ellipse", "center": `tuple` (`int`, `int`), "a": `int`, "b": `int`}]. To invert the boolean
+        logic of a specific mask index, one must place "invert": True in that dictionary.
+    :type kwargs_mask: `list` of `dict`
+    :return: boolean array of pixels to mask
+    :rtype: `np.ndarray`
+    """
+    if kwargs_mask is None:
+        return np.ones(shape)
+    else:
+        ny, nx = shape
+        y, x = np.mgrid[0:ny, 0:nx]
+        keep_mask = np.zeros(shape, dtype=bool)
+        remove_mask = np.zeros(shape, dtype=bool)
+        for param in kwargs_mask:
+            if param["type"] == "circle":
+                cx, cy = param["center"]
+                r = param["radius"]
+                mask = (x - cx) ** 2 + (y - cy) ** 2 <= r**2
+            elif param["type"] == "square":
+                cx, cy = param["center"]
+                hx = param["size"]
+                mask = (np.abs(x - cx) <= hx / 2) & (np.abs(y - cy) <= hx / 2)
+            elif param["type"] == "ellipse":
+                cx, cy = param["center"]
+                a = param["a"]
+                b = param["b"]
+                mask = ((x - cx) ** 2 / a**2) + ((y - cy) ** 2 / b**2) <= 1
+            else:
+                raise ValueError(f"Unknown mask type: {param['type']}")
+
+            if param.get("invert", False):
+                remove_mask |= mask
+            else:
+                keep_mask |= mask
+
+        if not any(not p.get("invert", False) for p in kwargs_mask):
+            keep_mask[:] = True
+        combined_mask = keep_mask & ~remove_mask
+
+        return combined_mask.astype(float)

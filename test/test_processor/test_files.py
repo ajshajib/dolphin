@@ -285,3 +285,12 @@ class TestFileSystem:
         path = _TEST_IO_DIR / "trained_nn" / "lensed_quasar_segmentation_model.h5"
 
         assert Path(self.file_system.get_trained_nn_model_file_path("quasar")) == path
+
+    def test_get_preprocessing_path(self):
+        """Test `get_preprocessing_path` method."""
+        preprocessing_path = _TEST_IO_DIR / "data" / "lens_system1" / "preprocessing"
+
+        assert (
+            Path(self.file_system.get_preprocessing_path(lens_name="lens_system1"))
+            == preprocessing_path
+        )

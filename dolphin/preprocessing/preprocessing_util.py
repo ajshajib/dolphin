@@ -33,6 +33,39 @@ def get_background(image_file_name):
     return background, background_rms
 
 
+def compute_noise_map(instrument, image_file_name, weight_file_name=None):
+    """Compute the per-pixel noise map for a given dataset.
+
+    :param instrument: instrument which took the data. Current
+      options are "JWST" and "HST"
+    :type instrument: `str`
+    :param image_file_name: path to the full science image FITS file
+    :type image_file_name: `str`
+    :param weight_file_name: (optional - required for HST data) path
+      to the weight data after drizzling, which should contain the
+      inverse variance per-pixel
+    :type weight_file_name: `str`
+
+    :return: array corresponding to the noise per-pixel across the entire
+      dataset
+    :rtype: `np.ndarray`
+    """
+
+    if instrument == "JWST":
+        with fits.open(image_file_name) as hdul:
+            full_noise_map = hdul["ERR"].data
+    elif instrument == "HST":
+        _, sigma_bkd = get_background(image_file_name)
+        with fits.open(image_file_name) as hdul:
+            data_full = hdul[0].data
+        with fits.open(weight_file_name) as hdul:
+            wht_full = hdul[0].data
+        wht_full[wht_full <= 0] = 10 ** (-10)
+        full_noise_map = np.sqrt(np.abs(data_full / wht_full) + sigma_bkd**2)
+
+    return full_noise_map
+
+
 def build_mask(shape, kwargs_mask=None):
     """Build a combined boolean mask from multiple geometric definitions. Options are
     "circle", "square", and "ellipse.".

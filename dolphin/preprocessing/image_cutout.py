@@ -99,7 +99,6 @@ class ImageCutout:
         cutout_scale=100,
         center_shift_arcsec=None,
         save=False,
-        use_noise_map=False,
         kwargs_mask=None,
         vmin=-0.75,
         vmax=1.5,
@@ -119,10 +118,6 @@ class ImageCutout:
         :param save: if `True`, creates the full HDF5 file in the proper location
         expected by `dolphin`.
         :type save: `bool`
-        :param use_noise_map: if `True`, uses a cutout of the noise map to estimate
-          background quantities in the modeling. Otherwise, the scalar background
-        RMS determined by `photutils` is used.
-        :type use_noise_map: `bool`
         :param kwargs_mask: list of dictionaries corresponding to masking keyword
         arguments.
         :type kwargs_mask: `list` of `dict`
@@ -159,14 +154,12 @@ class ImageCutout:
             print(f"Cutout RA = {center.ra:.6f}")
             print(f"Cutout DEC = {center.dec:.6f}")
 
-        mean_bkd, sigma_bkd = preprocessing_util.get_background(self.image_file_name)
+        mean_bkd, _ = preprocessing_util.get_background(self.image_file_name)
 
         if self.instrument == "JWST":
             with fits.open(self.image_file_name) as hdul:
                 header = hdul["SCI"].header
                 data_full = hdul["SCI"].data
-                err_map = hdul["ERR"].data
-                exposure_time = header.get("XPOSURE")
             wcs = WCS(header)
             image_data = Cutout2D(
                 data_full,
@@ -175,21 +168,20 @@ class ImageCutout:
                 wcs=wcs,
             ).data
             image_reduced = image_data - mean_bkd
-            if use_noise_map:
-                noise_map = Cutout2D(
-                    err_map,
-                    position=center,
-                    size=image_reduced.shape,
-                    wcs=wcs,
-                ).data
-                kwargs_data["noise_map"] = noise_map
-            else:
-                kwargs_data["background_rms"] = sigma_bkd
+            full_noise_map = preprocessing_util.compute_noise_map(
+                instrument="JWST", image_file_name=self.image_file_name
+            )
+            noise_map = Cutout2D(
+                full_noise_map,
+                position=center,
+                size=image_reduced.shape,
+                wcs=wcs,
+            ).data
+            kwargs_data["noise_map"] = noise_map
         elif self.instrument == "HST":
             with fits.open(self.image_file_name) as hdul:
                 header = hdul[0].header
                 data_full = hdul[0].data
-                exposure_time = header.get("EXPTIME")
             wcs = WCS(header)
             image_data = Cutout2D(
                 data_full,
@@ -198,20 +190,18 @@ class ImageCutout:
                 wcs=wcs,
             ).data
             image_reduced = image_data - mean_bkd
-            if use_noise_map:
-                with fits.open(self.weight_file_name) as hdul:
-                    wht_full = hdul[0].data
-                wht_full[wht_full <= 0] = 10 ** (-10)
-                full_noise_map = np.sqrt(np.abs(data_full / wht_full) + sigma_bkd**2)
-                noise_map = Cutout2D(
-                    full_noise_map,
-                    position=center,
-                    size=image_reduced.shape,
-                    wcs=wcs,
-                ).data
-                kwargs_data["noise_map"] = noise_map
-            else:
-                kwargs_data["background_rms"] = sigma_bkd
+            full_noise_map = preprocessing_util.compute_noise_map(
+                instrument="HST",
+                image_file_name=self.image_file_name,
+                weight_file_name=self.weight_file_name,
+            )
+            noise_map = Cutout2D(
+                full_noise_map,
+                position=center,
+                size=image_reduced.shape,
+                wcs=wcs,
+            ).data
+            kwargs_data["noise_map"] = noise_map
 
         transform_pix2angle = wcs.pixel_scale_matrix * 3600.0
 
@@ -227,47 +217,32 @@ class ImageCutout:
         kwargs_data["ra_at_xy_0"] = ra_at_xy_0
         kwargs_data["dec_at_xy_0"] = dec_at_xy_0
         kwargs_data["transform_pix2angle"] = transform_pix2angle
-        kwargs_data["exposure_time"] = exposure_time
 
         mask = preprocessing_util.build_mask(image_reduced.shape, kwargs_mask)
 
-        if use_noise_map:
-            fig, ax = plt.subplots(1, 2, figsize=(8, 8))
-            im_data = ax[0].matshow(
-                np.log10(np.clip(image_reduced * mask, 1e-10, None)),
-                vmin=vmin,
-                vmax=vmax,
-                origin="lower",
-                cmap="cubehelix",
-            )
-            ax[0].autoscale(False)
-            ax[0].set_title(f"{self.data_band} Cutout Data", fontsize=20)
-            ax[0].xaxis.set_ticks_position("bottom")
-            fig.colorbar(im_data, ax=ax[0], fraction=0.05)
+        fig, ax = plt.subplots(1, 2, figsize=(8, 8))
+        im_data = ax[0].matshow(
+            np.log10(np.clip(image_reduced * mask, 1e-10, None)),
+            vmin=vmin,
+            vmax=vmax,
+            origin="lower",
+            cmap="cubehelix",
+        )
+        ax[0].autoscale(False)
+        ax[0].set_title(f"{self.data_band} Cutout Data", fontsize=20)
+        ax[0].xaxis.set_ticks_position("bottom")
+        fig.colorbar(im_data, ax=ax[0], fraction=0.05)
 
-            im_noise = ax[1].matshow(
-                np.log10(noise_map * mask),
-                vmin=vmin,
-                origin="lower",
-                cmap="cubehelix",
-            )
-            ax[1].autoscale(False)
-            ax[1].set_title(f"{self.data_band} Noise Map", fontsize=20)
-            ax[1].xaxis.set_ticks_position("bottom")
-            fig.colorbar(im_noise, ax=ax[1], fraction=0.05)
-        else:
-            fig, ax = plt.subplots(figsize=(8, 8))
-            im_data = ax.matshow(
-                np.log10(np.clip(image_reduced * mask, 1e-10, None)),
-                vmin=vmin,
-                vmax=vmax,
-                origin="lower",
-                cmap="cubehelix",
-            )
-            ax.autoscale(False)
-            ax.set_title(f"{self.data_band} Cutout Data", fontsize=20)
-            ax.xaxis.set_ticks_position("bottom")
-            fig.colorbar(im_data, ax=ax, fraction=0.05)
+        im_noise = ax[1].matshow(
+            np.log10(noise_map * mask),
+            vmin=vmin,
+            origin="lower",
+            cmap="cubehelix",
+        )
+        ax[1].autoscale(False)
+        ax[1].set_title(f"{self.data_band} Noise Map", fontsize=20)
+        ax[1].xaxis.set_ticks_position("bottom")
+        fig.colorbar(im_noise, ax=ax[1], fraction=0.05)
 
         plt.tight_layout()
         plt.show()

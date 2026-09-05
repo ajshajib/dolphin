@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import numpy.testing as npt
 import pytest
+from astropy.io import fits
 
 from dolphin.preprocessing import preprocessing_util
 
@@ -36,6 +37,71 @@ class TestPreprocessingUtil:
 
         mock_getdata.assert_called_once()
         mock_background2d.assert_called_once()
+
+    def test_compute_noise_map_jwst(self, tmp_path):
+        """Test that `compute_noise_map()` correctly reads the JWST ERR array."""
+
+        image_file = tmp_path / "jwst.fits"
+
+        err = np.array(
+            [
+                [0.1, 0.2, 0.3],
+                [0.4, 0.5, 0.6],
+                [0.7, 0.8, 0.9],
+            ]
+        )
+
+        primary = fits.PrimaryHDU()
+        sci = fits.ImageHDU(data=np.ones((3, 3)), name="SCI")
+        err_hdu = fits.ImageHDU(data=err, name="ERR")
+
+        hdul = fits.HDUList([primary, sci, err_hdu])
+        hdul.writeto(image_file)
+
+        noise_map = preprocessing_util.compute_noise_map(
+            instrument="JWST",
+            image_file_name=str(image_file),
+        )
+        np.testing.assert_array_equal(noise_map, err)
+
+    @patch("dolphin.preprocessing.preprocessing_util.get_background")
+    def test_compute_noise_map_hst(
+        self,
+        mock_get_background,
+        tmp_path,
+    ):
+        """Test that `compute_noise_map` correctly computes the HST noise map."""
+
+        image_file = tmp_path / "hst_image.fits"
+        weight_file = tmp_path / "hst_weight.fits"
+
+        data = np.array(
+            [
+                [4.0, 9.0],
+                [16.0, 25.0],
+            ]
+        )
+        weight = np.array(
+            [
+                [1.0, 3.0],
+                [4.0, 5.0],
+            ]
+        )
+
+        sigma_bkd = 2.0
+        mock_get_background.return_value = (0.0, sigma_bkd)
+
+        fits.PrimaryHDU(data=data).writeto(image_file)
+        fits.PrimaryHDU(data=weight).writeto(weight_file)
+
+        noise_map = preprocessing_util.compute_noise_map(
+            instrument="HST",
+            image_file_name=str(image_file),
+            weight_file_name=str(weight_file),
+        )
+
+        expected = np.sqrt(np.abs(data / weight) + sigma_bkd**2)
+        np.testing.assert_allclose(noise_map, expected)
 
     def test_build_mask_none(self):
         """Test that no kwargs returns an all True mask."""

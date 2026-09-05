@@ -962,9 +962,4 @@ class FileSystem:
             f.create_dataset(
                 "transform_pix2angle", data=kwargs_data["transform_pix2angle"]
             )
-            f.create_dataset("exposure_time", data=kwargs_data["exposure_time"])
-
-            if "noise_map" in kwargs_data:
-                f.create_dataset("noise_map", data=kwargs_data["noise_map"])
-            else:
-                f.create_dataset("background_rms", data=kwargs_data["background_rms"])
+            f.create_dataset("noise_map", data=kwargs_data["noise_map"])

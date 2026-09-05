@@ -107,18 +107,19 @@ class PSF:
             with fits.open(self.weight_file_name) as hdul:
                 wht = hdul[0].data
             wht[wht <= 0] = 10 ** (-10)
+            full_noise_map = preprocessing_util.compute_noise_map(
+                instrument="HST",
+                image_file_name=self.image_file_name,
+                weight_file_name=self.weight_file_name,
+            )
         elif self.instrument == "JWST":
             with fits.open(self.image_file_name) as hdul:
                 sci = hdul["SCI"].data
                 wht = hdul["WHT"].data
-                variance = (
-                    hdul["VAR_POISSON"].data
-                    + hdul["VAR_RNOISE"].data
-                    + hdul["VAR_FLAT"].data
-                    + 1.0 / wht
-                )
             image_reduced = sci - mean_bkd
-            err = np.sqrt(variance)
+            full_noise_map = preprocessing_util.compute_noise_map(
+                instrument="JWST", image_file_name=self.image_file_name
+            )
 
         peaks_table = find_peaks(
             image_reduced,
@@ -145,12 +146,7 @@ class PSF:
 
         data_nddata_obj = NDData(data=image_reduced)
         weight_nddata_obj = NDData(data=wht)
-        if self.instrument == "HST":
-            noise_nddata_obj = NDData(
-                data=np.sqrt(np.abs(image_reduced / wht) + sigma_bkd**2)
-            )
-        else:
-            noise_nddata_obj = NDData(data=err)
+        noise_nddata_obj = NDData(data=full_noise_map)
 
         keep = np.ones(len(stars_table), dtype=bool)
         # remove specific star numbers

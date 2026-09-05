@@ -120,6 +120,7 @@ class TestImageCutout:
 
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.build_mask")
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.get_background")
+    @patch("dolphin.preprocessing.image_cutout.preprocessing_util.compute_noise_map")
     @patch("dolphin.preprocessing.image_cutout.Cutout2D")
     @patch("dolphin.preprocessing.image_cutout.WCS")
     @patch("dolphin.preprocessing.image_cutout.plt.tight_layout")
@@ -136,15 +137,17 @@ class TestImageCutout:
         mock_tight_layout,
         mock_wcs,
         mock_cutout,
+        mock_compute_noise_map,
         mock_background,
         mock_build_mask,
     ):
-        """Test :meth:`~dolphin.preprocessing.image_cutout.make_image_cutout`"""
+        """Test HST branch of
+        :meth:`~dolphin.preprocessing.image_cutout.make_image_cutout`"""
+
         image = np.ones((20, 20))
         header = {
             "RA_TARG": 10.0,
             "DEC_TARG": 20.0,
-            "EXPTIME": 1200.0,
         }
 
         hdul = MagicMock()
@@ -155,12 +158,13 @@ class TestImageCutout:
         mock_fits_open.return_value = hdul
 
         mock_background.return_value = (1.0, 0.5)
+        mock_compute_noise_map.return_value = np.ones((20, 20)) * 0.1
         mock_cutout.return_value.data = np.ones((10, 10))
         mock_wcs.return_value.pixel_scale_matrix = np.array(
             [[1.0e-5, 0.0], [0.0, 1.0e-5]]
         )
-
         mock_build_mask.return_value = np.ones((10, 10))
+
         kwargs_mask = [{"type": "circle", "center": (5, 5), "radius": 3}]
 
         mock_ax = MagicMock()
@@ -169,42 +173,30 @@ class TestImageCutout:
 
         self.imagecutout_hst.file_system.save_cutout_image = MagicMock()
 
-        self.imagecutout_hst.make_image_cutout(save=True, kwargs_mask=kwargs_mask)
+        self.imagecutout_hst.make_image_cutout(
+            save=True,
+            kwargs_mask=kwargs_mask,
+        )
+
+        mock_compute_noise_map.assert_called_once_with(
+            instrument="HST",
+            image_file_name=self.imagecutout_hst.image_file_name,
+            weight_file_name=self.imagecutout_hst.weight_file_name,
+        )
+
         mock_save_mask.assert_called_once()
-
         hdul.__getitem__.assert_called_with(0)
-
         self.imagecutout_hst.file_system.save_cutout_image.assert_called_once()
 
         kwargs = self.imagecutout_hst.file_system.save_cutout_image.call_args.args[2]
-
         assert "image_data" in kwargs
-        assert "background_rms" in kwargs
-        assert kwargs["background_rms"] == 0.5
-        assert kwargs["exposure_time"] == 1200.0
-
-        mock_show.assert_called_once()
-
-        # test that when use_noise_map=True, the noise_map is saved,
-        # and background_rms is not saved
-        mock_ax = MagicMock()
-        mock_fig = MagicMock()
-        mock_subplots.return_value = (mock_fig, mock_ax)
-
-        self.imagecutout_hst.make_image_cutout(
-            save=True,
-            use_noise_map=True,
-        )
-
-        kwargs = self.imagecutout_hst.file_system.save_cutout_image.call_args.args[2]
         assert "noise_map" in kwargs
 
-        # test that when cutout_center is provided, the position is set correctly
+        # test center shift
         self.imagecutout_hst.make_image_cutout(
             save=True,
             center_shift_arcsec=(10, 10),
         )
-
         kwargs = mock_cutout.call_args.kwargs
         position = kwargs["position"]
         assert np.isclose(position.ra.deg, 10.002956)
@@ -212,6 +204,7 @@ class TestImageCutout:
 
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.build_mask")
     @patch("dolphin.preprocessing.image_cutout.preprocessing_util.get_background")
+    @patch("dolphin.preprocessing.image_cutout.preprocessing_util.compute_noise_map")
     @patch("dolphin.preprocessing.image_cutout.Cutout2D")
     @patch("dolphin.preprocessing.image_cutout.WCS")
     @patch("dolphin.preprocessing.image_cutout.plt.tight_layout")
@@ -226,38 +219,48 @@ class TestImageCutout:
         mock_tight_layout,
         mock_wcs,
         mock_cutout,
+        mock_compute_noise_map,
         mock_background,
         mock_build_mask,
     ):
-        """Test :meth:`~dolphin.preprocessing.image_cutout.make_image_cutout`"""
+        """Test JWST image cutout."""
+
         sci = MagicMock()
         sci.data = np.ones((20, 20))
         sci.header = {
             "TARG_RA": 10.0,
             "TARG_DEC": 20.0,
-            "XPOSURE": 1500.0,
         }
 
-        err = MagicMock()
-        err.data = np.ones((20, 20)) * 2.0
+        primary = MagicMock()
+        primary.header = {
+            "TARG_RA": 10.0,
+            "TARG_DEC": 20.0,
+        }
 
         hdul = MagicMock()
         hdul.__enter__.return_value = hdul
         hdul.__exit__.return_value = None
 
         hdul.__getitem__.side_effect = lambda key: {
-            0: MagicMock(header={"TARG_RA": 10.0, "TARG_DEC": 20.0}),
+            0: primary,
             "SCI": sci,
-            "ERR": err,
         }[key]
 
         mock_fits_open.return_value = hdul
 
+        mock_fits_open.return_value = hdul
+
         mock_background.return_value = (1.0, 0.25)
+
+        mock_compute_noise_map.return_value = np.ones((20, 20)) * 0.2
+
         mock_cutout.return_value.data = np.ones((10, 10))
+
         mock_wcs.return_value.pixel_scale_matrix = np.array(
             [[1.0e-5, 0.0], [0.0, 1.0e-5]]
         )
+
         mock_build_mask.return_value = np.ones((10, 10))
 
         mock_axes = [MagicMock(), MagicMock()]
@@ -266,35 +269,23 @@ class TestImageCutout:
 
         self.imagecutout_jwst.file_system.save_cutout_image = MagicMock()
 
-        self.imagecutout_jwst.make_image_cutout(
-            save=True,
-            use_noise_map=True,
+        self.imagecutout_jwst.make_image_cutout(save=True)
+
+        # Test noise-map utility
+        mock_compute_noise_map.assert_called_once_with(
+            instrument="JWST",
+            image_file_name=self.imagecutout_jwst.image_file_name,
         )
 
+        # Test saving
         self.imagecutout_jwst.file_system.save_cutout_image.assert_called_once()
 
         kwargs = self.imagecutout_jwst.file_system.save_cutout_image.call_args.args[2]
 
         assert "image_data" in kwargs
         assert "noise_map" in kwargs
-        assert "background_rms" not in kwargs
-        assert kwargs["exposure_time"] == 1500.0
 
         mock_show.assert_called_once()
-
-        # Test that when use_noise_map=False, the noise_map is not saved,
-        # and background_rms is saved instead
-        mock_ax = MagicMock()
-        mock_fig = MagicMock()
-        mock_subplots.return_value = (mock_fig, mock_ax)
-
-        self.imagecutout_jwst.make_image_cutout(
-            save=True,
-            use_noise_map=False,
-        )
-
-        kwargs = self.imagecutout_jwst.file_system.save_cutout_image.call_args.args[2]
-        assert "background_rms" in kwargs
 
     @patch("builtins.print")
     @patch("dolphin.preprocessing.image_cutout.display")
@@ -422,8 +413,7 @@ class TestImageCutout:
         ra_at_xy_0 = 10.0
         dec_at_xy_0 = 20.0
         transform_pix2angle = np.array([[0.04, 0.0], [0.0, 0.04]])
-        exposure_time = 1200.0
-        background_rms = 0.5
+        noise_map = np.ones((5, 5))
 
         image_cutout_temp.file_system.save_cutout_image(
             lens_name=lens_name,
@@ -433,8 +423,7 @@ class TestImageCutout:
                 "ra_at_xy_0": ra_at_xy_0,
                 "dec_at_xy_0": dec_at_xy_0,
                 "transform_pix2angle": transform_pix2angle,
-                "exposure_time": exposure_time,
-                "background_rms": background_rms,
+                "noise_map": noise_map,
             },
         )
 
@@ -449,8 +438,7 @@ class TestImageCutout:
             assert "ra_at_xy_0" in f
             assert "dec_at_xy_0" in f
             assert "transform_pix2angle" in f
-            assert "exposure_time" in f
-            assert "background_rms" in f
+            assert "noise_map" in f
 
             np.testing.assert_array_equal(
                 f["image_data"][:],
@@ -465,27 +453,6 @@ class TestImageCutout:
                 transform_pix2angle,
             )
 
-            assert f["exposure_time"][()] == exposure_time
-            assert f["background_rms"][()] == background_rms
-
-        # check noise map saving
-        noise_map = np.ones((21, 21)) * 0.1
-        image_cutout_temp.file_system.save_cutout_image(
-            lens_name=lens_name,
-            data_band=data_band,
-            kwargs_data={
-                "image_data": image_data,
-                "ra_at_xy_0": ra_at_xy_0,
-                "dec_at_xy_0": dec_at_xy_0,
-                "transform_pix2angle": transform_pix2angle,
-                "exposure_time": exposure_time,
-                "noise_map": noise_map,
-            },
-        )
-
-        # check HDF5 contents for noise map
-        with h5py.File(filename, "r") as f:
-            assert "noise_map" in f
             np.testing.assert_array_equal(
                 f["noise_map"][:],
                 noise_map,

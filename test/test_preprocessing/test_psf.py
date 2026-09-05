@@ -50,16 +50,19 @@ class TestPSF:
     @patch("dolphin.preprocessing.psf.WCS")
     @patch("dolphin.preprocessing.psf.fits.open")
     @patch("dolphin.preprocessing.preprocessing_util.get_background")
-    def test_get_psf_candidates(
+    @patch("dolphin.preprocessing.preprocessing_util.compute_noise_map")
+    def test_get_psf_candidates_hst(
         self,
+        mock_compute_noise_map,
         mock_get_background,
         mock_fits,
         mock_wcs,
         mock_find_peaks,
         mock_extract_stars,
     ):
-        """Test PSF candidate extraction."""
+        """Test HST PSF candidate extraction."""
 
+        mock_compute_noise_map.return_value = np.ones((1000, 1000))
         mock_get_background.return_value = (0.0, 1.0)
 
         mock_hdu = MagicMock()
@@ -139,22 +142,14 @@ class TestPSF:
         mock_wht = MagicMock()
         mock_wht.data = np.ones((1000, 1000))
 
-        mock_var_poisson = MagicMock()
-        mock_var_poisson.data = np.ones((1000, 1000))
-
-        mock_var_rnoise = MagicMock()
-        mock_var_rnoise.data = np.ones((1000, 1000))
-
-        mock_var_flat = MagicMock()
-        mock_var_flat.data = np.ones((1000, 1000))
+        mock_err = MagicMock()
+        mock_err.data = np.ones((1000, 1000))
 
         mock_hdul.__getitem__.side_effect = lambda key: {
             0: mock_primary,
             "SCI": mock_sci,
             "WHT": mock_wht,
-            "VAR_POISSON": mock_var_poisson,
-            "VAR_RNOISE": mock_var_rnoise,
-            "VAR_FLAT": mock_var_flat,
+            "ERR": mock_err,
         }[key]
 
         mock_fits.return_value.__enter__.side_effect = [
@@ -249,22 +244,14 @@ class TestPSF:
         mock_wht = MagicMock()
         mock_wht.data = np.ones((1000, 1000))
 
-        mock_var_poisson = MagicMock()
-        mock_var_poisson.data = np.ones((1000, 1000))
-
-        mock_var_rnoise = MagicMock()
-        mock_var_rnoise.data = np.ones((1000, 1000))
-
-        mock_var_flat = MagicMock()
-        mock_var_flat.data = np.ones((1000, 1000))
+        mock_err = MagicMock()
+        mock_err.data = np.ones((1000, 1000))
 
         mock_hdul.__getitem__.side_effect = lambda key: {
             0: mock_primary,
             "SCI": mock_sci,
             "WHT": mock_wht,
-            "VAR_POISSON": mock_var_poisson,
-            "VAR_RNOISE": mock_var_rnoise,
-            "VAR_FLAT": mock_var_flat,
+            "ERR": mock_err,
         }[key]
 
         mock_fits.return_value.__enter__.side_effect = [

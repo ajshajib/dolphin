@@ -75,7 +75,7 @@ class TestImageCutout:
 
         self.imagecutout_hst.plot_full_image()
 
-        mock_fits_open.assert_called_once_with(self.imagecutout_hst.image_file_name)
+        mock_fits_open.assert_called_once_with(self.imagecutout_hst.full_image_file)
         hdul.__getitem__.assert_called_once_with(0)
 
         mock_ax.matshow.assert_called_once()
@@ -180,8 +180,8 @@ class TestImageCutout:
 
         mock_compute_noise_map.assert_called_once_with(
             instrument="HST",
-            image_file_name=self.imagecutout_hst.image_file_name,
-            weight_file_name=self.imagecutout_hst.weight_file_name,
+            full_image_file=self.imagecutout_hst.full_image_file,
+            weight_image_file=self.imagecutout_hst.weight_image_file,
         )
 
         mock_save_mask.assert_called_once()
@@ -274,7 +274,7 @@ class TestImageCutout:
         # Test noise-map utility
         mock_compute_noise_map.assert_called_once_with(
             instrument="JWST",
-            image_file_name=self.imagecutout_jwst.image_file_name,
+            full_image_file=self.imagecutout_jwst.full_image_file,
         )
 
         # Test saving

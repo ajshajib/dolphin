@@ -49,7 +49,7 @@ class ImageCutout:
         :param full_image_file: path to the full science image FITS file
         :type full_image_file: `str`
         :param weight_image_file: (optional) if analyzing HST data,
-          the path to the inverse variance per-pixel FITS file 
+          the path to the inverse variance per-pixel FITS file
           output from drizzling
         :type weight_image_file: `str`
         """

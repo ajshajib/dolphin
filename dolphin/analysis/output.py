@@ -81,7 +81,7 @@ class Output(Processor):
         """The `bic` after running a model by calling
         `lenstronomy.Workflow.fitting_sequence.FittingSequence.bic`.
 
-        :return: `bic` value
+        :return: BIC value
         :rtype: `dict`
         """
         if self._bic is None:

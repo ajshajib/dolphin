@@ -65,8 +65,8 @@ class ImageCutout:
             )
 
         self.instrument = instrument
-        self.image_file_name = full_image_file
-        self.weight_file_name = weight_image_file
+        self.full_image_file = full_image_file
+        self.weight_image_file = weight_image_file
 
     def plot_full_image(self, vmin=-1, vmax=1.5):
         """Plot the full raw image.
@@ -79,10 +79,10 @@ class ImageCutout:
         :return: None
         """
         if self.instrument == "JWST":
-            with fits.open(self.image_file_name) as hdul:
+            with fits.open(self.full_image_file) as hdul:
                 data_full = hdul["SCI"].data
         else:
-            with fits.open(self.image_file_name) as hdul:
+            with fits.open(self.full_image_file) as hdul:
                 data_full = hdul[0].data
 
         _, ax = plt.subplots(figsize=(10, 10))
@@ -130,7 +130,7 @@ class ImageCutout:
         kwargs_data = {}
 
         # get target position
-        with fits.open(self.image_file_name) as hdul:
+        with fits.open(self.full_image_file) as hdul:
             header = hdul[0].header
         if self.instrument == "JWST":
             ra = header["TARG_RA"] * u.deg
@@ -153,10 +153,10 @@ class ImageCutout:
             print(f"Cutout RA = {center.ra:.6f}")
             print(f"Cutout DEC = {center.dec:.6f}")
 
-        mean_bkd, _ = preprocessing_util.get_background(self.image_file_name)
+        mean_bkd, _ = preprocessing_util.get_background(self.full_image_file)
 
         if self.instrument == "JWST":
-            with fits.open(self.image_file_name) as hdul:
+            with fits.open(self.full_image_file) as hdul:
                 header = hdul["SCI"].header
                 data_full = hdul["SCI"].data
             wcs = WCS(header)
@@ -168,7 +168,7 @@ class ImageCutout:
             ).data
             image_reduced = image_data - mean_bkd
             full_noise_map = preprocessing_util.compute_noise_map(
-                instrument="JWST", image_file_name=self.image_file_name
+                instrument="JWST", full_image_file=self.full_image_file
             )
             noise_map = Cutout2D(
                 full_noise_map,
@@ -178,7 +178,7 @@ class ImageCutout:
             ).data
             kwargs_data["noise_map"] = noise_map
         elif self.instrument == "HST":
-            with fits.open(self.image_file_name) as hdul:
+            with fits.open(self.full_image_file) as hdul:
                 header = hdul[0].header
                 data_full = hdul[0].data
             wcs = WCS(header)
@@ -191,8 +191,8 @@ class ImageCutout:
             image_reduced = image_data - mean_bkd
             full_noise_map = preprocessing_util.compute_noise_map(
                 instrument="HST",
-                image_file_name=self.image_file_name,
-                weight_file_name=self.weight_file_name,
+                full_image_file=self.full_image_file,
+                weight_image_file=self.weight_image_file,
             )
             noise_map = Cutout2D(
                 full_noise_map,

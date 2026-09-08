@@ -1,2 +1,3 @@
 jaxtronomy @ https://github.com/lenstronomy/JAXtronomy/archive/refs/heads/main.zip
 lenstronomy @ https://github.com/lenstronomy/lenstronomy/archive/refs/heads/main.zip
+ipywidgets

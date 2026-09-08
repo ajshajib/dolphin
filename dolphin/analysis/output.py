@@ -78,7 +78,7 @@ class Output(Processor):
 
     @property
     def bayesian_information_criterion(self):
-        """The `bic` after running a model by calling
+        """The BIC value after running a model by calling
         `lenstronomy.Workflow.fitting_sequence.FittingSequence.bic`.
 
         :return: BIC value

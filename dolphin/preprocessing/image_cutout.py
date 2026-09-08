@@ -41,7 +41,7 @@ class ImageCutout:
         :type io_directory: `str`
         :param lens_name: name of the system to create a cutout of
         :type lens_name: `str`
-        :param data_band: data band of desired PSF
+        :param data_band: data band of desired cutout
         :type data_band: `str`
         :param instrument: instrument which took the data, options are
           "HST" and "JWST"
@@ -49,7 +49,8 @@ class ImageCutout:
         :param full_image_file: path to the full science image FITS file
         :type full_image_file: `str`
         :param weight_image_file: (optional) if analyzing HST data,
-          the path to the full weight image FITS file
+          the path to the inverse variance per-pixel FITS file 
+          output from drizzling
         :type weight_image_file: `str`
         """
         self.io_directory = io_directory
@@ -105,9 +106,7 @@ class ImageCutout:
     ):
         """Create the science image cutout in the expected `lenstronomy` format for
         `kwargs_data`. This includes generating `image_data`, `ra_at_xy_0`,
-        `dec_at_xy_0`, `transform_pix2angle`, `exposure_time`, and either
-        `background_rms` or `noise_map`, depending on the specified type with
-        `use_noise_map`.
+        `dec_at_xy_0`, `transform_pix2angle`, and `noise_map`.
 
         :param cutout_scale: pixel length of one side of the cutout image
         :type cutout_scale: `int`

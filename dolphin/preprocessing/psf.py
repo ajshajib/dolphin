@@ -50,8 +50,9 @@ class PSF:
         :type instrument: `str`
         :param full_image_file: path to the full science image FITS file
         :type full_image_file: `str`
-        :param weight_image_file: (optional) if analyzing HST data,
-          the path to the full weight image FITS file
+        :param weight_image_file: (optional - required for HST data) path
+          to the weight data after drizzling, which should contain the
+          inverse variance per-pixel
         :type weight_image_file: `str`
         """
         self.io_directory = io_directory
@@ -66,8 +67,8 @@ class PSF:
                 f"{instrument} is not supported! Options are: {supported_instruments}"
             )
 
-        self.image_file_name = full_image_file
-        self.weight_file_name = weight_image_file
+        self.full_image_file = full_image_file
+        self.weight_image_file = weight_image_file
 
     def get_psf_candidates(
         self,
@@ -98,27 +99,27 @@ class PSF:
         :return: tuple containing the cutout, weight, and noise map data for each star
         :rtype: `tuple` (`np.ndarray`, `np.ndarray`, `np.ndarray`)
         """
-        mean_bkd, sigma_bkd = preprocessing_util.get_background(self.image_file_name)
+        mean_bkd, sigma_bkd = preprocessing_util.get_background(self.full_image_file)
         if self.instrument == "HST":
-            with fits.open(self.image_file_name) as hdul:
+            with fits.open(self.full_image_file) as hdul:
                 sci = hdul[0].data
             image_reduced = sci - mean_bkd
 
-            with fits.open(self.weight_file_name) as hdul:
+            with fits.open(self.weight_image_file) as hdul:
                 wht = hdul[0].data
             wht[wht <= 0] = 10 ** (-10)
             full_noise_map = preprocessing_util.compute_noise_map(
                 instrument="HST",
-                image_file_name=self.image_file_name,
-                weight_file_name=self.weight_file_name,
+                full_image_file=self.full_image_file,
+                weight_image_file=self.weight_image_file,
             )
         elif self.instrument == "JWST":
-            with fits.open(self.image_file_name) as hdul:
+            with fits.open(self.full_image_file) as hdul:
                 sci = hdul["SCI"].data
                 wht = hdul["WHT"].data
             image_reduced = sci - mean_bkd
             full_noise_map = preprocessing_util.compute_noise_map(
-                instrument="JWST", image_file_name=self.image_file_name
+                instrument="JWST", full_image_file=self.full_image_file
             )
 
         peaks_table = find_peaks(
@@ -208,7 +209,7 @@ class PSF:
             with all required keywords, are as follows: [{"type": "circle", "center": `tuple` (`int`, `int`),
             "radius": `int`}, {"type": "square", "center": `tuple` (`int`, `int`), "size": `int`},
             {"type": "ellipse", "center": `tuple` (`int`, `int`), "a": `int`, "b": `int`}]. To invert the boolean
-            logic of a specific mask index, one must place "invert": True in that dictionary.
+            logic of a specific mask index, one must place `"invert": True` in that dictionary.
         :type kwargs_mask: `list` of `dict`
         :return: a boolean mask corresponding to the specified configuration
         :rtype: `bool`
@@ -279,7 +280,7 @@ class PSF:
         :param kwargs_one_step: keyword arguments to be passed to one_step_psf_estimate() method
         :type kwargs_one_step: `dict`
         :param verbose: (optional) If True, provides plots of updated PSF during the iterative process
-        type verose: `bool`
+        :type verbose: `bool`
         :param psf_initial_guess: (optional) Initial guess PSF on oversampled scale. If not provided, estimates
           an initial guess with the stacked stars.
         :type psf_initial_guess: `None` or `2d numpy array with square odd axis`
@@ -410,9 +411,9 @@ class PSF:
         :type convolution_method: `str`
         :param include_moffat: (optional) True for the PSF to be expressed as the sum of a
           Moffat and a grid of pixels. False to not include the Moffat. Default: True
-        :type include_moffat: bool
+        :type include_moffat: `bool`
         :param elliptical_moffat: (optional) Allow elliptical Moffat.
-        :type elliptical_moffat: bool
+        :type elliptical_moffat: `bool`
         :param regularization_terms: (optional) information about the regularization terms
         :type regularization_terms: `str`
         :param regularization_strength_scales: (optional) Lagrange parameter that weights
@@ -715,7 +716,7 @@ class PSF:
 
         star_coords_list = [(int(i), int(j)) for i, j in zip(x_peaks, y_peaks)]
 
-        data_full, header = fits.getdata(self.image_file_name, header=True)
+        data_full, header = fits.getdata(self.full_image_file, header=True)
         wcs = WCS(header)
         # turn the pixel coordinates in pixels to WCS coordinates
         star_ang = [wcs.all_pix2world(i[0], i[1], 0) for i in star_coords_list]

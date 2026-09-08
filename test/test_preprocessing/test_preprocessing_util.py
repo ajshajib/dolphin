@@ -30,7 +30,7 @@ class TestPreprocessingUtil:
         mock_background.background_rms_median = 2.3
         mock_background2d.return_value = mock_background
 
-        mean, rms = preprocessing_util.get_background(image_file_name="fake_image.fits")
+        mean, rms = preprocessing_util.get_background(full_image_file="fake_image.fits")
 
         assert mean == 100.5
         assert rms == 2.3
@@ -60,7 +60,7 @@ class TestPreprocessingUtil:
 
         noise_map = preprocessing_util.compute_noise_map(
             instrument="JWST",
-            image_file_name=str(image_file),
+            full_image_file=str(image_file),
         )
         np.testing.assert_array_equal(noise_map, err)
 
@@ -96,8 +96,8 @@ class TestPreprocessingUtil:
 
         noise_map = preprocessing_util.compute_noise_map(
             instrument="HST",
-            image_file_name=str(image_file),
-            weight_file_name=str(weight_file),
+            full_image_file=str(image_file),
+            weight_image_file=str(weight_file),
         )
 
         expected = np.sqrt(np.abs(data / weight) + sigma_bkd**2)

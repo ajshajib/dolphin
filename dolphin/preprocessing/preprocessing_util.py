@@ -8,15 +8,15 @@ from astropy.stats import SigmaClip
 from photutils.background import Background2D, MedianBackground
 
 
-def get_background(image_file_name):
+def get_background(full_image_file):
     """Estimate the background mean and RMS using `photutils`.
 
-    :param image_file_name: path to the full science image FITS file
-    :type image_file_name: `str`
+    :param full_image_file: path to the full science image FITS file
+    :type full_image_file: `str`
     :return: tuple of background mean and RMS as determined by `photutils`
     :rtype: `tuple` (`float`, `float`)
     """
-    full_data = fits.getdata(image_file_name)
+    full_data = fits.getdata(full_image_file)
 
     sigma_clip = SigmaClip(sigma=3.0)
     background_estimator = MedianBackground()
@@ -33,18 +33,18 @@ def get_background(image_file_name):
     return background, background_rms
 
 
-def compute_noise_map(instrument, image_file_name, weight_file_name=None):
+def compute_noise_map(instrument, full_image_file, weight_image_file=None):
     """Compute the per-pixel noise map for a given dataset.
 
     :param instrument: instrument which took the data. Current
       options are "JWST" and "HST"
     :type instrument: `str`
-    :param image_file_name: path to the full science image FITS file
-    :type image_file_name: `str`
-    :param weight_file_name: (optional - required for HST data) path
+    :param full_image_file: path to the full science image FITS file
+    :type full_image_file: `str`
+    :param weight_image_file: (optional - required for HST data) path
       to the weight data after drizzling, which should contain the
       inverse variance per-pixel
-    :type weight_file_name: `str`
+    :type weight_image_file: `str`
 
     :return: array corresponding to the noise per-pixel across the entire
       dataset
@@ -52,13 +52,13 @@ def compute_noise_map(instrument, image_file_name, weight_file_name=None):
     """
 
     if instrument == "JWST":
-        with fits.open(image_file_name) as hdul:
+        with fits.open(full_image_file) as hdul:
             full_noise_map = hdul["ERR"].data
     elif instrument == "HST":
-        _, sigma_bkd = get_background(image_file_name)
-        with fits.open(image_file_name) as hdul:
+        _, sigma_bkd = get_background(full_image_file)
+        with fits.open(full_image_file) as hdul:
             data_full = hdul[0].data
-        with fits.open(weight_file_name) as hdul:
+        with fits.open(weight_image_file) as hdul:
             wht_full = hdul[0].data
         wht_full[wht_full <= 0] = 10 ** (-10)
         full_noise_map = np.sqrt(np.abs(data_full / wht_full) + sigma_bkd**2)

@@ -764,7 +764,7 @@ class TestPSF:
         assert mock_show.call_count == 5
 
         mock_getdata.assert_called_once_with(
-            self.psf.image_file_name,
+            self.psf.full_image_file,
             header=True,
         )
         mock_wcs.assert_called_once()

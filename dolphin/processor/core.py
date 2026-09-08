@@ -112,11 +112,13 @@ class Processor:
 
             fit_output = fitting_sequence.fit_sequence(fitting_kwargs_list)
             kwargs_result = fitting_sequence.best_fit(bijective=False)
+            bic = fitting_sequence.bic
             multi_band_list_out = fitting_sequence.multi_band_list
 
             output = {
                 "settings": config.settings,
                 "kwargs_result": kwargs_result,
+                "bic": bic,
                 "fit_output": fit_output,
                 "multi_band_list_out": multi_band_list_out,
                 "dolphin_version": __version__,

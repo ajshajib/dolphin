@@ -305,6 +305,8 @@ class Photometry:
         band_config,
         walker_ratio,
         burn_in=0,
+        n_samples=None,
+        rng_seed=42,
         aperture_type=None,
         aperture_size=None,
         do_morphology=False,
@@ -319,6 +321,12 @@ class Photometry:
         :param burn_in: (optional) number of burn-in steps to compute the medians after
             convergence of the MCMC chain
         :type burn_in: `int`
+        :param n_samples: (optional) number of samples to randomly select from the flattened chain after
+          burn-in. If `None`, all samples after `burn_in` will be used.
+        :type n_samples: `int`
+        :param rng_seed: (optional) seed for the random number generator to ensure reproducibility.
+          Only applicable when `n_samples` is not `None`.
+        :type rng_seed: `int`
         :param aperture_type: (optional) type of aperture in which the inversion is to be calculated within.
             Options are: "circle" and "square." If not specified, the inversion will be computed over
             the full image grid
@@ -359,6 +367,20 @@ class Photometry:
         )
 
         flat_chain = chain.reshape(-1, chain.shape[-1])
+
+        # optionally randomly select indices from the converged chain
+        if n_samples is None:
+            n_samples = flat_chain.shape[0]
+
+        rng = np.random.default_rng(rng_seed)
+        random_indices = rng.choice(
+            flat_chain.shape[0],
+            size=n_samples,
+            replace=False,
+        )
+
+        # select random samples
+        flat_chain = flat_chain[random_indices]
 
         for sample in flat_chain:
             kwargs_out = self.param.args2kwargs(sample)

@@ -264,7 +264,10 @@ class TestPhotometry:
 
         # manually make a mask, as the old config mask functions do not work
         mask = np.ones((120, 120), dtype=bool)
-        np.save("../../io_directory_example/settings/masks/mask_lens_system1_F390W.npy", mask)
+        np.save(
+            "../../io_directory_example/settings/masks/mask_lens_system1_F390W.npy",
+            mask,
+        )
 
         result = self.photometry3._do_linear_inversion_single_band(
             data_band="F390W",
@@ -327,8 +330,8 @@ class TestPhotometry:
             assert np.all(r_eff > 0)
 
     def test_do_linear_inversion_with_rng(self):
-        """Test :meth:`~do_linear_inversion` output structure and shapes
-        with `n_samples` provided."""
+        """Test :meth:`~do_linear_inversion` output structure and shapes with
+        `n_samples` provided."""
 
         flux_chain, _ = self.photometry1.do_linear_inversion(
             band_config=self.photometry1.band_config,
@@ -341,7 +344,7 @@ class TestPhotometry:
         )
 
         assert len(flux_chain["F814W"]["lens"]) == 10
-    
+
     def test_calculate_ab_magnitude(self):
         """Test :meth:`~calculate_ab_magnitude` functionality."""
 

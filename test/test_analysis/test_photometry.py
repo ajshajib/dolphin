@@ -265,7 +265,7 @@ class TestPhotometry:
         # manually make a mask, as the old config mask functions do not work
         mask = np.ones((120, 120), dtype=bool)
         np.save(
-            "../../io_directory_example/settings/masks/mask_lens_system1_F390W.npy",
+            f"{_TEST_IO_DIR}/settings/masks/mask_lens_system1_F390W.npy",
             mask,
         )
 

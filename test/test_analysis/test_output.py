@@ -289,6 +289,12 @@ class TestOutput:
         """
         self.output.get_reshaped_emcee_chain("lens_system2", "example", 2, burn_in=1)
 
+        self.processor.swim(
+            "lens_system1", "test", use_jax=True, recipe_name="galaxy-galaxy"
+        )
+        chain = self.output.get_reshaped_emcee_chain("lens_system1", "test", 223874, burn_in=1)
+        np.testing.assert_array_equal(np.shape(chain), [self.output.num_params_sampled * 2, 1, self.output.num_params_sampled])
+
     def test_get_param_class(self):
         """Test `get_param_class` method.
 

@@ -289,6 +289,11 @@ class TestOutput:
         """
         self.output.get_reshaped_emcee_chain("lens_system2", "example", 2, burn_in=1)
 
+        chain = self.output.get_reshaped_emcee_chain(
+            "lens_system1", "example2", 223874, burn_in=1
+        )
+        np.testing.assert_array_equal(np.shape(chain), [34, 1, 17])
+
     def test_get_param_class(self):
         """Test `get_param_class` method.
 

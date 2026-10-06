@@ -619,7 +619,9 @@ class Output(Processor):
         :type lens_name: `str`
         :param model_id: model run identifier
         :type model_id: `str`
-        :param walker_ratio: number of walkers per parameter in MCMC
+        :param walker_ratio: number of walkers per parameter in MCMC. Used to deduce the number of walkers
+            if the emcee chains were saved as flattened arrays. If emcee chains were saved as unflattened
+            arrays, this argument is unused.
         :type walker_ratio: `int`
         :param burn_in: number of burn-in steps to discard
         :type burn_in: `int`
@@ -633,15 +635,23 @@ class Output(Processor):
                 "Nautilus samples do not have walkers to reshape. Use `.samples_mcmc` directly."
             )
 
-        num_params = self.num_params_sampled  # self.samples_mcmc.shape[1]
-        num_walkers = walker_ratio * num_params
-        num_step = int(len(self.posterior_samples) / num_walkers)
+        # If chains are flattened (kept for backwards compatibility)
+        if np.ndim(self.posterior_samples) == 2:
+            num_params = self.num_params_sampled  # self.samples_mcmc.shape[1]
+            num_walkers = walker_ratio * num_params
+            num_step = int(len(self.posterior_samples) / num_walkers)
 
-        chain = np.empty((num_walkers, num_step, num_params))
+            chain = np.empty((num_walkers, num_step, num_params))
 
-        for i in np.arange(num_params):
-            samples = self.posterior_samples[:, i].T
-            chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
+            for i in np.arange(num_params):
+                samples = self.posterior_samples[:, i].T
+                chain[:, :, i] = samples.reshape((num_step, num_walkers)).T
+
+        # If chains are unflattened
+        else:
+            # shape [n_steps, n_walkers, n_parameters] -> [n_walkers, n_steps, n_parameters]
+            chain = np.transpose(self.posterior_samples, axes=(1, 0, 2))
+
         if burn_in != 0:
             chain = chain[:, burn_in:, :]
 

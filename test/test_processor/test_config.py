@@ -331,9 +331,9 @@ class TestModelConfig:
         assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
         config_5 = deepcopy(self.config_5)
-        config_5.settings["model"]["special"] = ["astrometric_uncertainty"]
         config_5.settings["special_options"] = {
-            "general_scaling": {"theta_E": [False, 1, 1]}
+            "general_scaling": {"theta_E": [False, 1, 1]},
+            "point_source_offset": 0.04,
         }
 
         kwargs_constraints5 = config_5.get_kwargs_constraints()
@@ -392,7 +392,7 @@ class TestModelConfig:
         assert kwargs_likelihood3["prior_ps"] == [[0, "ra_image", 0.21, 0.15]]
 
         config = deepcopy(self.config_5)
-        config.settings["model"]["special"] = ["astrometric_uncertainty"]
+        config.settings["special_options"] = {"point_source_offset": 0.04}
         kwargs_likelihood5 = config.get_kwargs_likelihood()
 
         assert kwargs_likelihood5["time_delay_likelihood"]
@@ -835,12 +835,12 @@ class TestModelConfig:
         # Test 1: ensure consistency of special models
         # if specified in config file
         config = deepcopy(self.config_5)
-        config.settings["model"]["special"] = ["astrometric_uncertainty"]
         config.settings["special_options"] = {
-            "general_scaling": {"theta_E": [False, 1, 1]}
+            "general_scaling": {"theta_E": [False, 1, 1]},
+            "point_source_offset": 0.04,
         }
         assert config.get_special_list() == [
-            "astrometric_uncertainty",
+            "point_source_offset",
             "general_scaling",
             "time_delay_likelihood",
         ]
@@ -849,13 +849,6 @@ class TestModelConfig:
         # specified in the config file
         config = deepcopy(self.config_1)
         assert config.get_special_list() == []
-
-        # Test 3: ensure error message prints if special
-        # type is not supported
-        config = deepcopy(self.config_3)
-        config.settings["model"]["special"] = ["INVALID"]
-        with pytest.raises(ValueError):
-            config.get_special_list()
 
     def test_get_lens_model_params(self):
         """Test `get_lens_model_params` method."""
@@ -1021,18 +1014,18 @@ class TestModelConfig:
         # if specified in config file
         config = deepcopy(self.config_5)
 
-        config.settings["model"]["special"] = ["astrometric_uncertainty"]
+        config.settings["band"] = ["F390W", "F814W"]
+
         config.settings["special_options"] = {
-            "delta_x_image": [0.004, 0.004, 0.004, 0.004],
-            "delta_y_image": [0.004, 0.004, 0.004, 0.004],
-            "delta_image_lower": -0.004,
-            "delta_image_upper": 0.004,
+            "point_source_offset": 0.004,
             "H0": 70,
             "Om0": 0.3,
             "general_scaling": {"theta_E": [False, 1, 1]},
             "theta_E_scale_factor": [1],
             "theta_E_scale_factor_sigma": [0.05],
             "theta_E_scale_pow": [1],
+            "multi_band_offsets": True,
+            "reference_band": 0,
         }
 
         params = config.get_special_params()
@@ -1067,7 +1060,32 @@ class TestModelConfig:
         assert "D_dt" in lower
         assert "D_dt" in upper
 
-        assert fixed == {"theta_E_scale_pow": [1]}
+        assert fixed["theta_E_scale_pow"] == [1]
+
+        assert init["kwargs_offsets"] == [
+            {},
+            {"ra_shift": 0.0, "dec_shift": 0.0, "phi_rot": 0.0},
+        ]
+
+        assert sigma["kwargs_offsets"] == [
+            {},
+            {"ra_shift": 0.01, "dec_shift": 0.01, "phi_rot": 0.001},
+        ]
+
+        assert lower["kwargs_offsets"] == [
+            {},
+            {"ra_shift": -1.0, "dec_shift": -1.0, "phi_rot": -0.5},
+        ]
+
+        assert upper["kwargs_offsets"] == [
+            {},
+            {"ra_shift": 1.0, "dec_shift": 1.0, "phi_rot": 0.5},
+        ]
+
+        assert fixed["kwargs_offsets"] == [
+            {},
+            {},
+        ]
 
         # Test 2: ensure special params is empty list of dictionaries
         # if not specified in the config file

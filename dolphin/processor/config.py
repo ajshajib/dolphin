@@ -345,11 +345,11 @@ class ModelConfig(Config):
                     "PROFILE_SHEAR" if num_image > 2 else "CENTER"
                 )
 
-        if "special" in self.settings["model"]:
+        if "special_options" in self.settings:
             special_list = self.get_special_list()
 
             for item in special_list:
-                if item == "astrometric_uncertainty":
+                if item == "point_source_offset":
                     kwargs_constraints.update({"point_source_offset": True})
                 if item == "general_scaling":
                     kwargs_constraints.update(
@@ -619,11 +619,11 @@ class ModelConfig(Config):
         ):
             use_default_logL_addition = True
 
-        if "special" in self.settings["model"]:
+        if "special_options" in self.settings:
             special_list = self.get_special_list()
 
             for i, model in enumerate(special_list):
-                if model == "astrometric_uncertainty":
+                if model == "point_source_offset":
                     kwargs_likelihood.update({"astrometric_likelihood": True})
 
         if use_default_logL_addition:
@@ -1180,12 +1180,11 @@ class ModelConfig(Config):
     def get_special_list(self):
         special_list = []
 
-        if "special" in self.settings["model"]:
-            for model in self.settings["model"]["special"]:
-                if model == "astrometric_uncertainty":
-                    special_list.append("astrometric_uncertainty")
-                else:
-                    raise ValueError(f"{model} not supported")
+        if (
+            "special_options" in self.settings
+            and "point_source_offset" in self.settings["special_options"]
+        ):
+            special_list.append("point_source_offset")
 
         if (
             "special_options" in self.settings
@@ -1199,6 +1198,12 @@ class ModelConfig(Config):
             and "time_delays_covariance" in self.settings["point_source_options"]
         ):
             special_list.append("time_delay_likelihood")
+
+        if (
+            "special_options" in self.settings
+            and "multi_band_offsets" in self.settings["special_options"]
+        ):
+            special_list.append("multi_band_offsets")
 
         return special_list
 
@@ -1757,52 +1762,37 @@ class ModelConfig(Config):
         fixed = {}
 
         for item in special_list:
-            if item == "astrometric_uncertainty":
+            if item == "point_source_offset":
                 num_point_sources = len(
-                    np.array(self.settings["special_options"]["delta_x_image"])
+                    self.settings["point_source_options"]["ra_init"]
                 )
+                offset_factor = self.settings["special_options"]["point_source_offset"]
 
                 init.update(
                     {
-                        "delta_x_image": np.array(
-                            self.settings["special_options"]["delta_x_image"]
-                        ),
-                        "delta_y_image": np.array(
-                            self.settings["special_options"]["delta_y_image"]
-                        ),
+                        "delta_x_image": offset_factor * np.ones(num_point_sources),
+                        "delta_y_image": offset_factor * np.ones(num_point_sources),
                     }
                 )
 
                 sigma.update(
                     {
-                        "delta_x_image": 0.004 * np.ones(num_point_sources),
-                        "delta_y_image": 0.004 * np.ones(num_point_sources),
+                        "delta_x_image": offset_factor * np.ones(num_point_sources),
+                        "delta_y_image": offset_factor * np.ones(num_point_sources),
                     }
                 )
 
                 lower.update(
                     {
-                        "delta_x_image": self.settings["special_options"][
-                            "delta_image_lower"
-                        ]
-                        * np.ones(num_point_sources),
-                        "delta_y_image": self.settings["special_options"][
-                            "delta_image_lower"
-                        ]
-                        * np.ones(num_point_sources),
+                        "delta_x_image": -offset_factor * np.ones(num_point_sources),
+                        "delta_y_image": -offset_factor * np.ones(num_point_sources),
                     }
                 )
 
                 upper.update(
                     {
-                        "delta_x_image": self.settings["special_options"][
-                            "delta_image_upper"
-                        ]
-                        * np.ones(num_point_sources),
-                        "delta_y_image": self.settings["special_options"][
-                            "delta_image_upper"
-                        ]
-                        * np.ones(num_point_sources),
+                        "delta_x_image": offset_factor * np.ones(num_point_sources),
+                        "delta_y_image": offset_factor * np.ones(num_point_sources),
                     }
                 )
 
@@ -1885,6 +1875,48 @@ class ModelConfig(Config):
                 lower.update({"D_dt": 0.5 * D_dt_fiducial})
                 upper.update({"D_dt": 2.0 * D_dt_fiducial})
                 fixed.update({})
+            elif item == "multi_band_offsets":
+
+                def _kwargs_offsets_per_band(values):
+                    reference_band = self.settings["special_options"].get(
+                        "reference_band", 0
+                    )
+                    return [
+                        {} if band == reference_band else dict(values)
+                        for band in range(self.number_of_bands)
+                    ]
+
+                init.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": 0.0, "dec_shift": 0.0, "phi_rot": 0.0}
+                        )
+                    }
+                )
+                sigma.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": 0.01, "dec_shift": 0.01, "phi_rot": 0.001}
+                        )
+                    }
+                )
+                fixed.update(
+                    {"kwargs_offsets": [{} for _ in range(self.number_of_bands)]}
+                )
+                lower.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": -1.0, "dec_shift": -1.0, "phi_rot": -0.5}
+                        )
+                    }
+                )
+                upper.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": 1.0, "dec_shift": 1.0, "phi_rot": 0.5}
+                        )
+                    }
+                )
 
         params = [init, sigma, fixed, lower, upper]
         return params

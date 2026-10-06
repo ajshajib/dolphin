@@ -635,7 +635,7 @@ class Output(Processor):
                 "Nautilus samples do not have walkers to reshape. Use `.samples_mcmc` directly."
             )
 
-        # If chains are flattened (kepts for backwards compatibility, possibly deprecate in future?)
+        # If chains are flattened (kept for backwards compatibility)
         if np.ndim(self.posterior_samples) == 2:
             num_params = self.num_params_sampled  # self.samples_mcmc.shape[1]
             num_walkers = walker_ratio * num_params

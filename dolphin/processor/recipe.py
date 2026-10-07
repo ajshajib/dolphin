@@ -272,7 +272,7 @@ class Recipe:
                         sampling_kwargs["re_use_samples"] = True
 
                 if self._config.settings["fitting"]["sampler"] == "emcee":
-                    sampling_kwargs["flatten_samples"] = False
+                    sampling_kwargs["flatten_chains"] = False
 
             fitting_kwargs_list.append(
                 [self._config.settings["fitting"]["sampler"], sampling_kwargs]

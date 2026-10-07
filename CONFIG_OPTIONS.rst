@@ -436,7 +436,7 @@ Special Options
 
         .. code-block:: yaml
         
-           multi_band_offsets: 0
+           reference_band: 0
 
     - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``, ``w0wzCDM``, ``Flatw0wzCDM``, ``wpwaCDM``, ``FlatwpwaCDM``.
 

@@ -89,15 +89,6 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-    - ``special``: *(Optional)* String or list of special parameter types.
-
-      - Type: ``string`` or ``list of strings``
-      - Example:
-
-        .. code-block:: yaml
-
-           special: ["astrometric_uncertainty"]
-
 
 Lens Options
 ------------
@@ -420,41 +411,32 @@ Special Options
 
   - Suboptions:
 
-    - ``delta_x_image``: Initial spread from point source centroid in the x-axis.
+    - ``point_source_offset``: Sample the lensed point source positions relative to the best-fit centroid. This can be useful, for example, to prevent artifically tight posteriors on lensed image positions and account for instrument uncertainty.
 
-      - Type: ``array of floats corresponding to the number of point sources``
+      - Type: ``float (units of arcsec)``
       - Example:
 
         .. code-block:: yaml
         
-           delta_x_image: [0.0, 0.0]
+           point_source_offset: 0.04
 
-    - ``delta_y_image``: Initial spread from point source centroid in the y-axis.
+    - ``multi_band_offsets``: Adds an additional likelihood term during modeling to align images across data bands.
 
-      - Type: ``array of floats corresponding to the number of point sources``
+      - Type: ``bool``
       - Example:
 
         .. code-block:: yaml
         
-           delta_y_image: [0.0, 0.0]
+           multi_band_offsets: True
 
-    - ``delta_image_lower``: Lower bound in spread of point source centroid sampler.
+    - ``reference_band``: *(Optional)* If `multi_band_offsets` is `True`, set the band in which the other data will be aligned to. Default is the first data band in the `band` model settings.
 
-      - Type: ``float``
+      - Type: ``int``
       - Example:
 
         .. code-block:: yaml
         
-           delta_image_lower: -0.004
-
-    - ``delta_image_upper``: Upper bound in spread of point source centroid sampler.
-
-      - Type: ``float``
-      - Example:
-
-        .. code-block:: yaml
-        
-           delta_image_upper: 0.004
+           reference_band: 0
 
     - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``, ``w0wzCDM``, ``Flatw0wzCDM``, ``wpwaCDM``, ``FlatwpwaCDM``.
 

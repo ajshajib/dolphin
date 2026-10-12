@@ -601,7 +601,7 @@ Numeric Options
   - Suboptions:
 
     - ``supersampling_factor``: Supersampling factor for each band. This determines the factor by which the grid
-      is supersampled during ray-shooting. If ``supersampled_convolution`` is enabled, the PSF is supersampled by
+      is supersampled during ray-shooting. If ``supersampling_convolution`` is enabled, the PSF is supersampled by
       the same factor and the grid remains supersampled during the convolution of extended source light. Default is 3.
       Does not affect the rendering of point sources.
 
@@ -613,7 +613,7 @@ Numeric Options
            numeric_options:
              supersampling_factor: [1, 2]
 
-    - ``supersampled_convolution``: Determines whether the convolution of extended source light is performed on a
+    - ``supersampling_convolution``: Determines whether the convolution of extended source light is performed on a
       supersampled grid for each band. Default is False. Does not affect the rendering of point sources.
 
       - Type: ``bool`` for all bands or ``list of bools`` specifying for each band
@@ -622,7 +622,7 @@ Numeric Options
         .. code-block:: yaml
 
            numeric_options:
-             supersampled_convolution: [False, True]
+             supersampling_convolution: [False, True]
 
     - ``point_source_supersampling_factor``: Point source supersampling factor for each band. This determines the
       factor by which the PSF and grid are supersampled only during the rendering of point sources. Default is 1.

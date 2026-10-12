@@ -28,7 +28,9 @@ Top-level information
 
        band: ["F475X", "F600LP"]
 
-- ``psf_supersampled_factor``: *(Optional)* Factor by which the Point Spread Function (PSF) is supersampled. Default is 1.
+- ``psf_supersampled_factor``: *(Optional)* Factor by which the input Point Spread Function (PSF) has already been supersampled. Default is 1.
+  To determine what supersampling factor to use during modeling, see ``Numeric Options``. In the below example, if
+  ``supersampling_factor=5`` in ``numeric_options``, the input PSF is first downsampled by a factor of 3, then supersampled by a factor of 5
 
   - Type: ``float``
   - Example:
@@ -598,15 +600,54 @@ Numeric Options
 
   - Suboptions:
 
-    - ``supersampling_factor``: Supersampling factor for each band.
+    - ``supersampling_factor``: Supersampling factor for each band. This determines the factor by which the grid
+      is supersampled during ray-shooting. If ``supersampled_convolution`` is enabled, the PSF is supersampled by
+      the same factor and the grid remains supersampled during the convolution of extended source light. Default is 3.
+      Does not affect the rendering of point sources.
 
-      - Type: ``list of integers``
+      - Type: ``integer`` for all bands or ``list of integers`` specifying for each band
       - Example:
 
         .. code-block:: yaml
 
            numeric_options:
-             supersampling_factor: [2]
+             supersampling_factor: [1, 2]
+
+    - ``supersampled_convolution``: Determines whether the convolution of extended source light is performed on a
+      supersampled grid for each band. Default is False. Does not affect the rendering of point sources.
+
+      - Type: ``bool`` for all bands or ``list of bools`` specifying for each band
+      - Example:
+
+        .. code-block:: yaml
+
+           numeric_options:
+             supersampled_convolution: [False, True]
+
+    - ``point_source_supersampling_factor``: Point source supersampling factor for each band. This determines the
+      factor by which the PSF and grid are supersampled only during the rendering of point sources. Default is 1.
+
+      - Type: ``integer`` for all bands or ``list of integers`` specifying for each band
+      - Example:
+
+        .. code-block:: yaml
+
+           numeric_options:
+             supersampling_factor: [1, 2]
+
+    - ``compute_mode``: Can be "regular" or "adaptive". If "regular", then the entire grid is supersampled at the
+      provided ``supersampling_factor`` for ray-shooting, and convolution if ``supersampling_convolution`` is enabled.
+      If "adaptive", then only a portion of the grid is supersampled. If using ``jaxtronomy``, then this setting only
+      affects ray-shooting. To determine which portions of the grid are supersampled in the "adaptive" case, see
+      ``Supersampled Indices Options``. Default is "regular".
+
+      - Type: ``string`` for all bands or ``list of strings`` specifying for each band
+      - Example:
+
+        .. code-block:: yaml
+
+           numeric_options:
+             supersampling_factor: ["regular", "adaptive"]
 
 Fitting Options
 ---------------

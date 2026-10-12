@@ -914,7 +914,7 @@ Fitting Options
                block_center_neighbour: 0.0
 
 - ``fitting_kwargs_list``: *(Optional)* User-provided list of fitting sequences to bypass the automated recipes in dolphin.
-In order to use this list, the ``Processor.swim()`` method must be called with ``recipe_name="custom"``.
+  In order to use this list, the ``Processor.swim()`` method must be called with ``recipe_name="custom"``.
 
   - Type: ``list``
   - Example:

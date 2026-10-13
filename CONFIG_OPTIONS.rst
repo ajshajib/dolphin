@@ -28,9 +28,11 @@ Top-level information
 
        band: ["F475X", "F600LP"]
 
-- ``psf_supersampled_factor``: *(Optional)* Factor by which the Point Spread Function (PSF) is supersampled. Default is 1.
+- ``psf_supersampled_factor``: *(Optional)* Factor by which the input Point Spread Function (PSF) has already been supersampled. Default is 1.
+  The supersampling factor used during modeling is set in `Numeric Options`_. In the example below, if
+  ``supersampling_factor=5`` in ``numeric_options``, the input PSF is first downsampled by a factor of 3, then supersampled by a factor of 5
 
-  - Type: ``float``
+  - Type: ``integer``
   - Example:
 
     .. code-block:: yaml
@@ -598,15 +600,54 @@ Numeric Options
 
   - Suboptions:
 
-    - ``supersampling_factor``: Supersampling factor for each band.
+    - ``supersampling_factor``: Supersampling factor for each band. This determines the factor by which the grid
+      is supersampled during ray-shooting. If ``supersampling_convolution`` is enabled, the PSF is supersampled by
+      the same factor and the grid remains supersampled during the convolution of extended source light. Default is 3.
+      This option does not affect the rendering of point sources.
 
-      - Type: ``list of integers``
+      - Type: ``integer`` for all bands or ``list of integers`` with one value per band
       - Example:
 
         .. code-block:: yaml
 
            numeric_options:
-             supersampling_factor: [2]
+             supersampling_factor: [1, 2]
+
+    - ``supersampling_convolution``: Determines whether the convolution of extended source light is performed on a
+      supersampled grid for each band. Default is ``False``. Does not affect the rendering of point sources.
+
+      - Type: ``bool`` for all bands or ``list of bools`` with one value per band
+      - Example:
+
+        .. code-block:: yaml
+
+           numeric_options:
+             supersampling_convolution: [False, True]
+
+    - ``point_source_supersampling_factor``: Point source supersampling factor for each band. This determines the
+      factor by which the PSF and grid are supersampled when rendering point sources only. Default is 1.
+
+      - Type: ``integer`` for all bands or ``list of integers`` with one value per band
+      - Example:
+
+        .. code-block:: yaml
+
+           numeric_options:
+             point_source_supersampling_factor: [1, 2]
+
+    - ``compute_mode``: Can be "regular" or "adaptive". If "regular", then the entire grid is supersampled at the
+      provided ``supersampling_factor`` for ray-shooting, and convolution if ``supersampling_convolution`` is enabled.
+      If ``"adaptive"``, then only a portion of the grid is supersampled. To determine which portions of the grid
+      are supersampled in the ``"adaptive"`` case, see `Supersampled Indices Options`_. Default is "regular". If 
+      using ``jaxtronomy``, then the grid is partially supersampled only during ray-shooting, while being fully supersampled during convolution.
+
+      - Type: ``string`` for all bands or ``list of strings`` with one value per band
+      - Example:
+
+        .. code-block:: yaml
+
+           numeric_options:
+             compute_mode: ["regular", "adaptive"]
 
 Fitting Options
 ---------------
@@ -873,7 +914,7 @@ Fitting Options
                block_center_neighbour: 0.0
 
 - ``fitting_kwargs_list``: *(Optional)* User-provided list of fitting sequences to bypass the automated recipes in dolphin.
-In order to use this list, the ``Processor.swim()`` method must be called with ``recipe_name="custom"``.
+  In order to use this list, the ``Processor.swim()`` method must be called with ``recipe_name="custom"``.
 
   - Type: ``list``
   - Example:
@@ -984,8 +1025,7 @@ Supersampled Indices Options
 
 - ``supersampled_indices``: *(Optional)* Settings for selecting regions of the image where supersampled
   ray-shooting and convolution occur. Pixels outside of the indicated regions will not be supersampled.
-  This option is only applied when ``compute_mode="adaptive"`` has been set in the Numeric Options.
-  If using ``jaxtronomy``, then this setting only affects ray-shooting.
+  This option is only applied when ``compute_mode="adaptive"`` has been set in the `Numeric Options`_.
 
   - Suboptions:
   

@@ -262,6 +262,13 @@ class TestPhotometry:
         kwargs_ps = None
         kwargs_special = kwargs_out["kwargs_special"]
 
+        # manually make a mask, as the old config mask functions do not work
+        mask = np.ones((120, 120), dtype=bool)
+        np.save(
+            f"{_TEST_IO_DIR}/settings/masks/mask_lens_system1_F390W.npy",
+            mask,
+        )
+
         result = self.photometry3._do_linear_inversion_single_band(
             data_band="F390W",
             kwargs_lens=kwargs_lens,
@@ -277,12 +284,12 @@ class TestPhotometry:
         """Test :meth:`~do_linear_inversion` output structure and shapes."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            self.photometry1.band_config,
-            self.photometry1.walker_ratio,
-            self.photometry1.burn_in,
-            self.photometry1.aperture_type,
-            self.photometry1.aperture_size,
-            self.photometry1.do_morphology,
+            band_config=self.photometry1.band_config,
+            walker_ratio=self.photometry1.walker_ratio,
+            burn_in=self.photometry1.burn_in,
+            aperture_type=self.photometry1.aperture_type,
+            aperture_size=self.photometry1.aperture_size,
+            do_morphology=self.photometry1.do_morphology,
         )
 
         assert isinstance(flux_chain, dict)
@@ -321,6 +328,22 @@ class TestPhotometry:
             assert np.all((phi >= 0) & (phi <= 180))
             assert np.all((q > 0) & (q <= 1))
             assert np.all(r_eff > 0)
+
+    def test_do_linear_inversion_with_rng(self):
+        """Test :meth:`~do_linear_inversion` output structure and shapes with
+        `n_samples` provided."""
+
+        flux_chain, _ = self.photometry1.do_linear_inversion(
+            band_config=self.photometry1.band_config,
+            walker_ratio=self.photometry1.walker_ratio,
+            burn_in=self.photometry1.burn_in,
+            n_samples=10,
+            aperture_type=self.photometry1.aperture_type,
+            aperture_size=self.photometry1.aperture_size,
+            do_morphology=self.photometry1.do_morphology,
+        )
+
+        assert len(flux_chain["F814W"]["lens"]) == 10
 
     def test_calculate_ab_magnitude(self):
         """Test :meth:`~calculate_ab_magnitude` functionality."""
@@ -420,12 +443,12 @@ class TestPhotometry:
         """Test :meth:`~save_to_hdf5` writes expected structure."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            self.photometry1.band_config,
-            self.photometry1.walker_ratio,
-            self.photometry1.burn_in,
-            self.photometry1.aperture_type,
-            self.photometry1.aperture_size,
-            self.photometry1.do_morphology,
+            band_config=self.photometry1.band_config,
+            walker_ratio=self.photometry1.walker_ratio,
+            burn_in=self.photometry1.burn_in,
+            aperture_type=self.photometry1.aperture_type,
+            aperture_size=self.photometry1.aperture_size,
+            do_morphology=self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -519,12 +542,12 @@ class TestPhotometry:
         """Test :meth:`~load_flux_chain` correctly reloads saved flux chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            self.photometry1.band_config,
-            self.photometry1.walker_ratio,
-            self.photometry1.burn_in,
-            self.photometry1.aperture_type,
-            self.photometry1.aperture_size,
-            self.photometry1.do_morphology,
+            band_config=self.photometry1.band_config,
+            walker_ratio=self.photometry1.walker_ratio,
+            burn_in=self.photometry1.burn_in,
+            aperture_type=self.photometry1.aperture_type,
+            aperture_size=self.photometry1.aperture_size,
+            do_morphology=self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -563,12 +586,12 @@ class TestPhotometry:
         chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            self.photometry1.band_config,
-            self.photometry1.walker_ratio,
-            self.photometry1.burn_in,
-            self.photometry1.aperture_type,
-            self.photometry1.aperture_size,
-            self.photometry1.do_morphology,
+            band_config=self.photometry1.band_config,
+            walker_ratio=self.photometry1.walker_ratio,
+            burn_in=self.photometry1.burn_in,
+            aperture_type=self.photometry1.aperture_type,
+            aperture_size=self.photometry1.aperture_size,
+            do_morphology=self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -605,12 +628,12 @@ class TestPhotometry:
         chain."""
 
         flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            self.photometry1.band_config,
-            self.photometry1.walker_ratio,
-            self.photometry1.burn_in,
-            self.photometry1.aperture_type,
-            self.photometry1.aperture_size,
-            self.photometry1.do_morphology,
+            band_config=self.photometry1.band_config,
+            walker_ratio=self.photometry1.walker_ratio,
+            burn_in=self.photometry1.burn_in,
+            aperture_type=self.photometry1.aperture_type,
+            aperture_size=self.photometry1.aperture_size,
+            do_morphology=self.photometry1.do_morphology,
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -645,12 +668,12 @@ class TestPhotometry:
         # test that morphology dictionary is None if do_morphology
         # is initialized as False
         flux_chain, _ = self.photometry2.do_linear_inversion(
-            self.photometry2.band_config,
-            self.photometry2.walker_ratio,
-            self.photometry2.burn_in,
-            self.photometry2.aperture_type,
-            self.photometry2.aperture_size,
-            self.photometry2.do_morphology,
+            band_config=self.photometry2.band_config,
+            walker_ratio=self.photometry2.walker_ratio,
+            burn_in=self.photometry2.burn_in,
+            aperture_type=self.photometry2.aperture_type,
+            aperture_size=self.photometry2.aperture_size,
+            do_morphology=self.photometry2.do_morphology,
         )
 
         self.photometry2.save_to_hdf5(flux_chain)

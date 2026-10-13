@@ -1026,16 +1026,10 @@ class ModelConfig(Config):
                 for key, value in self.settings[option_name].items():
                     numeric_options[key] = deepcopy(value)
 
-        supersampling_factor = numeric_options.get(
-            "supersampling_factor", [3] * self.number_of_bands
-        )
-        if supersampling_factor is None:
-            supersampling_factor = [3] * self.number_of_bands
-
         kwargs_numerics = []
         for n in range(self.number_of_bands):
             kwargs_num = {
-                "supersampling_factor": supersampling_factor[n],
+                "supersampling_factor": 3,
                 "supersampling_convolution": False,
                 "supersampling_kernel_size": 3,
                 "flux_evaluate_indexes": None,
@@ -1044,9 +1038,6 @@ class ModelConfig(Config):
             }
 
             for key, value in numeric_options.items():
-                if key == "supersampling_factor":
-                    continue
-
                 if isinstance(value, list) and len(value) == self.number_of_bands:
                     kwargs_num[key] = deepcopy(value[n])
                 else:

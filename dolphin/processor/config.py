@@ -345,11 +345,11 @@ class ModelConfig(Config):
                     "PROFILE_SHEAR" if num_image > 2 else "CENTER"
                 )
 
-        if "special_options" in self.settings:
+        if "special" in self.settings["model"]:
             special_list = self.get_special_list()
 
             for item in special_list:
-                if item == "point_source_offset":
+                if item == "astrometric_uncertainty":
                     kwargs_constraints.update({"point_source_offset": True})
                 if item == "general_scaling":
                     kwargs_constraints.update(
@@ -619,11 +619,11 @@ class ModelConfig(Config):
         ):
             use_default_logL_addition = True
 
-        if "special_options" in self.settings:
+        if "special" in self.settings["model"]:
             special_list = self.get_special_list()
 
             for i, model in enumerate(special_list):
-                if model == "point_source_offset":
+                if model == "astrometric_uncertainty":
                     kwargs_likelihood.update({"astrometric_likelihood": True})
 
         if use_default_logL_addition:
@@ -1180,30 +1180,20 @@ class ModelConfig(Config):
     def get_special_list(self):
         special_list = []
 
-        if (
-            "special_options" in self.settings
-            and "point_source_offset" in self.settings["special_options"]
-        ):
-            special_list.append("point_source_offset")
-
-        if (
-            "special_options" in self.settings
-            and "general_scaling" in self.settings["special_options"]
-        ):
-            special_list.append("general_scaling")
-
-        if (
-            "point_source_options" in self.settings
-            and "time_delays_measured" in self.settings["point_source_options"]
-            and "time_delays_covariance" in self.settings["point_source_options"]
-        ):
-            special_list.append("time_delay_likelihood")
-
-        if (
-            "special_options" in self.settings
-            and "multi_band_offsets" in self.settings["special_options"]
-        ):
-            special_list.append("multi_band_offsets")
+        if "special" in self.settings["model"]:
+            for model in self.settings["model"]["special"]:
+                if model == "astrometric_uncertainty":
+                    special_list.append("astrometric_uncertainty")
+                elif model == "time_delay_likelihood":
+                    special_list.append("time_delay_likelihood")
+                elif model == "general_scaling":
+                    special_list.append("general_scaling")
+                elif model == "multi_band_offsets":
+                    special_list.append("multi_band_offsets")
+                else:
+                    raise ValueError(
+                        f"{model} not supported! Options are: astrometric_uncertainty, time_delay_likelihood, general_scaling, multi_band_offsets."
+                    )
 
         return special_list
 
@@ -1762,37 +1752,52 @@ class ModelConfig(Config):
         fixed = {}
 
         for item in special_list:
-            if item == "point_source_offset":
+            if item == "astrometric_uncertainty":
                 num_point_sources = len(
-                    self.settings["point_source_options"]["ra_init"]
+                    np.array(self.settings["special_options"]["delta_x_image"])
                 )
-                offset_factor = self.settings["special_options"]["point_source_offset"]
 
                 init.update(
                     {
-                        "delta_x_image": offset_factor * np.ones(num_point_sources),
-                        "delta_y_image": offset_factor * np.ones(num_point_sources),
+                        "delta_x_image": np.array(
+                            self.settings["special_options"]["delta_x_image"]
+                        ),
+                        "delta_y_image": np.array(
+                            self.settings["special_options"]["delta_y_image"]
+                        ),
                     }
                 )
 
                 sigma.update(
                     {
-                        "delta_x_image": offset_factor * np.ones(num_point_sources),
-                        "delta_y_image": offset_factor * np.ones(num_point_sources),
+                        "delta_x_image": 0.004 * np.ones(num_point_sources),
+                        "delta_y_image": 0.004 * np.ones(num_point_sources),
                     }
                 )
 
                 lower.update(
                     {
-                        "delta_x_image": -offset_factor * np.ones(num_point_sources),
-                        "delta_y_image": -offset_factor * np.ones(num_point_sources),
+                        "delta_x_image": self.settings["special_options"][
+                            "delta_image_lower"
+                        ]
+                        * np.ones(num_point_sources),
+                        "delta_y_image": self.settings["special_options"][
+                            "delta_image_lower"
+                        ]
+                        * np.ones(num_point_sources),
                     }
                 )
 
                 upper.update(
                     {
-                        "delta_x_image": offset_factor * np.ones(num_point_sources),
-                        "delta_y_image": offset_factor * np.ones(num_point_sources),
+                        "delta_x_image": self.settings["special_options"][
+                            "delta_image_upper"
+                        ]
+                        * np.ones(num_point_sources),
+                        "delta_y_image": self.settings["special_options"][
+                            "delta_image_upper"
+                        ]
+                        * np.ones(num_point_sources),
                     }
                 )
 

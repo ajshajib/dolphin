@@ -637,9 +637,11 @@ Numeric Options
 
     - ``compute_mode``: Can be "regular" or "adaptive". If "regular", then the entire grid is supersampled at the
       provided ``supersampling_factor`` for ray-shooting, and convolution if ``supersampling_convolution`` is enabled.
-      If ``"adaptive"``, then only a portion of the grid is supersampled. If using ``jaxtronomy``, then this setting only
-      affects ray-shooting. To determine which portions of the grid are supersampled in the ``"adaptive"`` case, see
-      `Supersampled Indices Options`_. Default is "regular".
+      If ``"adaptive"``, then only a portion of the grid is supersampled. To determine which portions of the grid
+      are supersampled in the ``"adaptive"`` case, see `Supersampled Indices Options`_. Default is "regular".
+
+      - If using ``jaxtronomy``, then the grid is partially supersampled only during ray-shooting, while being
+        fully supersampled during convolution.
 
       - Type: ``string`` for all bands or ``list of strings`` with one value per band
       - Example:
@@ -1026,7 +1028,6 @@ Supersampled Indices Options
 - ``supersampled_indices``: *(Optional)* Settings for selecting regions of the image where supersampled
   ray-shooting and convolution occur. Pixels outside of the indicated regions will not be supersampled.
   This option is only applied when ``compute_mode="adaptive"`` has been set in the Numeric Options.
-  If using ``jaxtronomy``, then this setting only affects ray-shooting.
 
   - Suboptions:
   

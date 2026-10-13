@@ -1025,7 +1025,7 @@ Supersampled Indices Options
 
 - ``supersampled_indices``: *(Optional)* Settings for selecting regions of the image where supersampled
   ray-shooting and convolution occur. Pixels outside of the indicated regions will not be supersampled.
-  This option is only applied when ``compute_mode="adaptive"`` has been set in the Numeric Options.
+  This option is only applied when ``compute_mode="adaptive"`` has been set in the `Numeric Options`_.
 
   - Suboptions:
   

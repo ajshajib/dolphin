@@ -711,12 +711,15 @@ class TestModelConfig:
         config = deepcopy(self.config_3)
         config.settings["numeric_options"] = {
             "supersampling_factor": [2, 4],
+            "supersampling_convolution": [False, True],
             "compute_mode": ["adaptive", "regular"],
             "point_source_supersampling_factor": [1, 2],
         }
         kwargs_numerics = config.get_kwargs_numerics()
         assert kwargs_numerics[0]["supersampling_factor"] == 2
         assert kwargs_numerics[1]["supersampling_factor"] == 4
+        assert kwargs_numerics[0]["supersampling_convolution"] is False
+        assert kwargs_numerics[1]["supersampling_convolution"] is True
         assert kwargs_numerics[0]["compute_mode"] == "adaptive"
         assert kwargs_numerics[1]["compute_mode"] == "regular"
         assert kwargs_numerics[0]["point_source_supersampling_factor"] == 1
@@ -732,7 +735,7 @@ class TestModelConfig:
         assert kwargs_numerics[0]["supersampled_indexes"] is None
 
         config.settings["numeric_options"] = {
-            "supersampling_factor": [3],
+            "supersampling_factor": 3,
             "compute_mode": "regular",
         }
         kwargs_numerics = config.get_kwargs_numerics()

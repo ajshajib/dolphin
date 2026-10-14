@@ -331,7 +331,11 @@ class TestModelConfig:
         assert kwargs_constraints_wsat == self.config_wsat.get_kwargs_constraints()
 
         config_5 = deepcopy(self.config_5)
-        config_5.settings["model"]["special"] = ["astrometric_uncertainty", "general_scaling", "time_delay_likelihood"]
+        config_5.settings["model"]["special"] = [
+            "astrometric_uncertainty",
+            "general_scaling",
+            "time_delay_likelihood",
+        ]
         config_5.settings["special_options"] = {
             "general_scaling": {"theta_E": [False, 1, 1]}
         }

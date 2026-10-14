@@ -91,9 +91,9 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-    - ``special``: *(Optional)* String or list of special parameter types.
+    - ``special``: *(Optional)* List of special parameter models. Support models include: ``astrometric_uncertainty``, ``general_scaling``, ``time_delay_likelihood``, ``multi_band_offsets``.
 
-      - Type: ``string`` or ``list of strings``
+      - Type: ``list of strings``
       - Example:
 
         .. code-block:: yaml
@@ -458,6 +458,15 @@ Special Options
         
            delta_image_upper: 0.004
 
+    - ``reference_band``: *(Optional)* If `multi_band_offsets` in `model["special"]`, set the band in which the other data will be aligned to. Default is the first data band in the `band` model settings.
+
+      - Type: ``int``
+      - Example:
+
+        .. code-block:: yaml
+
+          reference_band: 1
+
     - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``, ``w0wzCDM``, ``Flatw0wzCDM``, ``wpwaCDM``, ``FlatwpwaCDM``.
 
       - Type: ``string``
@@ -586,7 +595,7 @@ Special Options
 
           theta_E_scale_pow: [1]
 
-    - Combining all of the above, a specified parameter, :math:`p`, is scaled from the sampled scale factor, :math:`f_p`, and sampled power-law index, :math:`\alpha_p`, as:
+    - Combining all of the above, a specified parameter, :math:`p`, is scaled from the sampled scale factor, :math:`f_p`, and specified power-law index, :math:`\alpha_p`, as:
 
       .. math::
 

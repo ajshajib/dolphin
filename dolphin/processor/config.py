@@ -1175,21 +1175,16 @@ class ModelConfig(Config):
             for model in self.settings["model"]["special"]:
                 if model == "astrometric_uncertainty":
                     special_list.append("astrometric_uncertainty")
+                elif model == "time_delay_likelihood":
+                    special_list.append("time_delay_likelihood")
+                elif model == "general_scaling":
+                    special_list.append("general_scaling")
+                elif model == "multi_band_offsets":
+                    special_list.append("multi_band_offsets")
                 else:
-                    raise ValueError(f"{model} not supported")
-
-        if (
-            "special_options" in self.settings
-            and "general_scaling" in self.settings["special_options"]
-        ):
-            special_list.append("general_scaling")
-
-        if (
-            "point_source_options" in self.settings
-            and "time_delays_measured" in self.settings["point_source_options"]
-            and "time_delays_covariance" in self.settings["point_source_options"]
-        ):
-            special_list.append("time_delay_likelihood")
+                    raise ValueError(
+                        f"{model} not supported! Options are: astrometric_uncertainty, time_delay_likelihood, general_scaling, multi_band_offsets."
+                    )
 
         return special_list
 
@@ -1876,6 +1871,48 @@ class ModelConfig(Config):
                 lower.update({"D_dt": 0.5 * D_dt_fiducial})
                 upper.update({"D_dt": 2.0 * D_dt_fiducial})
                 fixed.update({})
+            elif item == "multi_band_offsets":
+
+                def _kwargs_offsets_per_band(values):
+                    reference_band = self.settings["special_options"].get(
+                        "reference_band", 0
+                    )
+                    return [
+                        {} if band == reference_band else dict(values)
+                        for band in range(self.number_of_bands)
+                    ]
+
+                init.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": 0.0, "dec_shift": 0.0, "phi_rot": 0.0}
+                        )
+                    }
+                )
+                sigma.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": 0.01, "dec_shift": 0.01, "phi_rot": 0.001}
+                        )
+                    }
+                )
+                fixed.update(
+                    {"kwargs_offsets": [{} for _ in range(self.number_of_bands)]}
+                )
+                lower.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": -1.0, "dec_shift": -1.0, "phi_rot": -0.5}
+                        )
+                    }
+                )
+                upper.update(
+                    {
+                        "kwargs_offsets": _kwargs_offsets_per_band(
+                            {"ra_shift": 1.0, "dec_shift": 1.0, "phi_rot": 0.5}
+                        )
+                    }
+                )
 
         params = [init, sigma, fixed, lower, upper]
         return params

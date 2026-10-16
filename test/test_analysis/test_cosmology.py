@@ -21,12 +21,12 @@ _TEST_LENS_NAME = "lensed_quasar"
 
 _Z_LENS = 0.5
 _Z_SOURCE = 2.0
-_WALKER_RATIO = 2 
+_WALKER_RATIO = 2
 
 
 # CREATE TEST UTILITIES BEFORE MAIN MODULE
 def _make_cosmology(**overrides):
-    """Create a Cosmology instance with default test settings"""
+    """Create a Cosmology instance with default test settings."""
     kwargs = {
         "io_directory": str(_TEST_IO_DIR),
         "lens_name": _TEST_LENS_NAME,
@@ -38,6 +38,7 @@ def _make_cosmology(**overrides):
     }
     kwargs.update(overrides)
     return Cosmology(**kwargs)
+
 
 def _fake_sigma(calls):
     """Stand-in for TDCosmography.velocity_dispersion_dimension_less.
@@ -51,11 +52,11 @@ def _fake_sigma(calls):
 
     return fake
 
+
 def _selected_samples(cosmo, rng_seed, n_samples):
     """Reproduce the chain rows the class will pick on its first RNG call."""
     chain = cosmo.output.get_reshaped_emcee_chain(
-        cosmo.lens_name, cosmo.model_id, cosmo.walker_ratio,
-        cosmo.burn_in
+        cosmo.lens_name, cosmo.model_id, cosmo.walker_ratio, cosmo.burn_in
     )
     flat = chain.reshape(-1, chain.shape[-1])
     idx = np.random.default_rng(rng_seed).choice(
@@ -63,9 +64,11 @@ def _selected_samples(cosmo, rng_seed, n_samples):
     )
     return flat[idx]
 
+
 @pytest.fixture
 def cosmo(monkeypatch):
-    """Create a test Cosmology instance with monkeypatched velocity_dispersion_dimension_less"""
+    """Create a test Cosmology instance with monkeypatched
+    velocity_dispersion_dimension_less."""
     c = _make_cosmology(n_samples=5, rng_seed=0)
     calls = []
     monkeypatch.setattr(
@@ -76,11 +79,12 @@ def cosmo(monkeypatch):
     c.calls = calls
     return c
 
+
 class FakePhotometry:
     """Configurable stand-in for the Photometry class."""
 
-    morphology = None          # what load_morphology_chain returns
-    raise_not_found = False    # simulate no saved morphology file
+    morphology = None  # what load_morphology_chain returns
+    raise_not_found = False  # simulate no saved morphology file
     inversion_calls = None
 
     def __init__(self, **kwargs):
@@ -95,35 +99,40 @@ class FakePhotometry:
         FakePhotometry.inversion_calls.append(kwargs)
         return None, self.morphology
 
+
 @pytest.fixture
 def fake_photometry(monkeypatch):
-    """Create a fixture for the FakePhotometry class"""
+    """Create a fixture for the FakePhotometry class."""
     FakePhotometry.morphology = None
     FakePhotometry.raise_not_found = False
     FakePhotometry.inversion_calls = []
     monkeypatch.setattr(cosmology_module, "Photometry", FakePhotometry)
     return FakePhotometry
 
+
 def _r_eff_index(cosmo):
     if "R_sersic_lens_light0" not in cosmo.output.params_sampled:
         pytest.skip("example model does not sample R_sersic_lens_light0")
     return cosmo.output.params_sampled.index("R_sersic_lens_light0")
 
+
 def _expected_ddt(dphi_arcsec2, dt_days):
-    """Independent D_dt [Mpc] = c * dt / dphi, with no mass-sheet terms"""
+    """Independent D_dt [Mpc] = c * dt / dphi, with no mass-sheet terms."""
     dphi_rad2 = np.asarray(dphi_arcsec2) * (1 * u.arcsec).to(u.rad).value ** 2
     dt_s = (np.asarray(dt_days) * u.day).to(u.s).value
     return (_C_LIGHT.value * dt_s / dphi_rad2 * u.m).to(u.Mpc).value
 
+
 def _ddt_of(cosmology, z_lens, z_source):
-    """Time-delay distance [Mpc] for an astropy cosmology"""
+    """Time-delay distance [Mpc] for an astropy cosmology."""
     dd = cosmology.angular_diameter_distance(z_lens).value
     ds = cosmology.angular_diameter_distance(z_source).value
     dds = cosmology.angular_diameter_distance_z1z2(z_lens, z_source).value
     return (1 + z_lens) * dd * ds / dds
 
+
 def _expected_h0_and_g(fid, z_lens, z_source, om_samples, ddt):
-    """Replay of `calculated_sampled_h0` for a known set of Omega_m draws"""
+    """Replay of `calculated_sampled_h0` for a known set of Omega_m draws."""
     ddt = np.asarray(ddt, dtype=float)
     if ddt.ndim == 1:
         ddt = ddt[:, None]
@@ -144,53 +153,59 @@ def _expected_h0_and_g(fid, z_lens, z_source, om_samples, ddt):
         g[i] = np.sqrt(r / r_fid)
     return h0, g
 
+
 @pytest.fixture
 def cosmo_tcmb():
-    """Create a cosmology fixture with a fixed Tcmb0"""
+    """Create a cosmology fixture with a fixed Tcmb0."""
     return _make_cosmology(
         n_samples=5,
         rng_seed=0,
         cosmo_fiducial=FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725),
     )
 
+
 def _om_draws(seed=0, om_min=0.05, om_max=0.5, n=5):
-    """Omega_m draws the method makes on the first RNG call after seeding"""
+    """Omega_m draws the method makes on the first RNG call after seeding."""
     return np.random.default_rng(seed).uniform(om_min, om_max, size=n)
 
 
 def _dd_over_dds(om, z_lens, z_source):
-    """Compute Dd/Dds for a given Omega_m and redshifts"""
+    """Compute Dd/Dds for a given Omega_m and redshifts."""
     c = FlatLambdaCDM(H0=70.0, Om0=float(om), Tcmb0=2.725)
     return (
         c.angular_diameter_distance(z_lens).value
         / c.angular_diameter_distance_z1z2(z_lens, z_source).value
     )
 
+
 def _expected_loglike(om_samples, sigma_obs, err, J, kappa, g):
-    """Replay of `logarithmic_kinematic_likelihood` for a known set 
-    of Omega_m draws
-    """
+    """Replay of `logarithmic_kinematic_likelihood` for a known set of Omega_m draws."""
     c_km_s = _C_LIGHT.to("km/s").value
     out = []
     for i, om in enumerate(om_samples):
         pred = (
-            np.sqrt(1 - kappa[i]) * g[i] * c_km_s
+            np.sqrt(1 - kappa[i])
+            * g[i]
+            * c_km_s
             * np.sqrt(_dd_over_dds(om, _Z_LENS, _Z_SOURCE) * J[i])
         )
         out.append(-0.5 * ((sigma_obs - pred) / err) ** 2)
     return np.array(out)
 
+
 def _set_bic(cosmo, bic):
     """BIC output stub for compute_bic_weight()"""
     cosmo.output = SimpleNamespace(_bic=bic)
 
+
 def _expected_bic_weight(bic_model, bic_min, s):
-    """Closed form of the BIC weight integral"""
+    """Closed form of the BIC weight integral."""
     a = 0.5
     z = (bic_min - bic_model) / s
     return norm.cdf(z) + np.exp(
         -a * (bic_model - bic_min) + 0.5 * (a * s) ** 2
     ) * norm.cdf(-(z + a * s))
+
 
 class TestCosmology:
     def setup_class(self):
@@ -208,9 +223,8 @@ class TestCosmology:
         assert self.cosmo.kwargs_model.get("multi_plane", False) is False
 
     def test_default_n_samples_is_chain_length(self):
-        """Check that the number of samples matches chain length if not
-        specified directly
-        """
+        """Check that the number of samples matches chain length if not specified
+        directly."""
         cosmo = _make_cosmology(burn_in=0)
         chain = self.output.get_reshaped_emcee_chain(
             _TEST_LENS_NAME, _TEST_MODEL_ID, _WALKER_RATIO, 0
@@ -218,15 +232,14 @@ class TestCosmology:
         assert cosmo.n_samples == chain.reshape(-1, chain.shape[-1]).shape[0]
 
     def test_burn_in_reduces_default_n_samples(self):
-        """Check that specifying a burn-in reduces the number of samples"""
+        """Check that specifying a burn-in reduces the number of samples."""
         full = _make_cosmology(burn_in=0)
         trimmed = _make_cosmology(burn_in=10)
         assert trimmed.n_samples < full.n_samples
 
     def test_fermat_potential_shape(self):
-        """Check that the shape of the Fermat potential array is as expected
-        given the number of images.
-        """
+        """Check that the shape of the Fermat potential array is as expected given the
+        number of images."""
         dphi = self.cosmo.fermat_potential()
         kwargs_ps = self.cosmo.param.args2kwargs(
             self.output.get_reshaped_emcee_chain(
@@ -259,13 +272,13 @@ class TestCosmology:
         np.testing.assert_allclose(dphi, 1.5)  # 2.0 - 0.5
 
     def test_fermat_potential_reproducible(self):
-        """Check that the Fermat potential is reproducible with the same seed"""
+        """Check that the Fermat potential is reproducible with the same seed."""
         a = _make_cosmology(n_samples=5, rng_seed=1).fermat_potential()
         b = _make_cosmology(n_samples=5, rng_seed=1).fermat_potential()
         np.testing.assert_array_equal(a, b)
 
     def test_fermat_potential_seed_changes_selection(self):
-        """Check that changing the seed changes the Fermat potential"""
+        """Check that changing the seed changes the Fermat potential."""
         a = _make_cosmology(n_samples=5, rng_seed=1).fermat_potential()
         b = _make_cosmology(n_samples=5, rng_seed=2).fermat_potential()
         assert not np.array_equal(a, b)
@@ -294,16 +307,14 @@ class TestCosmology:
 
     # single component lens light models
     def test_single_component_uses_chain_r_eff(self, cosmo):
-        """Test that the single component lens light model uses the 
-        correct r_eff from the chain when computing J
-        """
+        """Test that the single component lens light model uses the correct r_eff from
+        the chain when computing J."""
         cosmo.kwargs_model["index_lens_light_model_list"] = [[0]]
         idx = _r_eff_index(cosmo)
         samples = _selected_samples(cosmo, rng_seed=0, n_samples=5)
         beta_draws = np.zeros(len(samples))
         out = cosmo.velocity_dispersion_dimension_less(
-            beta_draws=beta_draws,
-            kinematics_band="F814W"
+            beta_draws=beta_draws, kinematics_band="F814W"
         )
 
         expected_r_eff = samples[:, idx]
@@ -320,7 +331,7 @@ class TestCosmology:
 
     # multi-component lens light
     def test_multi_component_uses_saved_morphology(self, cosmo, fake_photometry):
-        """Test when a multi-component lens light model uses the saved morphology"""
+        """Test when a multi-component lens light model uses the saved morphology."""
         cosmo.kwargs_model["index_lens_light_model_list"] = [[0, 1]]
         band = cosmo.output.model_settings["band"][0]
         r_eff = np.array([0.5, 0.6, 0.7, 0.8, 0.9])
@@ -328,8 +339,7 @@ class TestCosmology:
         beta_draws = np.zeros(len(r_eff))
 
         out = cosmo.velocity_dispersion_dimension_less(
-            beta_draws=beta_draws,
-            kinematics_band="F814W"
+            beta_draws=beta_draws, kinematics_band="F814W"
         )
 
         samples = _selected_samples(cosmo, rng_seed=0, n_samples=5)
@@ -340,7 +350,7 @@ class TestCosmology:
         assert fake_photometry.inversion_calls == []  # no recompute
 
     def test_multi_component_falls_back_to_inversion(self, cosmo, fake_photometry):
-        """Test when a multi-component lens light model falls back to inversion"""
+        """Test when a multi-component lens light model falls back to inversion."""
         cosmo.kwargs_model["index_lens_light_model_list"] = [[0, 1]]
         band = cosmo.output.model_settings["band"][0]
         r_eff = np.full(5, 0.42)
@@ -350,9 +360,7 @@ class TestCosmology:
         beta_draws = np.zeros(len(r_eff))
 
         cosmo.velocity_dispersion_dimension_less(
-            beta_draws=beta_draws,
-            band_config=band_config,
-            kinematics_band="F814W"
+            beta_draws=beta_draws, band_config=band_config, kinematics_band="F814W"
         )
 
         assert len(fake_photometry.inversion_calls) == 1
@@ -378,16 +386,15 @@ class TestCosmology:
         assert out.shape == (7, 3)
 
     def test_ddt_matches_analytic(self, cosmo):
-        """With sigma=0 the draws equal the measured delays, so the result
-        must equal c * dt / dphi exactly (kappa terms are zero)."""
-        fermat = np.array([[0.1, 0.3, 0.6],
-                           [0.12, 0.28, 0.55]])
+        """With sigma=0 the draws equal the measured delays, so the result must equal c
+        * dt / dphi exactly (kappa terms are zero)."""
+        fermat = np.array([[0.1, 0.3, 0.6], [0.12, 0.28, 0.55]])
         dt = [3.0, 8.0, 15.0]
         out = cosmo.ddt_from_time_delay(fermat, dt, [0.0, 0.0, 0.0])
         np.testing.assert_allclose(out, _expected_ddt(fermat, dt), rtol=1e-6)
 
     def test_ddt_reproducible_with_same_seed(self):
-        """Same seed should produce identical results"""
+        """Same seed should produce identical results."""
         fermat = np.full((10, 2), 0.3)
         a = _make_cosmology(n_samples=5, rng_seed=4).ddt_from_time_delay(
             fermat, [5.0, 9.0], [1.0, 1.0]
@@ -398,7 +405,7 @@ class TestCosmology:
         np.testing.assert_array_equal(a, b)
 
     def test_ddt_seed_changes_draws(self):
-        """Different seeds should produce different results"""
+        """Different seeds should produce different results."""
         fermat = np.full((10, 1), 0.3)
         a = _make_cosmology(n_samples=5, rng_seed=1).ddt_from_time_delay(
             fermat, [10.0], [1.0]
@@ -439,11 +446,15 @@ class TestCosmology:
         assert np.all((om >= 0.05) & (om <= 0.5))
 
     def test_h0_matches_replay(self, cosmo_tcmb):
-        ddt = np.array([[2800.0, 3100.0],
-                        [3000.0, 3200.0],
-                        [3300.0, 2900.0],
-                        [3050.0, 3050.0],
-                        [2700.0, 3400.0]])
+        ddt = np.array(
+            [
+                [2800.0, 3100.0],
+                [3000.0, 3200.0],
+                [3300.0, 2900.0],
+                [3050.0, 3050.0],
+                [2700.0, 3400.0],
+            ]
+        )
         h0, om, g = cosmo_tcmb.calculate_sampled_h0(ddt)
         exp_h0, exp_g = _expected_h0_and_g(
             cosmo_tcmb.cosmology, _Z_LENS, _Z_SOURCE, om, ddt
@@ -470,22 +481,18 @@ class TestCosmology:
         J = rng.uniform(0.05, 0.3, 5)
         kappa = rng.uniform(-0.05, 0.15, 5)
         g = rng.uniform(0.9, 1.1, 5)
-        out = cosmo.compute_logarithmic_kinematic_likelihood(
-            260.0, 12.0, J, kappa, g
-        )
+        out = cosmo.compute_logarithmic_kinematic_likelihood(260.0, 12.0, J, kappa, g)
         expected = _expected_loglike(_om_draws(), 260.0, 12.0, J, kappa, g)
         np.testing.assert_allclose(out, expected, rtol=1e-10)
 
     # tests for compute_bic_weight()
     @pytest.mark.parametrize("delta", [-10.0, -2.0, 0.0, 2.0, 10.0])
     def test_bic_matches_closed_form(self, cosmo, delta):
-        """Exact check against the analytic convolution"""
-        bic_all = [100.0, 104.0, 110.0, 120.0]   # BIC_min = 100
+        """Exact check against the analytic convolution."""
+        bic_all = [100.0, 104.0, 110.0, 120.0]  # BIC_min = 100
         sigma = np.std(bic_all, ddof=1)
         _set_bic(cosmo, 100.0 + delta)
-        w = cosmo.compute_bic_weight(
-            bic_all, n_grid=5001
-        )
+        w = cosmo.compute_bic_weight(bic_all, n_grid=5001)
         np.testing.assert_allclose(
             w, _expected_bic_weight(100.0 + delta, 100.0, sigma), rtol=1e-4
         )

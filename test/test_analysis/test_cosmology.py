@@ -213,7 +213,7 @@ class TestCosmology:
         self.cosmo = _make_cosmology(n_samples=5)
 
     def test_multi_plane_toggle(self):
-        """Check that multi-plane is disabled by default"""
+        """Check that multi-plane is disabled by default."""
         # enable multi-plane
         self.cosmo.kwargs_model["multi_plane"] = True
         assert self.cosmo.kwargs_model.get("multi_plane", False) is True
@@ -251,7 +251,7 @@ class TestCosmology:
         assert dphi.shape == (5, expected_cols)
 
     def test_fermat_potential_double(self, cosmo, monkeypatch):
-        """Two images should be a single Fermat potential difference per sample"""
+        """Two images should be a single Fermat potential difference per sample."""
         monkeypatch.setattr(
             cosmo.param,
             "args2kwargs",

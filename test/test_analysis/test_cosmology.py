@@ -197,8 +197,14 @@ class TestCosmology:
         self.output = Output(_TEST_IO_DIR)
         self.cosmo = _make_cosmology(n_samples=5)
 
-    def test_multi_plane_disabled(self):
+    def test_multi_plane_toggle(self):
         """Check that multi-plane is disabled by default"""
+        # enable multi-plane
+        self.cosmo.kwargs_model["multi_plane"] = True
+        assert self.cosmo.kwargs_model.get("multi_plane", False) is True
+
+        # disable it again
+        self.cosmo.kwargs_model["multi_plane"] = False
         assert self.cosmo.kwargs_model.get("multi_plane", False) is False
 
     def test_default_n_samples_is_chain_length(self):
@@ -230,6 +236,27 @@ class TestCosmology:
         n_images = len(kwargs_ps[0]["ra_image"])
         expected_cols = 3 if n_images == 4 else 1
         assert dphi.shape == (5, expected_cols)
+
+    def test_fermat_potential_double(self, cosmo, monkeypatch):
+        """Two images should be a single Fermat potential difference per sample"""
+        monkeypatch.setattr(
+            cosmo.param,
+            "args2kwargs",
+            lambda sample: {
+                "kwargs_lens": [],
+                "kwargs_ps": [{"ra_image": np.array([1.0, -1.0])}],
+            },
+        )
+        monkeypatch.setattr(
+            cosmo.TDCosmography,
+            "fermat_potential",
+            lambda **kwargs: np.array([0.5, 2.0]),
+        )
+
+        dphi = cosmo.fermat_potential()
+
+        assert dphi.shape == (5, 1)
+        np.testing.assert_allclose(dphi, 1.5)  # 2.0 - 0.5
 
     def test_fermat_potential_reproducible(self):
         """Check that the Fermat potential is reproducible with the same seed"""
@@ -388,6 +415,21 @@ class TestCosmology:
         assert h0.shape == (5, 3)
         assert om.shape == (5,)
         assert g.shape == (5,)
+
+        # test for only one image pair (1D input)
+        ddt = np.linspace(2700.0, 3300.0, 5)
+        h0_1d, om_1d, g_1d = _make_cosmology(
+            n_samples=5, rng_seed=0
+        ).calculate_sampled_h0(ddt)
+        assert h0_1d.shape == (5, 1)
+
+        h0_2d, om_2d, g_2d = _make_cosmology(
+            n_samples=5, rng_seed=0
+        ).calculate_sampled_h0(ddt[:, None])
+
+        np.testing.assert_array_equal(om_1d, om_2d)
+        np.testing.assert_allclose(h0_1d, h0_2d)
+        np.testing.assert_allclose(g_1d, g_2d)
 
     def test_h0_om_samples_replay_seed_and_bounds(self, cosmo):
         _, om, _ = cosmo.calculate_sampled_h0(np.full((5, 1), 3000.0))

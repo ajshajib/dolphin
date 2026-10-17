@@ -212,15 +212,28 @@ class TestCosmology:
         self.output = Output(_TEST_IO_DIR)
         self.cosmo = _make_cosmology(n_samples=5)
 
-    def test_multi_plane_toggle(self):
-        """Check that multi-plane is disabled by default."""
-        # enable multi-plane
-        self.cosmo.kwargs_model["multi_plane"] = True
-        assert self.cosmo.kwargs_model.get("multi_plane", False) is True
+    def test_multi_plane_false(self, monkeypatch):
+        """multi_plane in kwargs_model is disabled when Cosmology is created."""
+        original_load_output = Output.load_output
 
-        # disable it again
-        self.cosmo.kwargs_model["multi_plane"] = False
-        assert self.cosmo.kwargs_model.get("multi_plane", False) is False
+        def load_output_multi_plane(output_self, *args, **kwargs):
+            result = original_load_output(output_self, *args, **kwargs)
+            # pretend the saved model was run with multi_plane enabled
+            output_self.model_settings.setdefault("kwargs_model", {}).update(
+                {
+                    "multi_plane": True,
+                    # lenstronomy requires one redshift per lens model
+                    "lens_redshift_list": [_Z_LENS, _Z_LENS],
+                    "z_source": _Z_SOURCE,
+                }
+            )
+            return result
+
+        monkeypatch.setattr(Output, "load_output", load_output_multi_plane)
+
+        cosmo = _make_cosmology(n_samples=5)
+
+        assert cosmo.kwargs_model["multi_plane"] is False
 
     def test_default_n_samples_is_chain_length(self):
         """Check that the number of samples matches chain length if not specified

@@ -91,7 +91,7 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-    - ``special``: *(Optional)* List of special parameter models. Support models include: ``astrometric_uncertainty``, ``general_scaling``, ``time_delay_likelihood``, ``multi_band_offsets``.
+    - ``special``: *(Optional)* List of special parameter models. Supported models include: ``astrometric_uncertainty``, ``general_scaling``, ``time_delay_likelihood``, ``multi_band_offsets``.
 
       - Type: ``list of strings``
       - Example:

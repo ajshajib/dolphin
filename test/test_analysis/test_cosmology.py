@@ -33,7 +33,7 @@ def _make_cosmology(**overrides):
         "model_id": _TEST_MODEL_ID,
         "z_lens": _Z_LENS,
         "z_source": _Z_SOURCE,
-        "cosmo_fiducial": FlatLambdaCDM(H0=70, Om0=0.3),
+        "cosmology_model": FlatLambdaCDM(H0=70, Om0=0.3),
         "walker_ratio": _WALKER_RATIO,
     }
     kwargs.update(overrides)
@@ -131,36 +131,26 @@ def _ddt_of(cosmology, z_lens, z_source):
     return (1 + z_lens) * dd * ds / dds
 
 
-def _expected_h0_and_g(fid, z_lens, z_source, om_samples, ddt):
+def _expected_h0(fid, z_lens, z_source, om_samples, ddt):
     """Replay of `calculated_sampled_h0` for a known set of Omega_m draws."""
     ddt = np.asarray(ddt, dtype=float)
     if ddt.ndim == 1:
         ddt = ddt[:, None]
     h0_fid = float(fid.H0.value)
-    r_fid = (
-        fid.angular_diameter_distance(z_source).value
-        / fid.angular_diameter_distance_z1z2(z_lens, z_source).value
-    )
     h0 = np.empty_like(ddt)
-    g = np.empty(len(om_samples))
     for i, om in enumerate(om_samples):
-        c = FlatLambdaCDM(H0=h0_fid, Om0=float(om), Tcmb0=2.725)
+        c = FlatLambdaCDM(H0=h0_fid, Om0=float(om))
         h0[i, :] = h0_fid * _ddt_of(c, z_lens, z_source) / ddt[i, :]
-        r = (
-            c.angular_diameter_distance(z_source).value
-            / c.angular_diameter_distance_z1z2(z_lens, z_source).value
-        )
-        g[i] = np.sqrt(r / r_fid)
-    return h0, g
+    return h0
 
 
 @pytest.fixture
-def cosmo_tcmb():
-    """Create a cosmology fixture with a fixed Tcmb0."""
+def cosmo_fixed():
+    """Create a cosmology fixture."""
     return _make_cosmology(
         n_samples=5,
         rng_seed=0,
-        cosmo_fiducial=FlatLambdaCDM(H0=70, Om0=0.3, Tcmb0=2.725),
+        cosmology_model=FlatLambdaCDM(H0=70, Om0=0.3),
     )
 
 
@@ -171,18 +161,30 @@ def _om_draws(seed=0, om_min=0.05, om_max=0.5, n=5):
 
 def _dd_over_dds(om, z_lens, z_source):
     """Compute Dd/Dds for a given Omega_m and redshifts."""
-    c = FlatLambdaCDM(H0=70.0, Om0=float(om), Tcmb0=2.725)
+    c = FlatLambdaCDM(H0=70.0, Om0=float(om))
     return (
         c.angular_diameter_distance(z_lens).value
         / c.angular_diameter_distance_z1z2(z_lens, z_source).value
     )
 
 
-def _expected_loglike(om_samples, sigma_obs, err, J, kappa, g):
+def _expected_loglike(fid, om_samples, sigma_obs, err, J, kappa):
     """Replay of `logarithmic_kinematic_likelihood` for a known set of Omega_m draws."""
     c_km_s = _C_LIGHT.to("km/s").value
     out = []
+    h0_fid = float(fid.H0.value)
+    g = np.empty(len(om_samples))
+    r_fid = (
+        fid.angular_diameter_distance(_Z_SOURCE).value
+        / fid.angular_diameter_distance_z1z2(_Z_LENS, _Z_SOURCE).value
+    )
     for i, om in enumerate(om_samples):
+        c = FlatLambdaCDM(H0=h0_fid, Om0=float(om))
+        r = (
+            c.angular_diameter_distance(_Z_SOURCE).value
+            / c.angular_diameter_distance_z1z2(_Z_LENS, _Z_SOURCE).value
+        )
+        g[i] = np.sqrt(r / r_fid)
         pred = (
             np.sqrt(1 - kappa[i])
             * g[i]
@@ -431,34 +433,32 @@ class TestCosmology:
     # Tests for calculate_sampled_h0()
     def test_h0_output_shapes(self, cosmo):
         ddt = np.full((5, 3), 3000.0)
-        h0, om, g = cosmo.calculate_sampled_h0(ddt)
+        h0, om = cosmo.calculate_sampled_h0(ddt)
         assert h0.shape == (5, 3)
         assert om.shape == (5,)
-        assert g.shape == (5,)
 
         # test for only one image pair (1D input)
         ddt = np.linspace(2700.0, 3300.0, 5)
-        h0_1d, om_1d, g_1d = _make_cosmology(
-            n_samples=5, rng_seed=0
-        ).calculate_sampled_h0(ddt)
+        h0_1d, om_1d = _make_cosmology(n_samples=5, rng_seed=0).calculate_sampled_h0(
+            ddt
+        )
         assert h0_1d.shape == (5, 1)
 
-        h0_2d, om_2d, g_2d = _make_cosmology(
-            n_samples=5, rng_seed=0
-        ).calculate_sampled_h0(ddt[:, None])
+        h0_2d, om_2d = _make_cosmology(n_samples=5, rng_seed=0).calculate_sampled_h0(
+            ddt[:, None]
+        )
 
         np.testing.assert_array_equal(om_1d, om_2d)
         np.testing.assert_allclose(h0_1d, h0_2d)
-        np.testing.assert_allclose(g_1d, g_2d)
 
     def test_h0_om_samples_replay_seed_and_bounds(self, cosmo):
-        _, om, _ = cosmo.calculate_sampled_h0(np.full((5, 1), 3000.0))
+        _, om = cosmo.calculate_sampled_h0(np.full((5, 1), 3000.0))
         np.testing.assert_array_equal(
             om, np.random.default_rng(0).uniform(0.05, 0.5, size=5)
         )
         assert np.all((om >= 0.05) & (om <= 0.5))
 
-    def test_h0_matches_replay(self, cosmo_tcmb):
+    def test_h0_matches_replay(self, cosmo_fixed):
         ddt = np.array(
             [
                 [2800.0, 3100.0],
@@ -468,17 +468,14 @@ class TestCosmology:
                 [2700.0, 3400.0],
             ]
         )
-        h0, om, g = cosmo_tcmb.calculate_sampled_h0(ddt)
-        exp_h0, exp_g = _expected_h0_and_g(
-            cosmo_tcmb.cosmology, _Z_LENS, _Z_SOURCE, om, ddt
-        )
+        h0, om = cosmo_fixed.calculate_sampled_h0(ddt)
+        exp_h0 = _expected_h0(cosmo_fixed.cosmology, _Z_LENS, _Z_SOURCE, om, ddt)
         np.testing.assert_allclose(h0, exp_h0, rtol=1e-10)
-        np.testing.assert_allclose(g, exp_g, rtol=1e-10)
 
     def test_h0_same_cosmology_for_every_image_pair(self, cosmo):
         """Columns share Omega_m, so column ratios depend only on D_dt."""
         ddt = np.column_stack([np.full(5, 3000.0), np.full(5, 6000.0)])
-        h0, _, _ = cosmo.calculate_sampled_h0(ddt)
+        h0, _ = cosmo.calculate_sampled_h0(ddt)
         np.testing.assert_allclose(h0[:, 0] / h0[:, 1], 2.0)
 
     def test_h0_reproducible_with_same_seed(self):
@@ -489,14 +486,15 @@ class TestCosmology:
             np.testing.assert_array_equal(x, y)
 
     # tests for compute_logarithmic_kinematic_likelihood()
-    def test_kin_matches_replay(self, cosmo):
+    def test_kin_matches_replay(self, cosmo, cosmo_fixed):
         rng = np.random.default_rng(123)
         J = rng.uniform(0.05, 0.3, 5)
         kappa = rng.uniform(-0.05, 0.15, 5)
-        g = rng.uniform(0.9, 1.1, 5)
-        out = cosmo.compute_logarithmic_kinematic_likelihood(260.0, 12.0, J, kappa, g)
-        expected = _expected_loglike(_om_draws(), 260.0, 12.0, J, kappa, g)
-        np.testing.assert_allclose(out, expected, rtol=1e-10)
+        out = cosmo.compute_logarithmic_kinematic_likelihood(260.0, 12.0, J, kappa)
+        expected_L = _expected_loglike(
+            cosmo_fixed.cosmology, _om_draws(), 260.0, 12.0, J, kappa
+        )
+        np.testing.assert_allclose(out, expected_L, rtol=1e-10)
 
     # tests for compute_bic_weight()
     @pytest.mark.parametrize("delta", [-10.0, -2.0, 0.0, 2.0, 10.0])

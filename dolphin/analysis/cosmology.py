@@ -3,7 +3,6 @@
 __author__ = "brady-ryan"
 
 import numpy as np
-from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 
 from ..analysis.output import Output
@@ -22,7 +21,7 @@ class Cosmology:
         model_id,
         z_lens,
         z_source,
-        cosmo_fiducial,
+        cosmology_model,
         walker_ratio,
         burn_in=0,
         n_samples=None,
@@ -36,7 +35,7 @@ class Cosmology:
     ):
         """Initialize the class with the following inputs:
 
-        :param io_directory: path to the input/output directory. Should not end with slash.
+        :param io_directory: path to the input/output directory. It should not end with a slash.
         :type io_directory: `str`
         :param lens_name: name of the system to analyze
         :type lens_name: `str`
@@ -46,8 +45,8 @@ class Cosmology:
         :type z_lens: `float`
         :param z_source: redshift of the source
         :type z_source: `float`
-        :param cosmo_fiducial: fiducial `astropy.cosmology` instance
-        :type cosmo_fiducial: `astropy.cosmology` instance
+        :param cosmology_model: model `astropy.cosmology` instance
+        :type cosmology_model: `astropy.cosmology` instance
         :param walker_ratio: number of walkers per parameter in MCMC
         :type walker_ratio: `int`
         :param burn_in: (optional) number of burn-in steps to discard
@@ -78,7 +77,9 @@ class Cosmology:
         self.model_id = model_id
         self.z_lens = z_lens
         self.z_source = z_source
-        self.cosmology = cosmo_fiducial
+        self.cosmology = cosmology_model
+        self.cosmology_model_class = type(self.cosmology)
+        self.cosmology_model_base_params = dict(self.cosmology.parameters)
         self.walker_ratio = walker_ratio
         self.n_samples = n_samples
         self.burn_in = burn_in
@@ -125,10 +126,10 @@ class Cosmology:
 
         self.file_system = FileSystem(self.output.io_directory)
         self.TDCosmography = TDCosmography(
-            z_lens,
-            z_source,
+            self.z_lens,
+            self.z_source,
             self.kwargs_model,
-            cosmo_fiducial=cosmo_fiducial,
+            cosmo_fiducial=self.cosmology,
             lens_model_kinematics_bool=lens_model_kinematics_bool,
             light_model_kinematics_bool=light_model_kinematics_bool,
             kwargs_seeing=kwargs_seeing,
@@ -220,12 +221,13 @@ class Cosmology:
         kinematics_band,
         band_config=None,
     ):
-        """Sigma^2 = Dd/Dds * c^2 * J(kwargs_lens, kwargs_light, anisotropy) (Equation
-        4.11 in Birrer et al. 2016 or Equation 6 in Birrer et al. 2019) J() is a
+        r""":math:`\sigma^2 = \frac{D_d}{D_{ds}} c^2 J(\text{kwargs}_{\text{lens}},
+        \text{kwargs}_{\text{light}}, \text{anisotropy})`
+
+        Equation 4.11 in Birrer et al. 2016 or Equation 6 in Birrer et al. 2019. J() is a
         dimensionless and cosmological independent quantity only depending on angular
         units. This function returns J given the lens and light parameters and the
         anisotropy choice without an external mass sheet correction.
-
 
         :param beta_draws: stellar anisotropy samples for computation of J, must be the same
           in number as `n_samples`
@@ -235,6 +237,7 @@ class Cosmology:
         :type kinematics_band: `str`
         :param band_config: (optional) dictionary describing the filters and profile indices to
           utilize in the linear inversion to retrieve `r_eff` (see `Photometry` class documentation)
+        :type band_config: `dict`
 
         :return: Dimensionless velocity dispersion samples.
         :rtype: `np.ndarray`
@@ -373,80 +376,75 @@ class Cosmology:
     def calculate_sampled_h0(
         self,
         ddt_samples,
-        Om_min=0.05,
-        Om_max=0.5,
+        omega_m_min=0.05,
+        omega_m_max=0.5,
     ):
-        """Compute H0 posterior samples from D_dt posterior samples. For multiple image
-        pairs, H0 is calculated independently for each pair.
+        """Compute H0 posterior samples from D_dt posterior samples in the cosmology of
+        `cosmology_model` with Omega_m sampled uniformly. For multiple image pairs, H0
+        is calculated independently for each pair.
 
         :param ddt_samples: time-delay distance samples
         :type ddt_samples: `np.ndarray`
-        :param Om_min: (optional) minimum value of Omega_m to sample from
-        :type Om_min: float
-        :param Om_max: (optional) maximum value of Omega_m to sample from
-        :type Om_max: float
+        :param omega_m_min: (optional) minimum value of Omega_m to sample from
+        :type omega_m_min: float
+        :param omega_m_max: (optional) maximum value of Omega_m to sample from
+        :type omega_m_max: float
 
-        :return: H0 posterior samples, sampled Omega_m values, and cosmology weights
-        :rtype: tuple (np.ndarray, np.ndarray, np.ndarray)
+        :return: H0 posterior samples and sampled Omega_m values
+        :rtype: tuple (np.ndarray, np.ndarray)
         """
 
         ddt_samples = np.asarray(ddt_samples)
         if ddt_samples.ndim == 1:
             ddt_samples = ddt_samples[:, None]
 
-        # fiducial kinematic weighting
-        Ds_fiducial = self.cosmology.angular_diameter_distance(self.z_source).value
-        Dds_fiducial = self.cosmology.angular_diameter_distance_z1z2(
-            self.z_lens, self.z_source
-        ).value
-        R_fiducial = Ds_fiducial / Dds_fiducial
-
         # one Omega_m draw per MCMC realization
-        Om_samples = self.rng.uniform(
-            Om_min,
-            Om_max,
+        omega_m_samples = self.rng.uniform(
+            omega_m_min,
+            omega_m_max,
             size=self.n_samples,
         )
 
-        H0_samples = np.empty_like(ddt_samples)
-        g_samples = np.empty(self.n_samples)
-        H0_fiducial = float(self.cosmology.H0.value)
+        h0_samples = np.empty_like(ddt_samples)
         for i in range(self.n_samples):
-            cos_temp = FlatLambdaCDM(
-                H0=H0_fiducial,
-                Om0=float(Om_samples[i]),
-                Tcmb0=2.725,
-            )
+            params = {
+                **self.cosmology_model_base_params,
+                "Om0": float(omega_m_samples[i]),
+            }
+            cos_temp = self.cosmology_model_class(name="temp", **params)
+            H0_reference = float(cos_temp.H0.value)
 
-            Dd = cos_temp.angular_diameter_distance(self.z_lens).value
-            Ds = cos_temp.angular_diameter_distance(self.z_source).value
-            Dds = cos_temp.angular_diameter_distance_z1z2(
+            dd = cos_temp.angular_diameter_distance(self.z_lens).value
+            ds = cos_temp.angular_diameter_distance(self.z_source).value
+            dds = cos_temp.angular_diameter_distance_z1z2(
                 self.z_lens, self.z_source
             ).value
 
-            Ddt = (1 + self.z_lens) * Dd * Ds / Dds
+            ddt = (1 + self.z_lens) * dd * ds / dds
 
             # same cosmology for every image pair
-            H0_samples[i, :] = H0_fiducial * Ddt / ddt_samples[i, :]
+            h0_samples[i, :] = H0_reference * ddt / ddt_samples[i, :]
 
-            R = Ds / Dds
-            g_samples[i] = np.sqrt(R / R_fiducial)
-
-        return H0_samples, Om_samples, g_samples
+        return h0_samples, omega_m_samples
 
     def compute_logarithmic_kinematic_likelihood(
         self,
         sigma_v_observed,
         sigma_v_observed_error,
-        J_dimensionless_samples,
+        j_dimensionless_samples,
         kappa_ext_samples,
-        g_samples,
-        Om_min=0.05,
-        Om_max=0.5,
+        omega_m_min=0.05,
+        omega_m_max=0.5,
     ):
-        """Evaluates the log-probability of the modeled velocity dispersion, derived
-        from `J_dimensionless_samples`, under a normal distribution centered on
-        `sigma_v_observed` with standard deviation `sigma_v_observed_error`.
+        """Evaluates the log-probability of the modeled velocity dispersion with
+        corrections for external convergence, derived from `j_dimensionless_samples`,
+        under a normal distribution centered on `sigma_v_observed` with standard
+        deviation `sigma_v_observed_error`. The function also applies cosmology weights
+        to account for the cosmological dependence of the kinematics. The predicted
+        velocity dispersion scales with the distance ratio :math:`R = D_s / D_ds`, so
+        each realization is weighted by.
+
+            :math:`g_i = sqrt(R(Omega_m,i) / R_model)`,
 
         :param sigma_v_observed: observed velocity dispersion (in km/s) of the
           main deflector
@@ -454,53 +452,57 @@ class Cosmology:
         :param sigma_v_observed_error: 1-sigma error (in km/s) on the velocity
           dispersion of the main deflector
         :type sigma_v_observed_error: `float`
-        :param J_dimensionless_samples: modeled dimensionless velocity dispersion `J` samples, as computed
+        :param j_dimensionless_samples: modeled dimensionless velocity dispersion `J` samples, as computed
           by :meth:`~dolphin.analysis.cosmology.velocity_dispersion_dimension_less`
-        :type J_dimensionless_samples: `np.array`
+        :type j_dimensionless_samples: `np.array`
         :param kappa_ext_samples: array containing external convergence samples
-        :type kappa_ext_samples: `array`
-        :param g_samples: cosmological weighting as determined by
-          :meth:`~dolphin.analysis.cosmology.calculate_sampled_h0`
-        :type g_samples: `np.ndarray`
-        :param Om_min: (optional) minimum value of Omega_m to sample from
-        :type Om_min: float
-        :param Om_max: (optional) maximum value of Omega_m to sample from
-        :type Om_max: float
+        :type kappa_ext_samples: `np.array`
+        :param omega_m_min: (optional) minimum value of Omega_m to sample from
+        :type omega_m_min: float
+        :param omega_m_max: (optional) maximum value of Omega_m to sample from
+        :type omega_m_max: float
 
         :return: logarithmic kinematic likelihood term
         :rtype: `np.array`
         """
 
+        # model kinematic weighting
+        ds_model = self.cosmology.angular_diameter_distance(self.z_source).value
+        dds_model = self.cosmology.angular_diameter_distance_z1z2(
+            self.z_lens, self.z_source
+        ).value
+        R_model = ds_model / dds_model
+
         # one Omega_m draw per MCMC realization
-        Om_samples = self.rng.uniform(
-            Om_min,
-            Om_max,
+        omega_m_samples = self.rng.uniform(
+            omega_m_min,
+            omega_m_max,
             size=self.n_samples,
         )
 
         # compute predicted velocity dispersion based upon dimensionless value,
         # external convergence, and g-term weighting. Then, compute the
         # logarithmic kinematic likelihood term
-        H0_fiducial = float(self.cosmology.H0.value)
         logarithmic_likelihood = []
         for i in range(self.n_samples):
-            cos_temp = FlatLambdaCDM(
-                H0=H0_fiducial,
-                Om0=float(Om_samples[i]),
-                Tcmb0=2.725,
-            )
-            D_d = cos_temp.angular_diameter_distance(self.z_lens).value
-            D_ds = cos_temp.angular_diameter_distance_z1z2(
+            params = {
+                **self.cosmology_model_base_params,
+                "Om0": float(omega_m_samples[i]),
+            }
+            cos_temp = self.cosmology_model_class(name="temp", **params)
+            dd = cos_temp.angular_diameter_distance(self.z_lens).value
+            ds = cos_temp.angular_diameter_distance(self.z_source).value
+            dds = cos_temp.angular_diameter_distance_z1z2(
                 self.z_lens, self.z_source
             ).value
+            R = ds / dds
+            g = np.sqrt(R / R_model)
 
             c_km_s = 299792.458
 
-            sigma_v = c_km_s * np.sqrt(D_d / D_ds * J_dimensionless_samples[i])
+            sigma_v = c_km_s * np.sqrt(dd / dds * j_dimensionless_samples[i])
 
-            sigma_v_predicted = (
-                np.sqrt(1 - kappa_ext_samples[i]) * g_samples[i] * sigma_v
-            )
+            sigma_v_predicted = np.sqrt(1 - kappa_ext_samples[i]) * g * sigma_v
             logarithmic_likelihood_single = (
                 -0.5
                 * ((sigma_v_observed - sigma_v_predicted) / sigma_v_observed_error) ** 2

@@ -1183,7 +1183,7 @@ class ModelConfig(Config):
                     special_list.append("multi_band_offsets")
                 else:
                     raise ValueError(
-                        f"{model} not supported! Options are: astrometric_uncertainty, time_delay_likelihood, general_scaling, multi_band_offsets."
+                        f"{model} not supported! Options are: `astrometric_uncertainty`, `time_delay_likelihood`, `general_scaling`, and `multi_band_offsets`."
                     )
 
         return special_list
@@ -1872,27 +1872,21 @@ class ModelConfig(Config):
                 upper.update({"D_dt": 2.0 * D_dt_fiducial})
                 fixed.update({})
             elif item == "multi_band_offsets":
-
-                def _kwargs_offsets_per_band(values):
-                    reference_band = self.settings["special_options"].get(
-                        "reference_band", 0
-                    )
-                    return [
-                        {} if band == reference_band else dict(values)
-                        for band in range(self.number_of_bands)
-                    ]
-
                 init.update(
                     {
-                        "kwargs_offsets": _kwargs_offsets_per_band(
-                            {"ra_shift": 0.0, "dec_shift": 0.0, "phi_rot": 0.0}
+                        "kwargs_offsets": _build_kwargs_offsets_per_band(
+                            self.settings,
+                            self.number_of_bands,
+                            {"ra_shift": 0.0, "dec_shift": 0.0, "phi_rot": 0.0},
                         )
                     }
                 )
                 sigma.update(
                     {
-                        "kwargs_offsets": _kwargs_offsets_per_band(
-                            {"ra_shift": 0.01, "dec_shift": 0.01, "phi_rot": 0.001}
+                        "kwargs_offsets": _build_kwargs_offsets_per_band(
+                            self.settings,
+                            self.number_of_bands,
+                            {"ra_shift": 0.01, "dec_shift": 0.01, "phi_rot": 0.001},
                         )
                     }
                 )
@@ -1901,15 +1895,19 @@ class ModelConfig(Config):
                 )
                 lower.update(
                     {
-                        "kwargs_offsets": _kwargs_offsets_per_band(
-                            {"ra_shift": -1.0, "dec_shift": -1.0, "phi_rot": -0.5}
+                        "kwargs_offsets": _build_kwargs_offsets_per_band(
+                            self.settings,
+                            self.number_of_bands,
+                            {"ra_shift": -1.0, "dec_shift": -1.0, "phi_rot": -0.5},
                         )
                     }
                 )
                 upper.update(
                     {
-                        "kwargs_offsets": _kwargs_offsets_per_band(
-                            {"ra_shift": 1.0, "dec_shift": 1.0, "phi_rot": 0.5}
+                        "kwargs_offsets": _build_kwargs_offsets_per_band(
+                            self.settings,
+                            self.number_of_bands,
+                            {"ra_shift": 1.0, "dec_shift": 1.0, "phi_rot": 0.5},
                         )
                     }
                 )
@@ -2282,3 +2280,26 @@ def _build_cosmology(special_options):
             cosmo_kwargs[param] = cosmo_kwargs[param] * unit
 
     return cosmo_cls(**cosmo_kwargs)
+
+
+def _build_kwargs_offsets_per_band(settings, number_of_bands, kwargs_offsets):
+    """Build and return the appropriate dictionaries for the `multi_band_offsets`
+    special model.
+
+    :param settings: `ModelConfig.settings` dictionary
+    :type settings: `dict`
+    :param number_of_bands: number of data bands in the model
+    :type number_of_bands: `int`
+    :param kwargs_offsets: RA shift, DEC shift, and Phi rotation parameters
+      to be passed into `kwargs_special`. For the reference band, an empty
+      dictionary is created.
+    :type kwargs_offsets: `dict`
+
+    :return: dictionaries for the `multi_band_offsets` special model.
+    :rtype: `dict`
+    """
+    reference_band = settings["special_options"].get("reference_band", 0)
+    return [
+        {} if band == reference_band else dict(kwargs_offsets)
+        for band in range(number_of_bands)
+    ]

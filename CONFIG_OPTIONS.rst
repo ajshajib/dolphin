@@ -91,9 +91,9 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-    - ``special``: *(Optional)* String or list of special parameter types.
+    - ``special``: *(Optional)* List of strings for special parameters or settings. Supported values include: ``"astrometric_uncertainty"``, ``"general_scaling"``, ``"time_delay_likelihood"``, ``"multi_band_offsets"``.
 
-      - Type: ``string`` or ``list of strings``
+      - Type: ``list of strings``
       - Example:
 
         .. code-block:: yaml
@@ -399,7 +399,7 @@ Point Source Options
 
     - ``time_delays_measured``: Relative time delays (in days) with respect to the first point-source image. If this is provided, ``time_delays_covariance`` must also be provided to compute the time-delay likelihood, which is then added to the combined likelihood.
 
-      - Type: ``list of floats```
+      - Type: ``list of floats``
       - Example:
 
         .. code-block:: yaml
@@ -457,6 +457,15 @@ Special Options
         .. code-block:: yaml
         
            delta_image_upper: 0.004
+
+    - ``reference_band``: *(Optional)* If ``multi_band_offsets`` is in ``model["special"]``, set the band to which the other data will be aligned. The default is the first data band in the `band` model settings.
+
+      - Type: ``int``
+      - Example:
+
+        .. code-block:: yaml
+
+          reference_band: 1
 
     - ``cosmology``: *(Optional)* Astropy cosmology model to use for time-delay computations. Supported models: ``FlatLambdaCDM`` (default), ``LambdaCDM``, ``FlatwCDM``, ``wCDM``, ``Flatw0waCDM``, ``w0waCDM``, ``w0wzCDM``, ``Flatw0wzCDM``, ``wpwaCDM``, ``FlatwpwaCDM``.
 
@@ -586,7 +595,7 @@ Special Options
 
           theta_E_scale_pow: [1]
 
-    - Combining all of the above, a specified parameter, :math:`p`, is scaled from the sampled scale factor, :math:`f_p`, and sampled power-law index, :math:`\alpha_p`, as:
+    - Combining all of the above, a specified parameter, :math:`p`, is scaled from the sampled scale factor, :math:`f_p`, and specified power-law index, :math:`\alpha_p`, as:
 
       .. math::
 

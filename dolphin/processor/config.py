@@ -1170,7 +1170,7 @@ class ModelConfig(Config):
 
     def get_special_list(self):
         """Return `special_list`.
-        
+
         :return: list of special setting keywords
         :rtype: `list` of `str`
         """

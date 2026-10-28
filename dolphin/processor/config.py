@@ -1169,6 +1169,11 @@ class ModelConfig(Config):
             return []
 
     def get_special_list(self):
+        """Return `special_list`.
+        
+        :return: list of special setting keywords
+        :rtype: `list` of `str`
+        """
         special_list = []
 
         if "special" in self.settings["model"]:
@@ -2291,12 +2296,12 @@ def _build_kwargs_offsets_per_band(settings, number_of_bands, kwargs_offsets):
     :param number_of_bands: number of data bands in the model
     :type number_of_bands: `int`
     :param kwargs_offsets: RA shift, DEC shift, and Phi rotation parameters
-      to be passed into `kwargs_special`. For the reference band, an empty
-      dictionary is created.
+      to be passed into `kwargs_special`.
     :type kwargs_offsets: `dict`
 
     :return: dictionaries for the `multi_band_offsets` special model.
-    :rtype: `dict`
+      For the reference band, an empty dictionary is created.
+    :rtype: `list` of `dict`
     """
     reference_band = settings["special_options"].get("reference_band", 0)
     return [

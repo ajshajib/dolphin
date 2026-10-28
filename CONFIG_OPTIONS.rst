@@ -91,7 +91,7 @@ Model Section
 
            point_source: ["LENSED_POSITION"]
 
-    - ``special``: *(Optional)* List of strings for special parameters or settings. Supported models include: ``"astrometric_uncertainty"``, ``"general_scaling"``, ``"time_delay_likelihood"``, ``"multi_band_offsets"``.
+    - ``special``: *(Optional)* List of strings for special parameters or settings. Supported values include: ``"astrometric_uncertainty"``, ``"general_scaling"``, ``"time_delay_likelihood"``, ``"multi_band_offsets"``.
 
       - Type: ``list of strings``
       - Example:
@@ -399,7 +399,7 @@ Point Source Options
 
     - ``time_delays_measured``: Relative time delays (in days) with respect to the first point-source image. If this is provided, ``time_delays_covariance`` must also be provided to compute the time-delay likelihood, which is then added to the combined likelihood.
 
-      - Type: ``list of floats```
+      - Type: ``list of floats``
       - Example:
 
         .. code-block:: yaml
@@ -458,7 +458,7 @@ Special Options
         
            delta_image_upper: 0.004
 
-    - ``reference_band``: *(Optional)* If `multi_band_offsets` in `model["special"]`, set the band in which the other data will be aligned to. Default is the first data band in the `band` model settings.
+    - ``reference_band``: *(Optional)* If ``multi_band_offsets`` is in ``model["special"]``, set the band to which the other data will be aligned. The default is the first data band in the `band` model settings.
 
       - Type: ``int``
       - Example:

@@ -527,7 +527,7 @@ class Cosmology:
 
             logarithmic_likelihood.append(logarithmic_likelihood_single)
 
-        return logarithmic_likelihood
+        return np.array(logarithmic_likelihood)
 
     def compute_bic_weight(
         self,

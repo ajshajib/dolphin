@@ -2,9 +2,10 @@
 
 __author__ = "brady-ryan"
 
+import warnings
+
 import numpy as np
 from lenstronomy.Analysis.td_cosmography import TDCosmography
-import warnings
 
 from ..analysis.output import Output
 from ..analysis.photometry import Photometry
@@ -232,11 +233,11 @@ class Cosmology:
         :param kappa_ext_samples: (optional) array containing external convergence samples
         :type kappa_ext_samples: `numpy.array`
         :param band_config: (optional) dictionary describing the filters and profile indices to
-          utilize in the linear inversion to retrieve `r_eff` (see `Photometry` class documentation). 
+          utilize in the linear inversion to retrieve `r_eff` (see `Photometry` class documentation).
           For multi-component lens light models, this must be supplied if there are no saved
           outputs from the `Photometry` module's linear inversion routine.
         :type band_config: `dict` of `dict`
-          
+
         :return: Model-predicted velocity dispersion in units of km/s
         :rtype: `numpy.array`
         """
@@ -302,8 +303,8 @@ class Cosmology:
             gamma = kwargs_out["kwargs_lens"][0]["gamma"]
             kwargs_lens = kwargs_out["kwargs_lens"]
             kwargs_lens_light = kwargs_out["kwargs_lens_light"]
-            r_eff = r_eff_chain[i]  
-            
+            r_eff = r_eff_chain[i]
+
             # unphysical r_effs will be given no weight
             if r_eff <= 0:
                 sigma_v_list.append(np.array([np.nan]))
@@ -316,7 +317,7 @@ class Cosmology:
                 r_eff=r_eff,
                 theta_E=theta_E,
                 gamma=gamma,
-                kappa_ext=kappa_ext_samples[i]
+                kappa_ext=kappa_ext_samples[i],
             )
             sigma_v_list.append(sigma_v)
 
@@ -333,9 +334,9 @@ class Cosmology:
         dt_measured,
         dt_measured_uncertainty,
     ):
-        """Compute the time-delay distance posterior from the modeled Fermat
-        potential and measured time delays. The function draws measured time delays from
-        a Gaussian distribution with mean and standard deviation given by the measured
+        """Compute the time-delay distance posterior from the modeled Fermat potential
+        and measured time delays. The function draws measured time delays from a
+        Gaussian distribution with mean and standard deviation given by the measured
         values and their uncertainties, respectively.
 
         :param fermat_model_samples: posterior samples of the relative Fermat
@@ -385,22 +386,24 @@ class Cosmology:
         omega_m_min=0.05,
         omega_m_max=0.5,
     ):
-        """Compute :math:`\rm{H_0}` posterior samples from :math:`\rm D_{\Delta t}` posterior samples in 
-        the cosmology of `self.cosmology` with :math:`\Omega_{\rm m}` varied uniformly and external convergence
-        corrections. For multiple image pairs, :math:`\rm{H_0}` is calculated independently for each pair. As
-        this methodology assumes a flat prior in :math:`\rm D_{\Delta t}`, an additional weight term is 
-        computed to determine the proprtional prior in :math:`\rm{H_0}` (see, e.g., Eq. 20 in TDCOSMO XXVII).
+        """Compute :math:`\rm{H_0}` posterior samples from :math:`\rm D_{\\Delta t}`
+        posterior samples in the cosmology of `self.cosmology` with :math:`\\Omega_{\rm
+        m}` varied uniformly and external convergence corrections. For multiple image
+        pairs, :math:`\rm{H_0}` is calculated independently for each pair. As this
+        methodology assumes a flat prior in :math:`\rm D_{\\Delta t}`, an additional
+        weight term is computed to determine the proprtional prior in :math:`\rm{H_0}`
+        (see, e.g., Eq. 20 in TDCOSMO XXVII).
 
         :param ddt_samples: time-delay distance samples (in Mpc)
         :type ddt_samples: `numpy.ndarray`
         :param kappa_ext_samples: (optional) array containing external convergence samples
         :type kappa_ext_samples: `numpy.array`
-        :param omega_m_min: (optional) minimum value of :math:`\Omega_{\rm m}` to sample from
+        :param omega_m_min: (optional) minimum value of :math:`\\Omega_{\rm m}` to sample from
         :type omega_m_min: float
-        :param omega_m_max: (optional) maximum value of :math:`\Omega_{\rm m}` to sample from
+        :param omega_m_max: (optional) maximum value of :math:`\\Omega_{\rm m}` to sample from
         :type omega_m_max: float
 
-        :return: :math:`\rm{H_0}` posterior samples (in km/s/Mpc), sampled :math:`\Omega_{\rm m}` values, flat :math:`\rm{H_0}` weighting
+        :return: :math:`\rm{H_0}` posterior samples (in km/s/Mpc), sampled :math:`\\Omega_{\rm m}` values, flat :math:`\rm{H_0}` weighting
         :rtype: `tuple (numpy.ndarray, numpy.array, numpy.ndarray)`
         """
 
@@ -438,10 +441,10 @@ class Cosmology:
 
             # same cosmology for every image pair
             A = H0_reference * ddt_cosmology
-            ddt_samples_corrected = ddt_samples[i, :] / (1 - kappa_ext_samples[i]) 
+            ddt_samples_corrected = ddt_samples[i, :] / (1 - kappa_ext_samples[i])
             H0_samples[i, :] = A / ddt_samples_corrected
 
-            flat_weight = A * (1 - kappa_ext_samples[i]) / ddt_samples[i, :]**2
+            flat_weight = A * (1 - kappa_ext_samples[i]) / ddt_samples[i, :] ** 2
             flat_H0_weights[i, :] = flat_weight
 
         return H0_samples, omega_m_samples, flat_H0_weights
@@ -458,10 +461,10 @@ class Cosmology:
         under a normal distribution centered on `sigma_v_observed` with standard
         deviation `sigma_v_observed_error`. The function also applies cosmology weights
         to account for the cosmological dependence of the kinematics. The predicted
-        velocity dispersion scales with the distance ratio :math:`R = D_{\rm s} / D_{\rm ds}`, 
+        velocity dispersion scales with the distance ratio :math:`R = D_{\rm s} / D_{\rm ds}`,
         so each realization is weighted by:
 
-            :math:`g_i = \sqrt(R(\Omega_\rm{m},i) / R_{\rm model})`,
+            :math:`g_i = \\sqrt(R(\\Omega_\rm{m},i) / R_{\rm model})`,
 
         :param sigma_v_observed: observed velocity dispersion (in km/s) of the
           main deflector
@@ -472,9 +475,9 @@ class Cosmology:
         :param sigma_v_model: modeled velocity dispersion samples (in km/s), as computed
           by :meth:`~dolphin.analysis.Cosmology.velocity_dispersion`
         :type sigma_v_model: `numpy.array`
-        :param omega_m_min: (optional) minimum value of :math:`\Omega_{\rm m}` to sample from
+        :param omega_m_min: (optional) minimum value of :math:`\\Omega_{\rm m}` to sample from
         :type omega_m_min: float
-        :param omega_m_max: (optional) maximum value of :math:`\Omega_{\rm m}` to sample from
+        :param omega_m_max: (optional) maximum value of :math:`\\Omega_{\rm m}` to sample from
         :type omega_m_max: float
 
         :return: logarithmic kinematic likelihood term
@@ -521,7 +524,7 @@ class Cosmology:
                 logarithmic_likelihood_single,
                 -np.inf,
             )
-            
+
             logarithmic_likelihood.append(logarithmic_likelihood_single)
 
         return logarithmic_likelihood

@@ -67,8 +67,7 @@ def _selected_samples(cosmo, rng_seed, n_samples):
 
 @pytest.fixture
 def cosmo(monkeypatch):
-    """Create a test Cosmology instance with monkeypatched
-    velocity_dispersion."""
+    """Create a test Cosmology instance with monkeypatched velocity_dispersion."""
     c = _make_cosmology(n_samples=5, rng_seed=0)
     calls = []
     monkeypatch.setattr(
@@ -140,12 +139,15 @@ def _expected_h0(fid, z_lens, z_source, om_samples, ddt, kappa_ext):
     h0 = np.empty_like(ddt)
     for i, om in enumerate(om_samples):
         c = FlatLambdaCDM(H0=h0_fid, Om0=float(om))
-        h0[i, :] = h0_fid * _ddt_of(c, z_lens, z_source) / (ddt[i, :] / (1-kappa_ext[i]))
+        h0[i, :] = (
+            h0_fid * _ddt_of(c, z_lens, z_source) / (ddt[i, :] / (1 - kappa_ext[i]))
+        )
     return h0
 
+
 def _expected_wflat(fid, z_lens, z_source, om_samples, ddt, kappa_ext):
-    """Replay of the flat H0 prior weights, w = H0_fid * D_dt(Om) / D_dt_obs**2,
-    for a known set of Omega_m draws."""
+    """Replay of the flat H0 prior weights, w = H0_fid * D_dt(Om) / D_dt_obs**2, for a
+    known set of Omega_m draws."""
     ddt = np.asarray(ddt, dtype=float)
     if ddt.ndim == 1:
         ddt = ddt[:, None]
@@ -158,9 +160,10 @@ def _expected_wflat(fid, z_lens, z_source, om_samples, ddt, kappa_ext):
         dds = c.angular_diameter_distance_z1z2(z_lens, z_source).value
         ddt_cosmology = (1 + z_lens) * dd * ds / dds
         A = h0_fid * ddt_cosmology
-        flat_weight = A / (ddt[i, :] / (1-kappa_ext[i])) ** 2
+        flat_weight = A / (ddt[i, :] / (1 - kappa_ext[i])) ** 2
         flat_H0_weights[i, :] = flat_weight
     return flat_H0_weights
+
 
 @pytest.fixture
 def cosmo_fixed():
@@ -177,7 +180,6 @@ def _om_draws(seed=0, om_min=0.05, om_max=0.5, n=5):
     return np.random.default_rng(seed).uniform(om_min, om_max, size=n)
 
 
-
 def _expected_loglike(fid, om_samples, sigma_obs, err, sigma_model):
     """Replay of `logarithmic_kinematic_likelihood` for a known set of Omega_m draws."""
     out = []
@@ -188,23 +190,20 @@ def _expected_loglike(fid, om_samples, sigma_obs, err, sigma_model):
         / fid.angular_diameter_distance_z1z2(_Z_LENS, _Z_SOURCE).value
     )
     for i, om in enumerate(om_samples):
-            
+
         c = FlatLambdaCDM(H0=h0_fid, Om0=float(om))
         r = (
             c.angular_diameter_distance(_Z_SOURCE).value
             / c.angular_diameter_distance_z1z2(_Z_LENS, _Z_SOURCE).value
         )
         g[i] = np.sqrt(r / r_fid)
-        pred = (
-            g[i]
-            * sigma_model[i]
-        )
+        pred = g[i] * sigma_model[i]
         likelihood = -0.5 * ((sigma_obs - pred) / err) ** 2
         likelihood = np.where(
-                np.isfinite(likelihood),
-                likelihood,
-                -np.inf,
-            )
+            np.isfinite(likelihood),
+            likelihood,
+            -np.inf,
+        )
         out.append(likelihood)
     return np.array(out)
 
@@ -342,9 +341,7 @@ class TestCosmology:
         idx = _r_eff_index(cosmo)
         samples = _selected_samples(cosmo, rng_seed=0, n_samples=5)
         beta_draws = np.zeros(len(samples))
-        out = cosmo.velocity_dispersion(
-            beta_draws=beta_draws, kinematics_band="F814W"
-        )
+        out = cosmo.velocity_dispersion(beta_draws=beta_draws, kinematics_band="F814W")
 
         expected_r_eff = samples[:, idx]
         expected_theta_E = np.array(
@@ -361,9 +358,7 @@ class TestCosmology:
         fake_photometry.morphology = {band: {"r_eff": r_eff}}
         beta_draws = np.zeros(len(r_eff))
 
-        out = cosmo.velocity_dispersion(
-            beta_draws=beta_draws, kinematics_band="F814W"
-        )
+        out = cosmo.velocity_dispersion(beta_draws=beta_draws, kinematics_band="F814W")
 
         samples = _selected_samples(cosmo, rng_seed=0, n_samples=5)
         theta_E = np.array(
@@ -463,21 +458,21 @@ class TestCosmology:
 
         # test for only one image pair (1D input)
         ddt = np.linspace(2700.0, 3300.0, 5)
-        h0_1d, om_1d, w_1d = _make_cosmology(n_samples=5, rng_seed=0).calculate_sampled_h0(
-            ddt
-        )
+        h0_1d, om_1d, w_1d = _make_cosmology(
+            n_samples=5, rng_seed=0
+        ).calculate_sampled_h0(ddt)
         assert h0_1d.shape == (5, 1)
 
-        h0_2d, om_2d, w_2d = _make_cosmology(n_samples=5, rng_seed=0).calculate_sampled_h0(
-            ddt[:, None]
-        )
+        h0_2d, om_2d, w_2d = _make_cosmology(
+            n_samples=5, rng_seed=0
+        ).calculate_sampled_h0(ddt[:, None])
 
         np.testing.assert_array_equal(om_1d, om_2d)
         np.testing.assert_allclose(h0_1d, h0_2d)
         np.testing.assert_allclose(w_1d, w_2d)
 
     def test_h0_om_samples_replay_seed_and_bounds(self, cosmo):
-        _, om, _= cosmo.calculate_sampled_h0(np.full((5, 1), 3000.0))
+        _, om, _ = cosmo.calculate_sampled_h0(np.full((5, 1), 3000.0))
         np.testing.assert_array_equal(
             om, np.random.default_rng(0).uniform(0.05, 0.5, size=5)
         )
@@ -495,7 +490,9 @@ class TestCosmology:
         )
         kappa_ext = np.random.default_rng(0).uniform(0.01, 0.05, size=ddt.shape[0])
         h0, om, _ = cosmo_fixed.calculate_sampled_h0(ddt, kappa_ext)
-        exp_h0 = _expected_h0(cosmo_fixed.cosmology, _Z_LENS, _Z_SOURCE, om, ddt, kappa_ext)
+        exp_h0 = _expected_h0(
+            cosmo_fixed.cosmology, _Z_LENS, _Z_SOURCE, om, ddt, kappa_ext
+        )
         np.testing.assert_allclose(h0, exp_h0, rtol=1e-10)
 
     def test_h0_same_cosmology_for_every_image_pair(self, cosmo):

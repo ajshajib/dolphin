@@ -86,7 +86,6 @@ class Cosmology:
         self.n_samples = n_samples
         self.burn_in = burn_in
         self.rng_seed = rng_seed
-        self.rng = np.random.default_rng(self.rng_seed)
 
         self.output.load_output(
             self.lens_name,
@@ -169,7 +168,8 @@ class Cosmology:
         flat_chain = chain.reshape(-1, chain.shape[-1])
 
         # randomly select indices from the converged chain
-        random_indices = self.rng.choice(
+        rng = np.random.default_rng(self.rng_seed)
+        random_indices = rng.choice(
             flat_chain.shape[0],
             size=self.n_samples,
             replace=False,
@@ -256,13 +256,13 @@ class Cosmology:
         # flatten walkers and steps
         flat_chain = chain.reshape(-1, chain.shape[-1])
 
-        random_indices = self.rng.choice(
+        # select random samples
+        rng = np.random.default_rng(self.rng_seed)
+        random_indices = rng.choice(
             flat_chain.shape[0],
             size=self.n_samples,
             replace=False,
         )
-
-        # select random samples
         flat_chain = flat_chain[random_indices]
 
         # if multi-component lens light model, need to calculate r_eff for
@@ -360,7 +360,8 @@ class Cosmology:
         dt_measured = np.asarray(dt_measured)
 
         # draw measured time delays for each image pair
-        dt_draws = self.rng.normal(
+        rng = np.random.default_rng(self.rng_seed)
+        dt_draws = rng.normal(
             loc=dt_measured,
             scale=dt_measured_uncertainty,
             size=(len(fermat_model_samples), len(dt_measured)),
@@ -415,7 +416,8 @@ class Cosmology:
             kappa_ext_samples = np.zeros(shape=self.n_samples)
 
         # one :math:`\Omega_{\rm m}` draw per MCMC realization
-        omega_m_samples = self.rng.uniform(
+        rng = np.random.default_rng(self.rng_seed)
+        omega_m_samples = rng.uniform(
             omega_m_min,
             omega_m_max,
             size=self.n_samples,
@@ -492,7 +494,9 @@ class Cosmology:
         R_fiducial = ds_fiducial / dds_fiducial
 
         # one :math:`\Omega_{\rm m}` draw per MCMC realization
-        omega_m_samples = self.rng.uniform(
+        rng = np.random.default_rng(self.rng_seed)
+
+        omega_m_samples = rng.uniform(
             omega_m_min,
             omega_m_max,
             size=self.n_samples,

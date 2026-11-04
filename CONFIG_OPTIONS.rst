@@ -73,7 +73,7 @@ Model Section
 
            lens_light: ["SERSIC_ELLIPSE", "SERSIC_ELLIPSE"]
 
-    - ``source_light``: List of source light profiles. Supported models include: ``SERSIC_ELLIPSE``, ``SHAPELETS``. The list will be duplicated for each band.
+    - ``source_light``: List of source light profiles. Supported models include: ``SERSIC_ELLIPSE``, ``SHAPELETS``, ``SHAPELETS_ELLIPSE``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:

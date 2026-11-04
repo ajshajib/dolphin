@@ -773,7 +773,7 @@ class ModelConfig(Config):
             ]
         ):
             for i, model in enumerate(self.get_source_light_model_list()):
-                if model == "SHAPELETS":
+                if model in ["SHAPELETS", "SHAPELETS_ELLIPSE"]:
                     beta = kwargs_source[i]["beta"]
                     prior += -np.log(beta)
 
@@ -1626,7 +1626,7 @@ class ModelConfig(Config):
                         "e2": 0.5,
                     }
                 )
-            elif model == "SHAPELETS":
+            elif model in ["SHAPELETS", "SHAPELETS_ELLIPSE"]:
                 # If n_max is given as a single integer, convert it to a list
                 if isinstance(self.settings["source_light_options"]["n_max"], int):
                     self.settings["source_light_options"]["n_max"] = [
@@ -1660,6 +1660,12 @@ class ModelConfig(Config):
                 upper.append(
                     {"center_x": 1.2, "center_y": 1.2, "beta": 0.20, "n_max": 55}
                 )
+                if model == "SHAPELETS_ELLIPSE":
+                    init[-1].update({"e1": 0.0, "e2": 0.0})
+                    sigma[-1].update({"e1": 0.05, "e2": 0.05})
+                    lower[-1].update({"e1": -0.5, "e2": -0.5})
+                    upper[-1].update({"e1": 0.5, "e2": 0.5})
+
                 shapelets_index += 1
             else:
                 raise ValueError(f"{model} not implemented as a source light" "model!")

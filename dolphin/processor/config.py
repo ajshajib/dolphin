@@ -511,7 +511,9 @@ class ModelConfig(Config):
                     )
 
         # Join Shapelet and Sersic ellipticities, if they exist
-        join_ellipticity = self.settings["source_light_options"].get("join_shapelet_ellipticity", True)
+        join_ellipticity = self.settings["source_light_options"].get(
+            "join_shapelet_ellipticity", True
+        )
         if not isinstance(join_ellipticity, list):
             join_ellipticity = [join_ellipticity] * num_bands
 
@@ -529,7 +531,6 @@ class ModelConfig(Config):
                             ["e1", "e2"],
                         ]
                     )
-
 
         return joint_source_with_source, num_source_profiles
 

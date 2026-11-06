@@ -5,7 +5,7 @@ band: [F475X, F600LP]
 model:
   lens: [EPL, SHEAR_GAMMA_PSI]
   lens_light: [SERSIC_ELLIPSE, SERSIC_ELLIPSE] # lens light model list will be duplicated for each band
-  source_light: [SERSIC_ELLIPSE, SHAPELETS] # source light model list will be duplicated for each band
+  source_light: [SERSIC_ELLIPSE, SHAPELETS_ELLIPSE] # source light model list will be duplicated for each band
 
 numeric_options:
   supersampling_factor: [2]

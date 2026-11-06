@@ -485,19 +485,19 @@ class ModelConfig(Config):
         :rtype: `tuple` (`list`, `int`)
         """
         joint_source_with_source = []
-        num_source_profiles = len(self.get_source_light_model_list())
+        model_list = self.get_source_light_model_list()
+        num_source_profiles = len(model_list)
+        num_bands = self.number_of_bands
+        num_source_profile_single_band = int(num_source_profiles / num_bands)
 
         if num_source_profiles > 1:
             for n in range(1, num_source_profiles):
                 joint_source_with_source.append([0, n, ["center_x", "center_y"]])
 
         # Join Sersic ellipticities in multiband fitting
-        num_bands = self.number_of_bands
         if num_bands > 1:
-            num_source_profile_single_band = int(num_source_profiles / num_bands)
-
             for i in range(num_source_profile_single_band):
-                model = self.get_source_light_model_list()[i]
+                model = model_list[i]
                 if "SERSIC" in model:
                     join_list = ["n_sersic"]
                     if "ELLIPSE" in model:
@@ -509,6 +509,27 @@ class ModelConfig(Config):
                             join_list,
                         ]
                     )
+
+        # Join Shapelet and Sersic ellipticities, if they exist
+        join_ellipticity = self.settings["source_light_options"].get("join_shapelet_ellipticity", True)
+        if not isinstance(join_ellipticity, list):
+            join_ellipticity = [join_ellipticity] * num_bands
+
+        if "SHAPELETS_ELLIPSE" in model_list and "SERSIC_ELLIPSE" in model_list:
+            # Returns only the first index
+            shapelet_index = model_list.index("SHAPELETS_ELLIPSE")
+            sersic_index = model_list.index("SERSIC_ELLIPSE")
+
+            for i in range(num_bands):
+                if join_ellipticity[i]:
+                    joint_source_with_source.append(
+                        [
+                            i * num_source_profile_single_band + sersic_index,
+                            i * num_source_profile_single_band + shapelet_index,
+                            ["e1", "e2"],
+                        ]
+                    )
+
 
         return joint_source_with_source, num_source_profiles
 

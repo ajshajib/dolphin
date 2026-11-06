@@ -353,9 +353,9 @@ Source Light Options
 
            n_max: [2, 4]
 
-    - ``join_shapelet_ellipticity``: *(Optional)* Determines whether or not Shapelet ellipticities are joined to Sersic ellipticites,
-      if both exist. This option is True by default. If multiple elliptical Shapelets or Sersics exist, only the first of each will
-      be joined.
+    - ``join_shapelet_ellipticity``: *(Optional)* Determines whether or not Shapelet ellipticities are joined to Sersic ellipticites in
+      each band, if both exist. This option is True by default. If multiple elliptical Shapelets or Sersics exist within a band,
+      only the first of each will be joined.
 
       - Type: ``bool`` for all bands or ``list of bools`` with one value per band.
       - Example:

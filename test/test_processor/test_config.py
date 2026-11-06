@@ -273,6 +273,8 @@ class TestModelConfig:
                 [0, 2, ["center_x", "center_y"]],
                 [0, 3, ["center_x", "center_y"]],
                 [0, 2, ["n_sersic", "e1", "e2"]],
+                [0, 1, ["e1", "e2"]],
+                [2, 3, ["e1", "e2"]],
             ],
             "joint_lens_light_with_lens_light": [
                 [0, 1, ["center_x", "center_y"]],
@@ -300,6 +302,14 @@ class TestModelConfig:
         del self.config_5.settings["kwargs_constraints"]
 
         assert kwargs_constraints_3 == self.config_3.get_kwargs_constraints()
+        self.config_3.settings["source_light_options"]["join_shapelet_ellipticity"] = [
+            True,
+            False,
+        ]
+        assert (
+            kwargs_constraints_3["joint_source_with_source"][:-1]
+            == self.config_3.get_kwargs_constraints()["joint_source_with_source"]
+        )
 
         kwargs_constraints_wsat = {
             "joint_source_with_source": [
@@ -784,9 +794,9 @@ class TestModelConfig:
         config2 = deepcopy(self.config_3)
         assert config2.get_source_light_model_list() == [
             "SERSIC_ELLIPSE",
-            "SHAPELETS",
+            "SHAPELETS_ELLIPSE",
             "SERSIC_ELLIPSE",
-            "SHAPELETS",
+            "SHAPELETS_ELLIPSE",
         ]
 
     def test_get_lens_light_model_list(self):

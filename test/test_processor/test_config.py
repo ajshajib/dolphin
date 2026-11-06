@@ -786,9 +786,9 @@ class TestModelConfig:
         config2 = deepcopy(self.config_3)
         assert config2.get_source_light_model_list() == [
             "SERSIC_ELLIPSE",
-            "SHAPELETS",
+            "SHAPELETS_ELLIPSE",
             "SERSIC_ELLIPSE",
-            "SHAPELETS",
+            "SHAPELETS_ELLIPSE",
         ]
 
     def test_get_lens_light_model_list(self):

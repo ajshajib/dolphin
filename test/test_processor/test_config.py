@@ -273,6 +273,8 @@ class TestModelConfig:
                 [0, 2, ["center_x", "center_y"]],
                 [0, 3, ["center_x", "center_y"]],
                 [0, 2, ["n_sersic", "e1", "e2"]],
+                [0, 1, ["e1", "e2"]],
+                [2, 3, ["e1", "e2"]],
             ],
             "joint_lens_light_with_lens_light": [
                 [0, 1, ["center_x", "center_y"]],

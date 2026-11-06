@@ -387,12 +387,12 @@ class Cosmology:
         omega_m_min=0.05,
         omega_m_max=0.5,
     ):
-        """Compute :math:`\rm{H_0}` posterior samples from :math:`\rm D_{\\Delta t}`
+        """Compute :math:`\\rm{H_0}` posterior samples from :math:`\\rm D_{\\Delta t}`
         posterior samples in the cosmology of `self.cosmology` with :math:`\\Omega_{\rm
         m}` varied uniformly and external convergence corrections. For multiple image
-        pairs, :math:`\rm{H_0}` is calculated independently for each pair. As this
-        methodology assumes a flat prior in :math:`\rm D_{\\Delta t}`, an additional
-        weight term is computed to determine the proprtional prior in :math:`\rm{H_0}`
+        pairs, :math:`\\rm{H_0}` is calculated independently for each pair. As this
+        methodology assumes a flat prior in :math:`\\rm D_{\\Delta t}`, an additional
+        weight term is computed to determine the proprtional prior in :math:`\\rm{H_0}`
         (see, e.g., Eq. 20 in TDCOSMO XXVII).
 
         :param ddt_samples: time-delay distance samples (in Mpc)
@@ -404,7 +404,7 @@ class Cosmology:
         :param omega_m_max: (optional) maximum value of :math:`\\Omega_{\rm m}` to sample from
         :type omega_m_max: float
 
-        :return: :math:`\rm{H_0}` posterior samples (in km/s/Mpc), sampled :math:`\\Omega_{\rm m}` values, flat :math:`\rm{H_0}` weighting
+        :return: :math:`\\rm{H_0}` posterior samples (in km/s/Mpc), sampled :math:`\\Omega_{\rm m}` values, flat :math:`\\rm{H_0}` weighting
         :rtype: `tuple (numpy.ndarray, numpy.array, numpy.ndarray)`
         """
 
@@ -415,7 +415,7 @@ class Cosmology:
         if kappa_ext_samples is None:
             kappa_ext_samples = np.zeros(shape=self.n_samples)
 
-        # one :math:`\Omega_{\rm m}` draw per MCMC realization
+        # one `\Omega_{\rm m}` draw per MCMC realization
         rng = np.random.default_rng(self.rng_seed)
         omega_m_samples = rng.uniform(
             omega_m_min,
@@ -423,15 +423,15 @@ class Cosmology:
             size=self.n_samples,
         )
 
-        H0_samples = np.empty_like(ddt_samples)
-        flat_H0_weights = np.empty_like(ddt_samples)
+        h0_samples = np.empty_like(ddt_samples)
+        flat_h0_weights = np.empty_like(ddt_samples)
         for i in range(self.n_samples):
             params = {
                 **self.cosmology_model_base_params,
                 "Om0": float(omega_m_samples[i]),
             }
             cos_temp = self.cosmology_model_class(name="temp", **params)
-            H0_reference = float(cos_temp.H0.value)
+            h0_reference = float(cos_temp.H0.value)
 
             dd = cos_temp.angular_diameter_distance(self.z_lens).value
             ds = cos_temp.angular_diameter_distance(self.z_source).value
@@ -442,14 +442,14 @@ class Cosmology:
             ddt_cosmology = (1 + self.z_lens) * dd * ds / dds
 
             # same cosmology for every image pair
-            A = H0_reference * ddt_cosmology
+            A = h0_reference * ddt_cosmology
             ddt_samples_corrected = ddt_samples[i, :] / (1 - kappa_ext_samples[i])
-            H0_samples[i, :] = A / ddt_samples_corrected
+            h0_samples[i, :] = A / ddt_samples_corrected
 
             flat_weight = A * (1 - kappa_ext_samples[i]) / ddt_samples[i, :] ** 2
-            flat_H0_weights[i, :] = flat_weight
+            flat_h0_weights[i, :] = flat_weight
 
-        return H0_samples, omega_m_samples, flat_H0_weights
+        return h0_samples, omega_m_samples, flat_h0_weights
 
     def compute_logarithmic_kinematic_likelihood(
         self,
@@ -463,10 +463,10 @@ class Cosmology:
         under a normal distribution centered on `sigma_v_observed` with standard
         deviation `sigma_v_observed_error`. The function also applies cosmology weights
         to account for the cosmological dependence of the kinematics. The predicted
-        velocity dispersion scales with the distance ratio :math:`R = D_{\rm s} / D_{\rm ds}`,
+        velocity dispersion scales with the distance ratio :math:`R = D_{\\rm s} / D_{\\rm ds}`,
         so each realization is weighted by:
 
-            :math:`g_i = \\sqrt(R(\\Omega_\rm{m},i) / R_{\rm model})`,
+            :math:`g_i = \\sqrt(R(\\Omega_\\rm{m},i) / R_{\\rm model})`,
 
         :param sigma_v_observed: observed velocity dispersion (in km/s) of the
           main deflector
@@ -477,9 +477,9 @@ class Cosmology:
         :param sigma_v_model: modeled velocity dispersion samples (in km/s), as computed
           by :meth:`~dolphin.analysis.Cosmology.velocity_dispersion`
         :type sigma_v_model: `numpy.array`
-        :param omega_m_min: (optional) minimum value of :math:`\\Omega_{\rm m}` to sample from
+        :param omega_m_min: (optional) minimum value of :math:`\\Omega_{\\rm m}` to sample from
         :type omega_m_min: float
-        :param omega_m_max: (optional) maximum value of :math:`\\Omega_{\rm m}` to sample from
+        :param omega_m_max: (optional) maximum value of :math:`\\Omega_{\\rm m}` to sample from
         :type omega_m_max: float
 
         :return: logarithmic kinematic likelihood term
@@ -493,7 +493,7 @@ class Cosmology:
         ).value
         R_fiducial = ds_fiducial / dds_fiducial
 
-        # one :math:`\Omega_{\rm m}` draw per MCMC realization
+        # one `\Omega_{\rm m}` draw per MCMC realization
         rng = np.random.default_rng(self.rng_seed)
 
         omega_m_samples = rng.uniform(

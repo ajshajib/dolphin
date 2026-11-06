@@ -196,12 +196,12 @@ class Cosmology:
             )
 
             # differences relative to image 1
-            delta_fermat_12 = fermat_potential[1] - fermat_potential[0]
+            delta_fermat_12 = fermat_potential[0] - fermat_potential[1]
 
             if num_images == 4:
-                delta_fermat_13 = fermat_potential[2] - fermat_potential[0]
+                delta_fermat_13 = fermat_potential[0] - fermat_potential[2]
 
-                delta_fermat_14 = fermat_potential[3] - fermat_potential[0]
+                delta_fermat_14 = fermat_potential[0] - fermat_potential[3]
 
                 dphi_list.append(
                     [

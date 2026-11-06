@@ -297,7 +297,7 @@ class TestCosmology:
         dphi = cosmo.fermat_potential()
 
         assert dphi.shape == (5, 1)
-        np.testing.assert_allclose(dphi, 1.5)  # 2.0 - 0.5
+        np.testing.assert_allclose(dphi, -1.5)  # 0.5 - 2.0
 
     def test_fermat_potential_reproducible(self):
         """Check that the Fermat potential is reproducible with the same seed."""
@@ -330,7 +330,7 @@ class TestCosmology:
             kwargs_ps=kwargs["kwargs_ps"],
             original_ps_position=False,
         )
-        expected = phi[1:] - phi[0]
+        expected = phi[0] - phi[1:]
         np.testing.assert_allclose(dphi[0], expected)
 
     # single component lens light models

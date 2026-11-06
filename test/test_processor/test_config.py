@@ -302,8 +302,14 @@ class TestModelConfig:
         del self.config_5.settings["kwargs_constraints"]
 
         assert kwargs_constraints_3 == self.config_3.get_kwargs_constraints()
-        self.config_3.settings["source_light_options"]["join_shapelet_ellipticity"] = [True, False]
-        assert kwargs_constraints_3["joint_source_with_source"][:-1] == self.config_3.get_kwargs_constraints()["joint_source_with_source"]
+        self.config_3.settings["source_light_options"]["join_shapelet_ellipticity"] = [
+            True,
+            False,
+        ]
+        assert (
+            kwargs_constraints_3["joint_source_with_source"][:-1]
+            == self.config_3.get_kwargs_constraints()["joint_source_with_source"]
+        )
 
         kwargs_constraints_wsat = {
             "joint_source_with_source": [

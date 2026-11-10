@@ -362,7 +362,7 @@ Source Light Options
 
         .. code-block:: yaml
 
-           free_shapelet_ellipticity: [True, False]
+           join_shapelet_ellipticity: [True, False]
 
 Point Source Options
 --------------------

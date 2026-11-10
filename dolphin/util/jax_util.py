@@ -121,7 +121,7 @@ def custom_logL_addition_jax(
         ]
     ):
         for i, model in enumerate(model_config.get_source_light_model_list()):
-            if model == "SHAPELETS":
+            if model in ["SHAPELETS", "SHAPELETS_ELLIPSE"]:
                 beta = kwargs_source[i]["beta"]
                 prior += -jnp.log(beta)
 

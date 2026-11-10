@@ -73,7 +73,7 @@ Model Section
 
            lens_light: ["SERSIC_ELLIPSE", "SERSIC_ELLIPSE"]
 
-    - ``source_light``: List of source light profiles. Supported models include: ``SERSIC_ELLIPSE``, ``SHAPELETS``. The list will be duplicated for each band.
+    - ``source_light``: List of source light profiles. Supported models include: ``SERSIC_ELLIPSE``, ``SHAPELETS``, ``SHAPELETS_ELLIPSE``. The list will be duplicated for each band.
 
       - Type: ``list of strings``
       - Example:
@@ -352,6 +352,17 @@ Source Light Options
         .. code-block:: yaml
 
            n_max: [2, 4]
+
+    - ``join_shapelet_ellipticity``: *(Optional)* Determines whether or not Shapelet ellipticities are joined to Sersic ellipticites in
+      each band, if both exist. This option is ``True`` by default. If multiple elliptical Shapelets or Sersics exist within a band,
+      only the first of each will be joined.
+
+      - Type: ``bool`` for all bands or ``list of bools`` with one value per band.
+      - Example:
+
+        .. code-block:: yaml
+
+           free_shapelet_ellipticity: [True, False]
 
 Point Source Options
 --------------------

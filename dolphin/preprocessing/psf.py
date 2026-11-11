@@ -762,7 +762,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             image = np.log10(star_exposures[i])
-            im_star = ax[i].imshow(image, cmap="viridis", origin="lower")
+            im_star = ax[i].imshow(image, cmap="cubehelix", origin="lower")
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_star, ax=ax[i], fraction=0.05)
@@ -779,7 +779,7 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            im_weight = ax[i].imshow(np.log10(star_weights[i]), cmap="viridis")
+            im_weight = ax[i].imshow(np.log10(star_weights[i]), cmap="cividis", origin="lower")
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_weight, ax=ax[i], fraction=0.05)
@@ -796,7 +796,7 @@ class PSF:
         fig, ax = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 3 * nrows))
         ax = ax.flatten()
         for i in range(num_stars):
-            im_noise = ax[i].imshow(np.log10(noise_maps[i]), cmap="viridis")
+            im_noise = ax[i].imshow(np.log10(noise_maps[i]), cmap="viridis", origin="lower")
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
             fig.colorbar(im_noise, ax=ax[i], fraction=0.05)
@@ -892,11 +892,11 @@ class PSF:
 
         if method == "PSFr":
             fig, ax = plt.subplots(1, 2)
-            im_psf = ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="viridis")
+            im_psf = ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="cubehelix")
             ax[0].set_title(r"$\log_{10}$(PSF)")
             fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
 
-            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower")
+            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower", cmap="viridis")
             ax[1].set_title(r"$\log_{10}(\sigma^2$)")
             fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
 
@@ -924,11 +924,11 @@ class PSF:
                 plt.show()
 
             fig, ax = plt.subplots(1, 2)
-            im_psf = ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="viridis")
+            im_psf = ax[0].imshow(np.log10(psf_guess), origin="lower", cmap="cubehelix")
             ax[0].set_title(r"$\log_{10}$(PSF)")
             fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
 
-            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower")
+            im_variance = ax[1].imshow(np.log10(variance_map), origin="lower", cmap="viridis")
             ax[1].set_title(r"$\log_{10}(\sigma^2$)")
             fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
 
@@ -937,13 +937,13 @@ class PSF:
 
             if psf_cut is not None and variance_map_cut is not None:
                 _, ax = plt.subplots(1, 2)
-                ax[0].imshow(np.log10(psf_cut))
+                ax[0].imshow(np.log10(psf_cut), origin="lower", cmap="cubehelix")
                 ax[0].set_title(r"$\log_{10}$(PSF) CUT")
                 cut_fraction = 100 * (1 - np.sum(psf_cut) / np.sum(psf_guess))
                 ax[0].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
                 fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
 
-                ax[1].imshow(np.log10(variance_map_cut))
+                ax[1].imshow(np.log10(variance_map_cut), origin="lower", cmap="viridis")
                 ax[1].set_xlabel(f"Cut Fraction: {abs(cut_fraction):.2f}%")
                 ax[1].set_title(r"$\log_{10}(\sigma^2$) CUT")
                 fig.colorbar(im_variance, ax=ax[1], fraction=0.05)
@@ -969,7 +969,7 @@ class PSF:
 
         if plot:
             fig, ax = plt.subplots(1, 2)
-            im_psf = ax[0].imshow(np.log10(psf_data), origin="lower", cmap="viridis")
+            im_psf = ax[0].imshow(np.log10(psf_data), origin="lower", cmap="cubehelix")
             ax[0].set_title(r"$\log_{10}$(PSF)")
             fig.colorbar(im_psf, ax=ax[0], fraction=0.05)
 

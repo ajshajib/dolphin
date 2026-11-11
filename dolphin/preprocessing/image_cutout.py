@@ -88,7 +88,9 @@ class ImageCutout:
         _, ax = plt.subplots(figsize=(10, 10))
         plt_data = np.log10(data_full)
 
-        im = ax.matshow(plt_data, origin="lower", vmin=vmin, vmax=vmax)
+        im = ax.matshow(
+            plt_data, origin="lower", vmin=vmin, vmax=vmax, cmap="cubehelix"
+        )
         ax.autoscale(False)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -236,7 +238,7 @@ class ImageCutout:
             np.log10(noise_map * mask),
             vmin=vmin,
             origin="lower",
-            cmap="cubehelix",
+            cmap="viridis",
         )
         ax[1].autoscale(False)
         ax[1].set_title(f"{self.data_band} Noise Map", fontsize=20)

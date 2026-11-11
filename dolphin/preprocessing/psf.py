@@ -228,7 +228,7 @@ class PSF:
         fig.colorbar(im_star, ax=ax[0], fraction=0.05)
 
         im_weight = ax[1].imshow(
-            np.log10(weight_map * mask), cmap="plasma", origin="lower"
+            np.log10(weight_map * mask), cmap="cividis_r", origin="lower"
         )
         ax[1].set_title("Weight Map")
         fig.colorbar(im_weight, ax=ax[1], fraction=0.05)
@@ -644,7 +644,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             im_weight = ax[i].imshow(
-                np.log10(star_weights[i].data), cmap="plasma", origin="lower"
+                np.log10(star_weights[i].data), cmap="cividis_r", origin="lower"
             )
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")
@@ -792,7 +792,7 @@ class PSF:
         ax = ax.flatten()
         for i in range(num_stars):
             im_weight = ax[i].imshow(
-                np.log10(star_weights[i]), cmap="plasma", origin="lower"
+                np.log10(star_weights[i]), cmap="cividis_r", origin="lower"
             )
             ax[i].set_title(f"Star {i}")
             ax[i].axis("off")

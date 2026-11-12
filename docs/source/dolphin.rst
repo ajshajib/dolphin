@@ -9,6 +9,7 @@ Subpackages
 
    dolphin.ai
    dolphin.analysis
+   dolphin.preprocessing
    dolphin.processor
 
 Module contents

@@ -597,6 +597,16 @@ Special Options
 
           theta_E_scale_factor_sigma: [0.05]
 
+    - ``{param_name}_scale_factor_lower`` and ``{param_name}_scale_factor_upper``: *(Optional)* Lower and upper bounds of ``{param_name}_scale_factor``, with one value per scaling group. Defaults are 0.5 and 2 times each value of ``{param_name}_scale_factor``.
+
+      - Type: ``list``
+      - Example: two scaling groups
+
+        .. code-block:: yaml
+
+          theta_E_scale_factor_lower: [0.5, 0.01]
+          theta_E_scale_factor_upper: [2.5, 2.0]
+
     - ``{param_name}_scale_pow``: Power-law scaling factor for the specified `param_name` scaling.
 
       - Type: ``list``

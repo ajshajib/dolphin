@@ -1857,24 +1857,28 @@ class ModelConfig(Config):
                         raise ValueError(
                             f"{param_name}_scale_factor_sigma not in special_options!"
                         )
+                    # one bound per scaling group; defaults to 0.5x and 2x each factor
+                    scale_factor = self.settings["special_options"][
+                        f"{param_name}_scale_factor"
+                    ]
                     lower.update(
                         {
-                            f"{param_name}_scale_factor": [
-                                0.5
-                                * self.settings["special_options"][
-                                    f"{param_name}_scale_factor"
-                                ][0]
-                            ]
+                            f"{param_name}_scale_factor": self.settings[
+                                "special_options"
+                            ].get(
+                                f"{param_name}_scale_factor_lower",
+                                [0.5 * factor for factor in scale_factor],
+                            )
                         }
                     )
                     upper.update(
                         {
-                            f"{param_name}_scale_factor": [
-                                2.0
-                                * self.settings["special_options"][
-                                    f"{param_name}_scale_factor"
-                                ][0]
-                            ]
+                            f"{param_name}_scale_factor": self.settings[
+                                "special_options"
+                            ].get(
+                                f"{param_name}_scale_factor_upper",
+                                [2.0 * factor for factor in scale_factor],
+                            )
                         }
                     )
                     if f"{param_name}_scale_pow" in self.settings["special_options"]:

@@ -1089,6 +1089,31 @@ class TestModelConfig:
         assert upper["theta_E_scale_factor"] == [2]
         assert fixed["theta_E_scale_pow"] == [1]
 
+        # two scaling groups get one default bound each
+        config_two_groups = deepcopy(config)
+        config_two_groups.settings["special_options"].update(
+            {
+                "general_scaling": {"theta_E": [False, 1, 2]},
+                "theta_E_scale_factor": [1.0, 0.2],
+                "theta_E_scale_factor_sigma": [0.1, 0.02],
+                "theta_E_scale_pow": [1, 1],
+            }
+        )
+        _, _, _, lower2, upper2 = config_two_groups.get_special_params()
+        npt.assert_allclose(lower2["theta_E_scale_factor"], [0.5, 0.1])
+        npt.assert_allclose(upper2["theta_E_scale_factor"], [2.0, 0.4])
+
+        # user-provided bounds override the defaults
+        config_two_groups.settings["special_options"].update(
+            {
+                "theta_E_scale_factor_lower": [0.5, 0.01],
+                "theta_E_scale_factor_upper": [2.5, 2.0],
+            }
+        )
+        _, _, _, lower2, upper2 = config_two_groups.get_special_params()
+        assert lower2["theta_E_scale_factor"] == [0.5, 0.01]
+        assert upper2["theta_E_scale_factor"] == [2.5, 2.0]
+
         assert "D_dt" in init
         assert "D_dt" in sigma
         assert "D_dt" in lower

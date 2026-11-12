@@ -32,6 +32,3 @@ Module contents
 ---------------
 
 .. automodule:: dolphin.ai
-   :members:
-   :show-inheritance:
-   :undoc-members:

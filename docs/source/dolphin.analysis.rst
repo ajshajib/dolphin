@@ -13,7 +13,7 @@ dolphin.analysis.output module
    :undoc-members:
 
 dolphin.analysis.photometry module
-------------------------------
+----------------------------------
 
 .. automodule:: dolphin.analysis.photometry
    :members:
@@ -21,9 +21,14 @@ dolphin.analysis.photometry module
    :undoc-members:
 
 dolphin.analysis.cosmology module
-------------------------------
+---------------------------------
 
 .. automodule:: dolphin.analysis.cosmology
    :members:
    :show-inheritance:
    :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: dolphin.analysis

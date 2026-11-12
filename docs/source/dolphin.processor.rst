@@ -48,6 +48,3 @@ Module contents
 ---------------
 
 .. automodule:: dolphin.processor
-   :members:
-   :show-inheritance:
-   :undoc-members:

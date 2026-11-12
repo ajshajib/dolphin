@@ -12,10 +12,18 @@ dolphin.analysis.output module
    :show-inheritance:
    :undoc-members:
 
-Module contents
----------------
+dolphin.analysis.photometry module
+------------------------------
 
-.. automodule:: dolphin.analysis
+.. automodule:: dolphin.analysis.photometry
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+dolphin.analysis.cosmology module
+------------------------------
+
+.. automodule:: dolphin.analysis.cosmology
    :members:
    :show-inheritance:
    :undoc-members:

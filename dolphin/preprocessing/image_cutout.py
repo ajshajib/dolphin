@@ -117,10 +117,10 @@ class ImageCutout:
           then the target RA and DEC will be used as the cutout center.
         :type center_shift_arcsec: `tuple` (`float`, `float`)
         :param save: if `True`, creates the full HDF5 file in the proper location
-        expected by `dolphin`.
+          expected by `dolphin`.
         :type save: `bool`
         :param kwargs_mask: list of dictionaries corresponding to masking keyword
-        arguments.
+          arguments.
         :type kwargs_mask: `list` of `dict`
         :param vmin: lower limit of color map scale
         :type vmin: `float`

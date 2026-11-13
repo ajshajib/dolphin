@@ -439,10 +439,13 @@ class Output(Processor):
         model_plot.normalized_residual_plot(
             ax=axes[0, 2], band_index=band_index, **kwargs_residual_plot
         )
+        kwargs_source_plot = {
+            "delta_pix_source": 0.02,
+            "num_pix": 100,
+            **kwargs_source_plot,
+        }
         model_plot.source_plot(
             ax=axes[1, 0],
-            delta_pix_source=0.02,
-            num_pix=100,
             band_index=band_index,
             vmax=source_vmax,
             vmin=source_vmin,

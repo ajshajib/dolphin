@@ -1,6 +1,8 @@
 dolphin.processor package
 =========================
 
+.. automodule:: dolphin.processor
+
 Submodules
 ----------
 
@@ -40,14 +42,6 @@ dolphin.processor.recipe module
 -------------------------------
 
 .. automodule:: dolphin.processor.recipe
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dolphin.processor
    :members:
    :show-inheritance:
    :undoc-members:

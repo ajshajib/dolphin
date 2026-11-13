@@ -1,6 +1,8 @@
 dolphin.ai package
 ==================
 
+.. automodule:: dolphin.ai
+
 Submodules
 ----------
 
@@ -24,14 +26,6 @@ dolphin.ai.vision module
 ------------------------
 
 .. automodule:: dolphin.ai.vision
-   :members:
-   :show-inheritance:
-   :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dolphin.ai
    :members:
    :show-inheritance:
    :undoc-members:

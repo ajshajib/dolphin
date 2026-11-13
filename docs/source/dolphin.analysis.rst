@@ -1,9 +1,6 @@
 dolphin.analysis package
 ========================
 
-Module contents
----------------
-
 .. automodule:: dolphin.analysis
 
 Submodules

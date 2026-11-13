@@ -1,9 +1,6 @@
 dolphin.ai package
 ==================
 
-Module contents
----------------
-
 .. automodule:: dolphin.ai
 
 Submodules

@@ -1,9 +1,6 @@
 dolphin.processor package
 =========================
 
-Module contents
----------------
-
 .. automodule:: dolphin.processor
 
 Submodules

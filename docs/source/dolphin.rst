@@ -1,9 +1,6 @@
 dolphin package
 ===============
 
-Module contents
----------------
-
 .. automodule:: dolphin
    :members:
    :show-inheritance:

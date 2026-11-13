@@ -1,9 +1,6 @@
 dolphin.preprocessing package
 =============================
 
-Module contents
----------------
-
 .. automodule:: dolphin.preprocessing
 
 Submodules

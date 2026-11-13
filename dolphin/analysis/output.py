@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module provides classes to post process a model run output."""
+
 __author__ = "ajshajib"
 
 import numpy as np
@@ -224,6 +225,8 @@ class Output(Processor):
         source_v_max=None,
         print_results=False,
         show_source_light=False,
+        delta_pix_source=0.02,
+        num_pix_source=100,
     ):
         """Plot the model, residual, reconstructed source, convergence, and
         magnification profiles. Either `model_id` or `kwargs_result` needs to be
@@ -263,6 +266,10 @@ class Output(Processor):
             the magnification plot with the source-light subtracted data
             plot
         :type show_source_light: `bool`
+        :param delta_pix_source: pixel size for the source plot
+        :type delta_pix_source: `float`
+        :param num_pix_source: number of pixels for the source plot
+        :type num_pix_source: `int`
         :return: `matplotlib.pyplot.figure` instance with the plots
         :rtype: `matplotlib.pyplot.figure`
         """
@@ -304,12 +311,11 @@ class Output(Processor):
         )
         model_plot.source_plot(
             ax=axes[1, 0],
-            deltaPix_source=0.02,
-            numPix=100,
             band_index=band_index,
-            v_max=source_v_max,
-            v_min=source_v_min,
-            scale_size=0.4,
+            vmax=source_v_max,
+            vmin=source_v_min,
+            delta_pix=delta_pix_source,
+            num_pix=num_pix_source,
         )
         if not show_source_light:
             model_plot.convergence_plot(

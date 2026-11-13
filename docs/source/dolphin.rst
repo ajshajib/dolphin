@@ -1,6 +1,14 @@
 dolphin package
 ===============
 
+Module contents
+---------------
+
+.. automodule:: dolphin
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Subpackages
 -----------
 
@@ -11,11 +19,3 @@ Subpackages
    dolphin.analysis
    dolphin.preprocessing
    dolphin.processor
-
-Module contents
----------------
-
-.. automodule:: dolphin
-   :members:
-   :show-inheritance:
-   :undoc-members:

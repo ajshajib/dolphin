@@ -1,6 +1,11 @@
 dolphin.processor package
 =========================
 
+Module contents
+---------------
+
+.. automodule:: dolphin.processor
+
 Submodules
 ----------
 
@@ -43,8 +48,3 @@ dolphin.processor.recipe module
    :members:
    :show-inheritance:
    :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dolphin.processor

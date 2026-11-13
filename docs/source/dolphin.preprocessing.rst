@@ -1,6 +1,11 @@
 dolphin.preprocessing package
 =============================
 
+Module contents
+---------------
+
+.. automodule:: dolphin.preprocessing
+
 Submodules
 ----------
 
@@ -27,8 +32,3 @@ dolphin.preprocessing.preprocessing_util module
    :members:
    :show-inheritance:
    :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dolphin.preprocessing

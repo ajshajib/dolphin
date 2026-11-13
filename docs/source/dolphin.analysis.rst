@@ -1,6 +1,11 @@
 dolphin.analysis package
 ========================
 
+Module contents
+---------------
+
+.. automodule:: dolphin.analysis
+
 Submodules
 ----------
 
@@ -27,8 +32,3 @@ dolphin.analysis.cosmology module
    :members:
    :show-inheritance:
    :undoc-members:
-
-Module contents
----------------
-
-.. automodule:: dolphin.analysis

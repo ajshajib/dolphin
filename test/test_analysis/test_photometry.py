@@ -283,13 +283,15 @@ class TestPhotometry:
     def test_do_linear_inversion(self):
         """Test :meth:`~do_linear_inversion` output structure and shapes."""
 
-        flux_chain, morphology_chain, lens_light_chain = self.photometry1.do_linear_inversion(
-            band_config=self.photometry1.band_config,
-            walker_ratio=self.photometry1.walker_ratio,
-            burn_in=self.photometry1.burn_in,
-            aperture_type=self.photometry1.aperture_type,
-            aperture_size=self.photometry1.aperture_size,
-            do_morphology=self.photometry1.do_morphology,
+        flux_chain, morphology_chain, lens_light_chain = (
+            self.photometry1.do_linear_inversion(
+                band_config=self.photometry1.band_config,
+                walker_ratio=self.photometry1.walker_ratio,
+                burn_in=self.photometry1.burn_in,
+                aperture_type=self.photometry1.aperture_type,
+                aperture_size=self.photometry1.aperture_size,
+                do_morphology=self.photometry1.do_morphology,
+            )
         )
 
         assert isinstance(flux_chain, dict)
@@ -331,7 +333,7 @@ class TestPhotometry:
 
             # ensure that linearly solved amplitudes are saved
             kwargs_lens_light = lens_light_chain[data_band]
-            assert kwargs_lens_light[0]["amp"] is not 1.
+            assert kwargs_lens_light[0]["amp"] != 1.0
 
     def test_do_linear_inversion_with_rng(self):
         """Test :meth:`~do_linear_inversion` output structure and shapes with
@@ -446,13 +448,15 @@ class TestPhotometry:
     def test_save_to_hdf5(self):
         """Test :meth:`~save_to_hdf5` writes expected structure."""
 
-        flux_chain, morphology_chain, lens_light_chain = self.photometry1.do_linear_inversion(
-            band_config=self.photometry1.band_config,
-            walker_ratio=self.photometry1.walker_ratio,
-            burn_in=self.photometry1.burn_in,
-            aperture_type=self.photometry1.aperture_type,
-            aperture_size=self.photometry1.aperture_size,
-            do_morphology=self.photometry1.do_morphology,
+        flux_chain, morphology_chain, lens_light_chain = (
+            self.photometry1.do_linear_inversion(
+                band_config=self.photometry1.band_config,
+                walker_ratio=self.photometry1.walker_ratio,
+                burn_in=self.photometry1.burn_in,
+                aperture_type=self.photometry1.aperture_type,
+                aperture_size=self.photometry1.aperture_size,
+                do_morphology=self.photometry1.do_morphology,
+            )
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -464,7 +468,7 @@ class TestPhotometry:
             flux_chain,
             mag_chain,
             morphology_chain=morphology_chain,
-            lens_light_chain=lens_light_chain
+            lens_light_chain=lens_light_chain,
         )
 
         filename = (
@@ -696,16 +700,18 @@ class TestPhotometry:
         assert loaded_morph is None
 
     def test_load_lens_light_chain_chain(self):
-        """Test :meth:`~load_lens_light_chain` correctly reloads saved lens light parameters
-        chain."""
+        """Test :meth:`~load_lens_light_chain` correctly reloads saved lens light
+        parameters chain."""
 
-        flux_chain, morphology_chain, lens_light_chain = self.photometry1.do_linear_inversion(
-            band_config=self.photometry1.band_config,
-            walker_ratio=self.photometry1.walker_ratio,
-            burn_in=self.photometry1.burn_in,
-            aperture_type=self.photometry1.aperture_type,
-            aperture_size=self.photometry1.aperture_size,
-            do_morphology=self.photometry1.do_morphology,
+        flux_chain, morphology_chain, lens_light_chain = (
+            self.photometry1.do_linear_inversion(
+                band_config=self.photometry1.band_config,
+                walker_ratio=self.photometry1.walker_ratio,
+                burn_in=self.photometry1.burn_in,
+                aperture_type=self.photometry1.aperture_type,
+                aperture_size=self.photometry1.aperture_size,
+                do_morphology=self.photometry1.do_morphology,
+            )
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -713,10 +719,7 @@ class TestPhotometry:
         )
 
         self.photometry1.save_to_hdf5(
-            flux_chain,
-            mag_chain,
-            morphology_chain,
-            lens_light_chain
+            flux_chain, mag_chain, morphology_chain, lens_light_chain
         )
 
         loaded = self.photometry1.load_lens_light_chain()

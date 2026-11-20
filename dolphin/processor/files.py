@@ -650,12 +650,12 @@ class FileSystem:
         )
 
     def save_photometry_to_hdf5(
-        self, 
-        photometry_class, 
-        flux_chain, 
-        magnitude_chain=None, 
+        self,
+        photometry_class,
+        flux_chain,
+        magnitude_chain=None,
         morphology_chain=None,
-        lens_light_chain=None
+        lens_light_chain=None,
     ):
         """Save linear inversion outputs in HDF5 format for later analysis.
 

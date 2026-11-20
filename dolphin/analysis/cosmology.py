@@ -2,9 +2,9 @@
 
 __author__ = "brady-ryan"
 
+import copy
 import warnings
 
-import copy
 import numpy as np
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 

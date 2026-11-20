@@ -5,6 +5,7 @@ properties of the lens light for multi-component models."""
 __author__ = "brady-ryan"
 
 import copy
+
 import numpy as np
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.Data.imaging_data import ImageData
@@ -306,7 +307,7 @@ class Photometry:
                 "source_intrinsic": flux_source_instrinsic,
             },
             "morphology": {"phi": phi, "q": q, "r_eff": r_eff},
-            "lens_light_solved": lens_light_solved
+            "lens_light_solved": lens_light_solved,
         }
 
     def do_linear_inversion(
@@ -348,7 +349,7 @@ class Photometry:
             lens light profiles after the linear inversion
         :type do_morphology: `bool`
         :return: a tuple containing a dictionary of the fitted fluxes, a dictionary
-          of the fitted multi-component lens light morphological properties, and a 
+          of the fitted multi-component lens light morphological properties, and a
           dictionary of the linearly solved lens light kwargs.
         :rtype: `tuple` (`dict`, `dict`, `dict`)
         """
@@ -515,7 +516,13 @@ class Photometry:
 
         return magnitude_results
 
-    def save_to_hdf5(self, flux_chain, magnitude_chain=None, morphology_chain=None, lens_light_chain=None):
+    def save_to_hdf5(
+        self,
+        flux_chain,
+        magnitude_chain=None,
+        morphology_chain=None,
+        lens_light_chain=None,
+    ):
         """Save linear inversion outputs in HDF5 format for later analysis.
 
         :param flux_chain: Flux chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`

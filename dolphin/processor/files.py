@@ -650,18 +650,25 @@ class FileSystem:
         )
 
     def save_photometry_to_hdf5(
-        self, photometry_class, flux_chain, magnitude_chain=None, morphology_chain=None
+        self, 
+        photometry_class, 
+        flux_chain, 
+        magnitude_chain=None, 
+        morphology_chain=None,
+        lens_light_chain=None
     ):
         """Save linear inversion outputs in HDF5 format for later analysis.
 
         :param photometry_class: :class:`~dolphin.analysis.photometry.Photometry` class instance
         :type photometry_class: `class`
-        :param flux_chain: Flux chain as computed from :meth:`~dolphin.analysis.photometry.Photometrydo_linear_inversion`
+        :param flux_chain: Flux chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
         :type flux_chain: `np.ndarray`
         :param magnitude_chain: (Optional) AB magnitude chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.calculate_ab_magnitude`
         :type magnitude_chain: `np.ndarray`
         :param morphology_chain: (Optional) Morphology chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
         :type morphology_chain: `dict`
+        :param lens_light_chain: (Optional) Linearly solved lens light chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
+        :type lens_light_chain: `dict`
         """
 
         filename = self.get_photometry_file_path(
@@ -684,6 +691,15 @@ class FileSystem:
                             "magnitude",
                             data=magnitude_chain[data_band][component],
                         )
+
+                if lens_light_chain is not None:
+                    lens_light_group = f.create_group("lens_light_kwargs")
+                    for data_band in photometry_class.band_list:
+                        band_group = lens_light_group.create_group(data_band)
+                        for k, params in lens_light_chain[data_band].items():
+                            profile_group = band_group.create_group(f"profile_{k}")
+                            for name, arr in params.items():
+                                profile_group.create_dataset(name, data=np.array(arr))
 
             if photometry_class.do_morphology:
                 morphology_group = f.create_group("lens_light_morphology")
@@ -788,6 +804,35 @@ class FileSystem:
                 }
 
         return morphology_chain
+
+    def load_lens_light_chain(self, photometry_class):
+        """Load solved lens light chain as computed by :meth:`~do_linear_inversion`.
+
+        :param photometry_class: :class:`~dolphin.analysis.photometry.Photometry` class instance
+        :type photometry_class: `class`
+
+        :return: dictionary containing linearly solved parameter chains for each
+            filter and model index. Format:
+            ``{filter: {index: {"amp": array, "R_sersic": array, "n_sersic": array, ...}}}``
+        :rtype: `dict`
+        """
+        filename = self.get_photometry_file_path(
+            photometry_class.lens_name, photometry_class.model_id
+        )
+        result = {}
+        with h5py.File(filename, "r") as f:
+            if "lens_light_kwargs" not in f:
+                raise FileNotFoundError(
+                    "No lens light kwargs saved in this photometry file."
+                )
+            for band, band_group in f["lens_light_kwargs"].items():
+                result[band] = {}
+                for profile_name, profile_group in band_group.items():
+                    k = int(profile_name.split("_")[1])
+                    result[band][k] = {
+                        name: profile_group[name][()] for name in profile_group
+                    }
+        return result
 
     def get_preprocessing_path(self, lens_name):
         """Get the file path for preprocessing outputs.

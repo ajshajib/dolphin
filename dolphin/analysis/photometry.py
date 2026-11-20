@@ -4,6 +4,7 @@ properties of the lens light for multi-component models."""
 
 __author__ = "brady-ryan"
 
+import copy
 import numpy as np
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.Data.imaging_data import ImageData
@@ -206,6 +207,13 @@ class Photometry:
             kwargs_special=kwargs_special,
         )
 
+        # calling image_linear_solve automatically updates
+        # kwargs_lens_light with solved linear amplitudes
+        lens_light_solved = {
+            k_orig: copy.deepcopy(lens_light_kwargs[j])
+            for j, k_orig in enumerate(lens_light_indices)
+        }
+
         flux_images = []
 
         if has_point_source:
@@ -298,6 +306,7 @@ class Photometry:
                 "source_intrinsic": flux_source_instrinsic,
             },
             "morphology": {"phi": phi, "q": q, "r_eff": r_eff},
+            "lens_light_solved": lens_light_solved
         }
 
     def do_linear_inversion(
@@ -338,9 +347,10 @@ class Photometry:
         :param do_morphology: (optional) if `True`, solves for the morphological properties of multi-component
             lens light profiles after the linear inversion
         :type do_morphology: `bool`
-        :return: a tuple containing a dictionary of the fitted fluxes and a dictionary
-          of the fitted multi-component lens light morphological properties
-        :rtype: `tuple` (`dict`, `dict`)
+        :return: a tuple containing a dictionary of the fitted fluxes, a dictionary
+          of the fitted multi-component lens light morphological properties, and a 
+          dictionary of the linearly solved lens light kwargs.
+        :rtype: `tuple` (`dict`, `dict`, `dict`)
         """
         self.band_config = band_config
         self.walker_ratio = walker_ratio
@@ -361,6 +371,9 @@ class Photometry:
         morphology_results = {
             f: {"phi": [], "q": [], "r_eff": []} for f in self.band_list
         }
+
+        # {band: {profile_idx: {param_name: [values over samples]}}}
+        lens_light_results = {f: {} for f in self.band_list}
 
         chain = self.output.get_reshaped_emcee_chain(
             self.lens_name, self.model_id, self.walker_ratio, self.burn_in
@@ -423,10 +436,24 @@ class Photometry:
                 morphology_results[data_band]["q"].append(morphology["q"])
                 morphology_results[data_band]["r_eff"].append(morphology["r_eff"])
 
+                for k, kw in result["lens_light_solved"].items():
+                    profile = lens_light_results[data_band].setdefault(
+                        k, {name: [] for name in kw}
+                    )
+                    for name, val in kw.items():
+                        profile[name].append(val)
+
         for band in self.band_list:
             for key in flux_results[band]:
                 flux_results[band][key] = np.array(flux_results[band][key])
-        return flux_results, morphology_results
+
+            for k in lens_light_results[band]:
+                for name in lens_light_results[band][k]:
+                    lens_light_results[band][k][name] = np.array(
+                        lens_light_results[band][k][name]
+                    )
+
+        return flux_results, morphology_results, lens_light_results
 
     def calculate_ab_magnitude(self, flux_chain, calibration_parameters):
         """Helper function to calculate the AB magnitude from the flux chains computed
@@ -488,19 +515,21 @@ class Photometry:
 
         return magnitude_results
 
-    def save_to_hdf5(self, flux_chain, magnitude_chain=None, morphology_chain=None):
-        """Save the linear inversion outputs in HDF5 format for later analysis.
+    def save_to_hdf5(self, flux_chain, magnitude_chain=None, morphology_chain=None, lens_light_chain=None):
+        """Save linear inversion outputs in HDF5 format for later analysis.
 
-        :param flux_chain: Flux result dictionary as computed from :meth:`~do_linear_inversion`
-        :type flux_chain: `dict`
-        :param magnitude_chain: (optional) AB magnitude result dictionary as computed from :meth:`~calculate_ab_magnitude`
-        :type magnitude_chain: `dict`
-        :param morphology_chain: (optional) Morphology chain as computed from :meth:`~do_linear_inversion`
+        :param flux_chain: Flux chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
+        :type flux_chain: `np.ndarray`
+        :param magnitude_chain: (Optional) AB magnitude chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.calculate_ab_magnitude`
+        :type magnitude_chain: `np.ndarray`
+        :param morphology_chain: (Optional) Morphology chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
         :type morphology_chain: `dict`
+        :param lens_light_chain: (Optional) Linearly solved lens light chain as computed from :meth:`~dolphin.analysis.photometry.Photometry.do_linear_inversion`
+        :type lens_light_chain: `dict`
         """
 
         self.file_system.save_photometry_to_hdf5(
-            self, flux_chain, magnitude_chain, morphology_chain
+            self, flux_chain, magnitude_chain, morphology_chain, lens_light_chain
         )
 
     def load_flux_chain(self):
@@ -534,3 +563,14 @@ class Photometry:
         """
 
         return self.file_system.load_morphology_chain(self)
+
+    def load_lens_light_chain(self):
+        """Load solved lens light chain as computed by :meth:`~do_linear_inversion`.
+
+        :return: dictionary containing linearly solved parameter chains for each
+            filter and model index. Format:
+            ``{filter: {index: {"amp": array, "R_sersic": array, "n_sersic": array, ...}}}``
+        :rtype: `dict`
+        """
+
+        return self.file_system.load_lens_light_chain(self)

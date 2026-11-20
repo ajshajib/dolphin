@@ -283,13 +283,15 @@ class TestPhotometry:
     def test_do_linear_inversion(self):
         """Test :meth:`~do_linear_inversion` output structure and shapes."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            band_config=self.photometry1.band_config,
-            walker_ratio=self.photometry1.walker_ratio,
-            burn_in=self.photometry1.burn_in,
-            aperture_type=self.photometry1.aperture_type,
-            aperture_size=self.photometry1.aperture_size,
-            do_morphology=self.photometry1.do_morphology,
+        flux_chain, morphology_chain, lens_light_chain = (
+            self.photometry1.do_linear_inversion(
+                band_config=self.photometry1.band_config,
+                walker_ratio=self.photometry1.walker_ratio,
+                burn_in=self.photometry1.burn_in,
+                aperture_type=self.photometry1.aperture_type,
+                aperture_size=self.photometry1.aperture_size,
+                do_morphology=self.photometry1.do_morphology,
+            )
         )
 
         assert isinstance(flux_chain, dict)
@@ -329,11 +331,15 @@ class TestPhotometry:
             assert np.all((q > 0) & (q <= 1))
             assert np.all(r_eff > 0)
 
+            # ensure that linearly solved amplitudes are saved
+            kwargs_lens_light = lens_light_chain[data_band]
+            assert np.all(kwargs_lens_light[0]["amp"] != 1.0)
+
     def test_do_linear_inversion_with_rng(self):
         """Test :meth:`~do_linear_inversion` output structure and shapes with
         `n_samples` provided."""
 
-        flux_chain, _ = self.photometry1.do_linear_inversion(
+        flux_chain, _, _ = self.photometry1.do_linear_inversion(
             band_config=self.photometry1.band_config,
             walker_ratio=self.photometry1.walker_ratio,
             burn_in=self.photometry1.burn_in,
@@ -442,13 +448,15 @@ class TestPhotometry:
     def test_save_to_hdf5(self):
         """Test :meth:`~save_to_hdf5` writes expected structure."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
-            band_config=self.photometry1.band_config,
-            walker_ratio=self.photometry1.walker_ratio,
-            burn_in=self.photometry1.burn_in,
-            aperture_type=self.photometry1.aperture_type,
-            aperture_size=self.photometry1.aperture_size,
-            do_morphology=self.photometry1.do_morphology,
+        flux_chain, morphology_chain, lens_light_chain = (
+            self.photometry1.do_linear_inversion(
+                band_config=self.photometry1.band_config,
+                walker_ratio=self.photometry1.walker_ratio,
+                burn_in=self.photometry1.burn_in,
+                aperture_type=self.photometry1.aperture_type,
+                aperture_size=self.photometry1.aperture_size,
+                do_morphology=self.photometry1.do_morphology,
+            )
         )
 
         mag_chain = self.photometry1.calculate_ab_magnitude(
@@ -460,6 +468,7 @@ class TestPhotometry:
             flux_chain,
             mag_chain,
             morphology_chain=morphology_chain,
+            lens_light_chain=lens_light_chain,
         )
 
         filename = (
@@ -505,9 +514,7 @@ class TestPhotometry:
                     )
 
             assert "lens_light_morphology" in f
-
             morph_grp = f["lens_light_morphology"]
-
             for data_band in self.photometry1.band_list:
                 assert data_band in morph_grp
 
@@ -538,10 +545,22 @@ class TestPhotometry:
                     np.asarray(morphology_chain[data_band]["r_eff"]),
                 )
 
+            assert "lens_light_kwargs" in f
+            for data_band in self.photometry1.band_list:
+                band_grp = f["lens_light_kwargs"][data_band]
+                assert set(band_grp.keys()) == {
+                    f"profile_{k}" for k in lens_light_chain[data_band]
+                }
+                for k, params in lens_light_chain[data_band].items():
+                    profile_grp = band_grp[f"profile_{k}"]
+                    assert "amp" in profile_grp
+                    for name, arr in params.items():
+                        np.testing.assert_array_equal(profile_grp[name][:], arr)
+
     def test_load_flux_chain(self):
         """Test :meth:`~load_flux_chain` correctly reloads saved flux chain."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+        flux_chain, morphology_chain, _ = self.photometry1.do_linear_inversion(
             band_config=self.photometry1.band_config,
             walker_ratio=self.photometry1.walker_ratio,
             burn_in=self.photometry1.burn_in,
@@ -585,7 +604,7 @@ class TestPhotometry:
         """Test :meth:`~load_magnitude_chain` correctly reloads saved magnitude
         chain."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+        flux_chain, morphology_chain, _ = self.photometry1.do_linear_inversion(
             band_config=self.photometry1.band_config,
             walker_ratio=self.photometry1.walker_ratio,
             burn_in=self.photometry1.burn_in,
@@ -627,7 +646,7 @@ class TestPhotometry:
         """Test :meth:`~load_morphology_chain` correctly reloads saved morphology
         chain."""
 
-        flux_chain, morphology_chain = self.photometry1.do_linear_inversion(
+        flux_chain, morphology_chain, _ = self.photometry1.do_linear_inversion(
             band_config=self.photometry1.band_config,
             walker_ratio=self.photometry1.walker_ratio,
             burn_in=self.photometry1.burn_in,
@@ -667,7 +686,7 @@ class TestPhotometry:
 
         # test that morphology dictionary is None if do_morphology
         # is initialized as False
-        flux_chain, _ = self.photometry2.do_linear_inversion(
+        flux_chain, _, _ = self.photometry2.do_linear_inversion(
             band_config=self.photometry2.band_config,
             walker_ratio=self.photometry2.walker_ratio,
             burn_in=self.photometry2.burn_in,
@@ -679,3 +698,60 @@ class TestPhotometry:
         self.photometry2.save_to_hdf5(flux_chain)
         loaded_morph = self.photometry2.load_morphology_chain()
         assert loaded_morph is None
+
+    def test_load_lens_light_chain_chain(self):
+        """Test :meth:`~load_lens_light_chain` correctly reloads saved lens light
+        parameters chain."""
+
+        flux_chain, morphology_chain, lens_light_chain = (
+            self.photometry1.do_linear_inversion(
+                band_config=self.photometry1.band_config,
+                walker_ratio=self.photometry1.walker_ratio,
+                burn_in=self.photometry1.burn_in,
+                aperture_type=self.photometry1.aperture_type,
+                aperture_size=self.photometry1.aperture_size,
+                do_morphology=self.photometry1.do_morphology,
+            )
+        )
+
+        mag_chain = self.photometry1.calculate_ab_magnitude(
+            flux_chain, calibration_parameters=self.calibration_parameters1
+        )
+
+        self.photometry1.save_to_hdf5(
+            flux_chain, mag_chain, morphology_chain, lens_light_chain
+        )
+
+        loaded = self.photometry1.load_lens_light_chain()
+        for data_band in self.photometry1.band_list:
+            assert data_band in loaded
+            assert set(loaded[data_band]) == set(lens_light_chain[data_band])
+
+            for k, params in lens_light_chain[data_band].items():
+                assert isinstance(k, int)
+                for key in ["amp", "R_sersic"]:
+                    assert key in loaded[data_band][k]
+
+                for name, original in params.items():
+                    loaded_arr = np.asarray(loaded[data_band][k][name])
+                    original = np.asarray(original)
+                    assert loaded_arr.shape == original.shape
+                    assert np.all(np.isfinite(loaded_arr))
+                    np.testing.assert_allclose(
+                        loaded_arr, original, rtol=1e-10, atol=1e-10
+                    )
+
+        # test that an error is raised if the lens_light_kwargs are
+        # not saved
+        flux_chain, _, _ = self.photometry2.do_linear_inversion(
+            band_config=self.photometry2.band_config,
+            walker_ratio=self.photometry2.walker_ratio,
+            burn_in=self.photometry2.burn_in,
+            aperture_type=self.photometry2.aperture_type,
+            aperture_size=self.photometry2.aperture_size,
+            do_morphology=self.photometry2.do_morphology,
+        )
+
+        self.photometry2.save_to_hdf5(flux_chain)
+        with pytest.raises(FileNotFoundError):
+            self.photometry2.load_lens_light_chain()

@@ -741,8 +741,8 @@ class TestPhotometry:
                         loaded_arr, original, rtol=1e-10, atol=1e-10
                     )
 
-        # test that morphology dictionary is None if do_morphology
-        # is initialized as False
+        # test that an error is raised if the lens_light_kwargs are
+        # not saved
         flux_chain, _, _ = self.photometry2.do_linear_inversion(
             band_config=self.photometry2.band_config,
             walker_ratio=self.photometry2.walker_ratio,

@@ -333,7 +333,7 @@ class TestPhotometry:
 
             # ensure that linearly solved amplitudes are saved
             kwargs_lens_light = lens_light_chain[data_band]
-            assert kwargs_lens_light[0]["amp"] != 1.0
+            assert np.all(kwargs_lens_light[0]["amp"] != 1.0)
 
     def test_do_linear_inversion_with_rng(self):
         """Test :meth:`~do_linear_inversion` output structure and shapes with

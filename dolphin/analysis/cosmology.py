@@ -294,6 +294,7 @@ class Cosmology:
             r_eff_chain = morphology_results[kinematics_band]["r_eff"]
             solved_band = kwargs_lens_light_solved[kinematics_band]
         else:
+            # if single-component lens light model, use the r_eff from the reshaped chain
             bands = np.array(self.config.settings["band"])
             band_index = int(np.where(bands == kinematics_band)[0][0])
             index_r_eff = self.output.params_sampled.index(

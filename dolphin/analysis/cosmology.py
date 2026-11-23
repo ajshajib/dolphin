@@ -2,6 +2,7 @@
 
 __author__ = "brady-ryan"
 
+import copy
 import warnings
 
 import numpy as np
@@ -233,7 +234,8 @@ class Cosmology:
         :param kappa_ext_samples: (optional) array containing external convergence samples
         :type kappa_ext_samples: `numpy.ndarray`
         :param band_config: (optional) dictionary describing the filters and profile indices to
-          utilize in the linear inversion to retrieve `r_eff` (see `Photometry` class documentation).
+          utilize in the linear inversion to retrieve `r_eff` and amplitudes of individual light
+          models (see `Photometry` class documentation).
           For multi-component lens light models, this must be supplied if there are no saved
           outputs from the `Photometry` module's linear inversion routine.
         :type band_config: `dict` of `dict`
@@ -265,9 +267,12 @@ class Cosmology:
         )
         flat_chain = flat_chain[random_indices]
 
-        # if multi-component lens light model, need to calculate r_eff for
-        # each sample in the chain
-        if len(self.kwargs_model["index_lens_light_model_list"][0]) > 1:
+        # if multi-component lens light model, need to calculate r_eff
+        # and individual profile amplitudes for each sample in the chain
+        multi_component = len(self.kwargs_model["index_lens_light_model_list"][0]) > 1
+        solved_band = None
+
+        if multi_component:
             photometry = Photometry(
                 io_directory=self.io_directory,
                 lens_name=self.lens_name,
@@ -275,16 +280,20 @@ class Cosmology:
             )
             try:
                 morphology_results = photometry.load_morphology_chain()
+                kwargs_lens_light_solved = photometry.load_lens_light_chain()
             except FileNotFoundError:
-                _, morphology_results = photometry.do_linear_inversion(
-                    band_config=band_config,
-                    walker_ratio=self.walker_ratio,
-                    burn_in=self.burn_in,
-                    do_morphology=True,
-                    n_samples=self.n_samples,
-                    rng_seed=self.rng_seed,
+                _, morphology_results, kwargs_lens_light_solved = (
+                    photometry.do_linear_inversion(
+                        band_config=band_config,
+                        walker_ratio=self.walker_ratio,
+                        burn_in=self.burn_in,
+                        do_morphology=True,
+                        n_samples=self.n_samples,
+                        rng_seed=self.rng_seed,
+                    )
                 )
             r_eff_chain = morphology_results[kinematics_band]["r_eff"]
+            solved_band = kwargs_lens_light_solved[kinematics_band]
         else:
             # if single-component lens light model, use the r_eff from the reshaped chain
             bands = np.array(self.config.settings["band"])
@@ -303,6 +312,11 @@ class Cosmology:
             gamma = kwargs_out["kwargs_lens"][0]["gamma"]
             kwargs_lens = kwargs_out["kwargs_lens"]
             kwargs_lens_light = kwargs_out["kwargs_lens_light"]
+            if solved_band is not None:
+                kwargs_lens_light = copy.deepcopy(kwargs_lens_light)
+                for k, params in solved_band.items():
+                    for name, arr in params.items():
+                        kwargs_lens_light[k][name] = arr[i]
             r_eff = r_eff_chain[i]
 
             # unphysical r_effs will be given no weight

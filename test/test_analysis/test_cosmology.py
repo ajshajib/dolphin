@@ -83,8 +83,10 @@ class FakePhotometry:
     """Configurable stand-in for the Photometry class."""
 
     morphology = None  # what load_morphology_chain returns
-    raise_not_found = False  # simulate no saved morphology file
+    lens_light_kwargs = None  # what load_lens_light_chain returns
+    raise_not_found = False  # simulate no saved photometry file
     inversion_calls = None
+    save_calls = None
 
     def __init__(self, **kwargs):
         pass
@@ -94,9 +96,17 @@ class FakePhotometry:
             raise FileNotFoundError
         return self.morphology
 
+    def load_lens_light_chain(self):
+        if self.raise_not_found:
+            raise FileNotFoundError
+        return self.lens_light_kwargs
+
     def do_linear_inversion(self, **kwargs):
         FakePhotometry.inversion_calls.append(kwargs)
-        return None, self.morphology
+        return None, self.morphology, self.lens_light_kwargs
+
+    def save_to_hdf5(self, *args, **kwargs):
+        FakePhotometry.save_calls.append(kwargs)
 
 
 @pytest.fixture
@@ -351,34 +361,41 @@ class TestCosmology:
 
     # multi-component lens light
     def test_multi_component_uses_saved_morphology(self, cosmo, fake_photometry):
-        """Test when a multi-component lens light model uses the saved morphology."""
+        """Multi-component model uses saved morphology and solved lens light."""
         cosmo.kwargs_model["index_lens_light_model_list"] = [[0, 1]]
         band = cosmo.output.model_settings["band"][0]
         r_eff = np.array([0.5, 0.6, 0.7, 0.8, 0.9])
+        amp = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
         fake_photometry.morphology = {band: {"r_eff": r_eff}}
+        fake_photometry.lens_light_kwargs = {band: {0: {"amp": amp}}}
         beta_draws = np.zeros(len(r_eff))
 
-        out = cosmo.velocity_dispersion(beta_draws=beta_draws, kinematics_band="F814W")
+        out = cosmo.velocity_dispersion(beta_draws=beta_draws, kinematics_band=band)
 
         samples = _selected_samples(cosmo, rng_seed=0, n_samples=5)
         theta_E = np.array(
             [cosmo.param.args2kwargs(s)["kwargs_lens"][0]["theta_E"] for s in samples]
         )
         np.testing.assert_allclose(out, r_eff + theta_E)
-        assert fake_photometry.inversion_calls == []  # no recompute
+
+        # sample i received its own solved amplitude
+        out = [c["kwargs_lens_light"][0]["amp"] for c in cosmo.calls]
+        np.testing.assert_allclose(out, amp)
 
     def test_multi_component_falls_back_to_inversion(self, cosmo, fake_photometry):
-        """Test when a multi-component lens light model falls back to inversion."""
+        """Multi-component model recomputes and uses the solved lens light."""
         cosmo.kwargs_model["index_lens_light_model_list"] = [[0, 1]]
         band = cosmo.output.model_settings["band"][0]
         r_eff = np.full(5, 0.42)
+        amp = np.full(5, 2.0)
         fake_photometry.raise_not_found = True
         fake_photometry.morphology = {band: {"r_eff": r_eff}}
+        fake_photometry.lens_light_kwargs = {band: {0: {"amp": amp}}}
         band_config = {"dummy": "config"}
         beta_draws = np.zeros(len(r_eff))
 
         cosmo.velocity_dispersion(
-            beta_draws=beta_draws, band_config=band_config, kinematics_band="F814W"
+            beta_draws=beta_draws, band_config=band_config, kinematics_band=band
         )
 
         kw = fake_photometry.inversion_calls[0]
@@ -388,21 +405,26 @@ class TestCosmology:
         assert kw["rng_seed"] == 0
         assert kw["walker_ratio"] == cosmo.walker_ratio
         assert all(c["r_eff"] == 0.42 for c in cosmo.calls)
+        assert all(c["kwargs_lens_light"][0]["amp"] == 2.0 for c in cosmo.calls)
 
     def test_invalid_reff(self, cosmo, fake_photometry):
-        """Test when an invalid r_eff is passed to velocity_dispersion()."""
+        """An unphysical r_eff gives NaN for that sample and a warning."""
         cosmo.kwargs_model["index_lens_light_model_list"] = [[0, 1]]
         band = cosmo.output.model_settings["band"][0]
         r_eff = np.full(5, 0.42)
         r_eff[2] = -1
+        amp = np.full(5, 2.0)
         fake_photometry.raise_not_found = True
         fake_photometry.morphology = {band: {"r_eff": r_eff}}
+        fake_photometry.lens_light_kwargs = {band: {0: {"amp": amp}}}
         band_config = {"dummy": "config"}
         beta_draws = np.zeros(len(r_eff))
+
         with pytest.warns(UserWarning):
             sigma_v = cosmo.velocity_dispersion(
-                beta_draws=beta_draws, band_config=band_config, kinematics_band="F814W"
+                beta_draws=beta_draws, band_config=band_config, kinematics_band=band
             )
+
         assert np.isnan(sigma_v[2])
 
     # Test functions for ddt_from_time_delay()

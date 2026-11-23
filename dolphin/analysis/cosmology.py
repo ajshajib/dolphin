@@ -234,7 +234,8 @@ class Cosmology:
         :param kappa_ext_samples: (optional) array containing external convergence samples
         :type kappa_ext_samples: `numpy.ndarray`
         :param band_config: (optional) dictionary describing the filters and profile indices to
-          utilize in the linear inversion to retrieve `r_eff` (see `Photometry` class documentation).
+          utilize in the linear inversion to retrieve `r_eff` and amplitudes of individual light
+          models (see `Photometry` class documentation).
           For multi-component lens light models, this must be supplied if there are no saved
           outputs from the `Photometry` module's linear inversion routine.
         :type band_config: `dict` of `dict`
@@ -266,8 +267,8 @@ class Cosmology:
         )
         flat_chain = flat_chain[random_indices]
 
-        # if multi-component lens light model, need to calculate r_eff for
-        # each sample in the chain
+        # if multi-component lens light model, need to calculate r_eff 
+        # and individual profile amplitudes for each sample in the chain
         multi_component = len(self.kwargs_model["index_lens_light_model_list"][0]) > 1
         solved_band = None
 

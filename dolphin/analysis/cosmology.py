@@ -267,7 +267,7 @@ class Cosmology:
         )
         flat_chain = flat_chain[random_indices]
 
-        # if multi-component lens light model, need to calculate r_eff 
+        # if multi-component lens light model, need to calculate r_eff
         # and individual profile amplitudes for each sample in the chain
         multi_component = len(self.kwargs_model["index_lens_light_model_list"][0]) > 1
         solved_band = None

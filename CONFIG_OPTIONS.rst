@@ -227,7 +227,16 @@ Satellites Option
 
         .. code-block:: yaml
 
-           is_elliptical: [true, false]           
+           is_elliptical: [True, False]         
+
+    - ``has_light``: (Optional) Whether each satellite mass profile has an associated light profile. All satellites are initialized with a corresponding light profile by default.
+
+      - Type: ``list of booleans``
+      - Example:
+
+        .. code-block:: yaml
+
+          has_light: [True, False]
       
 
 Lens Light Options

@@ -837,6 +837,17 @@ class TestModelConfig:
             "SERSIC",
         ]
 
+        config = deepcopy(self.config_wsat)
+        config.settings["satellites"]["has_light"] = [True, False]
+        assert config.get_lens_light_model_list() == [
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+            "SERSIC_ELLIPSE",
+        ]
+
     def test_get_point_source_model_list(self):
         """Test `get_point_source_model_list` method."""
         config = deepcopy(self.config_5)
@@ -1242,6 +1253,10 @@ class TestModelConfig:
             [0, 1, 4, 6],
             [2, 3, 5, 7],
         ]
+
+        config_wsat = deepcopy(self.config_wsat)
+        config_wsat.settings["satellites"]["has_light"] = [True, False]
+        assert config_wsat.get_index_lens_light_model_list() == [[0, 1, 4], [2, 3, 5]]
 
     def test_get_index_source_light_model_list(self):
         """Test `get_index_source_light_model_list` method."""

@@ -1256,10 +1256,7 @@ class TestModelConfig:
 
         config_wsat = deepcopy(self.config_wsat)
         config_wsat.settings["satellites"]["has_light"] = [True, False]
-        assert config_wsat.get_index_lens_light_model_list() == [
-            [0, 1, 4],
-            [2, 3, 5]
-        ]
+        assert config_wsat.get_index_lens_light_model_list() == [[0, 1, 4], [2, 3, 5]]
 
     def test_get_index_source_light_model_list(self):
         """Test `get_index_source_light_model_list` method."""
